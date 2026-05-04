@@ -1,0 +1,12 @@
+{
+  "name": "learn-english-app",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "backend": "npm --workspace backend",
+    "frontend": "npm --workspace frontend"
+  }
+}

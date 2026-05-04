@@ -1,21 +1,21 @@
 ## 1. Project Scaffold
 
-- [ ] 1.1 Initialize monorepo structure: create `backend/` and `frontend/` directories with root `package.json` (workspaces)
-- [ ] 1.2 Scaffold NestJS backend: `nest new backend` with TypeScript strict mode
+- [x] 1.1 Initialize monorepo structure: create `backend/` and `frontend/` directories with root `package.json` (workspaces)
+- [x] 1.2 Scaffold NestJS backend: `nest new backend` with TypeScript strict mode
 - [ ] 1.3 Scaffold Next.js frontend: `npx create-next-app@latest frontend` with App Router, TypeScript, Tailwind
-- [ ] 1.4 Add `.env.example` files to both packages (DB URL, JWT secrets, API base URL)
-- [ ] 1.5 Set up Docker Compose for local PostgreSQL instance
+- [x] 1.4 Add `.env.example` files to both packages (DB URL, JWT secrets, API base URL)
+- [x] 1.5 Set up Docker Compose for local PostgreSQL instance
 
 ## 2. Database Schema
 
-- [ ] 2.1 Install TypeORM (or Prisma) and PostgreSQL driver in backend
-- [ ] 2.2 Create migration: `users` table (id, email, password_hash, created_at)
-- [ ] 2.3 Create migration: `words` table (id, text UNIQUE, fetched_at)
-- [ ] 2.4 Create migration: `meanings` table (id, word_id FK, definition, translation, transcription, part_of_speech, synonyms TEXT[], examples TEXT[])
-- [ ] 2.5 Create migration: `user_meanings` table (id, user_id FK, meaning_id FK, saved_at, UNIQUE user_id+meaning_id)
-- [ ] 2.6 Create migration: `cards` table (id, user_id FK, meaning_id FK, direction, ease_factor, interval, next_review, created_at, UNIQUE user_id+meaning_id+direction)
-- [ ] 2.7 Create migration: `review_logs` table (id, card_id FK, rating, reviewed_at)
-- [ ] 2.8 Verify all foreign key constraints and indexes (words.text, cards.next_review, user_meanings unique)
+- [x] 2.1 Install TypeORM (or Prisma) and PostgreSQL driver in backend
+- [x] 2.2 Create migration: `users` table (id, email, password_hash, created_at)
+- [x] 2.3 Create migration: `words` table (id, text UNIQUE, fetched_at)
+- [x] 2.4 Create migration: `meanings` table (id, word_id FK, definition, transcription, part_of_speech, synonyms TEXT[], examples TEXT[])
+- [x] 2.5 Create migration: `user_meanings` table (id, user_id FK, meaning_id FK, saved_at, UNIQUE user_id+meaning_id)
+- [x] 2.6 Create migration: `cards` table (id, user_id FK, meaning_id FK, ease_factor, interval, next_review, created_at, UNIQUE user_id+meaning_id)
+- [x] 2.7 Create migration: `review_logs` table (id, card_id FK, rating, reviewed_at)
+- [x] 2.8 Verify all foreign key constraints and indexes (words.text, cards.next_review, user_meanings unique)
 
 ## 3. Authentication Module (Backend)
 
