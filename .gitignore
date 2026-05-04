@@ -1,0 +1,9 @@
+.claude/
+.codex/
+.cursor/
+.idea/
+.vscode/
+.env
+.env.local
+
+
