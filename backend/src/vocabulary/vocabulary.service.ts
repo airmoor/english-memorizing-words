@@ -1,16 +1,36 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { ApiProperty } from '@nestjs/swagger';
 import { DataSource } from 'typeorm';
 
-export interface VocabularyItemDto {
+export class VocabularyItemDto {
+  @ApiProperty({ example: 'uuid-v4' })
   userMeaningId: string;
+
+  @ApiProperty({ example: 'uuid-v4' })
   meaningId: string;
+
+  @ApiProperty({ example: 'uuid-v4' })
   wordId: string;
+
+  @ApiProperty({ example: 'word' })
   wordText: string;
+
+  @ApiProperty({ example: 'A spoken or written word.' })
   definition: string;
+
+  @ApiProperty({ example: '/wɜːrd/', nullable: true })
   transcription: string | null;
+
+  @ApiProperty({ example: 'noun', nullable: true })
   partOfSpeech: string | null;
+
+  @ApiProperty({ example: ['term', 'expression'], type: [String] })
   synonyms: string[];
+
+  @ApiProperty({ example: ['He spoke the word.'], type: [String] })
   examples: string[];
+
+  @ApiProperty({ example: '2024-01-01T00:00:00.000Z' })
   savedAt: Date;
 }
 

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ApiProperty } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Word } from '../database/entities/word.entity';
@@ -10,18 +11,34 @@ import {
   NormalizedMeaning,
 } from './normalize';
 
-export interface MeaningDto {
+export class MeaningDto {
+  @ApiProperty({ example: 'uuid-v4' })
   id: string;
+
+  @ApiProperty({ example: 'A spoken or written word.' })
   definition: string;
+
+  @ApiProperty({ example: '/wɜːrd/', nullable: true })
   transcription: string | null;
+
+  @ApiProperty({ example: 'noun', nullable: true })
   partOfSpeech: string | null;
+
+  @ApiProperty({ example: ['term', 'expression'], type: [String] })
   synonyms: string[];
+
+  @ApiProperty({ example: ['He spoke the word.'], type: [String] })
   examples: string[];
 }
 
-export interface WordResponseDto {
+export class WordResponseDto {
+  @ApiProperty({ example: 'uuid-v4' })
   id: string;
+
+  @ApiProperty({ example: 'word' })
   text: string;
+
+  @ApiProperty({ type: [MeaningDto] })
   meanings: MeaningDto[];
 }
 

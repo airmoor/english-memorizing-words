@@ -6,3 +6,4 @@
 .env
 .env.local
 node_modules
+backend/dist/
