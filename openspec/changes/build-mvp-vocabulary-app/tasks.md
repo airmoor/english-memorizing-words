@@ -30,13 +30,13 @@
 
 ## 4. Words Module (Backend)
 
-- [ ] 4.1 Create `WordsModule` with `WordsService`, `WordsController`
-- [ ] 4.2 Implement `GET /api/words/:text`: check DB cache first; if found, return meanings
-- [ ] 4.3 Implement Free Dictionary API client (`https://api.dictionaryapi.dev/api/v2/entries/en/:word`)
-- [ ] 4.4 Implement DB write on cache miss: insert word + all meanings in a single transaction
-- [ ] 4.5 Normalize API response to internal Meaning schema (handle missing fields as empty arrays)
-- [ ] 4.6 Return 404 if external API returns not found; return 503 on network error
-- [ ] 4.7 Write unit tests for WordsService (cache hit, cache miss success, cache miss 404, API error)
+- [x] 4.1 Create `WordsModule` with `WordsService`, `WordsController`
+- [x] 4.2 Implement `GET /api/words/:text`: check DB cache first; if found, return meanings
+- [x] 4.3 Implement Free Dictionary API client (`https://api.dictionaryapi.dev/api/v2/entries/en/:word`)
+- [x] 4.4 Implement DB write on cache miss: insert word + all meanings in a single transaction
+- [x] 4.5 Normalize API response to internal Meaning schema (handle missing fields as empty arrays)
+- [x] 4.6 Return 404 if external API returns not found; return 503 on network error
+- [x] 4.7 Write unit tests for WordsService (cache hit, cache miss success, cache miss 404, API error)
 
 ## 5. Vocabulary Module (Backend)
 

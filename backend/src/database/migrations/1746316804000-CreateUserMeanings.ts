@@ -4,7 +4,7 @@ export class CreateUserMeanings1746316804000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
       CREATE TABLE "user_meanings" (
-        "id"         UUID        NOT NULL DEFAULT uuid_generate_v4(),
+        "id"         UUID        NOT NULL DEFAULT gen_random_uuid(),
         "user_id"    UUID        NOT NULL,
         "meaning_id" UUID        NOT NULL,
         "saved_at"   TIMESTAMPTZ NOT NULL DEFAULT NOW(),

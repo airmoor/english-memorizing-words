@@ -4,7 +4,7 @@ export class CreateMeanings1746316803000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
       CREATE TABLE "meanings" (
-        "id"             UUID    NOT NULL DEFAULT uuid_generate_v4(),
+        "id"             UUID    NOT NULL DEFAULT gen_random_uuid(),
         "word_id"        UUID    NOT NULL,
         "definition"     TEXT    NOT NULL,
         "transcription"  TEXT,
@@ -20,13 +20,13 @@ export class CreateMeanings1746316803000 implements MigrationInterface {
     `);
 
     await queryRunner.query(`
-      CREATE INDEX "IDX_meanings_word_definition_pos"
+      CREATE UNIQUE INDEX "UQ_meanings_word_definition_pos"
         ON "meanings" ("word_id", "definition", "part_of_speech")
     `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP INDEX "IDX_meanings_word_definition_pos"`);
+    await queryRunner.query(`DROP INDEX "UQ_meanings_word_definition_pos"`);
     await queryRunner.query(`DROP TABLE "meanings"`);
   }
 }

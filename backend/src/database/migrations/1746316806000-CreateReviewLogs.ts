@@ -4,7 +4,7 @@ export class CreateReviewLogs1746316806000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
       CREATE TABLE "review_logs" (
-        "id"          UUID        NOT NULL DEFAULT uuid_generate_v4(),
+        "id"          UUID        NOT NULL DEFAULT gen_random_uuid(),
         "card_id"     UUID        NOT NULL,
         "rating"      TEXT        NOT NULL,
         "reviewed_at" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
