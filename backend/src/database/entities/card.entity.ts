@@ -33,7 +33,7 @@ export class Card {
   interval: number;
 
   @Column({ name: 'next_review', type: 'date', default: () => 'CURRENT_DATE' })
-  nextReview: string;
+  nextReview: Date;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;

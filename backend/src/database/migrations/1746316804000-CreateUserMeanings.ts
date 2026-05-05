@@ -21,14 +21,10 @@ export class CreateUserMeanings1746316804000 implements MigrationInterface {
       )
     `);
 
-    await queryRunner.query(`
-      CREATE INDEX "IDX_user_meanings_user_meaning"
-        ON "user_meanings" ("user_id", "meaning_id")
-    `);
+    // UNIQUE constraint above already creates an implicit index on (user_id, meaning_id)
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP INDEX "IDX_user_meanings_user_meaning"`);
     await queryRunner.query(`DROP TABLE "user_meanings"`);
   }
 }

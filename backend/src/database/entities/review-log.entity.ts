@@ -11,7 +11,7 @@ import { Card } from './card.entity';
 export type Rating = 'again' | 'hard' | 'good' | 'easy';
 
 @Entity('review_logs')
-@Check(`"rating" IN ('again', 'hard', 'good', 'easy')`)
+@Check(`rating IN ('again', 'hard', 'good', 'easy')`)
 export class ReviewLog {
   @PrimaryGeneratedColumn('uuid')
   id: string;

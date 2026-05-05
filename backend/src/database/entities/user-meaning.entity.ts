@@ -1,7 +1,6 @@
 import {
   Column,
   Entity,
-  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -12,7 +11,6 @@ import { Meaning } from './meaning.entity';
 
 @Entity('user_meanings')
 @Unique(['userId', 'meaningId'])
-@Index(['userId', 'meaningId'])
 export class UserMeaning {
   @PrimaryGeneratedColumn('uuid')
   id: string;

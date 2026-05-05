@@ -12,7 +12,7 @@ import { UserMeaning } from './user-meaning.entity';
 import { Card } from './card.entity';
 
 @Entity('meanings')
-@Index(['wordId', 'definition', 'partOfSpeech'])
+@Index(['wordId', 'definition', 'partOfSpeech'], { unique: true })
 export class Meaning {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -29,10 +29,10 @@ export class Meaning {
   @Column({ name: 'part_of_speech', type: 'text', nullable: true })
   partOfSpeech: string | null;
 
-  @Column({ type: 'text', array: true, default: '{}' })
+  @Column({ type: 'text', array: true, default: () => "'{}'" })
   synonyms: string[];
 
-  @Column({ type: 'text', array: true, default: '{}' })
+  @Column({ type: 'text', array: true, default: () => "'{}'" })
   examples: string[];
 
   @ManyToOne(() => Word, (word) => word.meanings, { onDelete: 'CASCADE' })
