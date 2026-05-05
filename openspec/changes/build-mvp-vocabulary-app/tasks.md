@@ -40,12 +40,12 @@
 
 ## 5. Vocabulary Module (Backend)
 
-- [ ] 5.1 Create `VocabularyModule` with `VocabularyService`, `VocabularyController`
-- [ ] 5.2 Implement `POST /api/vocabulary/meanings/:meaningId`: save meaning + create card in one transaction (idempotent)
-- [ ] 5.3 Implement `POST /api/vocabulary/words/:wordId/save-all`: save all meanings of a word (skip already-saved, wrap in transaction)
-- [ ] 5.4 Implement `GET /api/vocabulary`: return all saved meanings for the authenticated user
-- [ ] 5.5 Implement `DELETE /api/vocabulary/meanings/:meaningId`: remove user_meaning + cascade delete card + review_logs
-- [ ] 5.6 Write unit tests for VocabularyService (save, save-all idempotency, delete cascade)
+- [x] 5.1 Create `VocabularyModule` with `VocabularyService`, `VocabularyController`
+- [x] 5.2 Implement `POST /api/vocabulary/meanings/:meaningId`: save meaning + create card in one transaction (idempotent)
+- [x] 5.3 Implement `POST /api/vocabulary/words/:wordId/save-all`: save all meanings of a word (skip already-saved, wrap in transaction)
+- [x] 5.4 Implement `GET /api/vocabulary`: return all saved meanings for the authenticated user
+- [x] 5.5 Implement `DELETE /api/vocabulary/meanings/:meaningId`: remove user_meaning + cascade delete card + review_logs
+- [x] 5.6 Write unit tests for VocabularyService (save, save-all idempotency, delete cascade)
 
 ## 6. Review Module (Backend)
 
