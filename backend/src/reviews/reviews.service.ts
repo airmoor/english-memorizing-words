@@ -24,6 +24,17 @@ export class NextCardDto {
   meaningCount: number;
 }
 
+export class ReviewProgressDto {
+  @ApiProperty({ example: 5 })
+  dueToday: number;
+
+  @ApiProperty({ example: 42 })
+  total: number;
+
+  @ApiProperty({ example: 3 })
+  reviewedToday: number;
+}
+
 export class ReviewResultDto {
   @ApiProperty({ example: '2024-06-15' })
   nextReview: Date;
@@ -78,6 +89,36 @@ function applySmTwo(
 @Injectable()
 export class ReviewsService {
   constructor(private readonly dataSource: DataSource) {}
+
+  // ── GET /reviews/progress ───────────────────────────────────────────────
+
+  async getProgress(userId: string): Promise<ReviewProgressDto> {
+    const [[due], [total], [reviewed]] = await Promise.all([
+      this.dataSource.query<[{ count: string }]>(
+        `SELECT COUNT(*) AS count FROM cards
+         WHERE user_id = $1 AND next_review <= CURRENT_DATE`,
+        [userId],
+      ),
+      this.dataSource.query<[{ count: string }]>(
+        `SELECT COUNT(*) AS count FROM cards WHERE user_id = $1`,
+        [userId],
+      ),
+      this.dataSource.query<[{ count: string }]>(
+        `SELECT COUNT(*) AS count
+         FROM review_logs rl
+         JOIN cards c ON c.id = rl.card_id
+         WHERE c.user_id = $1
+           AND rl.reviewed_at::date = CURRENT_DATE`,
+        [userId],
+      ),
+    ]);
+
+    return {
+      dueToday: Number(due.count),
+      total: Number(total.count),
+      reviewedToday: Number(reviewed.count),
+    };
+  }
 
   // ── GET /reviews/next ────────────────────────────────────────────────────
 

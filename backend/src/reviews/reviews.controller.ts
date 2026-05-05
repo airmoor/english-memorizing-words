@@ -20,6 +20,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AuthUser, CurrentUser } from '../common/decorators/current-user.decorator';
 import {
   NextCardDto,
+  ReviewProgressDto,
   ReviewResultDto,
   ReviewsService,
 } from './reviews.service';
@@ -44,6 +45,14 @@ class AnswerDto {
 @Controller('reviews')
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
+
+  @Get('progress')
+  @ApiOperation({ summary: 'Get daily review progress for the authenticated user' })
+  @ApiResponse({ status: 200, description: 'Progress counts', type: ReviewProgressDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  getProgress(@CurrentUser() user: AuthUser): Promise<ReviewProgressDto> {
+    return this.reviewsService.getProgress(user.id);
+  }
 
   @Get('next')
   @ApiOperation({ summary: 'Get the next due card for review' })
