@@ -49,11 +49,11 @@
 
 ## 6. Review Module (Backend)
 
-- [ ] 6.1 Create `ReviewModule` with `ReviewService`, `ReviewController`
-- [ ] 6.2 Implement `GET /api/review/due`: return all cards where next_review <= today for the authenticated user
-- [ ] 6.3 Implement `POST /api/review/cards/:cardId/rate`: accept rating (again|hard|good|easy), apply SM-2 update, insert review_log
-- [ ] 6.4 Implement SM-2 algorithm function (ease recalculation, interval progression, next_review date)
-- [ ] 6.5 Clamp ease_factor at minimum 1.3
+- [x] 6.1 Create `ReviewsModule` with `ReviewsService`, `ReviewsController`
+- [x] 6.2 Implement `GET /api/reviews/next`: return next due card for the authenticated user
+- [x] 6.3 Implement `POST /api/reviews/:cardId`: accept rating (again|hard|good|easy), apply SM-2 update, insert review_log
+- [x] 6.4 Implement SM-2 algorithm function (ease recalculation, interval progression, next_review date)
+- [x] 6.5 Clamp ease_factor at minimum 1.3
 - [ ] 6.6 Write unit tests for SM-2 algorithm (all four ratings, ease floor, interval progression)
 - [ ] 6.7 Write unit tests for ReviewService (due cards query, rating submission)
 
