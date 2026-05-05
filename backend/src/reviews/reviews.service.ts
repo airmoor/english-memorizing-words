@@ -65,6 +65,11 @@ function applySmTwo(
         interval: interval === 0 ? 2 : Math.round(interval * easeFactor * 1.3),
         easeFactor: easeFactor + 0.15,
       };
+
+    default: {
+      const exhaustive: never = rating;
+      throw new Error(`Unsupported rating: ${exhaustive}`);
+    }
   }
 }
 
@@ -81,7 +86,7 @@ export class ReviewsService {
       {
         cardId: string;
         meaningId: string;
-        wordText: string;
+        word: string;
         partOfSpeech: string | null;
         examples: string[];
         meaningCount: string; // pg returns bigint as string
@@ -90,7 +95,7 @@ export class ReviewsService {
       `SELECT
          c.id             AS "cardId",
          m.id             AS "meaningId",
-         w.text           AS "wordText",
+         w.text           AS "word",
          m.part_of_speech AS "partOfSpeech",
          m.examples       AS "examples",
          (
@@ -103,7 +108,7 @@ export class ReviewsService {
        JOIN words   w ON w.id = m.word_id
        WHERE c.user_id = $1
          AND c.next_review <= CURRENT_DATE
-       ORDER BY c.next_review ASC
+       ORDER BY c.next_review ASC, c.id ASC
        LIMIT 1`,
       [userId],
     );
@@ -114,7 +119,7 @@ export class ReviewsService {
     return {
       cardId: row.cardId,
       meaningId: row.meaningId,
-      word: row.wordText,
+      word: row.word,
       partOfSpeech: row.partOfSpeech,
       example: row.examples?.[0] ?? null,
       meaningCount: Number(row.meaningCount),
@@ -151,62 +156,52 @@ export class ReviewsService {
     cardId: string,
     rating: Rating,
   ): Promise<ReviewResultDto> {
-    // Ownership check outside transaction — fail fast before acquiring runner
-    const current = await this.dataSource.query<
-      { interval: number; ease_factor: number }[]
-    >(
-      `SELECT interval, ease_factor FROM cards WHERE id = $1 AND user_id = $2`,
-      [cardId, userId],
-    );
-
-    if (current.length === 0) {
-      throw new NotFoundException(`Card ${cardId} not found`);
-    }
-
-    const { interval, ease_factor: easeFactor } = current[0];
-    const next = applySmTwo(interval, easeFactor, rating);
-
     const qr = this.dataSource.createQueryRunner();
     await qr.connect();
     await qr.startTransaction();
 
     try {
-      await qr.query(
+      // Lock the row inside the transaction — FOR UPDATE is only effective here
+      const current = (await qr.query(
+        `SELECT interval, ease_factor FROM cards WHERE id = $1 AND user_id = $2 FOR UPDATE`,
+        [cardId, userId],
+      )) as { interval: number; ease_factor: number }[];
+
+      if (current.length === 0) {
+        throw new NotFoundException(`Card ${cardId} not found`);
+      }
+
+      const { interval, ease_factor: easeFactor } = current[0];
+      const next = applySmTwo(interval, easeFactor, rating);
+
+      const updated = (await qr.query(
         `UPDATE cards
          SET interval     = $1,
              ease_factor  = $2,
              next_review  = CURRENT_DATE + ($3 * INTERVAL '1 day')
-         WHERE id = $4 AND user_id = $5`,
+         WHERE id = $4 AND user_id = $5
+         RETURNING next_review`,
         [next.interval, next.easeFactor, next.interval, cardId, userId],
-      );
+      )) as { next_review: Date }[];
 
       await qr.query(
         `INSERT INTO review_logs (id, card_id, rating)
-         VALUES (gen_random_uuid(), $1, $2)
-         RETURNING id`,
+         VALUES (gen_random_uuid(), $1, $2)`,
         [cardId, rating],
       );
 
       await qr.commitTransaction();
+
+      return {
+        nextReview: updated[0].next_review,
+        interval: next.interval,
+        easeFactor: next.easeFactor,
+      };
     } catch (err) {
       await qr.rollbackTransaction();
       throw err;
     } finally {
       await qr.release();
     }
-
-    // Re-read the persisted next_review date from DB (avoids timezone arithmetic in JS)
-    const [{ next_review }] = await this.dataSource.query<
-      { next_review: Date }[]
-    >(
-      `SELECT next_review FROM cards WHERE id = $1`,
-      [cardId],
-    );
-
-    return {
-      nextReview: next_review,
-      interval: next.interval,
-      easeFactor: next.easeFactor,
-    };
   }
 }
