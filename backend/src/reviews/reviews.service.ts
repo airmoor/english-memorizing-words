@@ -192,6 +192,10 @@ export class ReviewsService {
 
       await qr.commitTransaction();
 
+      if (updated.length === 0) {
+        throw new NotFoundException(`Card ${cardId} not found during update`);
+      }
+
       return {
         nextReview: updated[0].next_review,
         interval: next.interval,
