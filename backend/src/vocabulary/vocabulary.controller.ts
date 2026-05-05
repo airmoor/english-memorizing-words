@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -13,6 +14,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { VocabularyService, VocabularyItemDto } from './vocabulary.service';
 import {
   AuthUser,
@@ -21,6 +23,7 @@ import {
 
 @ApiTags('vocabulary')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('vocabulary')
 export class VocabularyController {
   constructor(private readonly vocabularyService: VocabularyService) {}

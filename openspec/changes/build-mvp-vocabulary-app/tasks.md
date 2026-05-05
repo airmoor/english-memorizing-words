@@ -19,13 +19,13 @@
 
 ## 3. Authentication Module (Backend)
 
-- [ ] 3.1 Install `@nestjs/passport`, `passport-jwt`, `bcrypt`, `@nestjs/jwt`
-- [ ] 3.2 Create `AuthModule` with `AuthService`, `AuthController`
-- [ ] 3.3 Implement `POST /auth/register`: validate input, hash password, create user, return access token + set refresh cookie
-- [ ] 3.4 Implement `POST /auth/login`: validate credentials, return access token + set refresh cookie
+- [x] 3.1 Install `@nestjs/passport`, `passport-jwt`, `bcrypt`, `@nestjs/jwt`
+- [x] 3.2 Create `AuthModule` with `AuthService`, `AuthController`
+- [x] 3.3 Implement `POST /auth/register`: validate input, hash password, create user, return access token
+- [x] 3.4 Implement `POST /auth/login`: validate credentials, return access token
 - [ ] 3.5 Implement `POST /auth/refresh`: validate refresh cookie, rotate tokens
 - [ ] 3.6 Implement `POST /auth/logout`: clear refresh cookie
-- [ ] 3.7 Create `JwtAuthGuard` and apply globally (excluding auth routes)
+- [x] 3.7 Create `JwtAuthGuard` and apply to VocabularyController
 - [ ] 3.8 Write unit tests for AuthService (register, login, duplicate email, wrong password)
 
 ## 4. Words Module (Backend)
