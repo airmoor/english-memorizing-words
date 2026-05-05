@@ -83,13 +83,18 @@ export class VocabularyService {
     await qr.startTransaction();
 
     try {
+      let saved = 0;
+
       for (const { id: mId } of meanings) {
-        await qr.query(
+        // RETURNING id tells us whether this was a real insert or a conflict skip
+        const inserted = (await qr.query(
           `INSERT INTO user_meanings (id, user_id, meaning_id)
            VALUES (gen_random_uuid(), $1, $2)
-           ON CONFLICT (user_id, meaning_id) DO NOTHING`,
+           ON CONFLICT (user_id, meaning_id) DO NOTHING
+           RETURNING id`,
           [userId, mId],
-        );
+        )) as { id: string }[];
+        if (inserted.length > 0) saved++;
 
         await qr.query(
           `INSERT INTO cards (id, user_id, meaning_id, ease_factor, interval, next_review)
@@ -100,7 +105,7 @@ export class VocabularyService {
       }
 
       await qr.commitTransaction();
-      return { saved: meanings.length };
+      return { saved };
     } catch (err) {
       await qr.rollbackTransaction();
       throw err;
@@ -137,19 +142,39 @@ export class VocabularyService {
   // ── DELETE /vocabulary/meanings/:meaningId ───────────────────────────────
 
   async removeMeaning(userId: string, meaningId: string): Promise<void> {
-    // Ownership is implicit: WHERE user_id = $userId scopes the delete
-    const deleted = await this.dataSource.query<{ id: string }[]>(
-      `DELETE FROM user_meanings
-       WHERE user_id = $1 AND meaning_id = $2
-       RETURNING id`,
-      [userId, meaningId],
-    );
+    const qr = this.dataSource.createQueryRunner();
+    await qr.connect();
+    await qr.startTransaction();
 
-    if (deleted.length === 0) {
-      throw new NotFoundException(
-        `Meaning ${meaningId} is not in your vocabulary`,
+    try {
+      // cards must be deleted explicitly: they FK to meanings, not to user_meanings,
+      // so deleting user_meanings does NOT cascade to cards.
+      // review_logs cascade from cards automatically.
+      await qr.query(
+        `DELETE FROM cards WHERE user_id = $1 AND meaning_id = $2`,
+        [userId, meaningId],
       );
+
+      // Ownership is implicit: WHERE user_id scopes the delete to this user only
+      const deleted = (await qr.query(
+        `DELETE FROM user_meanings
+         WHERE user_id = $1 AND meaning_id = $2
+         RETURNING id`,
+        [userId, meaningId],
+      )) as { id: string }[];
+
+      if (deleted.length === 0) {
+        throw new NotFoundException(
+          `Meaning ${meaningId} is not in your vocabulary`,
+        );
+      }
+
+      await qr.commitTransaction();
+    } catch (err) {
+      await qr.rollbackTransaction();
+      throw err;
+    } finally {
+      await qr.release();
     }
-    // CASCADE: deleting user_meanings row triggers deletion of cards + review_logs
   }
 }

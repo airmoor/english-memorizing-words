@@ -122,19 +122,59 @@ describe('VocabularyService', () => {
   describe('saveAllMeanings', () => {
     it('saves all meanings in a single transaction', async () => {
       dataSourceQuery
-        .mockResolvedValueOnce([{ exists: true }])              // word exists
-        .mockResolvedValueOnce([{ id: 'm-1' }, { id: 'm-2' }]); // meanings
+        .mockResolvedValueOnce([{ exists: true }])
+        .mockResolvedValueOnce([{ id: 'm-1' }, { id: 'm-2' }]);
 
+      // user_meanings inserts both return a row (both new)
       const qr = dataSource.createQueryRunner();
+      (qr.query as jest.Mock)
+        .mockResolvedValueOnce([{ id: 'm-1' }]) // user_meanings insert m-1 → new
+        .mockResolvedValueOnce(undefined)        // cards insert m-1
+        .mockResolvedValueOnce([{ id: 'm-2' }]) // user_meanings insert m-2 → new
+        .mockResolvedValueOnce(undefined);       // cards insert m-2
 
       const result = await service.saveAllMeanings(USER_ID, WORD_ID);
 
       expect(result).toEqual({ saved: 2 });
       expect(qr.startTransaction).toHaveBeenCalled();
       expect(qr.commitTransaction).toHaveBeenCalled();
-
-      // 2 meanings × 2 inserts each = 4 qr.query calls
+      // 2 meanings × 2 inserts = 4 qr.query calls
       expect((qr.query as jest.Mock).mock.calls).toHaveLength(4);
+    });
+
+    it('counts only newly inserted meanings — skips already-saved ones', async () => {
+      dataSourceQuery
+        .mockResolvedValueOnce([{ exists: true }])
+        .mockResolvedValueOnce([{ id: 'm-1' }, { id: 'm-2' }]);
+
+      const qr = dataSource.createQueryRunner();
+      (qr.query as jest.Mock)
+        .mockResolvedValueOnce([{ id: 'm-1' }]) // user_meanings m-1 → new
+        .mockResolvedValueOnce(undefined)        // cards m-1
+        .mockResolvedValueOnce([])               // user_meanings m-2 → conflict skip
+        .mockResolvedValueOnce(undefined);       // cards m-2
+
+      const result = await service.saveAllMeanings(USER_ID, WORD_ID);
+
+      expect(result).toEqual({ saved: 1 }); // only m-1 was actually new
+    });
+
+    it('returns { saved: 0 } when all meanings are already saved', async () => {
+      dataSourceQuery
+        .mockResolvedValueOnce([{ exists: true }])
+        .mockResolvedValueOnce([{ id: 'm-1' }, { id: 'm-2' }]);
+
+      const qr = dataSource.createQueryRunner();
+      (qr.query as jest.Mock)
+        .mockResolvedValueOnce([])  // user_meanings m-1 → conflict skip
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce([])  // user_meanings m-2 → conflict skip
+        .mockResolvedValueOnce(undefined);
+
+      const result = await service.saveAllMeanings(USER_ID, WORD_ID);
+
+      expect(result).toEqual({ saved: 0 });
+      expect(qr.commitTransaction).toHaveBeenCalled(); // transaction still commits cleanly
     });
 
     it('uses ON CONFLICT DO NOTHING on every insert (save-all idempotency)', async () => {
@@ -143,6 +183,8 @@ describe('VocabularyService', () => {
         .mockResolvedValueOnce([{ id: 'm-1' }, { id: 'm-2' }]);
 
       const qr = dataSource.createQueryRunner();
+      (qr.query as jest.Mock).mockResolvedValue([]);
+
       await service.saveAllMeanings(USER_ID, WORD_ID);
 
       const allSql: string[] = (qr.query as jest.Mock).mock.calls.map(
@@ -237,47 +279,85 @@ describe('VocabularyService', () => {
   // ── removeMeaning ───────────────────────────────────────────────────────────
 
   describe('removeMeaning', () => {
-    it('deletes user_meaning scoped to the user (ownership via WHERE)', async () => {
-      dataSourceQuery.mockResolvedValue([{ id: 'um-1' }]);
-
-      await expect(
-        service.removeMeaning(USER_ID, MEANING_ID),
-      ).resolves.toBeUndefined();
-
-      expect(dataSourceQuery).toHaveBeenCalledWith(
-        expect.stringContaining('WHERE user_id = $1 AND meaning_id = $2'),
-        [USER_ID, MEANING_ID],
+    const makeRemoveQr = (userMeaningsResult: { id: string }[]) =>
+      makeQr(
+        jest
+          .fn()
+          .mockResolvedValueOnce(undefined)          // DELETE FROM cards
+          .mockResolvedValueOnce(userMeaningsResult), // DELETE FROM user_meanings RETURNING id
       );
-    });
 
-    it('uses RETURNING id to detect whether a row was deleted', async () => {
-      dataSourceQuery.mockResolvedValue([{ id: 'um-1' }]);
+    it('runs inside a transaction', async () => {
+      const qr = makeRemoveQr([{ id: 'um-1' }]);
+      dataSource.createQueryRunner.mockReturnValue(qr);
+
       await service.removeMeaning(USER_ID, MEANING_ID);
 
-      expect(dataSourceQuery).toHaveBeenCalledWith(
-        expect.stringContaining('RETURNING id'),
-        expect.any(Array),
+      expect(qr.startTransaction).toHaveBeenCalled();
+      expect(qr.commitTransaction).toHaveBeenCalled();
+      expect(qr.rollbackTransaction).not.toHaveBeenCalled();
+    });
+
+    it('deletes cards BEFORE user_meanings', async () => {
+      const qr = makeRemoveQr([{ id: 'um-1' }]);
+      dataSource.createQueryRunner.mockReturnValue(qr);
+
+      await service.removeMeaning(USER_ID, MEANING_ID);
+
+      const calls: string[] = (qr.query as jest.Mock).mock.calls.map(
+        ([sql]: [string]) => sql,
+      );
+      const cardsIdx = calls.findIndex((s) => /DELETE FROM cards/.test(s));
+      const umIdx = calls.findIndex((s) => /DELETE FROM user_meanings/.test(s));
+
+      expect(cardsIdx).toBeGreaterThanOrEqual(0);
+      expect(umIdx).toBeGreaterThan(cardsIdx); // cards must come first
+    });
+
+    it('scopes both deletes to the user (ownership via WHERE)', async () => {
+      const qr = makeRemoveQr([{ id: 'um-1' }]);
+      dataSource.createQueryRunner.mockReturnValue(qr);
+
+      await service.removeMeaning(USER_ID, MEANING_ID);
+
+      const calls: [string, unknown[]][] = (qr.query as jest.Mock).mock.calls;
+      calls.forEach(([, params]) =>
+        expect(params).toEqual([USER_ID, MEANING_ID]),
       );
     });
 
-    it('throws NotFoundException when meaning is not in the vocabulary', async () => {
-      dataSourceQuery.mockResolvedValue([]); // 0 rows deleted
+    it('uses RETURNING id on user_meanings delete to detect missing rows', async () => {
+      const qr = makeRemoveQr([{ id: 'um-1' }]);
+      dataSource.createQueryRunner.mockReturnValue(qr);
+
+      await service.removeMeaning(USER_ID, MEANING_ID);
+
+      const sqlCalls: string[] = (qr.query as jest.Mock).mock.calls.map(
+        ([sql]: [string]) => sql,
+      );
+      expect(
+        sqlCalls.some((s) => /DELETE FROM user_meanings/.test(s) && /RETURNING id/.test(s)),
+      ).toBe(true);
+    });
+
+    it('throws NotFoundException and rolls back when meaning is not in vocabulary', async () => {
+      const qr = makeRemoveQr([]); // user_meanings RETURNING returns nothing
+      dataSource.createQueryRunner.mockReturnValue(qr);
 
       await expect(
         service.removeMeaning(USER_ID, MEANING_ID),
       ).rejects.toThrow(NotFoundException);
+
+      expect(qr.rollbackTransaction).toHaveBeenCalled();
+      expect(qr.commitTransaction).not.toHaveBeenCalled();
     });
 
-    it('cascade: relies on DB CASCADE (no explicit card/log deletes in service)', async () => {
-      dataSourceQuery.mockResolvedValue([{ id: 'um-1' }]);
-      await service.removeMeaning(USER_ID, MEANING_ID);
+    it('always releases the runner', async () => {
+      const qr = makeRemoveQr([]);
+      dataSource.createQueryRunner.mockReturnValue(qr);
 
-      // Service issues exactly one DELETE query — cascade handles the rest
-      expect(dataSourceQuery).toHaveBeenCalledTimes(1);
-      expect(dataSourceQuery).toHaveBeenCalledWith(
-        expect.stringContaining('DELETE FROM user_meanings'),
-        expect.any(Array),
-      );
+      await expect(service.removeMeaning(USER_ID, MEANING_ID)).rejects.toThrow();
+      expect(qr.release).toHaveBeenCalled();
     });
   });
 });
