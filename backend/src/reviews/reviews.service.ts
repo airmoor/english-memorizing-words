@@ -33,6 +33,9 @@ export class ReviewProgressDto {
 
   @ApiProperty({ example: 3 })
   reviewedToday: number;
+
+  @ApiProperty({ example: 7 })
+  streak: number;
 }
 
 export class ReviewResultDto {
@@ -84,6 +87,31 @@ function applySmTwo(
   }
 }
 
+// ── Streak helper ────────────────────────────────────────────────────────────
+
+function computeStreak(days: string[]): number {
+  // days: ISO date strings ordered DESC, e.g. ['2024-06-15', '2024-06-14', ...]
+  if (days.length === 0) return 0;
+
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+
+  let streak = 0;
+  let expected = today;
+
+  for (const day of days) {
+    const date = new Date(day);
+    date.setUTCHours(0, 0, 0, 0);
+
+    if (date.getTime() !== expected.getTime()) break;
+
+    streak++;
+    expected = new Date(expected.getTime() - 86_400_000); // step back one day
+  }
+
+  return streak;
+}
+
 // ── Service ──────────────────────────────────────────────────────────────────
 
 @Injectable()
@@ -93,7 +121,7 @@ export class ReviewsService {
   // ── GET /reviews/progress ───────────────────────────────────────────────
 
   async getProgress(userId: string): Promise<ReviewProgressDto> {
-    const [[due], [total], [reviewed]] = await Promise.all([
+    const [[due], [total], [reviewed], reviewDays] = await Promise.all([
       this.dataSource.query<[{ count: string }]>(
         `SELECT COUNT(*) AS count FROM cards
          WHERE user_id = $1 AND next_review <= CURRENT_DATE`,
@@ -111,12 +139,21 @@ export class ReviewsService {
            AND rl.reviewed_at::date = CURRENT_DATE`,
         [userId],
       ),
+      this.dataSource.query<{ day: string }[]>(
+        `SELECT DISTINCT rl.reviewed_at::date AS day
+         FROM review_logs rl
+         JOIN cards c ON c.id = rl.card_id
+         WHERE c.user_id = $1
+         ORDER BY day DESC`,
+        [userId],
+      ),
     ]);
 
     return {
       dueToday: Number(due.count),
       total: Number(total.count),
       reviewedToday: Number(reviewed.count),
+      streak: computeStreak(reviewDays.map((r) => r.day)),
     };
   }
 
