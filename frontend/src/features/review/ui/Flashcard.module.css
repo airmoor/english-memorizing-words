@@ -1,0 +1,64 @@
+.card {
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+  animation: fadeUp 0.25s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.badge {
+  font-size: var(--font-xs);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-secondary);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+}
+
+.count {
+  font-size: var(--font-xs);
+  font-weight: var(--fw-medium);
+  color: var(--color-accent);
+  background: var(--color-accent-subtle);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+}
+
+.word {
+  word-break: break-word;
+}
+
+.example {
+  font-style: italic;
+}
+
+.revealBtn {
+  margin-top: var(--space-sm);
+}
+
+.back {
+  border-top: 1px solid var(--color-border);
+  margin-top: var(--space-lg);
+  padding-top: var(--space-lg);
+  animation: fadeUp 0.2s ease;
+}
+
+.examples {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.examples li {
+  padding: 0.2rem 0;
+}
+
+.errorMsg {
+  text-align: center;
+  margin-top: var(--space-sm);
+}

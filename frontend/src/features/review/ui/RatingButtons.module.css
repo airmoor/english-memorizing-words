@@ -1,0 +1,37 @@
+.row {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: var(--space-lg);
+}
+
+.btn {
+  flex: 1;
+  min-width: 72px;
+  max-width: 100px;
+  padding: var(--space-sm) 0;
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
+  font-weight: var(--fw-semibold);
+  font-family: inherit;
+  cursor: pointer;
+  background: transparent;
+  transition: background 0.15s, color 0.15s, opacity 0.15s;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Rating-specific — these are feature-level semantic colors */
+.again { border: 2px solid var(--color-danger);  color: var(--color-danger); }
+.hard  { border: 2px solid var(--color-warning); color: var(--color-warning); }
+.good  { border: 2px solid var(--color-success); color: var(--color-success); }
+.easy  { border: 2px solid var(--color-accent);  color: var(--color-accent); }
+
+.again:hover:not(:disabled) { background: var(--color-danger);  color: #fff; }
+.hard:hover:not(:disabled)  { background: var(--color-warning); color: #fff; }
+.good:hover:not(:disabled)  { background: var(--color-success); color: #fff; }
+.easy:hover:not(:disabled)  { background: var(--color-accent);  color: #fff; }

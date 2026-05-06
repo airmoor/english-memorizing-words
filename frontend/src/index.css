@@ -1,0 +1,80 @@
+/* ── Design Tokens (light defaults — ThemeProvider overrides at runtime) ──── */
+:root {
+  /* Colors */
+  --color-bg-primary:   #f4f5f9;
+  --color-bg-secondary: #ffffff;
+  --color-bg-card:      #ffffff;
+  --color-text-primary:   #1a1a2e;
+  --color-text-secondary: #6b7280;
+  --color-accent:       #6366f1;
+  --color-accent-hover: #4f46e5;
+  --color-accent-subtle:#eef2ff;
+  --color-border:       #e5e7eb;
+  --color-danger:       #ef4444;
+  --color-success:      #22c55e;
+  --color-warning:      #f59e0b;
+
+  /* Spacing */
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  16px;
+  --space-lg:  24px;
+  --space-xl:  32px;
+  --space-xxl: 48px;
+
+  /* Border radius */
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   16px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+
+  /* Typography */
+  --font-xs:  0.75rem;
+  --font-sm:  0.875rem;
+  --font-md:  1rem;
+  --font-lg:  1.125rem;
+  --font-xl:  1.5rem;
+  --font-xxl: 2.25rem;
+
+  --fw-regular:  400;
+  --fw-medium:   500;
+  --fw-semibold: 600;
+  --fw-bold:     700;
+}
+
+/* ── Reset ──────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: var(--font-md);
+  -webkit-font-smoothing: antialiased;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  transition: background 0.2s, color 0.2s;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4 {
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+p {
+  margin: 0;
+}
+
+button {
+  font-family: inherit;
+}
