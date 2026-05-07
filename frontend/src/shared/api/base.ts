@@ -11,7 +11,23 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+export async function refreshToken(): Promise<boolean> {
+  try {
+    const res = await fetch(`${BASE}/auth/refresh`, {
+      method: 'POST',
+      credentials: 'include',
+    })
+    if (!res.ok) return false
+    const body = await res.json().catch(() => null)
+    if (!body?.accessToken) return false
+    tokenStore.set(body.accessToken)
+    return true
+  } catch {
+    return false
+  }
+}
+
+async function request<T>(path: string, init: RequestInit = {}, isRetry = false): Promise<T> {
   const token = tokenStore.get()
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -19,7 +35,17 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   }
   if (token) headers['Authorization'] = `Bearer ${token}`
 
-  const res = await fetch(`${BASE}${path}`, { ...init, headers })
+  const res = await fetch(`${BASE}${path}`, { ...init, headers, credentials: 'include' })
+
+  if (res.status === 401 && !isRetry) {
+    const refreshed = await refreshToken()
+    if (refreshed) {
+      return request<T>(path, init, true)
+    }
+    tokenStore.clear()
+    window.location.href = '/'
+    throw new ApiError(401, 'Session expired')
+  }
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
@@ -34,4 +60,6 @@ export const apiClient = {
   get: <T>(path: string) => request<T>(path),
   post: <T>(path: string, body?: unknown) =>
     request<T>(path, { method: 'POST', body: JSON.stringify(body) }),
+  delete: <T>(path: string) =>
+    request<T>(path, { method: 'DELETE' }),
 }

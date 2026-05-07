@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
 import { getNextCard } from '../../features/review/api/getNextCard'
-import { useAuth } from '../../features/auth/model/AuthContext'
+import { useLogout } from '../../features/auth/model/useLogout'
 import { useTheme } from '../../shared/design/ThemeProvider'
 import { ProgressHeader } from '../../features/review/ui/ProgressHeader'
 import { Flashcard } from '../../features/review/ui/Flashcard'
@@ -10,19 +9,13 @@ import { Text } from '../../shared/ui/Typography/Typography'
 import styles from './ReviewPage.module.css'
 
 export function ReviewPage() {
-  const { logout } = useAuth()
+  const logout = useLogout()
   const { theme, toggleTheme } = useTheme()
-  const navigate = useNavigate()
 
   const { data: card, isPending, isError, error } = useQuery({
     queryKey: ['nextCard'],
     queryFn: getNextCard,
   })
-
-  function handleLogout() {
-    logout()
-    navigate('/')
-  }
 
   return (
     <div className={styles.page}>
@@ -36,7 +29,7 @@ export function ReviewPage() {
           >
             {theme === 'light' ? '🌙' : '☀️'}
           </button>
-          <button onClick={handleLogout} className={styles.logout}>
+          <button onClick={logout} className={styles.logout}>
             Log out
           </button>
         </div>

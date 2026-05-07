@@ -1,8 +1,12 @@
 import { Navigate } from 'react-router-dom'
-import { useAuth } from '../model/AuthContext'
+import { useAuthStore } from '../model/authStore'
+import { Spinner } from '../../../shared/ui/Spinner'
 
 export function RequireAuth({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth()
-  if (!isAuthenticated) return <Navigate to="/" replace />
+  const token = useAuthStore((s) => s.token)
+  const isInitialized = useAuthStore((s) => s.isInitialized)
+
+  if (!isInitialized) return <Spinner />
+  if (!token) return <Navigate to="/" replace />
   return <>{children}</>
 }
