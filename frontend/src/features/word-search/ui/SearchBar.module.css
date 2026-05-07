@@ -1,0 +1,17 @@
+.bar {
+  display: flex;
+  gap: var(--space-sm);
+  width: 100%;
+}
+
+.input {
+  border-radius: var(--radius-lg);
+  padding: 0.75rem var(--space-lg);
+  font-size: var(--font-md);
+}
+
+.btn {
+  flex-shrink: 0;
+  border-radius: var(--radius-lg);
+  padding: 0.75rem var(--space-xl);
+}

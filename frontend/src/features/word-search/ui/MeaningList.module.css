@@ -1,0 +1,39 @@
+.list {
+  width: 100%;
+}
+
+.resultHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.wordInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.wordHeading {
+  font-size: var(--font-xxl);
+}
+
+.saveAllBtn {
+  flex-shrink: 0;
+}
+
+.allSavedBadge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.375rem 0.75rem;
+  background: var(--color-accent-subtle);
+  color: var(--color-accent);
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+}

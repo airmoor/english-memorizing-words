@@ -68,14 +68,14 @@
 
 ## 8. Frontend — Word Search Page
 
-- [ ] 8.1 Create `/search` page with a text input and search button
-- [ ] 8.2 Call `GET /api/words/:text` on submit; show loading state
-- [ ] 8.3 Render each meaning as a card: definition, transcription, part of speech, synonyms, examples
-- [ ] 8.4 Show "Save" button per meaning; show "Save all" button at the top
-- [ ] 8.5 Mark already-saved meanings with a visual indicator (check icon or different button state)
-- [ ] 8.6 Handle 404 (word not found) and 503 (API unavailable) with appropriate UI messages
-- [ ] 8.7 Wire "Save" to `POST /api/vocabulary/meanings/:id` with optimistic UI update
-- [ ] 8.8 Wire "Save all" to `POST /api/vocabulary/words/:wordId/save-all`
+- [x] 8.1 Create `/search` page with a text input and search button
+- [x] 8.2 Call `GET /api/words/:text` on submit; show loading state (debounced 300 ms + Enter)
+- [x] 8.3 Render each meaning as a card: definition, transcription, part of speech, synonyms, examples
+- [x] 8.4 Show "Save" button per meaning; show "Save all" button at the top
+- [x] 8.5 Mark already-saved meanings with a visual indicator ("Saved ✓" badge, accent-subtle style)
+- [x] 8.6 Handle 404 (word not found) and 503 (API unavailable) with appropriate UI messages
+- [x] 8.7 Wire "Save" to `POST /api/vocabulary/meanings/:id` with optimistic UI update
+- [x] 8.8 Wire "Save all" to `POST /api/vocabulary/words/:wordId/save-all`
 
 ## 9. Frontend — Vocabulary Page
 

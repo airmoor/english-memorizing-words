@@ -16,7 +16,7 @@ export function AuthPage() {
       ? await loginApi(email, password)
       : await registerApi(email, password)
     setToken(token)
-    navigate('/review')
+    navigate('/search')
   }
 
   return (

@@ -1,0 +1,55 @@
+.page {
+  min-height: 100vh;
+  background: var(--color-bg-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: var(--space-xl) var(--space-md);
+}
+
+.content {
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.searchWrap {
+  /* Slight elevation so it feels like a sticky search area */
+  position: sticky;
+  top: 72px; /* header height (56px) + 16px gap */
+  z-index: 5;
+  padding: var(--space-sm) 0;
+  background: var(--color-bg-primary);
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* Empty / error states */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-sm);
+  padding: var(--space-xxl) var(--space-md);
+}
+
+.emptyIcon {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.stateTitle {
+  font-size: var(--font-lg);
+}
