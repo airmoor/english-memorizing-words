@@ -59,12 +59,12 @@
 
 ## 7. Frontend — Auth Pages
 
-- [ ] 7.1 Install Tanstack Query, Zustand, and axios (or fetch wrapper)
-- [ ] 7.2 Create `/register` page: form with email + password fields, submit calls POST /auth/register
-- [ ] 7.3 Create `/login` page: form with email + password, submit calls POST /auth/login
-- [ ] 7.4 Implement auth state: store access token in memory (not localStorage); use Zustand
-- [ ] 7.5 Implement axios interceptor: auto-refresh access token via refresh cookie on 401
-- [ ] 7.6 Add route guard: redirect unauthenticated users to `/login`
+- [x] 7.1 Install Tanstack Query, Zustand, and axios (or fetch wrapper)
+- [x] 7.2 Create `/register` page: form with email + password fields, submit calls POST /auth/register
+- [x] 7.3 Create `/login` page: form with email + password, submit calls POST /auth/login
+- [x] 7.4 Implement auth state: store access token in memory (not localStorage); use Zustand
+- [x] 7.5 Implement axios interceptor: auto-refresh access token via refresh cookie on 401
+- [x] 7.6 Add route guard: redirect unauthenticated users to `/login`
 
 ## 8. Frontend — Word Search Page
 

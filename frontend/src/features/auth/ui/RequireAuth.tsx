@@ -7,6 +7,6 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   const isInitialized = useAuthStore((s) => s.isInitialized)
 
   if (!isInitialized) return <Spinner />
-  if (!token) return <Navigate to="/" replace />
+  if (!token) return <Navigate to="/login" replace />
   return <>{children}</>
 }

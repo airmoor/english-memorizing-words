@@ -8,7 +8,9 @@ import { VocabularyPage } from '../../pages/vocabulary/VocabularyPage'
 export function AppRouter() {
   return (
     <Routes>
-      <Route path="/" element={<AuthPage />} />
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<AuthPage />} />
+      <Route path="/register" element={<AuthPage />} />
       <Route
         path="/search"
         element={
@@ -33,7 +35,7 @@ export function AppRouter() {
           </RequireAuth>
         }
       />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   )
 }
