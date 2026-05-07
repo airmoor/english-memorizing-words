@@ -11,6 +11,14 @@ export class TokenResponseDto {
   accessToken: string;
 }
 
+interface TokenPair {
+  accessToken: string;
+  refreshToken: string;
+}
+
+const ACCESS_EXPIRY = '15m';
+const REFRESH_EXPIRY = '7d';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -19,7 +27,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async register(email: string, password: string): Promise<TokenResponseDto> {
+  async register(email: string, password: string): Promise<TokenPair> {
     const normalizedEmail = email.toLowerCase().trim();
     const existing = await this.usersRepo.findOne({ where: { email: normalizedEmail } });
     if (existing) throw new ConflictException('Email already registered');
@@ -28,10 +36,10 @@ export class AuthService {
     const user = this.usersRepo.create({ email: normalizedEmail, passwordHash });
     await this.usersRepo.save(user);
 
-    return this.issueToken(user.id);
+    return this.issueTokens(user.id);
   }
 
-  async login(email: string, password: string): Promise<TokenResponseDto> {
+  async login(email: string, password: string): Promise<TokenPair> {
     const normalizedEmail = email.toLowerCase().trim();
     const user = await this.usersRepo.findOne({ where: { email: normalizedEmail } });
     if (!user) throw new UnauthorizedException('Invalid credentials');
@@ -39,11 +47,30 @@ export class AuthService {
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) throw new UnauthorizedException('Invalid credentials');
 
-    return this.issueToken(user.id);
+    return this.issueTokens(user.id);
   }
 
-  private issueToken(userId: string): TokenResponseDto {
-    const accessToken = this.jwtService.sign({ sub: userId });
-    return { accessToken };
+  async refresh(rawToken: string | undefined): Promise<TokenPair> {
+    if (!rawToken) throw new UnauthorizedException('No refresh token');
+    try {
+      const payload = this.jwtService.verify<{ sub: string }>(rawToken, {
+        secret: process.env.JWT_REFRESH_SECRET ?? 'change-me-refresh-secret',
+      });
+      return this.issueTokens(payload.sub);
+    } catch {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+  }
+
+  private issueTokens(userId: string): TokenPair {
+    const accessToken = this.jwtService.sign(
+      { sub: userId },
+      { secret: process.env.JWT_SECRET ?? 'change-me-secret', expiresIn: ACCESS_EXPIRY },
+    );
+    const refreshToken = this.jwtService.sign(
+      { sub: userId },
+      { secret: process.env.JWT_REFRESH_SECRET ?? 'change-me-refresh-secret', expiresIn: REFRESH_EXPIRY },
+    );
+    return { accessToken, refreshToken };
   }
 }
