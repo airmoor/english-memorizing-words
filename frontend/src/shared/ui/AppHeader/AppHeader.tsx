@@ -17,6 +17,12 @@ export function AppHeader() {
           Search
         </NavLink>
         <NavLink
+          to="/vocabulary"
+          className={({ isActive }) => [styles.link, isActive ? styles.active : ''].join(' ')}
+        >
+          Vocabulary
+        </NavLink>
+        <NavLink
           to="/review"
           className={({ isActive }) => [styles.link, isActive ? styles.active : ''].join(' ')}
         >

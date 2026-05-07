@@ -79,10 +79,10 @@
 
 ## 9. Frontend — Vocabulary Page
 
-- [ ] 9.1 Create `/vocabulary` page listing all saved meanings
-- [ ] 9.2 Each row shows: word text, definition preview, part of speech
-- [ ] 9.3 Implement remove button per meaning (calls DELETE, removes from list optimistically)
-- [ ] 9.4 Show empty state when vocabulary is empty
+- [x] 9.1 Create `/vocabulary` page listing all saved meanings
+- [x] 9.2 Each row shows: word text, definition preview, part of speech
+- [x] 9.3 Implement remove button per meaning (calls DELETE, removes from list optimistically)
+- [x] 9.4 Show empty state when vocabulary is empty
 
 ## 10. Frontend — Review Page
 
