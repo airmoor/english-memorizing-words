@@ -1,5 +1,6 @@
 import { apiClient } from '../../../shared/api/base'
-import type { WordResult, VocabularyEntry } from '../../../entities/word/model/types'
+import type { WordResult } from '../../../entities/word/model/types'
+import type { VocabularyEntry } from '../../../entities/vocabulary/model/types'
 
 export const fetchWord = (text: string): Promise<WordResult> =>
   apiClient.get(`/words/${encodeURIComponent(text)}`)

@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import type { VocabularyEntry } from '../../../entities/word/model/types'
+import type { VocabularyEntry } from '../../../entities/vocabulary/model/types'
 import { Text } from '../../../shared/ui/Typography/Typography'
 import { Button } from '../../../shared/ui/Button/Button'
 import { Stack } from '../../../shared/ui/Stack/Stack'

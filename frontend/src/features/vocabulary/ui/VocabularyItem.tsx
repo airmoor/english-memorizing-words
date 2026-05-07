@@ -1,4 +1,4 @@
-import type { VocabularyEntry } from '../../../entities/word/model/types'
+import type { VocabularyEntry } from '../../../entities/vocabulary/model/types'
 import { Text } from '../../../shared/ui/Typography/Typography'
 import styles from './VocabularyItem.module.css'
 

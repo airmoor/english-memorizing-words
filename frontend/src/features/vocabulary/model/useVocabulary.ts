@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { fetchVocabulary, deleteMeaning } from '../api/vocabularyApi'
-import type { VocabularyEntry } from '../../../entities/word/model/types'
+import type { VocabularyEntry } from '../../../entities/vocabulary/model/types'
 
 export function useVocabulary() {
   const queryClient = useQueryClient()

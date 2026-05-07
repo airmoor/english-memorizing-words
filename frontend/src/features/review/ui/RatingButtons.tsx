@@ -1,4 +1,4 @@
-import type { Rating } from '../../../shared/types'
+import type { Rating } from '../../../entities/review/model/types'
 import styles from './RatingButtons.module.css'
 
 const RATINGS: { value: Rating; label: string; cls: string }[] = [
