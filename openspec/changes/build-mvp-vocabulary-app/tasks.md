@@ -117,6 +117,16 @@
 - [x] 9d.5 Honour `prefers-color-scheme: dark` for first-time visitors when no stored preference exists.
 - [x] 9d.6 Honour `prefers-reduced-motion: reduce` globally — collapses animation/transition durations to ~0ms via a single `*` rule.
 
+## 9e. Frontend — Theme Settings Page & Visual Polish
+
+- [x] 9e.1 Refactor theme model to two axes — `mode: 'light' | 'dark' | 'system'` + per-mode variant (`lightVariant`, `darkVariant`). Resolved theme key (`light` | `sepia` | `dark` | `midnight`) derived deterministically.
+- [x] 9e.2 Migrate legacy `lexis.theme` (single key) to new `lexis.theme.settings` (JSON) on first load; old key removed.
+- [x] 9e.3 `system` mode listens to `prefers-color-scheme` via `matchMedia` and updates live without reload.
+- [x] 9e.4 New `/settings` page: dedicated theme management UX with mode tiles + variant tiles + live preview swatch.
+- [x] 9e.5 Header refinement — drop heavy nav-pill container; active link uses underline accent only. Settings gear icon replaces the in-header theme picker.
+- [x] 9e.6 Search input: editorial typography (serif), focus ring with ambient glow, leading search-icon, integrated submit button.
+- [x] 9e.7 Vocabulary item visual language matched to HomePage cards (serif word, hover lift, soft shadow).
+
 ## 10. Frontend — Review Page
 
 - [ ] 10.1 Create `/review` page; on load call `GET /api/review/due`

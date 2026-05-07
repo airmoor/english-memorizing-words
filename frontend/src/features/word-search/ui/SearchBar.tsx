@@ -1,6 +1,4 @@
 import type { KeyboardEvent } from 'react'
-import { Input } from '../../../shared/ui/Input/Input'
-import { Button } from '../../../shared/ui/Button/Button'
 import styles from './SearchBar.module.css'
 
 interface Props {
@@ -10,6 +8,26 @@ interface Props {
   disabled?: boolean
 }
 
+/** Search-icon SVG, currentColor. */
+function SearchIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.5-3.5" />
+    </svg>
+  )
+}
+
 export function SearchBar({ value, onChange, onSearch, disabled }: Props) {
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter') onSearch()
@@ -17,13 +35,15 @@ export function SearchBar({ value, onChange, onSearch, disabled }: Props) {
 
   return (
     <div className={styles.bar}>
-      <Input
+      <span className={styles.iconLeft} aria-hidden>
+        <SearchIcon />
+      </span>
+      <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Search any English word…"
-        fullWidth
         autoFocus
         autoComplete="off"
         autoCorrect="off"
@@ -31,13 +51,14 @@ export function SearchBar({ value, onChange, onSearch, disabled }: Props) {
         className={styles.input}
         aria-label="Word search input"
       />
-      <Button
+      <button
+        type="button"
         onClick={onSearch}
         disabled={disabled || value.trim().length === 0}
         className={styles.btn}
       >
         Search
-      </Button>
+      </button>
     </div>
   )
 }

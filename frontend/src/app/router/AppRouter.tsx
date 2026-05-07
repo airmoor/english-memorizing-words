@@ -5,6 +5,7 @@ import { HomePage } from '../../pages/home/HomePage'
 import { SearchPage } from '../../pages/search/SearchPage'
 import { ReviewPage } from '../../pages/review/ReviewPage'
 import { VocabularyPage } from '../../pages/vocabulary/VocabularyPage'
+import { SettingsPage } from '../../pages/settings/SettingsPage'
 
 export function AppRouter() {
   return (
@@ -49,6 +50,14 @@ export function AppRouter() {
         element={
           <RequireAuth>
             <ReviewPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <RequireAuth>
+            <SettingsPage />
           </RequireAuth>
         }
       />

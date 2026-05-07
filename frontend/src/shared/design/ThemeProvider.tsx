@@ -5,96 +5,181 @@ import { darkTheme } from './themes/dark'
 import { midnightTheme } from './themes/midnight'
 import type { ThemeVars } from './tokens'
 
-export type ThemeName = 'light' | 'sepia' | 'dark' | 'midnight'
+// ── Two-axis theme model ────────────────────────────────────────────────────
+//
+//   mode          — brightness preference ('system' resolves via matchMedia)
+//   lightVariant  — which palette to use when the effective mode is 'light'
+//   darkVariant   — which palette to use when the effective mode is 'dark'
+//
+// Resolved theme key (the one that actually drives CSS variables) is one of:
+//   'light' | 'sepia' | 'dark' | 'midnight'
+// derived from { mode, lightVariant, darkVariant } + OS preference.
 
-export interface ThemeMeta {
-  name: ThemeName
-  label: string
-  /** Single-glyph icon used by the theme cycle button. */
-  icon: string
+export type ThemeMode = 'light' | 'dark' | 'system'
+export type LightVariant = 'standard' | 'sepia'
+export type DarkVariant = 'standard' | 'midnight'
+
+export interface ThemeSettings {
+  mode: ThemeMode
+  lightVariant: LightVariant
+  darkVariant: DarkVariant
 }
 
-export const THEME_ORDER: ThemeMeta[] = [
-  { name: 'light',    label: 'Light',    icon: '☀️' },
-  { name: 'sepia',    label: 'Sepia',    icon: '📜' },
-  { name: 'dark',     label: 'Dark',     icon: '🌙' },
-  { name: 'midnight', label: 'Midnight', icon: '🌌' },
-]
+export type ResolvedTheme = 'light' | 'sepia' | 'dark' | 'midnight'
 
-interface ThemeContextValue {
-  theme: ThemeName
-  meta: ThemeMeta
-  /** Cycles to the next theme in THEME_ORDER. */
-  toggleTheme: () => void
-  /** Sets a specific theme directly (e.g. for a settings dropdown). */
-  setTheme: (name: ThemeName) => void
-}
-
-const ThemeContext = createContext<ThemeContextValue | null>(null)
-
-const themes: Record<ThemeName, ThemeVars> = {
+const themes: Record<ResolvedTheme, ThemeVars> = {
   light: lightTheme,
   sepia: sepiaTheme,
   dark: darkTheme,
   midnight: midnightTheme,
 }
 
-const STORAGE_KEY = 'lexis.theme'
+export const MODE_OPTIONS: { value: ThemeMode; label: string; icon: string }[] = [
+  { value: 'light',  label: 'Light',  icon: '☀️' },
+  { value: 'dark',   label: 'Dark',   icon: '🌙' },
+  { value: 'system', label: 'System', icon: '💻' },
+]
 
-function applyTheme(vars: ThemeVars) {
+export const LIGHT_VARIANT_OPTIONS: { value: LightVariant; label: string; description: string }[] = [
+  { value: 'standard', label: 'Standard', description: 'Clean, neutral, productive' },
+  { value: 'sepia',    label: 'Sepia',    description: 'Warm parchment for long reading' },
+]
+
+export const DARK_VARIANT_OPTIONS: { value: DarkVariant; label: string; description: string }[] = [
+  { value: 'standard', label: 'Standard', description: 'Cool, calm dark' },
+  { value: 'midnight', label: 'Midnight', description: 'Deep blue-black, late-night reading' },
+]
+
+const STORAGE_KEY = 'lexis.theme.settings'
+const LEGACY_KEY = 'lexis.theme'
+
+const DEFAULT_SETTINGS: ThemeSettings = {
+  mode: 'system',
+  lightVariant: 'standard',
+  darkVariant: 'standard',
+}
+
+// ── Pure helpers (exported for tests / Settings page preview) ──────────────
+
+function getSystemMode(): 'light' | 'dark' {
+  if (typeof window === 'undefined') return 'light'
+  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+}
+
+export function resolveTheme(settings: ThemeSettings): ResolvedTheme {
+  const effectiveMode = settings.mode === 'system' ? getSystemMode() : settings.mode
+  if (effectiveMode === 'light') {
+    return settings.lightVariant === 'sepia' ? 'sepia' : 'light'
+  }
+  return settings.darkVariant === 'midnight' ? 'midnight' : 'dark'
+}
+
+// ── Storage + migration ────────────────────────────────────────────────────
+
+function loadSettings(): ThemeSettings {
+  if (typeof window === 'undefined') return DEFAULT_SETTINGS
+
+  // 1. New format
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY)
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<ThemeSettings>
+      return {
+        mode: ['light', 'dark', 'system'].includes(parsed.mode as string)
+          ? (parsed.mode as ThemeMode)
+          : DEFAULT_SETTINGS.mode,
+        lightVariant: ['standard', 'sepia'].includes(parsed.lightVariant as string)
+          ? (parsed.lightVariant as LightVariant)
+          : DEFAULT_SETTINGS.lightVariant,
+        darkVariant: ['standard', 'midnight'].includes(parsed.darkVariant as string)
+          ? (parsed.darkVariant as DarkVariant)
+          : DEFAULT_SETTINGS.darkVariant,
+      }
+    }
+  } catch {
+    // fall through to migration / default
+  }
+
+  // 2. Migration from legacy single-key format ('lexis.theme' → settings)
+  try {
+    const legacy = window.localStorage.getItem(LEGACY_KEY)
+    if (legacy) {
+      const migrated = migrateLegacy(legacy as ResolvedTheme)
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated))
+      window.localStorage.removeItem(LEGACY_KEY)
+      return migrated
+    }
+  } catch {
+    // ignore
+  }
+
+  return DEFAULT_SETTINGS
+}
+
+function migrateLegacy(legacy: ResolvedTheme): ThemeSettings {
+  switch (legacy) {
+    case 'light':    return { mode: 'light', lightVariant: 'standard', darkVariant: 'standard' }
+    case 'sepia':    return { mode: 'light', lightVariant: 'sepia',    darkVariant: 'standard' }
+    case 'dark':     return { mode: 'dark',  lightVariant: 'standard', darkVariant: 'standard' }
+    case 'midnight': return { mode: 'dark',  lightVariant: 'standard', darkVariant: 'midnight' }
+    default:         return DEFAULT_SETTINGS
+  }
+}
+
+function applyTheme(name: ResolvedTheme) {
   const root = document.documentElement
-  for (const [key, value] of Object.entries(vars)) {
+  for (const [key, value] of Object.entries(themes[name])) {
     root.style.setProperty(key, value)
   }
+  root.setAttribute('data-theme', name)
 }
 
-/**
- * Resolves the initial theme. Priority:
- *   1. `lexis.theme` in localStorage (user's explicit choice)
- *   2. `prefers-color-scheme: dark`  → 'dark'
- *   3. otherwise                     → 'light'
- *
- * The OS-level signal is consulted only on first visit; once the user picks
- * a theme it sticks via localStorage and we never override their choice.
- */
-function resolveInitialTheme(): ThemeName {
-  if (typeof window === 'undefined') return 'light'
-  const stored = window.localStorage.getItem(STORAGE_KEY)
-  if (stored && stored in themes) return stored as ThemeName
-  if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) return 'dark'
-  return 'light'
+// ── React Context ──────────────────────────────────────────────────────────
+
+interface ThemeContextValue {
+  settings: ThemeSettings
+  /** The actual palette currently driving CSS vars (for inspection / preview). */
+  resolved: ResolvedTheme
+  setMode: (mode: ThemeMode) => void
+  setLightVariant: (v: LightVariant) => void
+  setDarkVariant: (v: DarkVariant) => void
 }
+
+const ThemeContext = createContext<ThemeContextValue | null>(null)
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeName>(resolveInitialTheme)
+  const [settings, setSettings] = useState<ThemeSettings>(loadSettings)
 
+  // Apply theme + persist on every settings change
   useEffect(() => {
-    applyTheme(themes[theme])
-    document.documentElement.setAttribute('data-theme', theme)
+    applyTheme(resolveTheme(settings))
     try {
-      window.localStorage.setItem(STORAGE_KEY, theme)
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
     } catch {
-      // localStorage may be unavailable (private browsing) — fail silently
+      // localStorage unavailable (private browsing) — fail silently
     }
-  }, [theme])
+  }, [settings])
 
-  const meta = THEME_ORDER.find((m) => m.name === theme) ?? THEME_ORDER[0]
+  // Live-update when system theme changes AND user is on 'system' mode
+  useEffect(() => {
+    if (settings.mode !== 'system') return
+    if (typeof window === 'undefined' || !window.matchMedia) return
 
-  function toggleTheme() {
-    const idx = THEME_ORDER.findIndex((m) => m.name === theme)
-    const next = THEME_ORDER[(idx + 1) % THEME_ORDER.length]
-    setThemeState(next.name)
+    const mq = window.matchMedia('(prefers-color-scheme: dark)')
+    const handler = () => applyTheme(resolveTheme(settings))
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [settings])
+
+  const ctx: ThemeContextValue = {
+    settings,
+    resolved: resolveTheme(settings),
+    setMode: (mode) => setSettings((s) => ({ ...s, mode })),
+    setLightVariant: (v) => setSettings((s) => ({ ...s, lightVariant: v })),
+    setDarkVariant: (v) => setSettings((s) => ({ ...s, darkVariant: v })),
   }
 
-  function setTheme(name: ThemeName) {
-    setThemeState(name)
-  }
-
-  return (
-    <ThemeContext.Provider value={{ theme, meta, toggleTheme, setTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  )
+  return <ThemeContext.Provider value={ctx}>{children}</ThemeContext.Provider>
 }
 
 export function useTheme(): ThemeContextValue {
