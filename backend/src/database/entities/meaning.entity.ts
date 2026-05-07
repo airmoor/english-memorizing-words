@@ -23,9 +23,6 @@ export class Meaning {
   @Column({ type: 'text' })
   definition: string;
 
-  @Column({ type: 'text', nullable: true })
-  transcription: string | null;
-
   @Column({ name: 'part_of_speech', type: 'text', nullable: true })
   partOfSpeech: string | null;
 
@@ -34,6 +31,9 @@ export class Meaning {
 
   @Column({ type: 'text', array: true, default: () => "'{}'" })
   examples: string[];
+
+  @Column({ name: 'sense_number', type: 'text', nullable: true })
+  senseNumber: string | null;
 
   @ManyToOne(() => Word, (word) => word.meanings, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'word_id' })

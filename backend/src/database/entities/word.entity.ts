@@ -9,6 +9,12 @@ export class Word {
   @Column({ type: 'text', unique: true })
   text: string;
 
+  @Column({ type: 'text', nullable: true })
+  transcription: string | null;
+
+  @Column({ type: 'text' })
+  provider: 'merriam-webster' | 'free-dictionary';
+
   @Column({ name: 'fetched_at', type: 'timestamptz' })
   fetchedAt: Date;
 

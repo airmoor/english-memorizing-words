@@ -1,0 +1,122 @@
+.sense {
+  list-style: none;
+  padding: var(--space-md) 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.sense:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.subSense {
+  padding-left: var(--space-xl);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--space-md);
+  align-items: start;
+}
+
+.senseNumber {
+  display: inline-block;
+  min-width: 1.75rem;
+  font-size: var(--font-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--color-accent);
+  padding-top: 2px;
+  user-select: none;
+}
+
+.body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.definition {
+  margin: 0;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+}
+
+.examples {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.example {
+  position: relative;
+  padding-left: var(--space-md);
+  font-style: italic;
+}
+
+.example::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 70%;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+}
+
+.synonyms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.synonym {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--font-xs);
+  color: var(--color-text-secondary);
+}
+
+.savedBadge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  background: var(--color-accent-subtle);
+  color: var(--color-accent);
+  border-radius: var(--radius-md);
+  font-size: var(--font-xs);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+  user-select: none;
+  margin-top: 2px;
+}
+
+.saveBtn {
+  flex-shrink: 0;
+  padding: 0.2rem 0.65rem;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-xs);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s, color 0.15s;
+  margin-top: 2px;
+}
+
+.saveBtn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}

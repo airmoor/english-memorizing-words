@@ -3,7 +3,8 @@ import { AppHeader } from '../../shared/ui/AppHeader/AppHeader'
 import { Spinner } from '../../shared/ui/Spinner'
 import { Text } from '../../shared/ui/Typography/Typography'
 import { SearchBar } from '../../features/word-search/ui/SearchBar'
-import { MeaningList } from '../../features/word-search/ui/MeaningList'
+import { WordEntry } from '../../features/word-search/ui/WordEntry'
+
 import { useWordSearch } from '../../features/word-search/model/useWordSearch'
 import { useSavedMeanings } from '../../features/word-search/model/useSavedMeanings'
 import styles from './SearchPage.module.css'
@@ -98,7 +99,7 @@ export function SearchPage() {
             )}
 
             {searchState.status === 'success' && (
-              <MeaningList
+              <WordEntry
                 word={searchState.word}
                 savedIds={savedIds}
                 onSave={save}

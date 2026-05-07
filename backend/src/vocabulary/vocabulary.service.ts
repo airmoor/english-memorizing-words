@@ -30,6 +30,9 @@ export class VocabularyItemDto {
   @ApiProperty({ example: ['He spoke the word.'], type: [String] })
   examples: string[];
 
+  @ApiProperty({ example: '1a', nullable: true })
+  senseNumber: string | null;
+
   @ApiProperty({ example: '2024-01-01T00:00:00.000Z' })
   savedAt: Date;
 }
@@ -41,7 +44,6 @@ export class VocabularyService {
   // ── POST /vocabulary/meanings/:meaningId ─────────────────────────────────
 
   async saveMeaning(userId: string, meaningId: string): Promise<void> {
-    // Existence check before touching a transaction
     const [{ exists }] = await this.dataSource.query<[{ exists: boolean }]>(
       `SELECT EXISTS(SELECT 1 FROM meanings WHERE id = $1) AS exists`,
       [meaningId],
@@ -53,7 +55,6 @@ export class VocabularyService {
     await qr.startTransaction();
 
     try {
-      // Both inserts are idempotent: duplicate key → silently skip
       await qr.query(
         `INSERT INTO user_meanings (id, user_id, meaning_id)
          VALUES (gen_random_uuid(), $1, $2)
@@ -106,7 +107,6 @@ export class VocabularyService {
       let saved = 0;
 
       for (const { id: mId } of meanings) {
-        // RETURNING id tells us whether this was a real insert or a conflict skip
         const inserted = (await qr.query(
           `INSERT INTO user_meanings (id, user_id, meaning_id)
            VALUES (gen_random_uuid(), $1, $2)
@@ -137,19 +137,19 @@ export class VocabularyService {
   // ── GET /vocabulary ───────────────────────────────────────────────────────
 
   getUserVocabulary(userId: string): Promise<VocabularyItemDto[]> {
-    // Single JOIN query — no N+1
     return this.dataSource.query<VocabularyItemDto[]>(
       `SELECT
          um.id            AS "userMeaningId",
          um.saved_at      AS "savedAt",
          m.id             AS "meaningId",
          m.definition,
-         m.transcription,
          m.part_of_speech AS "partOfSpeech",
          m.synonyms,
          m.examples,
+         m.sense_number   AS "senseNumber",
          w.id             AS "wordId",
-         w.text           AS "wordText"
+         w.text           AS "wordText",
+         w.transcription
        FROM user_meanings um
        JOIN meanings m ON m.id = um.meaning_id
        JOIN words    w ON w.id = m.word_id
@@ -167,15 +167,11 @@ export class VocabularyService {
     await qr.startTransaction();
 
     try {
-      // cards must be deleted explicitly: they FK to meanings, not to user_meanings,
-      // so deleting user_meanings does NOT cascade to cards.
-      // review_logs cascade from cards automatically.
       await qr.query(
         `DELETE FROM cards WHERE user_id = $1 AND meaning_id = $2`,
         [userId, meaningId],
       );
 
-      // Ownership is implicit: WHERE user_id scopes the delete to this user only
       const deleted = (await qr.query(
         `DELETE FROM user_meanings
          WHERE user_id = $1 AND meaning_id = $2

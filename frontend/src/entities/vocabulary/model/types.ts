@@ -3,10 +3,11 @@ export interface VocabularyEntry {
   meaningId: string
   wordId: string
   wordText: string
-  definition: string
   transcription: string | null
+  definition: string
   partOfSpeech: string | null
   synonyms: string[]
   examples: string[]
+  senseNumber: string | null
   savedAt: string
 }

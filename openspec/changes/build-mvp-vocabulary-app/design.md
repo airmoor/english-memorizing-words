@@ -26,28 +26,76 @@ The learning model is **definition-based (EN → EN)**: users learn words by rea
 
 ## Decisions
 
-### 1. External Dictionary API: Free Dictionary API (dictionaryapi.dev)
+### 1. External Dictionary API: Merriam-Webster Learner's (Primary) + Free Dictionary (Fallback)
 
-**Choice:** Free Dictionary API (https://api.dictionaryapi.dev/api/v2/entries/en/:word) — free, no key required, permissive local caching.
+**Choice:** Two-tier dictionary provider strategy with provider abstraction.
 
-**Rationale:** No API key friction, covers definitions, phonetics/transcription, part of speech, examples, and synonyms. Results can be stored locally without restriction. Merriam-Webster's free tier requires a key and has stricter caching terms.
+- **Primary**: Merriam-Webster Learner's Dictionary — `https://www.dictionaryapi.com/api/v3/references/learners/json/:word?key=:KEY`. Definitions are written for English-as-a-second-language learners (simpler vocabulary, more pedagogical examples). Returns IPA transcription, structured sense hierarchy, and inflection metadata.
+- **Fallback**: Free Dictionary API — `https://api.dictionaryapi.dev/api/v2/entries/en/:word`. No key required.
 
-**Known limitations:**
-- No official SLA or uptime guarantee
-- Response structure is deeply nested and inconsistent — words can have multiple `phonetics` arrays, meanings split across multiple objects with the same part of speech, and examples may be absent entirely
-- Some valid English words return 404
-- `synonyms` and `antonyms` appear at both the meaning level and the definition level; only definition-level synonyms are used
+**Rationale:** MW Learner's is purpose-built for ESL learners and is the better default for this app's audience. Free Dictionary is retained as a fallback because (a) MW requires an API key (`MERRIAM_API_KEY`) which may be missing in dev, (b) MW occasionally lacks coverage that Free Dictionary has (slang, proper nouns), (c) downtime resilience.
 
-**Normalization contract:** The ingestion layer MUST map the raw API response to the internal schema before any DB write. Mapping rules:
-- `phonetics[*].text` → `transcription`: iterate the `phonetics` array and use the first element where `.text` is a non-empty string; null if none qualify
-- Each `meanings[i].definitions[j]` → one `meanings` row
-- `meanings[i].partOfSpeech` → `part_of_speech`
-- `meanings[i].definitions[j].definition` → `definition`
-- `meanings[i].definitions[j].example` → `examples[0]` (wrap as single-element array; empty array if absent)
-- `meanings[i].definitions[j].synonyms` → `synonyms` (empty array if absent)
-- All missing optional fields default to `null` or `[]` — never omitted
+**Provider abstraction (mandatory file layout):**
+```
+src/words/providers/
+├── provider.interface.ts
+├── dictionary-provider.service.ts   # selects MW first, falls back to FD
+├── merriam/
+│   ├── merriam.dto.ts               # vendor types (isolated)
+│   ├── merriam.normalizer.ts        # MW response → NormalizedWord
+│   └── merriam.provider.ts
+└── free-dictionary/
+    ├── free-dictionary.dto.ts
+    ├── free-dictionary.normalizer.ts
+    └── free-dictionary.provider.ts
+```
 
-**Fallback:** If a word is not found (API 404), return 404 to the client — no silent failure. If the API is unavailable, return 503.
+**Hard rule:** Vendor-specific DTOs MUST NOT leave the corresponding provider directory. The only word representation visible to `WordsService`, the database, and the rest of the application is `NormalizedWord`.
+
+**Internal normalized schema (provider-independent):**
+```typescript
+interface NormalizedWord {
+  text: string                          // matches lowercased search text
+  transcription: string | null          // IPA from MW or phonetic from FD
+  provider: 'merriam-webster' | 'free-dictionary'
+  meanings: NormalizedMeaning[]
+}
+
+interface NormalizedMeaning {
+  definition: string
+  partOfSpeech: string | null
+  synonyms: string[]                    // FD only; empty for MW
+  examples: string[]
+}
+```
+
+**Merriam-Webster normalization rules:**
+- Consume only `entries[0]` — MW returns multiple top-level entries (the lookup word plus related compound headwords like "Internet service provider"); only the first canonical entry is consumed
+- `entries[0].hwi.prs[0].ipa` → `transcription` (null if absent)
+- For every sense in `entries[0].def[].sseq[][]`, walk `["sense" | "bs" | "pseq", content]` items; emit one `NormalizedMeaning` per leaf sense
+- Definition text comes from `dt` items where the first element is `"text"`, with all `{...}` MW markup tokens stripped (`{bc}`, `{it}…{/it}`, `{sx|word||}`, etc.)
+- Examples come from `dt` items where the first element is `"vis"` (the `t` field of each entry)
+- Synonyms array is always empty (MW Learner's does not expose a synonyms field)
+- Nested sub-senses (1a, 1b) are flattened into separate rows — visual sense hierarchy is out of scope for MVP
+
+**Free Dictionary normalization rules:** preserved verbatim from prior design — `phonetics[*].text` → `transcription`; each `meanings[i].definitions[j]` → one row; `definitions[j].synonyms` → `synonyms`; `definitions[j].example` wrapped as 1-element `examples[]` array.
+
+**Fallback triggers** (in `DictionaryProviderService`):
+1. `MERRIAM_API_KEY` env var is missing → MW marked unavailable, FD used
+2. MW returns a non-2xx status
+3. MW returns an empty array OR an array of strings (MW's "did you mean…" suggestion shape)
+4. MW request throws (timeout, network)
+
+In all cases the failure is logged. Final 404 is returned only when **both** providers report not-found. 503 is returned only when both are unavailable.
+
+**Sense numbering (added in 1746500000001-AddSenseNumber):**
+- `meanings.sense_number TEXT NULL` — preserves the MW dictionary-style sense label, e.g. `"1"`, `"1a"`, `"1b"`, `"2"`. Free Dictionary leaves this null.
+- Required to render a single canonical word entry with grouped meanings (matching Merriam-Webster's UX). The frontend uses these labels to indent subsenses (entries containing letters) under their parent number.
+- Sub-senses within a `sdsense` (e.g., "especially: …") inherit the parent sense's number.
+
+**Fields explicitly NOT added (out of MVP scope):**
+- `audio_url` — audio pronunciation is a non-goal
+- `sense_label` — `sdsense` text (e.g., "especially") is currently inlined into the `definition` text rather than stored separately
 
 ---
 
@@ -88,16 +136,18 @@ users
 words
   id            UUID PK
   text          TEXT UNIQUE NOT NULL   -- lowercase normalized
+  transcription TEXT                   -- nullable; IPA (MW) or phonetic text (FD)
+  provider      TEXT NOT NULL          -- 'merriam-webster' | 'free-dictionary'
   fetched_at    TIMESTAMPTZ NOT NULL   -- timestamp of last successful API fetch
 
 meanings
-  id            UUID PK
-  word_id       UUID FK → words.id ON DELETE CASCADE
-  definition    TEXT NOT NULL
-  transcription TEXT                   -- nullable
+  id             UUID PK
+  word_id        UUID FK → words.id ON DELETE CASCADE
+  definition     TEXT NOT NULL
   part_of_speech TEXT
-  synonyms      TEXT[]  NOT NULL DEFAULT '{}'
-  examples      TEXT[]  NOT NULL DEFAULT '{}'
+  synonyms       TEXT[]  NOT NULL DEFAULT '{}'
+  examples       TEXT[]  NOT NULL DEFAULT '{}'
+  sense_number   TEXT                   -- "1", "1a", "1b", "2" (MW); NULL for FD
   -- composite index: (word_id, definition, part_of_speech) for deduplication on race
 
 user_meanings  (junction: user's saved vocabulary)
@@ -127,9 +177,13 @@ review_logs
 
 **Key invariants:**
 - `words` and `meanings` are global (shared across users, immutable after first fetch).
+- Pronunciation lives on `words`, not `meanings` — both providers return one transcription per word lookup, not per sense.
+- `words.provider` records which API sourced the cached entry. It is informational (not used to invalidate cache) but useful for future re-fetch / migration tooling.
 - Only `user_meanings`, `cards`, and `review_logs` are user-scoped.
 - Saving a meaning creates a row in `user_meanings` AND a row in `cards` (see Decision 8).
 - The `cards` table has no `direction` column — the only supported mode is EN → EN (word → definition). The column is omitted rather than defaulted to avoid future confusion.
+
+**Schema changes from prior (Free-Dictionary-only) design:** see migration `1746500000000-AddDictionaryProvider`. Adds `words.transcription`, `words.provider`; drops `meanings.transcription`. The migration TRUNCATEs `words` (cascades to dependents) — this is deliberate because pre-migration cache rows came from Free Dictionary only and the new architecture requires consistent provider attribution. User accounts are preserved.
 
 ---
 
@@ -234,11 +288,11 @@ No target-language content appears anywhere in the card. The user's task is to r
 
 ---
 
-### 8. Word Lookup Pipeline with Race Condition Handling
+### 8. Word Lookup Pipeline with Provider Selection and Race Condition Handling
 
 Concurrent requests for the same uncached word (e.g., two users searching simultaneously) MUST NOT produce duplicate rows in `words` or `meanings`.
 
-**Strategy: DB-level conflict handling via `ON CONFLICT DO NOTHING`**
+**Strategy:** DB-level conflict handling via `ON CONFLICT DO NOTHING`, plus provider fallback at the API layer.
 
 ```
 Client → GET /api/words/:text
@@ -252,23 +306,43 @@ Client → GET /api/words/:text
         ┌─────┴──────────┐
         │ found           │ not found
         ▼                 ▼
-   SELECT meanings    fetch from dictionaryapi.dev
-   WHERE word_id         │
-   return them     ┌─────┴──────┐
-                   │ 200 OK      │ 404 / error
-                   ▼             ▼
-         BEGIN TRANSACTION    return 404 / 503
-         INSERT INTO words (text, fetched_at)
-           ON CONFLICT (text) DO NOTHING
-         SELECT id FROM words WHERE text = :text
-         INSERT INTO meanings (...) VALUES (...)
-           ON CONFLICT DO NOTHING        ← if race: skip silently
-         COMMIT
-         SELECT meanings WHERE word_id = :id
-         return meanings
+   return cached     DictionaryProviderService.fetchWord(:text)
+                          │
+                ┌─────────┴──────────┐
+                │ MW available?       │
+                ▼                     │
+              YES                     │
+                │                     │
+        try Merriam-Webster           │
+                │                     │
+        ┌───────┴───────┐             │
+        │ ok            │ not-found / err
+        ▼               └─────────────┤
+   normalize → return                 │
+                                      ▼
+                              try Free Dictionary
+                                      │
+                              ┌───────┴────────┐
+                              │ ok             │ not-found / err
+                              ▼                ▼
+                        normalize → return   throw 404 / 503
+                              │
+                              ▼
+              BEGIN TRANSACTION
+              INSERT INTO words (text, transcription, provider, fetched_at)
+                ON CONFLICT (text) DO NOTHING
+              SELECT id FROM words WHERE text = :text
+              INSERT INTO meanings (...)
+                ON CONFLICT DO NOTHING       ← if race: skip silently
+              COMMIT
+              return WordResponseDto
 ```
 
 **Why this works:** `words.text` has a UNIQUE constraint. If two concurrent requests both reach the "not found" branch simultaneously, only one INSERT will succeed; the other will hit `ON CONFLICT DO NOTHING`. Both then re-SELECT the word id and proceed to read the already-inserted meanings. No duplicates, no errors, no distributed lock needed.
+
+**Provider fallback semantics:**
+- "MW available" is checked synchronously via `MerriamProvider.isAvailable()` — currently equivalent to `process.env.MERRIAM_API_KEY` being set
+- Both providers return `null` for "not found" and throw for "unavailable"; `DictionaryProviderService` translates the cascade into a single 404 (both not-found) or 503 (both unavailable)
 
 **Meanings deduplication:** Meanings don't have a natural unique key beyond their content. A composite index on `(word_id, definition, part_of_speech)` supports `ON CONFLICT DO NOTHING` for the race case. Theoretically identical `(word_id, definition, part_of_speech)` tuples with genuinely distinct meanings are possible but rare enough in practice to be acceptable — over-normalizing this case adds complexity that isn't justified at MVP scale.
 

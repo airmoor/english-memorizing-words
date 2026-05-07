@@ -32,7 +32,13 @@
 
 - [x] 4.1 Create `WordsModule` with `WordsService`, `WordsController`
 - [x] 4.2 Implement `GET /api/words/:text`: check DB cache first; if found, return meanings
-- [x] 4.3 Implement Free Dictionary API client (`https://api.dictionaryapi.dev/api/v2/entries/en/:word`)
+- [x] 4.3 Implement dictionary provider abstraction with Merriam-Webster Learner's primary + Free Dictionary fallback
+- [x] 4.3a Create provider interface (`IDictionaryProvider`) and selection service (`DictionaryProviderService`)
+- [x] 4.3b Implement Merriam-Webster provider (uses entries[0]; key from `MERRIAM_API_KEY` env)
+- [x] 4.3c Implement Free Dictionary provider as fallback
+- [x] 4.3d Add migration `1746500000000-AddDictionaryProvider`: words.transcription, words.provider, drop meanings.transcription
+- [x] 4.3e Add migration `1746500000001-AddSenseNumber`: meanings.sense_number for MW dictionary-style hierarchy
+- [x] 4.3f MW normalizer resolves bare letter sense numbers ("a", "b") into canonical "1a" / "1b" using the most recent top-level number
 - [x] 4.4 Implement DB write on cache miss: insert word + all meanings in a single transaction
 - [x] 4.5 Normalize API response to internal Meaning schema (handle missing fields as empty arrays)
 - [x] 4.6 Return 404 if external API returns not found; return 503 on network error
@@ -76,6 +82,7 @@
 - [x] 8.6 Handle 404 (word not found) and 503 (API unavailable) with appropriate UI messages
 - [x] 8.7 Wire "Save" to `POST /api/vocabulary/meanings/:id` with optimistic UI update
 - [x] 8.8 Wire "Save all" to `POST /api/vocabulary/words/:wordId/save-all`
+- [x] 8.9 Render search results as a single canonical dictionary entry (`WordEntry` + `Sense`); replace the per-meaning Card layout. Senses grouped by part of speech, sub-senses indented under their parent number.
 
 ## 9. Frontend — Vocabulary Page
 
@@ -93,6 +100,7 @@
 - [ ] 10.5 Show four rating buttons: Again / Hard / Good / Easy
 - [ ] 10.6 On rating tap, call `POST /api/review/cards/:id/rate`, advance to next card
 - [ ] 10.7 Show completion screen when no cards remain, displaying next scheduled review date
+- [x] 10.8 Fix `Unexpected end of JSON input` crash on Review page: shared API client treats HTTP 200 with empty body as `null` (NestJS serialises a `null` controller return that way)
 
 ## 11. PWA Configuration
 

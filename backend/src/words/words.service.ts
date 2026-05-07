@@ -4,12 +4,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Word } from '../database/entities/word.entity';
 import { Meaning } from '../database/entities/meaning.entity';
-import { DictionaryApiService } from './dictionary-api.service';
-import {
-  normalizeSearchText,
-  normalizeApiResponse,
-  NormalizedMeaning,
-} from './normalize';
+import { normalizeSearchText } from './normalize';
+import { DictionaryProviderService } from './providers/dictionary-provider.service';
+import type {
+  NormalizedWord,
+  ProviderName,
+} from './providers/provider.interface';
+
+// ── Response DTOs ────────────────────────────────────────────────────────────
 
 export class MeaningDto {
   @ApiProperty({ example: 'uuid-v4' })
@@ -17,9 +19,6 @@ export class MeaningDto {
 
   @ApiProperty({ example: 'A spoken or written word.' })
   definition: string;
-
-  @ApiProperty({ example: '/wɜːrd/', nullable: true })
-  transcription: string | null;
 
   @ApiProperty({ example: 'noun', nullable: true })
   partOfSpeech: string | null;
@@ -29,6 +28,9 @@ export class MeaningDto {
 
   @ApiProperty({ example: ['He spoke the word.'], type: [String] })
   examples: string[];
+
+  @ApiProperty({ example: '1a', nullable: true })
+  senseNumber: string | null;
 }
 
 export class WordResponseDto {
@@ -38,9 +40,20 @@ export class WordResponseDto {
   @ApiProperty({ example: 'word' })
   text: string;
 
+  @ApiProperty({ example: 'ˈwɚd', nullable: true })
+  transcription: string | null;
+
+  @ApiProperty({
+    enum: ['merriam-webster', 'free-dictionary'],
+    example: 'merriam-webster',
+  })
+  provider: ProviderName;
+
   @ApiProperty({ type: [MeaningDto] })
   meanings: MeaningDto[];
 }
+
+// ── Service ──────────────────────────────────────────────────────────────────
 
 @Injectable()
 export class WordsService {
@@ -49,64 +62,66 @@ export class WordsService {
     private readonly wordsRepo: Repository<Word>,
     @InjectRepository(Meaning)
     private readonly meaningsRepo: Repository<Meaning>,
-    private readonly dictionaryApi: DictionaryApiService,
+    private readonly providerService: DictionaryProviderService,
     private readonly dataSource: DataSource,
   ) {}
 
   async findWord(rawText: string): Promise<WordResponseDto> {
     const text = normalizeSearchText(rawText);
 
-    // DB-first: return immediately if already cached
+    // DB-first
     const cached = await this.wordsRepo.findOne({
       where: { text },
       relations: { meanings: true },
     });
+    if (cached) return this.toDto(cached, cached.meanings);
 
-    if (cached) {
-      return this.toDto(cached, cached.meanings);
-    }
+    // Cache miss — provider cascade (MW first, FD fallback)
+    const normalized = await this.providerService.fetchWord(text);
 
-    // Cache miss — fetch from external API (throws 404 or 503 on failure)
-    const apiEntries = await this.dictionaryApi.fetchWord(text);
-    const normalized = normalizeApiResponse(apiEntries);
-
-    // Write to DB with race-condition-safe transaction
-    const { word, meanings } = await this.writeToDb(text, normalized);
+    const { word, meanings } = await this.writeToDb(normalized);
     return this.toDto(word, meanings);
   }
 
   private async writeToDb(
-    text: string,
-    normalized: NormalizedMeaning[],
+    normalized: NormalizedWord,
   ): Promise<{ word: Word; meanings: Meaning[] }> {
     const qr = this.dataSource.createQueryRunner();
     await qr.connect();
     await qr.startTransaction();
 
     try {
-      // Insert word; silently skip if a concurrent request already inserted it
+      // Insert word; on race, refresh transcription/provider with latest provider's data
       await qr.query(
-        `INSERT INTO words (id, text, fetched_at)
-         VALUES (gen_random_uuid(), $1, NOW())
-         ON CONFLICT (text) DO NOTHING`,
-        [text],
+        `INSERT INTO words (id, text, transcription, provider, fetched_at)
+         VALUES (gen_random_uuid(), $1, $2, $3, NOW())
+         ON CONFLICT (text) DO UPDATE
+           SET transcription = EXCLUDED.transcription,
+               provider      = EXCLUDED.provider,
+               fetched_at    = NOW()`,
+        [normalized.text, normalized.transcription, normalized.provider],
       );
 
-      // Re-fetch the canonical word id (works whether we inserted or skipped)
-      const [{ id: wordId }] = await qr.query(
+      const rows = (await qr.query(
         `SELECT id FROM words WHERE text = $1`,
-        [text],
-      );
+        [normalized.text],
+      )) as [{ id: string }];
+      const [{ id: wordId }] = rows;
 
-      // Insert each meaning; suppress duplicates on (word_id, definition, part_of_speech)
-      for (const m of normalized) {
+      for (const m of normalized.meanings) {
         await qr.query(
           `INSERT INTO meanings
-             (id, word_id, definition, transcription, part_of_speech, synonyms, examples)
-           VALUES
-             (gen_random_uuid(), $1, $2, $3, $4, $5, $6)
+             (id, word_id, definition, part_of_speech, synonyms, examples, sense_number)
+           VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6)
            ON CONFLICT DO NOTHING`,
-          [wordId, m.definition, m.transcription, m.partOfSpeech, m.synonyms, m.examples],
+          [
+            wordId,
+            m.definition,
+            m.partOfSpeech,
+            m.synonyms,
+            m.examples,
+            m.senseNumber,
+          ],
         );
       }
 
@@ -127,13 +142,15 @@ export class WordsService {
     return {
       id: word.id,
       text: word.text,
+      transcription: word.transcription,
+      provider: word.provider,
       meanings: meanings.map((m) => ({
         id: m.id,
         definition: m.definition,
-        transcription: m.transcription,
         partOfSpeech: m.partOfSpeech,
         synonyms: m.synonyms,
         examples: m.examples,
+        senseNumber: m.senseNumber,
       })),
     };
   }

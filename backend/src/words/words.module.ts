@@ -4,11 +4,18 @@ import { Word } from '../database/entities/word.entity';
 import { Meaning } from '../database/entities/meaning.entity';
 import { WordsController } from './words.controller';
 import { WordsService } from './words.service';
-import { DictionaryApiService } from './dictionary-api.service';
+import { DictionaryProviderService } from './providers/dictionary-provider.service';
+import { MerriamProvider } from './providers/merriam/merriam.provider';
+import { FreeDictionaryProvider } from './providers/free-dictionary/free-dictionary.provider';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Word, Meaning])],
   controllers: [WordsController],
-  providers: [WordsService, DictionaryApiService],
+  providers: [
+    WordsService,
+    DictionaryProviderService,
+    MerriamProvider,
+    FreeDictionaryProvider,
+  ],
 })
 export class WordsModule {}

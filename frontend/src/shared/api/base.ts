@@ -52,7 +52,17 @@ async function request<T>(path: string, init: RequestInit = {}, isRetry = false)
   }
 
   if (res.status === 204) return undefined as T
-  return res.json() as Promise<T>
+
+  // NestJS serialises a `null` controller return value as HTTP 200 with an empty
+  // body (Content-Length: 0). Calling .json() on that throws "Unexpected end of
+  // JSON input". Treat empty 2xx bodies as null — callers must type T as e.g.
+  // `Foo | null` to model an absent resource.
+  const contentLength = res.headers.get('content-length')
+  if (contentLength === '0') return null as T
+
+  const text = await res.text()
+  if (text.length === 0) return null as T
+  return JSON.parse(text) as T
 }
 
 export const apiClient = {
