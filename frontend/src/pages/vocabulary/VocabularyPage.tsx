@@ -1,6 +1,7 @@
 import { AppHeader } from '../../shared/ui/AppHeader/AppHeader'
 import { Spinner } from '../../shared/ui/Spinner'
 import { Text } from '../../shared/ui/Typography/Typography'
+import { Container } from '../../shared/ui/layout/Container'
 import { VocabularyList } from '../../features/vocabulary/ui/VocabularyList'
 import { useVocabulary } from '../../features/vocabulary/model/useVocabulary'
 import styles from './VocabularyPage.module.css'
@@ -11,7 +12,7 @@ export function VocabularyPage() {
   return (
     <div className={styles.page}>
       <AppHeader />
-      <main className={styles.content}>
+      <Container as="main">
         <Text variant="title" as="h1" className={styles.heading}>
           My Vocabulary
         </Text>
@@ -27,7 +28,7 @@ export function VocabularyPage() {
         {!isLoading && !isError && (
           <VocabularyList items={items} onRemove={remove} />
         )}
-      </main>
+      </Container>
     </div>
   )
 }

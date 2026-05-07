@@ -1,0 +1,31 @@
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-primary);
+  text-decoration: none;
+  user-select: none;
+  font-family: var(--font-serif);
+  letter-spacing: -0.01em;
+  transition: color 0.18s ease;
+}
+
+.logo:hover {
+  color: var(--color-accent);
+}
+
+.mark {
+  flex-shrink: 0;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.logo:hover .mark {
+  transform: rotate(-4deg) scale(1.04);
+}
+
+.wordmark {
+  font-size: 1.1rem;
+  font-weight: 500;
+  font-style: italic;
+  line-height: 1;
+}

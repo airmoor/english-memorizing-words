@@ -5,6 +5,7 @@ import { Flashcard } from '../../features/review/ui/Flashcard'
 import { AppHeader } from '../../shared/ui/AppHeader/AppHeader'
 import { Spinner } from '../../shared/ui/Spinner'
 import { Text } from '../../shared/ui/Typography/Typography'
+import { Container } from '../../shared/ui/layout/Container'
 import styles from './ReviewPage.module.css'
 
 export function ReviewPage() {
@@ -18,7 +19,7 @@ export function ReviewPage() {
       <AppHeader />
       <SessionProgress />
 
-      <main className={styles.main}>
+      <Container as="main" width="narrow" className={styles.main}>
         {isPending && <Spinner />}
 
         {isError && (
@@ -38,7 +39,7 @@ export function ReviewPage() {
         )}
 
         {card && <Flashcard key={card.cardId} card={card} />}
-      </main>
+      </Container>
     </div>
   )
 }

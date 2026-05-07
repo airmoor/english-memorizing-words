@@ -99,6 +99,24 @@
 - [x] 9b.4 Standardise authenticated pages on the global `AppHeader` (Review page no longer ships its own composite header)
 - [x] 9b.5 Post-login navigation lands on `/home` instead of `/search`
 
+## 9c. Frontend — Visual Identity & Theme System
+
+- [x] 9c.1 Introduce Lexis brand: SVG logo (phonetic-bracket monogram `/L/`) + italic serif wordmark; reusable `<Logo />` component
+- [x] 9c.2 Header redesigned to 3-column grid: logo (left) · centered pill nav · actions (right); sticky with backdrop blur
+- [x] 9c.3 Theme system expanded from 2 to 4: Light, Sepia, Dark, Midnight. Cycle button persists choice to localStorage (`lexis.theme`)
+- [x] 9c.4 Typography: add `--font-serif` (Iowan/Charter/Georgia stack) for word display + headings; `--font-sans` for UI; `--font-mono` reserved
+- [x] 9c.5 Atmospheric polish: focus ring, theme-aware shadows, smooth transitions (`--ease-out`, `--ease-spring`), hover lift on word entry, animated theme toggle
+- [x] 9c.6 AuthForm uses the Logo component instead of bespoke "Learn English" heading
+
+## 9d. Frontend — Layout System & Theme Completion
+
+- [x] 9d.1 Add `Container` primitive with three width presets (narrow/default/wide) under `shared/ui/layout/`. Centralises max-width and responsive horizontal padding.
+- [x] 9d.2 Migrate Home, Search, Vocabulary, Review pages off bespoke `max-width` declarations onto `Container`. Eliminates the visible width "jump" between routes.
+- [x] 9d.3 Add responsive horizontal padding tokens — `--content-padding-x` widens on tablets (≥720px) and laptops (≥1024px) for editorial airiness.
+- [x] 9d.4 Replace cycle-only theme toggle with a proper `ThemePicker` dropdown showing all four themes with labels + active checkmark; ESC + click-outside dismiss.
+- [x] 9d.5 Honour `prefers-color-scheme: dark` for first-time visitors when no stored preference exists.
+- [x] 9d.6 Honour `prefers-reduced-motion: reduce` globally — collapses animation/transition durations to ~0ms via a single `*` rule.
+
 ## 10. Frontend — Review Page
 
 - [ ] 10.1 Create `/review` page; on load call `GET /api/review/due`

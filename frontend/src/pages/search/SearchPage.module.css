@@ -5,16 +5,7 @@
   flex-direction: column;
 }
 
-.main {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  padding: var(--space-xl) var(--space-md);
-}
-
 .content {
-  width: 100%;
-  max-width: 640px;
   display: flex;
   flex-direction: column;
   gap: var(--space-xl);

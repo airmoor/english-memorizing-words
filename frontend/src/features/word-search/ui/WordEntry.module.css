@@ -3,7 +3,13 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
-  animation: fadeUp 0.2s ease both;
+  animation: fadeUp 0.32s var(--ease-out) both;
+  transition: box-shadow 0.25s var(--ease-out), transform 0.25s var(--ease-out);
+}
+
+.entry:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 @keyframes fadeUp {
@@ -29,7 +35,10 @@
 
 .word {
   margin: 0;
+  font-family: var(--font-serif);
   font-size: var(--font-xxl);
+  font-weight: var(--fw-semibold);
+  letter-spacing: -0.02em;
   word-break: break-word;
 }
 

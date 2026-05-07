@@ -3,12 +3,6 @@
   background: var(--color-bg-primary);
 }
 
-.content {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: var(--space-xl) var(--space-lg);
-}
-
 .heading {
   margin: 0 0 var(--space-xl);
 }

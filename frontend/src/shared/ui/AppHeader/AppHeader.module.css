@@ -2,35 +2,48 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   padding: 0 var(--space-lg);
-  height: 56px;
-  background: var(--color-bg-secondary);
+  height: 60px;
+  background: color-mix(in srgb, var(--color-bg-secondary) 92%, transparent);
+  backdrop-filter: saturate(180%) blur(10px);
+  -webkit-backdrop-filter: saturate(180%) blur(10px);
   border-bottom: 1px solid var(--color-border);
-  gap: var(--space-md);
 }
 
+.logoLink {
+  justify-self: start;
+  text-decoration: none;
+}
+
+/* ── Centered nav ───────────────────────────────────────────────────────── */
+
 .nav {
+  justify-self: center;
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
+  gap: 2px;
+  padding: 4px;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
 }
 
 .link {
-  padding: var(--space-xs) var(--space-md);
-  border-radius: var(--radius-md);
+  position: relative;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
   font-size: var(--font-sm);
   font-weight: var(--fw-medium);
   color: var(--color-text-secondary);
   text-decoration: none;
-  transition: color 0.15s, background 0.15s;
+  transition: color 0.18s var(--ease-out), background 0.18s var(--ease-out);
 }
 
 .link:hover {
   color: var(--color-text-primary);
-  background: var(--color-bg-primary);
 }
 
 .active {
@@ -40,28 +53,15 @@
 
 .active:hover {
   color: var(--color-accent);
-  background: var(--color-accent-subtle);
 }
 
+/* ── Actions cluster ────────────────────────────────────────────────────── */
+
 .actions {
+  justify-self: end;
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-}
-
-.themeToggle {
-  padding: var(--space-xs) var(--space-sm);
-  background: none;
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-full);
-  font-size: var(--font-md);
-  cursor: pointer;
-  line-height: 1;
-  transition: border-color 0.15s;
-}
-
-.themeToggle:hover {
-  border-color: var(--color-accent);
 }
 
 .logout {
@@ -80,4 +80,24 @@
 .logout:hover {
   border-color: var(--color-danger);
   color: var(--color-danger);
+}
+
+/* ── Responsive: collapse logo wordmark below 720px ─────────────────────── */
+@media (max-width: 720px) {
+  .header {
+    grid-template-columns: auto 1fr auto;
+    padding: 0 var(--space-md);
+    gap: var(--space-sm);
+  }
+  .logoLink :global(.wordmark),
+  .logoLink :global([class*='wordmark']) {
+    display: none;
+  }
+  .nav {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav::-webkit-scrollbar {
+    display: none;
+  }
 }

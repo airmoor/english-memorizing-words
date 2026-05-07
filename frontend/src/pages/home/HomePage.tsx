@@ -7,6 +7,7 @@ import { Card } from '../../shared/ui/Card/Card'
 import { Button } from '../../shared/ui/Button/Button'
 import { Text } from '../../shared/ui/Typography/Typography'
 import { Spinner } from '../../shared/ui/Spinner'
+import { Container } from '../../shared/ui/layout/Container'
 import styles from './HomePage.module.css'
 
 export function HomePage() {
@@ -39,7 +40,7 @@ export function HomePage() {
     <div className={styles.page}>
       <AppHeader />
 
-      <main className={styles.main}>
+      <Container as="main">
         <div className={styles.content}>
           {/* Greeting */}
           <Text variant="heading" as="h1" className={styles.greeting}>
@@ -152,7 +153,7 @@ export function HomePage() {
             </>
           )}
         </div>
-      </main>
+      </Container>
     </div>
   )
 }

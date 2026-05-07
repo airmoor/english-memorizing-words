@@ -1,0 +1,97 @@
+.root {
+  position: relative;
+}
+
+.trigger {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--font-md);
+  cursor: pointer;
+  line-height: 1;
+  transition: border-color 0.15s var(--ease-out), transform 0.25s var(--ease-spring);
+}
+
+.trigger:hover {
+  border-color: var(--color-accent);
+  transform: rotate(8deg);
+}
+
+.menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + var(--space-xs));
+  z-index: 20;
+  min-width: 168px;
+  padding: 6px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  animation: dropIn 0.18s var(--ease-out) both;
+}
+
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.menuLabel {
+  padding: 6px 10px 4px;
+  font-size: var(--font-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.option {
+  display: grid;
+  grid-template-columns: 22px 1fr auto;
+  gap: var(--space-sm);
+  align-items: center;
+  padding: 8px 10px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: var(--font-sm);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s var(--ease-out);
+}
+
+.option:hover {
+  background: var(--color-bg-primary);
+}
+
+.optionActive {
+  color: var(--color-accent);
+  background: var(--color-accent-subtle);
+}
+
+.optionActive:hover {
+  background: var(--color-accent-subtle);
+}
+
+.optionIcon {
+  font-size: var(--font-md);
+  line-height: 1;
+}
+
+.optionLabel {
+  font-weight: var(--fw-medium);
+}
+
+.check {
+  font-weight: var(--fw-semibold);
+}

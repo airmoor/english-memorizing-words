@@ -1,49 +1,41 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, Link } from 'react-router-dom'
 import { useLogout } from '../../../features/auth/model/useLogout'
-import { useTheme } from '../../design/ThemeProvider'
+import { Logo } from '../Logo/Logo'
+import { ThemePicker } from '../ThemePicker/ThemePicker'
 import styles from './AppHeader.module.css'
+
+const NAV_ITEMS: { to: string; label: string }[] = [
+  { to: '/home',       label: 'Home' },
+  { to: '/search',     label: 'Search' },
+  { to: '/vocabulary', label: 'Vocabulary' },
+  { to: '/review',     label: 'Review' },
+]
 
 export function AppHeader() {
   const logout = useLogout()
-  const { theme, toggleTheme } = useTheme()
 
   return (
     <header className={styles.header}>
-      <nav className={styles.nav}>
-        <NavLink
-          to="/home"
-          className={({ isActive }) => [styles.link, isActive ? styles.active : ''].join(' ')}
-        >
-          Home
-        </NavLink>
-        <NavLink
-          to="/search"
-          className={({ isActive }) => [styles.link, isActive ? styles.active : ''].join(' ')}
-        >
-          Search
-        </NavLink>
-        <NavLink
-          to="/vocabulary"
-          className={({ isActive }) => [styles.link, isActive ? styles.active : ''].join(' ')}
-        >
-          Vocabulary
-        </NavLink>
-        <NavLink
-          to="/review"
-          className={({ isActive }) => [styles.link, isActive ? styles.active : ''].join(' ')}
-        >
-          Review
-        </NavLink>
+      <Link to="/home" className={styles.logoLink} aria-label="Lexis home">
+        <Logo />
+      </Link>
+
+      <nav className={styles.nav} aria-label="Primary">
+        {NAV_ITEMS.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            className={({ isActive }) =>
+              [styles.link, isActive ? styles.active : ''].join(' ')
+            }
+          >
+            {item.label}
+          </NavLink>
+        ))}
       </nav>
 
       <div className={styles.actions}>
-        <button
-          onClick={toggleTheme}
-          className={styles.themeToggle}
-          aria-label="Toggle theme"
-        >
-          {theme === 'light' ? '🌙' : '☀️'}
-        </button>
+        <ThemePicker />
         <button onClick={logout} className={styles.logout}>
           Log out
         </button>

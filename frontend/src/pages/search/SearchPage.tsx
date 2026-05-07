@@ -4,7 +4,7 @@ import { Spinner } from '../../shared/ui/Spinner'
 import { Text } from '../../shared/ui/Typography/Typography'
 import { SearchBar } from '../../features/word-search/ui/SearchBar'
 import { WordEntry } from '../../features/word-search/ui/WordEntry'
-
+import { Container } from '../../shared/ui/layout/Container'
 import { useWordSearch } from '../../features/word-search/model/useWordSearch'
 import { useSavedMeanings } from '../../features/word-search/model/useSavedMeanings'
 import styles from './SearchPage.module.css'
@@ -38,7 +38,7 @@ export function SearchPage() {
     <div className={styles.page}>
       <AppHeader />
 
-      <main className={styles.main}>
+      <Container as="main">
         <div className={styles.content}>
           {/* Search bar — always visible at top */}
           <div className={styles.searchWrap}>
@@ -110,7 +110,7 @@ export function SearchPage() {
             )}
           </div>
         </div>
-      </main>
+      </Container>
     </div>
   )
 }

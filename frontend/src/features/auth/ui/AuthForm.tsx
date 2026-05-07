@@ -3,6 +3,7 @@ import { Card } from '../../../shared/ui/Card/Card'
 import { Button } from '../../../shared/ui/Button/Button'
 import { Text } from '../../../shared/ui/Typography/Typography'
 import { Stack } from '../../../shared/ui/Stack/Stack'
+import { Logo } from '../../../shared/ui/Logo/Logo'
 import styles from './AuthForm.module.css'
 
 interface Props {
@@ -44,8 +45,8 @@ export function AuthForm({ mode, onSubmit, onToggle }: Props) {
 
   return (
     <div className={styles.wrapper}>
-      <Stack gap="sm" align="center" className={styles.header}>
-        <Text variant="heading" as="h1">Learn English</Text>
+      <Stack gap="md" align="center" className={styles.header}>
+        <Logo size={44} />
         <Text variant="body" color="secondary">
           {isLogin ? 'Welcome back' : 'Create your account'}
         </Text>
