@@ -17,7 +17,7 @@ export function AuthPage() {
       ? await loginApi(email, password)
       : await registerApi(email, password)
     setToken(token)
-    navigate('/search')
+    navigate('/home')
   }
 
   function handleToggle() {

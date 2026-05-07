@@ -1,17 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { getNextCard } from '../../features/review/api/getNextCard'
-import { useLogout } from '../../features/auth/model/useLogout'
-import { useTheme } from '../../shared/design/ThemeProvider'
-import { ProgressHeader } from '../../features/review/ui/ProgressHeader'
+import { SessionProgress } from '../../features/review/ui/SessionProgress'
 import { Flashcard } from '../../features/review/ui/Flashcard'
+import { AppHeader } from '../../shared/ui/AppHeader/AppHeader'
 import { Spinner } from '../../shared/ui/Spinner'
 import { Text } from '../../shared/ui/Typography/Typography'
 import styles from './ReviewPage.module.css'
 
 export function ReviewPage() {
-  const logout = useLogout()
-  const { theme, toggleTheme } = useTheme()
-
   const { data: card, isPending, isError, error } = useQuery({
     queryKey: ['nextCard'],
     queryFn: getNextCard,
@@ -19,21 +15,8 @@ export function ReviewPage() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <ProgressHeader />
-        <div className={styles.headerActions}>
-          <button
-            onClick={toggleTheme}
-            className={styles.themeToggle}
-            aria-label="Toggle theme"
-          >
-            {theme === 'light' ? '🌙' : '☀️'}
-          </button>
-          <button onClick={logout} className={styles.logout}>
-            Log out
-          </button>
-        </div>
-      </header>
+      <AppHeader />
+      <SessionProgress />
 
       <main className={styles.main}>
         {isPending && <Spinner />}

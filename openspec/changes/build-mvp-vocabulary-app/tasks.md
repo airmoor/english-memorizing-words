@@ -91,6 +91,14 @@
 - [x] 9.3 Implement remove button per meaning (calls DELETE, removes from list optimistically)
 - [x] 9.4 Show empty state when vocabulary is empty
 
+## 9b. Frontend — Home Dashboard + Navigation
+
+- [x] 9b.1 Add Home (`/home`) dashboard: greeting, due-today CTA, stats grid (streak / saved / reviewed today / due today), Recently saved (top 5)
+- [x] 9b.2 Add Home as the leftmost item in the global header navigation; redirect `/` to `/home` for authenticated users
+- [x] 9b.3 Replace per-page Review counter (`ProgressHeader`) with in-session progress bar (`SessionProgress`) — bulk stats moved to /home
+- [x] 9b.4 Standardise authenticated pages on the global `AppHeader` (Review page no longer ships its own composite header)
+- [x] 9b.5 Post-login navigation lands on `/home` instead of `/search`
+
 ## 10. Frontend — Review Page
 
 - [ ] 10.1 Create `/review` page; on load call `GET /api/review/due`

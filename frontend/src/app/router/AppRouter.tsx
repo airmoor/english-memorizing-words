@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { RequireAuth } from '../../features/auth/ui/RequireAuth'
 import { AuthPage } from '../../pages/auth/AuthPage'
+import { HomePage } from '../../pages/home/HomePage'
 import { SearchPage } from '../../pages/search/SearchPage'
 import { ReviewPage } from '../../pages/review/ReviewPage'
 import { VocabularyPage } from '../../pages/vocabulary/VocabularyPage'
@@ -8,9 +9,25 @@ import { VocabularyPage } from '../../pages/vocabulary/VocabularyPage'
 export function AppRouter() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      {/* Root: authenticated → /home, unauthenticated → /login (handled by RequireAuth) */}
+      <Route
+        path="/"
+        element={
+          <RequireAuth>
+            <Navigate to="/home" replace />
+          </RequireAuth>
+        }
+      />
       <Route path="/login" element={<AuthPage />} />
       <Route path="/register" element={<AuthPage />} />
+      <Route
+        path="/home"
+        element={
+          <RequireAuth>
+            <HomePage />
+          </RequireAuth>
+        }
+      />
       <Route
         path="/search"
         element={

@@ -11,6 +11,12 @@ export function AppHeader() {
     <header className={styles.header}>
       <nav className={styles.nav}>
         <NavLink
+          to="/home"
+          className={({ isActive }) => [styles.link, isActive ? styles.active : ''].join(' ')}
+        >
+          Home
+        </NavLink>
+        <NavLink
           to="/search"
           className={({ isActive }) => [styles.link, isActive ? styles.active : ''].join(' ')}
         >
