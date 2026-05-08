@@ -47,6 +47,12 @@ export function Flashcard({ card }: Props) {
 
         <Text variant="heading" className={styles.word}>{card.word}</Text>
 
+        {card.transcription && (
+          <Text variant="caption" color="secondary" className={styles.transcription}>
+            {card.transcription}
+          </Text>
+        )}
+
         {card.example && (
           <Text variant="body" color="secondary" as="p" className={styles.example}>
             "{card.example}"

@@ -2,6 +2,7 @@ export interface NextCard {
   cardId: string
   meaningId: string
   word: string
+  transcription: string | null
   partOfSpeech: string | null
   example: string | null
   meaningCount: number
@@ -23,6 +24,7 @@ export interface ReviewProgress {
   total: number
   reviewedToday: number
   streak: number
+  nextReviewDate: string | null
 }
 
 export type Rating = 'again' | 'hard' | 'good' | 'easy'

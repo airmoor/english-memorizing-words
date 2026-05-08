@@ -33,6 +33,11 @@
   word-break: break-word;
 }
 
+.transcription {
+  font-family: var(--font-mono, monospace);
+  letter-spacing: 0.02em;
+}
+
 .example {
   font-style: italic;
 }

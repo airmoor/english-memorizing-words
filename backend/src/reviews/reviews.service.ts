@@ -14,6 +14,9 @@ export class NextCardDto {
   @ApiProperty({ example: 'ephemeral' })
   word: string;
 
+  @ApiProperty({ example: '/ɪˈfem.ər.əl/', nullable: true })
+  transcription: string | null;
+
   @ApiProperty({ example: 'adjective', nullable: true })
   partOfSpeech: string | null;
 
@@ -36,6 +39,9 @@ export class ReviewProgressDto {
 
   @ApiProperty({ example: 7 })
   streak: number;
+
+  @ApiProperty({ example: '2024-06-16', nullable: true })
+  nextReviewDate: string | null;
 }
 
 export class ReviewResultDto {
@@ -121,7 +127,7 @@ export class ReviewsService {
   // ── GET /reviews/progress ───────────────────────────────────────────────
 
   async getProgress(userId: string): Promise<ReviewProgressDto> {
-    const [[due], [total], [reviewed], reviewDays] = await Promise.all([
+    const [[due], [total], [reviewed], reviewDays, [nextRow]] = await Promise.all([
       this.dataSource.query<[{ count: string }]>(
         `SELECT COUNT(*) AS count FROM cards
          WHERE user_id = $1 AND next_review <= CURRENT_DATE`,
@@ -147,6 +153,12 @@ export class ReviewsService {
          ORDER BY day DESC`,
         [userId],
       ),
+      this.dataSource.query<[{ next_date: string | null }]>(
+        `SELECT MIN(next_review)::text AS next_date
+         FROM cards
+         WHERE user_id = $1 AND next_review > CURRENT_DATE`,
+        [userId],
+      ),
     ]);
 
     return {
@@ -154,6 +166,7 @@ export class ReviewsService {
       total: Number(total.count),
       reviewedToday: Number(reviewed.count),
       streak: computeStreak(reviewDays.map((r) => r.day)),
+      nextReviewDate: nextRow?.next_date ?? null,
     };
   }
 
@@ -165,6 +178,7 @@ export class ReviewsService {
         cardId: string;
         meaningId: string;
         word: string;
+        transcription: string | null;
         partOfSpeech: string | null;
         examples: string[];
         meaningCount: string; // pg returns bigint as string
@@ -174,6 +188,7 @@ export class ReviewsService {
          c.id             AS "cardId",
          m.id             AS "meaningId",
          w.text           AS "word",
+         w.transcription  AS "transcription",
          m.part_of_speech AS "partOfSpeech",
          m.examples       AS "examples",
          (
@@ -198,6 +213,7 @@ export class ReviewsService {
       cardId: row.cardId,
       meaningId: row.meaningId,
       word: row.word,
+      transcription: row.transcription ?? null,
       partOfSpeech: row.partOfSpeech,
       example: row.examples?.[0] ?? null,
       meaningCount: Number(row.meaningCount),
