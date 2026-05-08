@@ -1,5 +1,5 @@
-import { AppHeader } from '../../shared/ui/AppHeader/AppHeader'
 import { Container } from '../../shared/ui/layout/Container'
+import { PageLayout } from '../../shared/ui/layout/PageLayout'
 import { Card } from '../../shared/ui/Card/Card'
 import { Text } from '../../shared/ui/Typography/Typography'
 import {
@@ -21,8 +21,7 @@ export function SettingsPage() {
   const showDarkVariants  = settings.mode === 'dark'  || settings.mode === 'system'
 
   return (
-    <div className={styles.page}>
-      <AppHeader />
+    <PageLayout>
       <Container as="main">
         <div className={styles.content}>
           <header className={styles.heading}>
@@ -107,7 +106,7 @@ export function SettingsPage() {
           </Text>
         </div>
       </Container>
-    </div>
+    </PageLayout>
   )
 }
 

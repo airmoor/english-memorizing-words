@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
-import { AppHeader } from '../../shared/ui/AppHeader/AppHeader'
 import { Spinner } from '../../shared/ui/Spinner'
 import { Text } from '../../shared/ui/Typography/Typography'
 import { SearchBar } from '../../features/word-search/ui/SearchBar'
 import { WordEntry } from '../../features/word-search/ui/WordEntry'
 import { Container } from '../../shared/ui/layout/Container'
+import { PageLayout } from '../../shared/ui/layout/PageLayout'
 import { useWordSearch } from '../../features/word-search/model/useWordSearch'
 import { useSavedMeanings } from '../../features/word-search/model/useSavedMeanings'
 import styles from './SearchPage.module.css'
@@ -35,9 +35,7 @@ export function SearchPage() {
   const { savedIds, isSaved: _isSaved, save, saveAll, isSavingAll, allSaved } = useSavedMeanings()
 
   return (
-    <div className={styles.page}>
-      <AppHeader />
-
+    <PageLayout className={styles.flexPage}>
       <Container as="main">
         <div className={styles.content}>
           {/* Search bar — always visible at top */}
@@ -111,6 +109,6 @@ export function SearchPage() {
           </div>
         </div>
       </Container>
-    </div>
+    </PageLayout>
   )
 }

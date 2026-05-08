@@ -1,0 +1,25 @@
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-xl);
+}
+
+/* Bento: stats (left, compact) beside recent (right, wider) */
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    gap: var(--space-xl) var(--space-md);
+  }
+}
+
+/* Full-width cells always span all columns */
+.full {
+  grid-column: 1 / -1;
+}
+
+/* On narrow viewports every cell is full-width regardless */
+@media (max-width: 1023px) {
+  .cell {
+    grid-column: 1 / -1;
+  }
+}

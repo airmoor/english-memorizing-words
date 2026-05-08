@@ -2,12 +2,13 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getProgress } from '../../features/review/api/getProgress'
 import { fetchVocabulary } from '../../features/vocabulary/api/vocabularyApi'
-import { AppHeader } from '../../shared/ui/AppHeader/AppHeader'
 import { Card } from '../../shared/ui/Card/Card'
 import { Button } from '../../shared/ui/Button/Button'
 import { Text } from '../../shared/ui/Typography/Typography'
 import { Spinner } from '../../shared/ui/Spinner'
 import { Container } from '../../shared/ui/layout/Container'
+import { PageLayout } from '../../shared/ui/layout/PageLayout'
+import { DashboardGrid, DashboardCell } from '../../shared/ui/layout/DashboardGrid'
 import styles from './HomePage.module.css'
 
 export function HomePage() {
@@ -37,124 +38,130 @@ export function HomePage() {
   const streak = stats?.streak ?? 0
 
   return (
-    <div className={styles.page}>
-      <AppHeader />
-
+    <PageLayout>
       <Container as="main">
-        <div className={styles.content}>
+        <DashboardGrid>
           {/* Greeting */}
-          <Text variant="heading" as="h1" className={styles.greeting}>
-            Welcome back
-          </Text>
+          <DashboardCell span="full">
+            <Text variant="heading" as="h1" className={styles.greeting}>
+              Welcome back
+            </Text>
+          </DashboardCell>
 
-          {isLoading && (
-            <div className={styles.loading}><Spinner /></div>
-          )}
-
-          {!isLoading && (
+          {isLoading ? (
+            <DashboardCell span="full">
+              <div className={styles.loading}><Spinner /></div>
+            </DashboardCell>
+          ) : (
             <>
-              {/* Hero CTA: due today */}
-              <Card padding="lg" variant="glass" className={styles.hero}>
-                <div className={styles.heroBody}>
-                  {dueToday > 0 ? (
-                    <>
-                      <Text variant="title" as="h2" className={styles.heroTitle}>
-                        {dueToday} card{dueToday !== 1 ? 's' : ''} due today
-                      </Text>
-                      <Text variant="body" color="secondary" as="p" className={styles.heroSubtitle}>
-                        Keep your streak going — review them now.
-                      </Text>
-                    </>
-                  ) : total === 0 ? (
-                    <>
-                      <Text variant="title" as="h2" className={styles.heroTitle}>
-                        Start building your vocabulary
-                      </Text>
-                      <Text variant="body" color="secondary" as="p" className={styles.heroSubtitle}>
-                        Search any English word and save its meanings to begin.
-                      </Text>
-                    </>
-                  ) : (
-                    <>
-                      <Text variant="title" as="h2" className={styles.heroTitle}>
-                        You're all caught up 🎉
-                      </Text>
-                      <Text variant="body" color="secondary" as="p" className={styles.heroSubtitle}>
-                        Come back tomorrow for more reviews.
-                      </Text>
-                    </>
-                  )}
-                </div>
-
-                <div className={styles.heroActions}>
-                  {dueToday > 0 && (
-                    <Button onClick={() => navigate('/review')}>Start review</Button>
-                  )}
-                  <Button variant="secondary" onClick={() => navigate('/search')}>
-                    Search words
-                  </Button>
-                </div>
-              </Card>
-
-              {/* Stats grid */}
-              <div className={styles.stats}>
-                <StatTile
-                  icon="🔥"
-                  label="Streak"
-                  value={streak}
-                  unit={streak === 1 ? 'day' : 'days'}
-                  accent={streak > 0}
-                />
-                <StatTile
-                  icon="📚"
-                  label="Saved"
-                  value={total}
-                  unit={total === 1 ? 'meaning' : 'meanings'}
-                />
-                <StatTile
-                  icon="✓"
-                  label="Reviewed today"
-                  value={reviewedToday}
-                  unit={reviewedToday === 1 ? 'card' : 'cards'}
-                />
-                <StatTile
-                  icon="⏰"
-                  label="Due today"
-                  value={dueToday}
-                  unit={dueToday === 1 ? 'card' : 'cards'}
-                />
-              </div>
-
-              {/* Recently saved */}
-              {recent.length > 0 && (
-                <Card padding="lg" className={styles.recent}>
-                  <div className={styles.recentHeader}>
-                    <Text variant="title" as="h3">Recently saved</Text>
-                    <button
-                      onClick={() => navigate('/vocabulary')}
-                      className={styles.recentLink}
-                    >
-                      View all →
-                    </button>
+              {/* Hero CTA: due today — always full width */}
+              <DashboardCell span="full">
+                <Card padding="lg" variant="glass" className={styles.hero}>
+                  <div className={styles.heroBody}>
+                    {dueToday > 0 ? (
+                      <>
+                        <Text variant="title" as="h2" className={styles.heroTitle}>
+                          {dueToday} card{dueToday !== 1 ? 's' : ''} due today
+                        </Text>
+                        <Text variant="body" color="secondary" as="p" className={styles.heroSubtitle}>
+                          Keep your streak going — review them now.
+                        </Text>
+                      </>
+                    ) : total === 0 ? (
+                      <>
+                        <Text variant="title" as="h2" className={styles.heroTitle}>
+                          Start building your vocabulary
+                        </Text>
+                        <Text variant="body" color="secondary" as="p" className={styles.heroSubtitle}>
+                          Search any English word and save its meanings to begin.
+                        </Text>
+                      </>
+                    ) : (
+                      <>
+                        <Text variant="title" as="h2" className={styles.heroTitle}>
+                          You're all caught up 🎉
+                        </Text>
+                        <Text variant="body" color="secondary" as="p" className={styles.heroSubtitle}>
+                          Come back tomorrow for more reviews.
+                        </Text>
+                      </>
+                    )}
                   </div>
-                  <ul className={styles.recentList}>
-                    {recent.map((entry) => (
-                      <li key={entry.userMeaningId} className={styles.recentItem}>
-                        <span className={styles.recentWord}>{entry.wordText}</span>
-                        {entry.partOfSpeech && (
-                          <span className={styles.recentPos}>{entry.partOfSpeech}</span>
-                        )}
-                        <span className={styles.recentDef}>{entry.definition}</span>
-                      </li>
-                    ))}
-                  </ul>
+
+                  <div className={styles.heroActions}>
+                    {dueToday > 0 && (
+                      <Button onClick={() => navigate('/review')}>Start review</Button>
+                    )}
+                    <Button variant="secondary" onClick={() => navigate('/search')}>
+                      Search words
+                    </Button>
+                  </div>
                 </Card>
+              </DashboardCell>
+
+              {/* Stats — Bento left column on desktop, full-width stack on mobile */}
+              <DashboardCell span={recent.length === 0 ? 'full' : 'auto'}>
+                <div className={styles.stats}>
+                  <StatTile
+                    icon="🔥"
+                    label="Streak"
+                    value={streak}
+                    unit={streak === 1 ? 'day' : 'days'}
+                    accent={streak > 0}
+                  />
+                  <StatTile
+                    icon="📚"
+                    label="Saved"
+                    value={total}
+                    unit={total === 1 ? 'meaning' : 'meanings'}
+                  />
+                  <StatTile
+                    icon="✓"
+                    label="Reviewed today"
+                    value={reviewedToday}
+                    unit={reviewedToday === 1 ? 'card' : 'cards'}
+                  />
+                  <StatTile
+                    icon="⏰"
+                    label="Due today"
+                    value={dueToday}
+                    unit={dueToday === 1 ? 'card' : 'cards'}
+                  />
+                </div>
+              </DashboardCell>
+
+              {/* Recently saved — Bento right column on desktop */}
+              {recent.length > 0 && (
+                <DashboardCell>
+                  <Card padding="lg" className={styles.recent}>
+                    <div className={styles.recentHeader}>
+                      <Text variant="title" as="h3">Recently saved</Text>
+                      <button
+                        onClick={() => navigate('/vocabulary')}
+                        className={styles.recentLink}
+                      >
+                        View all →
+                      </button>
+                    </div>
+                    <ul className={styles.recentList}>
+                      {recent.map((entry) => (
+                        <li key={entry.userMeaningId} className={styles.recentItem}>
+                          <span className={styles.recentWord}>{entry.wordText}</span>
+                          {entry.partOfSpeech && (
+                            <span className={styles.recentPos}>{entry.partOfSpeech}</span>
+                          )}
+                          <span className={styles.recentDef}>{entry.definition}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </Card>
+                </DashboardCell>
               )}
             </>
           )}
-        </div>
+        </DashboardGrid>
       </Container>
-    </div>
+    </PageLayout>
   )
 }
 

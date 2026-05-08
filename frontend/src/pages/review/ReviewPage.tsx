@@ -3,10 +3,10 @@ import { getNextCard } from '../../features/review/api/getNextCard'
 import { getProgress } from '../../features/review/api/getProgress'
 import { SessionProgress } from '../../features/review/ui/SessionProgress'
 import { Flashcard } from '../../features/review/ui/Flashcard'
-import { AppHeader } from '../../shared/ui/AppHeader/AppHeader'
 import { Spinner } from '../../shared/ui/Spinner'
 import { Text } from '../../shared/ui/Typography/Typography'
 import { Container } from '../../shared/ui/layout/Container'
+import { PageLayout } from '../../shared/ui/layout/PageLayout'
 import styles from './ReviewPage.module.css'
 
 function formatReviewDate(isoDate: string): string {
@@ -33,8 +33,7 @@ export function ReviewPage() {
   })
 
   return (
-    <div className={styles.page}>
-      <AppHeader />
+    <PageLayout className={styles.flexPage}>
       <SessionProgress />
 
       <Container as="main" width="narrow" className={styles.main}>
@@ -60,6 +59,6 @@ export function ReviewPage() {
 
         {card && <Flashcard key={card.cardId} card={card} />}
       </Container>
-    </div>
+    </PageLayout>
   )
 }
