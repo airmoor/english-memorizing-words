@@ -10,17 +10,15 @@ import {
   type ThemeMode,
   type LightVariant,
   type DarkVariant,
+  type ResolvedTheme,
 } from '../../shared/design/ThemeProvider'
 import styles from './SettingsPage.module.css'
 
 export function SettingsPage() {
   const { settings, resolved, setMode, setLightVariant, setDarkVariant } = useTheme()
 
-  // Show light-variant picker only if light themes are reachable
-  const showLightVariants =
-    settings.mode === 'light' || settings.mode === 'system'
-  const showDarkVariants =
-    settings.mode === 'dark' || settings.mode === 'system'
+  const showLightVariants = settings.mode === 'light' || settings.mode === 'system'
+  const showDarkVariants  = settings.mode === 'dark'  || settings.mode === 'system'
 
   return (
     <div className={styles.page}>
@@ -30,7 +28,7 @@ export function SettingsPage() {
           <header className={styles.heading}>
             <Text variant="title" as="h1" className={styles.title}>Settings</Text>
             <Text variant="body" color="secondary" as="p">
-              Customise how Lexis looks. Changes apply immediately and persist on this device.
+              Choose your atmosphere. Changes apply immediately and persist on this device.
             </Text>
           </header>
 
@@ -42,7 +40,6 @@ export function SettingsPage() {
                 System follows your operating system's preference.
               </Text>
             </div>
-
             <div className={styles.modeGrid}>
               {MODE_OPTIONS.map((opt) => (
                 <ModeTile
@@ -57,7 +54,7 @@ export function SettingsPage() {
             </div>
           </Card>
 
-          {/* Light variant */}
+          {/* Light variants */}
           {showLightVariants && (
             <Card padding="lg" className={styles.section}>
               <div className={styles.sectionHeader}>
@@ -66,7 +63,6 @@ export function SettingsPage() {
                   Used when {settings.mode === 'system' ? 'your system is in light mode' : 'Light is selected above'}.
                 </Text>
               </div>
-
               <div className={styles.variantList}>
                 {LIGHT_VARIANT_OPTIONS.map((opt) => (
                   <VariantTile
@@ -74,7 +70,7 @@ export function SettingsPage() {
                     label={opt.label}
                     description={opt.description}
                     active={settings.lightVariant === opt.value}
-                    swatch={opt.value === 'sepia' ? 'sepia' : 'light'}
+                    swatch={opt.swatch}
                     onClick={() => setLightVariant(opt.value as LightVariant)}
                   />
                 ))}
@@ -82,7 +78,7 @@ export function SettingsPage() {
             </Card>
           )}
 
-          {/* Dark variant */}
+          {/* Dark variants */}
           {showDarkVariants && (
             <Card padding="lg" className={styles.section}>
               <div className={styles.sectionHeader}>
@@ -91,7 +87,6 @@ export function SettingsPage() {
                   Used when {settings.mode === 'system' ? 'your system is in dark mode' : 'Dark is selected above'}.
                 </Text>
               </div>
-
               <div className={styles.variantList}>
                 {DARK_VARIANT_OPTIONS.map((opt) => (
                   <VariantTile
@@ -99,7 +94,7 @@ export function SettingsPage() {
                     label={opt.label}
                     description={opt.description}
                     active={settings.darkVariant === opt.value}
-                    swatch={opt.value === 'midnight' ? 'midnight' : 'dark'}
+                    swatch={opt.swatch}
                     onClick={() => setDarkVariant(opt.value as DarkVariant)}
                   />
                 ))}
@@ -116,7 +111,7 @@ export function SettingsPage() {
   )
 }
 
-// ── Tiles ────────────────────────────────────────────────────────────────────
+// ── Tiles ─────────────────────────────────────────────────────────────────────
 
 function ModeTile({
   value, label, icon, active, onClick,
@@ -149,7 +144,7 @@ function VariantTile({
   label: string
   description: string
   active: boolean
-  swatch: 'light' | 'sepia' | 'dark' | 'midnight'
+  swatch: ResolvedTheme
   onClick: () => void
 }) {
   return (

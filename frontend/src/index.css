@@ -81,20 +81,48 @@
   :root { --content-padding-x: var(--space-xxl); }
 }
 
-/* Heavier shadows in dark themes for atmospheric depth */
+/* Heavier shadows in all dark themes for atmospheric depth */
 :root[data-theme='dark'],
-:root[data-theme='midnight'] {
+:root[data-theme='midnight'],
+:root[data-theme='violetLibrary'],
+:root[data-theme='emeraldDepths'],
+:root[data-theme='sakuraNight'],
+:root[data-theme='neon'] {
   --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.35);
   --shadow-md: 0 6px 28px rgba(0, 0, 0, 0.45);
   --shadow-lg: 0 14px 48px rgba(0, 0, 0, 0.55);
 }
 
-/* Per-theme gradient palette overrides */
+/* Per-theme gradient palette — overrides the :root defaults set above.
+   ThemeProvider also injects these via inline style; the attribute selector
+   serves as a CSS-only fallback before JS runs. */
+
 :root[data-theme='sepia'] {
   --gradient-a:    #81e6d9;
   --gradient-b:    #d6bcfa;
   --gradient-c:    #fbb6ce;
   --gradient-glow: rgba(214, 188, 250, 0.2);
+}
+
+:root[data-theme='marshmallow'] {
+  --gradient-a:    #f9a8d4;
+  --gradient-b:    #c4b5fd;
+  --gradient-c:    #bae6fd;
+  --gradient-glow: rgba(249, 168, 212, 0.25);
+}
+
+:root[data-theme='arcticGlass'] {
+  --gradient-a:    #67e8f9;
+  --gradient-b:    #93c5fd;
+  --gradient-c:    #e0f2fe;
+  --gradient-glow: rgba(14, 165, 233, 0.2);
+}
+
+:root[data-theme='solarEditorial'] {
+  --gradient-a:    #fcd34d;
+  --gradient-b:    #fb923c;
+  --gradient-c:    #fde68a;
+  --gradient-glow: rgba(217, 119, 6, 0.2);
 }
 
 :root[data-theme='dark'] {
@@ -109,6 +137,34 @@
   --gradient-b:    #818cf8;
   --gradient-c:    #c4b5fd;
   --gradient-glow: rgba(125, 211, 252, 0.2);
+}
+
+:root[data-theme='violetLibrary'] {
+  --gradient-a:    #c4b5fd;
+  --gradient-b:    #a78bfa;
+  --gradient-c:    #818cf8;
+  --gradient-glow: rgba(196, 181, 253, 0.25);
+}
+
+:root[data-theme='emeraldDepths'] {
+  --gradient-a:    #5eead4;
+  --gradient-b:    #34d399;
+  --gradient-c:    #6ee7b7;
+  --gradient-glow: rgba(52, 211, 153, 0.25);
+}
+
+:root[data-theme='sakuraNight'] {
+  --gradient-a:    #fb7185;
+  --gradient-b:    #c084fc;
+  --gradient-c:    #e879f9;
+  --gradient-glow: rgba(217, 70, 168, 0.25);
+}
+
+:root[data-theme='neon'] {
+  --gradient-a:    #06b6d4;
+  --gradient-b:    #7c3aed;
+  --gradient-c:    #ec4899;
+  --gradient-glow: rgba(6, 182, 212, 0.3);
 }
 
 /* ── Reset ──────────────────────────────────────────────────────────────── */

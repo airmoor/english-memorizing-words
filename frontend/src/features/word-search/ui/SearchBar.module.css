@@ -84,6 +84,12 @@
   color: var(--color-text-primary);
 }
 
+/* Suppress the global :focus-visible ring — the parent gradient border is
+   the accessibility indicator. Screen readers still see the semantic input. */
+.input:focus-visible {
+  outline: none;
+}
+
 .input::placeholder {
   color: var(--color-text-secondary);
   opacity: 0.65;
