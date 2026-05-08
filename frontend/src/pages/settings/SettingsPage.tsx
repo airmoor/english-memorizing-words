@@ -55,7 +55,7 @@ export function SettingsPage() {
 
           {/* Light variants */}
           {showLightVariants && (
-            <Card padding="lg" className={styles.section}>
+            <Card variant="floating" padding="lg" className={styles.section}>
               <div className={styles.sectionHeader}>
                 <Text variant="label" as="h2" className={styles.sectionTitle}>Light palette</Text>
                 <Text variant="caption" color="secondary" as="p">
@@ -79,7 +79,7 @@ export function SettingsPage() {
 
           {/* Dark variants */}
           {showDarkVariants && (
-            <Card padding="lg" className={styles.section}>
+            <Card variant="floating" padding="lg" className={styles.section}>
               <div className={styles.sectionHeader}>
                 <Text variant="label" as="h2" className={styles.sectionTitle}>Dark palette</Text>
                 <Text variant="caption" color="secondary" as="p">

@@ -133,7 +133,7 @@ export function HomePage() {
               {/* Recently saved — Bento right column on desktop */}
               {recent.length > 0 && (
                 <DashboardCell>
-                  <Card padding="lg" className={styles.recent}>
+                  <Card variant="floating" padding="lg" className={styles.recent}>
                     <div className={styles.recentHeader}>
                       <Text variant="title" as="h3">Recently saved</Text>
                       <button
@@ -179,7 +179,7 @@ function StatTile({
   accent?: boolean
 }) {
   return (
-    <Card padding="md" className={[styles.statTile, accent ? styles.statAccent : ''].join(' ')}>
+    <Card variant="floating" padding="md" className={[styles.statTile, accent ? styles.statAccent : ''].join(' ')}>
       <div className={styles.statIcon} aria-hidden>{icon}</div>
       <div className={styles.statValue}>{value}</div>
       <div className={styles.statLabel}>

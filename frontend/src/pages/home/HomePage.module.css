@@ -1,5 +1,13 @@
 .greeting {
   margin: 0;
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  /* Subtle two-stop gradient: primary color bleeds into theme accent */
+  background: linear-gradient(135deg, var(--color-text-primary) 55%, var(--gradient-a));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .loading {
@@ -14,6 +22,30 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes heroShimmer {
+  0%   { transform: translateX(-100%); opacity: 0; }
+  12%  { opacity: 1; }
+  88%  { opacity: 1; }
+  100% { transform: translateX(400%); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 55%;
+    height: 100%;
+    background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.07) 50%, transparent 70%);
+    animation: heroShimmer 9s ease-in-out infinite;
+    pointer-events: none;
+    border-radius: inherit;
+  }
 }
 
 .heroBody {

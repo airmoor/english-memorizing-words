@@ -33,7 +33,7 @@ export function Flashcard({ card }: Props) {
   })
 
   return (
-    <Card className={styles.card}>
+    <Card variant="glass" className={styles.card}>
       {/* Front */}
       <Stack gap="md">
         <Stack direction="row" gap="sm" align="center">

@@ -9,7 +9,7 @@
 .padding-md  { padding: var(--space-lg); }
 .padding-lg  { padding: var(--space-xl) var(--space-lg); }
 
-/* ── Interactive variant — hover lift for clickable cards/list items ──────── */
+/* ── Interactive — hover lift for clickable cards/list items ─────────────── */
 .interactive {
   list-style: none;
   transition:
@@ -20,16 +20,51 @@
 
 .interactive:hover {
   border-color: var(--color-accent);
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.14),
+    0 3px  10px rgba(0, 0, 0, 0.08);
+  transform: translateY(-3px);
 }
 
-/* ── Glass variant — gradient background for hero/highlight surfaces ─────── */
+/* ── Glass — real translucent surface with backdrop blur ─────────────────── */
+/*
+ * Use selectively: hero CTA, review flashcard.
+ * backdrop-filter is GPU-intensive — apply to at most one or two surfaces
+ * visible at any time.
+ */
 .glass {
-  background: linear-gradient(
-    135deg,
-    var(--color-accent-subtle) 0%,
-    var(--color-bg-card) 100%
-  );
-  border-color: var(--color-accent-subtle);
+  background: var(--glass-bg);
+  backdrop-filter: saturate(var(--glass-saturate)) blur(var(--glass-blur));
+  -webkit-backdrop-filter: saturate(var(--glass-saturate)) blur(var(--glass-blur));
+  border-color: var(--glass-border);
+  box-shadow:
+    var(--shadow-md),
+    inset 0 1px 0 var(--glass-highlight);
+}
+
+/* ── Floating — opaque widget surface with layered depth ─────────────────── */
+/*
+ * Preferred for stat tiles, dashboard widgets, settings sections, list cards.
+ * No backdrop-filter — uses shadow layering + inset top highlight for depth.
+ */
+.floating {
+  background: var(--color-bg-card);
+  border-color: var(--color-border);
+  box-shadow:
+    var(--shadow-lg),
+    inset 0 1px 0 var(--glass-highlight);
+  transition:
+    box-shadow   0.18s var(--ease-out),
+    border-color 0.18s var(--ease-out),
+    transform    0.18s var(--ease-out);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .floating:hover {
+    box-shadow:
+      0 16px 48px rgba(0, 0, 0, 0.13),
+      0 4px  12px rgba(0, 0, 0, 0.07),
+      inset 0 1px 0 var(--glass-highlight);
+    transform: translateY(-1px);
+  }
 }

@@ -1,4 +1,8 @@
 .page {
   min-height: 100vh;
-  background: var(--color-bg-primary);
+  background:
+    radial-gradient(ellipse 80% 45% at 50% -5%,  var(--gradient-glow) 0%, transparent 70%),
+    radial-gradient(ellipse 55% 35% at 15% 65%,  color-mix(in srgb, var(--gradient-a) 8%, transparent) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 30% at 88% 40%,  color-mix(in srgb, var(--gradient-b) 6%, transparent) 0%, transparent 60%),
+    var(--color-bg-primary);
 }

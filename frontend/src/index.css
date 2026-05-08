@@ -61,6 +61,17 @@
   --gradient-c:    #f9a8d4;
   --gradient-glow: rgba(167, 139, 250, 0.18);
 
+  /* ── Liquid Glass surface system ─────────────────────────────────────
+     Selective use: backdrop-filter glass only on primary hero surfaces
+     and the review flashcard. All other surfaces use the floating variant
+     (layered shadow + inset highlight) without GPU-expensive blur.
+     ─────────────────────────────────────────────────────────────────── */
+  --glass-blur:      8px;
+  --glass-saturate:  150%;
+  --glass-bg:        rgba(255, 255, 255, 0.70);
+  --glass-border:    rgba(255, 255, 255, 0.50);
+  --glass-highlight: rgba(255, 255, 255, 0.22);
+
   /* ── Layout system ───────────────────────────────────────────────── */
   /* All authenticated pages flow through Container.tsx, which honours
      these tokens. Adjust here to retune the entire app's rhythm. */
@@ -91,6 +102,70 @@
   --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.35);
   --shadow-md: 0 6px 28px rgba(0, 0, 0, 0.45);
   --shadow-lg: 0 14px 48px rgba(0, 0, 0, 0.55);
+}
+
+/* ── Glass surface tokens per theme ─────────────────────────────────────── */
+
+/* Light variants */
+:root[data-theme='sepia'] {
+  --glass-bg:        rgba(251, 245, 230, 0.76);
+  --glass-border:    rgba(216, 200, 164, 0.60);
+  --glass-highlight: rgba(255, 250, 238, 0.30);
+}
+
+:root[data-theme='marshmallow'] {
+  --glass-bg:        rgba(255, 244, 249, 0.76);
+  --glass-border:    rgba(245, 198, 216, 0.55);
+  --glass-highlight: rgba(255, 255, 255, 0.28);
+}
+
+:root[data-theme='arcticGlass'] {
+  --glass-bg:        rgba(240, 247, 255, 0.80);
+  --glass-border:    rgba(191, 219, 254, 0.65);
+  --glass-highlight: rgba(255, 255, 255, 0.38);
+}
+
+:root[data-theme='solarEditorial'] {
+  --glass-bg:        rgba(255, 252, 248, 0.80);
+  --glass-border:    rgba(216, 180, 100, 0.30);
+  --glass-highlight: rgba(255, 255, 255, 0.34);
+}
+
+/* Dark variants */
+:root[data-theme='dark'] {
+  --glass-bg:        rgba(22, 22, 42, 0.62);
+  --glass-border:    rgba(255, 255, 255, 0.09);
+  --glass-highlight: rgba(255, 255, 255, 0.07);
+}
+
+:root[data-theme='midnight'] {
+  --glass-bg:        rgba(20, 26, 44, 0.66);
+  --glass-border:    rgba(56, 189, 248, 0.14);
+  --glass-highlight: rgba(125, 211, 252, 0.08);
+}
+
+:root[data-theme='violetLibrary'] {
+  --glass-bg:        rgba(35, 24, 72, 0.66);
+  --glass-border:    rgba(180, 142, 244, 0.18);
+  --glass-highlight: rgba(196, 181, 253, 0.08);
+}
+
+:root[data-theme='emeraldDepths'] {
+  --glass-bg:        rgba(10, 38, 32, 0.68);
+  --glass-border:    rgba(52, 211, 153, 0.16);
+  --glass-highlight: rgba(94, 234, 212, 0.09);
+}
+
+:root[data-theme='sakuraNight'] {
+  --glass-bg:        rgba(18, 10, 26, 0.68);
+  --glass-border:    rgba(217, 70, 168, 0.18);
+  --glass-highlight: rgba(251, 113, 133, 0.09);
+}
+
+:root[data-theme='neon'] {
+  --glass-bg:        rgba(10, 10, 20, 0.72);
+  --glass-border:    rgba(6, 182, 212, 0.20);
+  --glass-highlight: rgba(6, 182, 212, 0.10);
 }
 
 /* Per-theme gradient palette — overrides the :root defaults set above.
