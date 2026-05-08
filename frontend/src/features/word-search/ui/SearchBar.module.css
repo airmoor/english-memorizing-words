@@ -1,18 +1,59 @@
+@keyframes gradientBorderFlow {
+  0%   { background-position: 0 0, 0% 50%; }
+  50%  { background-position: 0 0, 100% 50%; }
+  100% { background-position: 0 0, 0% 50%; }
+}
+
+/* ── Idle: visible aurora gradient border ────────────────────────────────── */
 .bar {
+  --_ga: color-mix(in srgb, var(--gradient-a, #2dd4bf) 65%, transparent);
+  --_gb: color-mix(in srgb, var(--gradient-b, #a78bfa) 65%, transparent);
+  --_gc: color-mix(in srgb, var(--gradient-c, #f9a8d4) 65%, transparent);
+
   position: relative;
   display: flex;
   align-items: center;
   width: 100%;
-  background: var(--color-bg-card);
-  border: 1.5px solid var(--color-border);
+  border: 2px solid transparent;
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  transition: border-color 0.18s var(--ease-out), box-shadow 0.18s var(--ease-out);
+  background-image:
+    linear-gradient(var(--color-bg-card), var(--color-bg-card)),
+    linear-gradient(
+      135deg,
+      var(--_ga)  0%,
+      var(--_gb) 33%,
+      var(--_gc) 66%,
+      var(--_ga) 100%
+    );
+  background-clip: padding-box, border-box;
+  background-size: 100% 100%, 300% 300%;
+  background-position: 0 0, 0% 50%;
+  animation: gradientBorderFlow 5s ease infinite;
+  box-shadow: var(--shadow-sm), 0 0 10px var(--gradient-glow, rgba(167, 139, 250, 0.2));
+  transition: box-shadow 0.28s var(--ease-out);
 }
 
+/* ── Hover: stronger border visibility ───────────────────────────────────── */
+.bar:hover {
+  --_ga: color-mix(in srgb, var(--gradient-a, #2dd4bf) 85%, transparent);
+  --_gb: color-mix(in srgb, var(--gradient-b, #a78bfa) 85%, transparent);
+  --_gc: color-mix(in srgb, var(--gradient-c, #f9a8d4) 85%, transparent);
+  box-shadow:
+    var(--shadow-sm),
+    0 0 14px var(--gradient-glow, rgba(167, 139, 250, 0.2)),
+    0 0 28px var(--gradient-glow, rgba(167, 139, 250, 0.2));
+}
+
+/* ── Focus: full gradient + pronounced glow ──────────────────────────────── */
 .bar:focus-within {
-  border-color: var(--color-accent);
-  box-shadow: var(--shadow-md), 0 0 0 4px var(--color-accent-subtle);
+  --_ga: var(--gradient-a, #2dd4bf);
+  --_gb: var(--gradient-b, #a78bfa);
+  --_gc: var(--gradient-c, #f9a8d4);
+  box-shadow:
+    var(--shadow-md),
+    0 0 0 3px var(--gradient-glow, rgba(167, 139, 250, 0.25)),
+    0 0 28px var(--gradient-glow, rgba(167, 139, 250, 0.25));
+  animation-duration: 3.5s;
 }
 
 .iconLeft {
@@ -23,6 +64,7 @@
   color: var(--color-text-secondary);
   flex-shrink: 0;
   pointer-events: none;
+  transition: color 0.18s var(--ease-out);
 }
 
 .bar:focus-within .iconLeft {

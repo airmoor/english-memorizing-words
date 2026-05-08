@@ -124,6 +124,12 @@
   background: var(--color-accent-subtle);
 }
 
+@keyframes swatchShimmer {
+  0%   { background-position: 0% 0%,   0 0; }
+  50%  { background-position: 100% 100%, 0 0; }
+  100% { background-position: 0% 0%,   0 0; }
+}
+
 .swatch {
   width: 36px;
   height: 36px;
@@ -131,10 +137,40 @@
   border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-.swatch_light    { background: linear-gradient(135deg, #ffffff 0%, #f4f5f9 100%); }
-.swatch_sepia    { background: linear-gradient(135deg, #fbf5e6 0%, #ebe0c7 100%); }
-.swatch_dark     { background: linear-gradient(135deg, #1c1c32 0%, #0e0e1a 100%); }
-.swatch_midnight { background: linear-gradient(135deg, #141a2c 0%, #0a0e1a 100%); }
+.swatch_light {
+  background-image:
+    linear-gradient(135deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.55) 50%, rgba(255,255,255,0) 100%),
+    linear-gradient(135deg, #ffffff 0%, #edf0fa 50%, #f4f5f9 100%);
+  background-size: 300% 300%, 100% 100%;
+  animation: swatchShimmer 6s ease infinite;
+}
+
+.swatch_sepia {
+  background-image:
+    linear-gradient(135deg, rgba(255,255,255,0) 0%, rgba(255,248,230,0.6) 50%, rgba(255,255,255,0) 100%),
+    linear-gradient(135deg, #fbf5e6 0%, #f2e5c8 50%, #ebe0c7 100%);
+  background-size: 300% 300%, 100% 100%;
+  animation: swatchShimmer 6s ease infinite;
+  animation-delay: -1.5s;
+}
+
+.swatch_dark {
+  background-image:
+    linear-gradient(135deg, rgba(255,255,255,0) 0%, rgba(100,100,180,0.12) 50%, rgba(255,255,255,0) 100%),
+    linear-gradient(135deg, #1c1c32 0%, #222244 50%, #0e0e1a 100%);
+  background-size: 300% 300%, 100% 100%;
+  animation: swatchShimmer 6s ease infinite;
+  animation-delay: -3s;
+}
+
+.swatch_midnight {
+  background-image:
+    linear-gradient(135deg, rgba(255,255,255,0) 0%, rgba(56,189,248,0.1) 50%, rgba(255,255,255,0) 100%),
+    linear-gradient(135deg, #141a2c 0%, #182040 50%, #0a0e1a 100%);
+  background-size: 300% 300%, 100% 100%;
+  animation: swatchShimmer 6s ease infinite;
+  animation-delay: -4.5s;
+}
 
 .variantBody {
   display: flex;

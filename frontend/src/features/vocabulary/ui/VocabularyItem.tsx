@@ -1,4 +1,5 @@
 import type { VocabularyEntry } from '../../../entities/vocabulary/model/types'
+import { Card } from '../../../shared/ui/Card/Card'
 import { Text } from '../../../shared/ui/Typography/Typography'
 import styles from './VocabularyItem.module.css'
 
@@ -9,7 +10,7 @@ interface Props {
 
 export function VocabularyItem({ item, onRemove }: Props) {
   return (
-    <li className={styles.item}>
+    <Card as="li" padding="md" interactive className={styles.item}>
       <div className={styles.main}>
         <div className={styles.wordRow}>
           <Text variant="label" as="span" className={styles.word}>
@@ -33,6 +34,6 @@ export function VocabularyItem({ item, onRemove }: Props) {
       >
         ✕
       </button>
-    </li>
+    </Card>
   )
 }

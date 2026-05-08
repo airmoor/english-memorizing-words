@@ -13,4 +13,8 @@ export const lightTheme: ThemeVars = {
   '--color-danger':       '#ef4444',
   '--color-success':      '#22c55e',
   '--color-warning':      '#f59e0b',
+  '--gradient-a':         '#2dd4bf',
+  '--gradient-b':         '#a78bfa',
+  '--gradient-c':         '#f9a8d4',
+  '--gradient-glow':      'rgba(167, 139, 250, 0.18)',
 }

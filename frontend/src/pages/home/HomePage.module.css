@@ -22,8 +22,6 @@
 /* Hero CTA */
 
 .hero {
-  background: linear-gradient(135deg, var(--color-accent-subtle) 0%, var(--color-bg-card) 100%);
-  border-color: var(--color-accent-subtle);
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);

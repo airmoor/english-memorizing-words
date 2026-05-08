@@ -13,4 +13,8 @@ export const darkTheme: ThemeVars = {
   '--color-danger':       '#f87171',
   '--color-success':      '#4ade80',
   '--color-warning':      '#fbbf24',
+  '--gradient-a':         '#2dd4bf',
+  '--gradient-b':         '#818cf8',
+  '--gradient-c':         '#e879f9',
+  '--gradient-glow':      'rgba(129, 140, 248, 0.25)',
 }

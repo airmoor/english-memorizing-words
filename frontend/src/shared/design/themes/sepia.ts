@@ -18,4 +18,8 @@ export const sepiaTheme: ThemeVars = {
   '--color-danger':       '#a83232',
   '--color-success':      '#5a7d4a',
   '--color-warning':      '#b6892b',
+  '--gradient-a':         '#81e6d9',
+  '--gradient-b':         '#d6bcfa',
+  '--gradient-c':         '#fbb6ce',
+  '--gradient-glow':      'rgba(214, 188, 250, 0.2)',
 }

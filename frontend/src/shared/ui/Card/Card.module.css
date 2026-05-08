@@ -8,3 +8,28 @@
 .padding-sm  { padding: var(--space-md); }
 .padding-md  { padding: var(--space-lg); }
 .padding-lg  { padding: var(--space-xl) var(--space-lg); }
+
+/* ── Interactive variant — hover lift for clickable cards/list items ──────── */
+.interactive {
+  list-style: none;
+  transition:
+    border-color 0.18s var(--ease-out),
+    box-shadow   0.18s var(--ease-out),
+    transform    0.18s var(--ease-out);
+}
+
+.interactive:hover {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+/* ── Glass variant — gradient background for hero/highlight surfaces ─────── */
+.glass {
+  background: linear-gradient(
+    135deg,
+    var(--color-accent-subtle) 0%,
+    var(--color-bg-card) 100%
+  );
+  border-color: var(--color-accent-subtle);
+}

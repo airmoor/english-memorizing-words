@@ -1,10 +1,19 @@
+/* ── Full-width band — background fills viewport ─────────────────────────── */
 .bar {
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* ── Constrained inner — aligns with page Container ─────────────────────── */
+.inner {
+  max-width: var(--content-width);
+  margin-inline: auto;
+  padding-inline: var(--content-padding-x);
+  padding-block: var(--space-sm);
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
-  padding: var(--space-sm) var(--space-lg);
-  background: var(--color-bg-secondary);
-  min-height: 56px;
+  min-height: 52px;
   justify-content: center;
 }
 
@@ -26,21 +35,39 @@
   color: var(--color-warning);
 }
 
+/* ── Progress track ───────────────────────────────────────────────────────── */
 .track {
   width: 100%;
-  height: 4px;
+  height: 6px;
   background: var(--color-border);
   border-radius: var(--radius-full);
   overflow: hidden;
 }
 
+/* ── Gradient fill — reveals aurora gradient as progress grows ────────────── */
 .fill {
   height: 100%;
-  background: var(--color-accent);
+  /* Fixed background-size so gradient looks consistent at any fill width */
+  background: linear-gradient(
+    90deg,
+    var(--gradient-a, #2dd4bf)  0%,
+    var(--gradient-b, #a78bfa) 50%,
+    var(--gradient-c, #f9a8d4) 100%
+  );
+  background-size: var(--content-width, 880px) 100%;
+  background-repeat: no-repeat;
   border-radius: var(--radius-full);
-  transition: width 0.3s ease;
+  box-shadow: 0 0 6px var(--gradient-glow, rgba(167, 139, 250, 0.3));
+  transition: width 0.4s var(--ease-out);
 }
 
 .fillDone {
-  background: var(--color-success, var(--color-accent));
+  background: linear-gradient(
+    90deg,
+    var(--gradient-a, #2dd4bf) 0%,
+    var(--color-success) 100%
+  );
+  background-size: var(--content-width, 880px) 100%;
+  background-repeat: no-repeat;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.35);
 }

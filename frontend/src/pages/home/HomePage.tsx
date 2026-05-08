@@ -54,7 +54,7 @@ export function HomePage() {
           {!isLoading && (
             <>
               {/* Hero CTA: due today */}
-              <Card padding="lg" className={styles.hero}>
+              <Card padding="lg" variant="glass" className={styles.hero}>
                 <div className={styles.heroBody}>
                   {dueToday > 0 ? (
                     <>

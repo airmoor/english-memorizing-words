@@ -17,4 +17,8 @@ export const midnightTheme: ThemeVars = {
   '--color-danger':       '#f87171',
   '--color-success':      '#5eead4',
   '--color-warning':      '#fbbf24',
+  '--gradient-a':         '#38bdf8',
+  '--gradient-b':         '#818cf8',
+  '--gradient-c':         '#c4b5fd',
+  '--gradient-glow':      'rgba(125, 211, 252, 0.2)',
 }
