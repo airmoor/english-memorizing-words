@@ -129,13 +129,13 @@
 
 ## 10. Frontend — Review Page
 
-- [ ] 10.1 Create `/review` page; on load call `GET /api/review/due`
-- [ ] 10.2 Show session progress counter (X cards remaining)
-- [ ] 10.3 Render card front: word text + transcription, "Show answer" button
-- [ ] 10.4 Render card back: definition, translation, part of speech, examples
-- [ ] 10.5 Show four rating buttons: Again / Hard / Good / Easy
-- [ ] 10.6 On rating tap, call `POST /api/review/cards/:id/rate`, advance to next card
-- [ ] 10.7 Show completion screen when no cards remain, displaying next scheduled review date
+- [x] 10.1 Create `/review` page; on load call `GET /api/review/due`
+- [x] 10.2 Show session progress counter (X cards remaining)
+- [x] 10.3 Render card front: word text + transcription, "Show answer" button
+- [ ] 10.4 Render card back: definition, translation, part of speech, examples — definition, POS, examples implemented; translation N/A (not in domain model, English-only dictionary)
+- [x] 10.5 Show four rating buttons: Again / Hard / Good / Easy
+- [x] 10.6 On rating tap, call `POST /api/review/cards/:id/rate`, advance to next card
+- [x] 10.7 Show completion screen when no cards remain, displaying next scheduled review date
 - [x] 10.8 Fix `Unexpected end of JSON input` crash on Review page: shared API client treats HTTP 200 with empty body as `null` (NestJS serialises a `null` controller return that way)
 
 ## 11. PWA Configuration
