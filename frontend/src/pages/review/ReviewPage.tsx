@@ -34,9 +34,9 @@ export function ReviewPage() {
 
   return (
     <PageLayout className={styles.flexPage}>
-      <Container as="main" width="narrow" className={styles.main}>
-        <SessionProgress />
-
+       <Container as="main" width="default">
+       <SessionProgress />
+       <div className={styles.main}>
         {isPending && <Spinner />}
 
         {isError && (
@@ -58,6 +58,7 @@ export function ReviewPage() {
         )}
 
         {card && <Flashcard key={card.cardId} card={card} />}
+        </div>
       </Container>
     </PageLayout>
   )

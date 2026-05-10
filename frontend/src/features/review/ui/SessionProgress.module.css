@@ -3,7 +3,6 @@
    The review card must remain the clear visual focus — this is supporting info.
 ───────────────────────────────────────────────────────────────────────────── */
 .bar {
-  max-width: 520px;    /* aligns exactly with Flashcard.module.css .card */
   width: 100%;
   margin-inline: auto;
   display: flex;
