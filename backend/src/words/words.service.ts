@@ -6,10 +6,8 @@ import { Word } from '../database/entities/word.entity';
 import { Meaning } from '../database/entities/meaning.entity';
 import { normalizeSearchText } from './normalize';
 import { DictionaryProviderService } from './providers/dictionary-provider.service';
-import type {
-  NormalizedWord,
-  ProviderName,
-} from './providers/provider.interface';
+import type { NormalizedWord } from './providers/provider.interface';
+import { DictionaryProvider } from './providers/provider.interface';
 
 // ── Response DTOs ────────────────────────────────────────────────────────────
 
@@ -43,11 +41,8 @@ export class WordResponseDto {
   @ApiProperty({ example: 'ˈwɚd', nullable: true })
   transcription: string | null;
 
-  @ApiProperty({
-    enum: ['merriam-webster', 'free-dictionary'],
-    example: 'merriam-webster',
-  })
-  provider: ProviderName;
+  @ApiProperty({ enum: DictionaryProvider, example: DictionaryProvider.MERRIAM })
+  provider: DictionaryProvider;
 
   @ApiProperty({ type: [MeaningDto] })
   meanings: MeaningDto[];

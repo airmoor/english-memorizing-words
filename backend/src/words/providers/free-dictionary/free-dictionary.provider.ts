@@ -7,6 +7,7 @@ import type {
   IDictionaryProvider,
   NormalizedWord,
 } from '../provider.interface';
+import { DictionaryProvider } from '../provider.interface';
 import type { FdEntry } from './free-dictionary.dto';
 import { normalizeFreeDictionary } from './free-dictionary.normalizer';
 
@@ -14,7 +15,7 @@ const FD_BASE = 'https://api.dictionaryapi.dev/api/v2/entries/en';
 
 @Injectable()
 export class FreeDictionaryProvider implements IDictionaryProvider {
-  readonly name = 'free-dictionary' as const;
+  readonly name = DictionaryProvider.FREE;
   private readonly logger = new Logger(FreeDictionaryProvider.name);
 
   isAvailable(): boolean {

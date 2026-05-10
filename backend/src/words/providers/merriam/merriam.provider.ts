@@ -8,6 +8,7 @@ import type {
   IDictionaryProvider,
   NormalizedWord,
 } from '../provider.interface';
+import { DictionaryProvider } from '../provider.interface';
 import type { MwEntry, MwResponse } from './merriam.dto';
 import { normalizeMerriamEntry } from './merriam.normalizer';
 
@@ -16,7 +17,7 @@ const MW_BASE =
 
 @Injectable()
 export class MerriamProvider implements IDictionaryProvider {
-  readonly name = 'merriam-webster' as const;
+  readonly name = DictionaryProvider.MERRIAM;
   private readonly logger = new Logger(MerriamProvider.name);
   private readonly apiKey: string | undefined;
 

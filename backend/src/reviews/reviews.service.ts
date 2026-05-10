@@ -64,11 +64,11 @@ export class ReviewProgressDto {
 }
 
 export class ReviewResultDto {
-  @ApiProperty({ example: '2024-06-15' })
+  @ApiProperty({ example: '2024-06-15T00:00:00.000Z' })
   nextReview: Date;
 
   @ApiProperty({ example: 4 })
-  interval: number;
+  intervalDays: number;
 
   @ApiProperty({ example: 2.5 })
   easeFactor: number;
@@ -79,29 +79,29 @@ export class ReviewResultDto {
 type Rating = 'again' | 'hard' | 'good' | 'easy';
 
 function applySmTwo(
-  interval: number,
+  intervalDays: number,
   easeFactor: number,
   rating: Rating,
-): { interval: number; easeFactor: number } {
+): { intervalDays: number; easeFactor: number } {
   switch (rating) {
     case 'again':
-      return { interval: 0, easeFactor: Math.max(1.3, easeFactor - 0.2) };
+      return { intervalDays: 0, easeFactor: Math.max(1.3, easeFactor - 0.2) };
 
     case 'hard':
       return {
-        interval: Math.max(1, Math.round(interval * 1.2)),
+        intervalDays: Math.max(1, Math.round(intervalDays * 1.2)),
         easeFactor: Math.max(1.3, easeFactor - 0.15),
       };
 
     case 'good':
       return {
-        interval: interval === 0 ? 1 : Math.round(interval * easeFactor),
+        intervalDays: intervalDays === 0 ? 1 : Math.round(intervalDays * easeFactor),
         easeFactor,
       };
 
     case 'easy':
       return {
-        interval: interval === 0 ? 2 : Math.round(interval * easeFactor * 1.3),
+        intervalDays: intervalDays === 0 ? 2 : Math.round(intervalDays * easeFactor * 1.3),
         easeFactor: easeFactor + 0.15,
       };
 
@@ -144,7 +144,7 @@ export class ReviewsService {
     const [[due], [total], [reviewed], reviewDays, [nextRow]] = await Promise.all([
       this.dataSource.query<[{ count: string }]>(
         `SELECT COUNT(*) AS count FROM cards
-         WHERE user_id = $1 AND next_review <= CURRENT_DATE`,
+         WHERE user_id = $1 AND next_review <= NOW()`,
         [userId],
       ),
       this.dataSource.query<[{ count: string }]>(
@@ -170,7 +170,7 @@ export class ReviewsService {
       this.dataSource.query<[{ next_date: string | null }]>(
         `SELECT MIN(next_review)::text AS next_date
          FROM cards
-         WHERE user_id = $1 AND next_review > CURRENT_DATE`,
+         WHERE user_id = $1 AND next_review > NOW()`,
         [userId],
       ),
     ]);
@@ -210,7 +210,7 @@ export class ReviewsService {
        FROM cards c
        JOIN words w ON w.id = c.word_id
        WHERE c.user_id = $1
-         AND c.next_review <= CURRENT_DATE
+         AND c.next_review <= NOW()
        ORDER BY c.next_review ASC, c.id ASC
        LIMIT 1`,
       [userId],
@@ -266,25 +266,26 @@ export class ReviewsService {
 
     try {
       const current = (await qr.query(
-        `SELECT interval, ease_factor FROM cards WHERE id = $1 AND user_id = $2 FOR UPDATE`,
+        `SELECT interval_days, ease_factor FROM cards WHERE id = $1 AND user_id = $2 FOR UPDATE`,
         [cardId, userId],
-      )) as { interval: number; ease_factor: number }[];
+      )) as { interval_days: number; ease_factor: number }[];
 
       if (current.length === 0) {
         throw new NotFoundException(`Card ${cardId} not found`);
       }
 
-      const { interval, ease_factor: easeFactor } = current[0];
-      const next = applySmTwo(interval, easeFactor, rating);
+      const { interval_days: intervalDays, ease_factor: easeFactor } = current[0];
+      const next = applySmTwo(intervalDays, easeFactor, rating);
 
       const updated = (await qr.query(
         `UPDATE cards
-         SET interval    = $1,
-             ease_factor = $2,
-             next_review = CURRENT_DATE + ($3 * INTERVAL '1 day')
+         SET interval_days    = $1,
+             ease_factor      = $2,
+             next_review      = NOW() + ($3 * INTERVAL '1 day'),
+             last_reviewed_at = NOW()
          WHERE id = $4 AND user_id = $5
          RETURNING next_review`,
-        [next.interval, next.easeFactor, next.interval, cardId, userId],
+        [next.intervalDays, next.easeFactor, next.intervalDays, cardId, userId],
       )) as { next_review: Date }[];
 
       await qr.query(
@@ -301,7 +302,7 @@ export class ReviewsService {
 
       return {
         nextReview: updated[0].next_review,
-        interval: next.interval,
+        intervalDays: next.intervalDays,
         easeFactor: next.easeFactor,
       };
     } catch (err) {

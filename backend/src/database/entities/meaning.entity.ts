@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Word } from './word.entity';
 
@@ -36,6 +37,9 @@ export class Meaning {
 
   @Column({ name: 'sense_number', type: 'text', nullable: true })
   senseNumber: string | null;
+
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
+  updatedAt: Date;
 
   @ManyToOne(() => Word, (word) => word.meanings, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'word_id' })

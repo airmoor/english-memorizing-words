@@ -6,6 +6,7 @@ import type {
   MwVis,
 } from './merriam.dto';
 import type { NormalizedMeaning, NormalizedWord } from '../provider.interface';
+import { DictionaryProvider } from '../provider.interface';
 
 /**
  * Strips Merriam-Webster proprietary inline markup from text fields.
@@ -172,7 +173,7 @@ export function normalizeMerriamEntry(
   return {
     text: searchText,
     transcription,
-    provider: 'merriam-webster',
+    provider: DictionaryProvider.MERRIAM,
     meanings,
   };
 }

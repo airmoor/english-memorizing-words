@@ -4,7 +4,8 @@
  * Vendor-specific DTOs (MW, FD) MUST stay inside their provider directories.
  */
 
-export type ProviderName = 'merriam-webster' | 'free-dictionary';
+import { DictionaryProvider } from '../../database/enums/dictionary-provider.enum';
+export { DictionaryProvider } from '../../database/enums/dictionary-provider.enum';
 
 export interface NormalizedMeaning {
   definition: string;
@@ -18,7 +19,7 @@ export interface NormalizedMeaning {
 export interface NormalizedWord {
   text: string;
   transcription: string | null;
-  provider: ProviderName;
+  provider: DictionaryProvider;
   meanings: NormalizedMeaning[];
 }
 
@@ -31,7 +32,7 @@ export interface NormalizedWord {
  * The selector service uses these two primitives to cascade between providers.
  */
 export interface IDictionaryProvider {
-  readonly name: ProviderName;
+  readonly name: DictionaryProvider;
   isAvailable(): boolean;
   fetchWord(text: string): Promise<NormalizedWord | null>;
 }

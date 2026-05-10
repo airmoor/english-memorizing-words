@@ -1,5 +1,6 @@
 import type { FdEntry } from './free-dictionary.dto';
 import type { NormalizedMeaning, NormalizedWord } from '../provider.interface';
+import { DictionaryProvider } from '../provider.interface';
 
 /**
  * Free Dictionary returns multiple entries (one per pronunciation/etymology).
@@ -40,7 +41,7 @@ export function normalizeFreeDictionary(
   return {
     text: searchText,
     transcription,
-    provider: 'free-dictionary',
+    provider: DictionaryProvider.FREE,
     meanings,
   };
 }

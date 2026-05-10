@@ -68,8 +68,8 @@ export class VocabularyService {
       );
 
       await qr.query(
-        `INSERT INTO cards (id, user_id, word_id, ease_factor, interval, next_review)
-         VALUES (gen_random_uuid(), $1, $2, 2.5, 0, CURRENT_DATE)
+        `INSERT INTO cards (id, user_id, word_id, ease_factor, interval_days, next_review)
+         VALUES (gen_random_uuid(), $1, $2, 2.5, 0, NOW())
          ON CONFLICT (user_id, word_id) DO NOTHING`,
         [userId, wordId],
       );

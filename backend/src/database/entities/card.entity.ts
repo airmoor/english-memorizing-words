@@ -34,11 +34,21 @@ export class Card {
   @Column({ name: 'ease_factor', type: 'float', default: 2.5 })
   easeFactor: number;
 
-  @Column({ type: 'int', default: 0 })
-  interval: number;
+  /** Number of days until next scheduled review. Renamed from `interval` for clarity. */
+  @Column({ name: 'interval_days', type: 'int', default: 0 })
+  intervalDays: number;
 
-  @Column({ name: 'next_review', type: 'date', default: () => 'CURRENT_DATE' })
+  /** Stored as timestamptz for timezone-safe scheduling. */
+  @Column({ name: 'next_review', type: 'timestamptz', default: () => 'NOW()' })
   nextReview: Date;
+
+  /**
+   * Populated on every review submission.
+   * Null for cards that have never been reviewed (newly added).
+   * Required for future FSRS stability calculations.
+   */
+  @Column({ name: 'last_reviewed_at', type: 'timestamptz', nullable: true })
+  lastReviewedAt: Date | null;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
