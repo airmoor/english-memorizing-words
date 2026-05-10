@@ -3,6 +3,7 @@ import {
   Logger,
   ServiceUnavailableException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import type {
   IDictionaryProvider,
   NormalizedWord,
@@ -17,13 +18,24 @@ const MW_BASE =
 export class MerriamProvider implements IDictionaryProvider {
   readonly name = 'merriam-webster' as const;
   private readonly logger = new Logger(MerriamProvider.name);
+  private readonly apiKey: string | undefined;
+
+  constructor(config: ConfigService) {
+    this.apiKey = config.get<string>('MERRIAM_API_KEY');
+    if (this.apiKey) {
+      const masked = this.apiKey.slice(0, 4) + '****';
+      this.logger.log(`MERRIAM_API_KEY loaded: ${masked}`);
+    } else {
+      this.logger.warn('MERRIAM_API_KEY not set — falling back to Free Dictionary API');
+    }
+  }
 
   isAvailable(): boolean {
-    return !!process.env.MERRIAM_API_KEY;
+    return !!this.apiKey;
   }
 
   async fetchWord(text: string): Promise<NormalizedWord | null> {
-    const key = process.env.MERRIAM_API_KEY;
+    const key = this.apiKey;
     if (!key) {
       // isAvailable() should have gated this; throw so the selector can fall back
       throw new ServiceUnavailableException('MERRIAM_API_KEY not configured');
