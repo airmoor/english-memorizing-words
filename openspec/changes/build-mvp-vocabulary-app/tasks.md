@@ -140,10 +140,15 @@
 
 ## 11. PWA Configuration
 
-- [ ] 11.1 Install and configure `@ducanh2912/next-pwa` (or `next-pwa`)
-- [ ] 11.2 Add `manifest.json` (name, icons, theme color, display: standalone)
-- [ ] 11.3 Configure service worker to pre-cache app shell (/, /search, /vocabulary, /review)
-- [ ] 11.4 Test installability on mobile (Chrome DevTools → Application → Manifest)
+- [x] 11.1 Install and configure `vite-plugin-pwa` (autoUpdate, skipWaiting, clientsClaim, cleanupOutdatedCaches)
+- [x] 11.2 Add `manifest.webmanifest` — name "Lexis", standalone display, #1a0b2e theme/background, 5 icon sizes including maskable
+- [x] 11.3 Generate PNG icons from brand SVG: 64×64, 192×192, 512×512, maskable-512×512, apple-touch-icon-180×180
+- [x] 11.4 Configure Workbox: precache all JS/CSS/HTML/icons; NavigationFirst strategy for HTML nav; API calls intentionally excluded
+- [x] 11.5 Add Apple PWA meta tags to index.html (apple-mobile-web-app-capable, status-bar-style, apple-mobile-web-app-title)
+- [x] 11.6 Create `src/shared/pwa/usePwaInstall.ts` — hook for beforeinstallprompt, install(), dismiss()
+- [x] 11.7 Add subtle install CTA to AppHeader: accent-bordered pill with install icon + dismiss button; fades in when installable
+- [x] 11.8 Add standalone-mode CSS in index.css: safe-area insets, overscroll-behavior: none, tap highlight disabled
+- [x] 11.9 Update README with PWA install instructions, local testing steps, iOS limitations
 
 ## 12. Integration & Validation
 

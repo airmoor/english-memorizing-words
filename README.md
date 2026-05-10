@@ -90,6 +90,42 @@ npm --workspace frontend run dev
 | `build`  | Production build     |
 | `lint`   | Lint source files    |
 
+## PWA
+
+Lexis is installable as a Progressive Web App on desktop and mobile.
+
+**Installing:**
+- **Chrome/Edge/Android:** Address bar → install icon, or header "Install" button when available.
+- **iOS Safari:** Share → "Add to Home Screen". The app runs in standalone (full-screen) mode.
+
+**Testing locally:**
+
+```bash
+# Build production bundle (service worker is not active in dev mode)
+npm --workspace frontend run build
+
+# Preview the production build (handles SPA routing correctly)
+npm --workspace frontend run preview
+```
+
+Then open `http://localhost:4173` in Chrome and check DevTools → Application → Service Workers.
+
+> **Note:** Do not use `npx serve frontend/dist` without the `-s` flag — bare `serve` returns 404 for client-side routes (`/search`, `/review`, etc.) because it has no SPA fallback. Either use `vite preview` (recommended) or `npx serve -s frontend/dist`.
+
+**Testing offline mode:**
+1. Open the served build in Chrome.
+2. DevTools → Network → set "Offline".
+3. Reload — the app shell should load from cache.
+4. API calls will fail (expected: auth/review data is never cached).
+
+**Update strategy:**
+The service worker uses `autoUpdate` with `skipWaiting` + `clientsClaim`. New deployments activate immediately across all open tabs with no stale-cache window.
+
+**Known iOS limitations:**
+- `beforeinstallprompt` is not supported on iOS — the header install button does not appear. Users must install via Share → "Add to Home Screen" manually.
+- Push notifications require a separate Web Push setup (not yet implemented).
+- `status-bar-style: black-translucent` requires the `viewport-fit=cover` viewport meta (already set).
+
 ## Architecture Notes
 
 - **Dictionary-first model:** `words` → `meanings` → `examples`. Word lookup normalizes Merriam-Webster responses into this schema; transcription (IPA) lives on `words`.

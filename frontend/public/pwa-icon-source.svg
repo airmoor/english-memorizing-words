@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Background: deep purple matching the app's dark identity -->
+  <rect width="512" height="512" rx="0" fill="#1a0b2e"/>
+
+  <!-- Lexis logomark, centered and scaled (~7.2x from 48×46 original) -->
+  <!-- Translate to center: (512 - 48*7.2)/2 = (512-345.6)/2 = 83.2 on X, (512 - 46*7.2)/2 = (512-331.2)/2 = 90.4 on Y -->
+  <g transform="translate(83.2, 90.4) scale(7.2)">
+    <path fill="#863bff" d="M25.946 44.938c-.664.845-2.021.375-2.021-.698V33.937a2.26 2.26 0 0 0-2.262-2.262H10.287c-.92 0-1.456-1.04-.92-1.788l7.48-10.471c1.07-1.497 0-3.578-1.842-3.578H1.237c-.92 0-1.456-1.04-.92-1.788L10.013.474c.214-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.471c-1.07 1.498 0 3.579 1.842 3.579h11.377c.943 0 1.473 1.088.89 1.83L25.947 44.94z"/>
+
+    <!-- Inner glow highlight (simplified, no blur filters for rasterisation clarity) -->
+    <!-- Top-right azure accent -->
+    <ellipse cx="41.412" cy="6.333" rx="3.5" ry="6" fill="#47bfff" opacity="0.55" transform="rotate(37.892 41.412 6.333)"/>
+    <!-- Inner light streak -->
+    <ellipse cx="27" cy="8" rx="12" ry="3" fill="#ede6ff" opacity="0.25" transform="rotate(-10 27 8)"/>
+  </g>
+</svg>

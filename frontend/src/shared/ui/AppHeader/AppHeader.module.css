@@ -122,6 +122,67 @@
   color: var(--color-danger);
 }
 
+/* ── Install prompt badge ───────────────────────────────────────────────── */
+
+.installBadge {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--color-accent);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  animation: fadeInBadge 0.3s var(--ease-out);
+}
+
+@keyframes fadeInBadge {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.installBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px 5px 10px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: var(--font-sm);
+  font-weight: var(--fw-medium);
+  color: var(--color-accent);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.installBtn:hover {
+  background: var(--color-accent-subtle);
+}
+
+.installDismiss {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: none;
+  border: none;
+  border-left: 1px solid color-mix(in srgb, var(--color-accent) 40%, transparent);
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+  line-height: 1;
+}
+
+.installDismiss:hover {
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+}
+
+@media (max-width: 480px) {
+  .installBtn { padding: 5px 8px; }
+  .installBtn span { display: none; }
+}
+
 /* ── Responsive: collapse logo wordmark below 720px ─────────────────────── */
 @media (max-width: 720px) {
   .header {

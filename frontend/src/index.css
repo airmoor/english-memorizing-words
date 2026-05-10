@@ -300,3 +300,21 @@ button {
     scroll-behavior: auto !important;
   }
 }
+
+/* ── PWA standalone mode — native-app feel ────────────────────────── */
+/* When running as an installed PWA the OS chrome is gone, so we reclaim
+   that space and tighten vertical rhythm for a more immersive feel. */
+@media (display-mode: standalone) {
+  /* Safe-area insets for notched devices / Dynamic Island */
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    /* Disable overscroll bounce — feels more native */
+    overscroll-behavior: none;
+  }
+
+  /* Prevent tap highlight artifacts (mobile) */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}

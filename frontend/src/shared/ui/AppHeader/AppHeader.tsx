@@ -1,6 +1,7 @@
 import { NavLink, Link } from 'react-router-dom'
 import { useLogout } from '../../../features/auth/model/useLogout'
 import { Logo } from '../Logo/Logo'
+import { usePwaInstall } from '../../pwa/usePwaInstall'
 import styles from './AppHeader.module.css'
 
 const NAV_ITEMS: { to: string; label: string }[] = [
@@ -12,6 +13,7 @@ const NAV_ITEMS: { to: string; label: string }[] = [
 
 export function AppHeader() {
   const logout = useLogout()
+  const { canInstall, install, dismiss } = usePwaInstall()
 
   return (
     <header className={styles.header}>
@@ -34,6 +36,17 @@ export function AppHeader() {
       </nav>
 
       <div className={styles.actions}>
+        {canInstall && (
+          <div className={styles.installBadge} role="group" aria-label="Install Lexis app">
+            <button onClick={install} className={styles.installBtn} title="Install Lexis">
+              <InstallIcon />
+              <span className={styles.installLabel}>Install</span>
+            </button>
+            <button onClick={dismiss} className={styles.installDismiss} aria-label="Dismiss install prompt">
+              ×
+            </button>
+          </div>
+        )}
         <NavLink
           to="/settings"
           className={({ isActive }) =>
@@ -49,6 +62,27 @@ export function AppHeader() {
         </button>
       </div>
     </header>
+  )
+}
+
+/** Download-to-device icon for install CTA. */
+function InstallIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" y1="15" x2="12" y2="3" />
+    </svg>
   )
 }
 
