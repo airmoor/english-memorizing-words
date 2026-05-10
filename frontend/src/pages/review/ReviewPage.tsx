@@ -34,9 +34,9 @@ export function ReviewPage() {
 
   return (
     <PageLayout className={styles.flexPage}>
-      <SessionProgress />
-
       <Container as="main" width="narrow" className={styles.main}>
+        <SessionProgress />
+
         {isPending && <Spinner />}
 
         {isError && (

@@ -24,13 +24,12 @@ export function SessionProgress() {
 
   return (
     <div className={styles.bar}>
-      <div className={styles.inner}>
       <div className={styles.text}>
         <span className={styles.label}>
           {sessionTotal === 0
             ? 'No cards due today'
             : isDone
-            ? 'Session complete'
+            ? 'Session complete ✓'
             : `${data.reviewedToday} of ${sessionTotal} reviewed`}
         </span>
         {data.streak > 0 && (
@@ -51,7 +50,6 @@ export function SessionProgress() {
           className={[styles.fill, isDone ? styles.fillDone : ''].join(' ')}
           style={{ width: `${percent}%` }}
         />
-      </div>
       </div>
     </div>
   )
