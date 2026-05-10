@@ -29,7 +29,9 @@
   background-size: 100% 100%, 300% 300%;
   background-position: 0 0, 0% 50%;
   animation: gradientBorderFlow 5s ease infinite;
-  box-shadow: var(--shadow-sm), 0 0 10px var(--gradient-glow, rgba(167, 139, 250, 0.2));
+  box-shadow:
+  var(--shadow-sm),
+  0 0 8px rgba(167, 139, 250, 0.08);
   transition: box-shadow 0.28s var(--ease-out);
 }
 
@@ -39,9 +41,8 @@
   --_gb: color-mix(in srgb, var(--gradient-b, #a78bfa) 85%, transparent);
   --_gc: color-mix(in srgb, var(--gradient-c, #f9a8d4) 85%, transparent);
   box-shadow:
-    var(--shadow-sm),
-    0 0 14px var(--gradient-glow, rgba(167, 139, 250, 0.2)),
-    0 0 28px var(--gradient-glow, rgba(167, 139, 250, 0.2));
+  var(--shadow-sm),
+  0 0 12px rgba(167, 139, 250, 0.12);
 }
 
 /* ── Focus: full gradient + pronounced glow ──────────────────────────────── */
@@ -50,9 +51,8 @@
   --_gb: var(--gradient-b, #a78bfa);
   --_gc: var(--gradient-c, #f9a8d4);
   box-shadow:
-    var(--shadow-md),
-    0 0 0 3px var(--gradient-glow, rgba(167, 139, 250, 0.25)),
-    0 0 28px var(--gradient-glow, rgba(167, 139, 250, 0.25));
+  var(--shadow-sm),
+  0 0 16px rgba(167, 139, 250, 0.16);
   animation-duration: 3.5s;
 }
 
@@ -87,6 +87,10 @@
 /* Suppress the global :focus-visible ring — the parent gradient border is
    the accessibility indicator. Screen readers still see the semantic input. */
 .input:focus-visible {
+  outline: none;
+}
+
+.input:focus {
   outline: none;
 }
 
