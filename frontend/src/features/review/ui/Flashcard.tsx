@@ -36,15 +36,6 @@ export function Flashcard({ card }: Props) {
     <Card variant="glass" className={styles.card}>
       {/* Front */}
       <Stack gap="md">
-        <Stack direction="row" gap="sm" align="center">
-          {card.partOfSpeech && (
-            <span className={styles.badge}>{card.partOfSpeech}</span>
-          )}
-          <span className={styles.count}>
-            {card.meaningCount} meaning{card.meaningCount !== 1 ? 's' : ''}
-          </span>
-        </Stack>
-
         <Text variant="heading" className={styles.word}>{card.word}</Text>
 
         {card.transcription && (
@@ -74,17 +65,37 @@ export function Flashcard({ card }: Props) {
           )}
 
           {answerQuery.data && (
-            <Stack gap="sm">
-              <Text variant="body">{answerQuery.data.definition}</Text>
-              {answerQuery.data.examples.length > 0 && (
-                <ul className={styles.examples}>
-                  {answerQuery.data.examples.map((ex, i) => (
-                    <li key={i}>
-                      <Text variant="caption" color="secondary" as="span">"{ex}"</Text>
-                    </li>
-                  ))}
-                </ul>
-              )}
+            <Stack gap="md">
+              <ol className={styles.meanings}>
+                {answerQuery.data.meanings.map((m, i) => (
+                  <li key={m.id} className={styles.meaning}>
+                    <Stack gap="xs">
+                      <Stack direction="row" gap="sm" align="center">
+                        {m.partOfSpeech && (
+                          <span className={styles.badge}>{m.partOfSpeech}</span>
+                        )}
+                        <Text variant="body" as="span">{m.definition}</Text>
+                      </Stack>
+                      {m.examples.length > 0 && (
+                        <ul className={styles.examples}>
+                          {m.examples.map((ex, j) => (
+                            <li key={j}>
+                              <Text variant="caption" color="secondary" as="span">"{ex}"</Text>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      {m.synonyms.length > 0 && (
+                        <div className={styles.synonyms}>
+                          {m.synonyms.map((s) => (
+                            <span key={s} className={styles.synonym}>{s}</span>
+                          ))}
+                        </div>
+                      )}
+                    </Stack>
+                  </li>
+                ))}
+              </ol>
             </Stack>
           )}
 

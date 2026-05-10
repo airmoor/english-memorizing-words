@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { fetchVocabulary, deleteMeaning } from '../api/vocabularyApi'
-import type { VocabularyEntry } from '../../../entities/vocabulary/model/types'
+import { fetchVocabulary, deleteWord } from '../api/vocabularyApi'
+import type { VocabularyWord } from '../../../entities/vocabulary/model/types'
 
 export function useVocabulary() {
   const queryClient = useQueryClient()
@@ -12,23 +12,21 @@ export function useVocabulary() {
   })
 
   const removeMutation = useMutation({
-    mutationFn: (meaningId: string) => deleteMeaning(meaningId),
+    mutationFn: (wordId: string) => deleteWord(wordId),
 
-    onMutate: async (meaningId) => {
-      // Cancel any in-flight refetch so it doesn't overwrite the optimistic update
+    onMutate: async (wordId) => {
       await queryClient.cancelQueries({ queryKey: ['vocabulary'] })
 
-      const prev = queryClient.getQueryData<VocabularyEntry[]>(['vocabulary'])
+      const prev = queryClient.getQueryData<VocabularyWord[]>(['vocabulary'])
 
-      queryClient.setQueryData<VocabularyEntry[]>(['vocabulary'], (old = []) =>
-        old.filter((item) => item.meaningId !== meaningId),
+      queryClient.setQueryData<VocabularyWord[]>(['vocabulary'], (old = []) =>
+        old.filter((item) => item.wordId !== wordId),
       )
 
       return { prev }
     },
 
     onError: (_err, _id, ctx) => {
-      // Roll back on failure
       if (ctx?.prev !== undefined) {
         queryClient.setQueryData(['vocabulary'], ctx.prev)
       }
@@ -43,6 +41,6 @@ export function useVocabulary() {
     items: query.data ?? [],
     isLoading: query.isPending,
     isError: query.isError,
-    remove: (meaningId: string) => removeMutation.mutate(meaningId),
+    remove: (wordId: string) => removeMutation.mutate(wordId),
   }
 }

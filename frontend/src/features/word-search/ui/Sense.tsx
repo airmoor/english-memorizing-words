@@ -4,19 +4,15 @@ import styles from './Sense.module.css'
 
 interface Props {
   meaning: Meaning
-  saved: boolean
-  onSave: () => void
   /** True when the sense_number is a sub-sense (e.g. "1a", "1b") so we can indent. */
   isSubSense: boolean
 }
 
 /**
- * Renders a single sense row inside a dictionary entry.
- * Layout: [sense number] · definition · save chip
- *           examples (indented, italic)
- *           synonym pills
+ * Renders a single sense inside a dictionary entry.
+ * Save state is managed at the word level — no per-sense save button.
  */
-export function Sense({ meaning, saved, onSave, isSubSense }: Props) {
+export function Sense({ meaning, isSubSense }: Props) {
   return (
     <li className={[styles.sense, isSubSense ? styles.subSense : ''].join(' ')}>
       <div className={styles.row}>
@@ -49,14 +45,6 @@ export function Sense({ meaning, saved, onSave, isSubSense }: Props) {
             </div>
           )}
         </div>
-
-        {saved ? (
-          <span className={styles.savedBadge} aria-label="Saved">Saved ✓</span>
-        ) : (
-          <button onClick={onSave} className={styles.saveBtn} aria-label="Save this sense">
-            Save
-          </button>
-        )}
       </div>
     </li>
   )

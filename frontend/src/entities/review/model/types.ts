@@ -1,16 +1,32 @@
+/**
+ * The front side of a review card — identifies the word, its pronunciation,
+ * and a single example sentence for context before the answer is revealed.
+ */
 export interface NextCard {
   cardId: string
-  meaningId: string
+  wordId: string
   word: string
   transcription: string | null
-  partOfSpeech: string | null
   example: string | null
-  meaningCount: number
 }
 
-export interface CardAnswer {
+/**
+ * A single sense/definition shown on the answer side of a review card.
+ */
+export interface CardMeaning {
+  id: string
   definition: string
+  partOfSpeech: string | null
   examples: string[]
+  senseNumber: string | null
+  synonyms: string[]
+}
+
+/**
+ * The back side of a review card — all meanings for the word.
+ */
+export interface CardAnswer {
+  meanings: CardMeaning[]
 }
 
 export interface ReviewResult {

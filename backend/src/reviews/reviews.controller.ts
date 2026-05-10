@@ -19,6 +19,7 @@ import { IsIn } from 'class-validator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AuthUser, CurrentUser } from '../common/decorators/current-user.decorator';
 import {
+  CardAnswerDto,
   NextCardDto,
   ReviewProgressDto,
   ReviewResultDto,
@@ -29,14 +30,6 @@ export class ReviewRatingDto {
   @ApiProperty({ enum: ['again', 'hard', 'good', 'easy'] })
   @IsIn(['again', 'hard', 'good', 'easy'])
   rating: 'again' | 'hard' | 'good' | 'easy';
-}
-
-class AnswerDto {
-  @ApiProperty({ example: 'Lasting for a very short time.' })
-  definition: string;
-
-  @ApiProperty({ example: ['An ephemeral trend.'], type: [String] })
-  examples: string[];
 }
 
 @ApiTags('reviews')
@@ -63,14 +56,14 @@ export class ReviewsController {
   }
 
   @Get('answer/:cardId')
-  @ApiOperation({ summary: 'Reveal the answer side of a card' })
-  @ApiResponse({ status: 200, description: 'Definition and examples', type: AnswerDto })
+  @ApiOperation({ summary: 'Reveal all meanings for a card\'s word' })
+  @ApiResponse({ status: 200, description: 'All meanings for the word', type: CardAnswerDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Card not found' })
   getAnswer(
     @CurrentUser() user: AuthUser,
     @Param('cardId') cardId: string,
-  ): Promise<{ definition: string; examples: string[] }> {
+  ): Promise<CardAnswerDto> {
     return this.reviewsService.getAnswer(user.id, cardId);
   }
 

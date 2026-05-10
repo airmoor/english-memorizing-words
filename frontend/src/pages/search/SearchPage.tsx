@@ -6,7 +6,7 @@ import { WordEntry } from '../../features/word-search/ui/WordEntry'
 import { Container } from '../../shared/ui/layout/Container'
 import { PageLayout } from '../../shared/ui/layout/PageLayout'
 import { useWordSearch } from '../../features/word-search/model/useWordSearch'
-import { useSavedMeanings } from '../../features/word-search/model/useSavedMeanings'
+import { useSavedWords } from '../../features/word-search/model/useSavedWords'
 import styles from './SearchPage.module.css'
 
 function normalizeText(raw: string): string {
@@ -32,7 +32,7 @@ export function SearchPage() {
   }
 
   const searchState = useWordSearch(query)
-  const { savedIds, isSaved: _isSaved, save, saveAll, isSavingAll, allSaved } = useSavedMeanings()
+  const { isSaved, save, isSaving } = useSavedWords()
 
   return (
     <PageLayout className={styles.flexPage}>
@@ -99,11 +99,9 @@ export function SearchPage() {
             {searchState.status === 'success' && (
               <WordEntry
                 word={searchState.word}
-                savedIds={savedIds}
+                isSaved={isSaved(searchState.word.id)}
                 onSave={save}
-                onSaveAll={saveAll}
-                isSavingAll={isSavingAll}
-                allSaved={allSaved(searchState.word.meanings.map((m) => m.id))}
+                isSaving={isSaving}
               />
             )}
           </div>

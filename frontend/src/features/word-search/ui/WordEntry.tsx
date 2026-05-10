@@ -7,26 +7,11 @@ import styles from './WordEntry.module.css'
 
 interface Props {
   word: WordResult
-  savedIds: ReadonlySet<string>
-  onSave: (meaningId: string) => void
-  onSaveAll: (wordId: string, meaningIds: string[]) => void
-  isSavingAll: boolean
-  allSaved: boolean
+  isSaved: boolean
+  onSave: (wordId: string) => void
+  isSaving: boolean
 }
 
-/**
- * Determines whether a sense_number represents a sub-sense (e.g. "1a", "1b").
- * A pure-digit number ("1", "2") is a top-level sense.
- */
-function isSubSense(senseNumber: string | null): boolean {
-  return senseNumber !== null && /[a-zA-Z]/.test(senseNumber)
-}
-
-/**
- * Groups consecutive meanings sharing the same part of speech so a single
- * entry can render multiple POS sections (e.g. "noun", "verb").
- * Order is preserved exactly as the provider returned it.
- */
 function groupByPos(meanings: Meaning[]): { pos: string | null; meanings: Meaning[] }[] {
   const groups: { pos: string | null; meanings: Meaning[] }[] = []
   for (const m of meanings) {
@@ -40,25 +25,20 @@ function groupByPos(meanings: Meaning[]): { pos: string | null; meanings: Meanin
   return groups
 }
 
+function isSubSense(senseNumber: string | null): boolean {
+  return senseNumber !== null && /[a-zA-Z]/.test(senseNumber)
+}
+
 /**
  * Single canonical dictionary entry for a word.
- * Renders: word + transcription + provider tag → grouped senses by POS,
- * each sense numbered (1, 1a, 1b, 2) with definition / examples / synonyms.
+ * Save is at the word level — the user saves the whole word, not individual senses.
  */
-export function WordEntry({
-  word,
-  savedIds,
-  onSave,
-  onSaveAll,
-  isSavingAll,
-  allSaved,
-}: Props) {
-  const meaningIds = word.meanings.map((m) => m.id)
+export function WordEntry({ word, isSaved, onSave, isSaving }: Props) {
   const groups = groupByPos(word.meanings)
 
   return (
     <Card padding="lg" className={styles.entry}>
-      {/* Header: word, transcription, save-all */}
+      {/* Header: word, transcription, word-level save */}
       <header className={styles.header}>
         <div className={styles.wordBlock}>
           <Text variant="heading" as="h2" className={styles.word}>{word.text}</Text>
@@ -69,21 +49,21 @@ export function WordEntry({
           )}
         </div>
 
-        {allSaved ? (
-          <span className={styles.allSavedBadge}>All saved ✓</span>
+        {isSaved ? (
+          <span className={styles.allSavedBadge}>Saved ✓</span>
         ) : (
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => onSaveAll(word.id, meaningIds)}
-            disabled={isSavingAll}
+            onClick={() => onSave(word.id)}
+            disabled={isSaving}
           >
-            {isSavingAll ? 'Saving…' : 'Save all'}
+            {isSaving ? 'Saving…' : 'Save word'}
           </Button>
         )}
       </header>
 
-      {/* Grouped senses by part of speech */}
+      {/* Senses grouped by part of speech */}
       {groups.map((group, gi) => (
         <section key={gi} className={styles.group}>
           {group.pos && (
@@ -96,8 +76,6 @@ export function WordEntry({
               <Sense
                 key={meaning.id}
                 meaning={meaning}
-                saved={savedIds.has(meaning.id)}
-                onSave={() => onSave(meaning.id)}
                 isSubSense={isSubSense(meaning.senseNumber)}
               />
             ))}
@@ -105,7 +83,6 @@ export function WordEntry({
         </section>
       ))}
 
-      {/* Provider attribution footer */}
       <footer className={styles.footer}>
         <Text variant="caption" color="secondary" as="span">
           Source: {word.provider === 'merriam-webster' ? 'Merriam-Webster Learner\'s' : 'Free Dictionary'}

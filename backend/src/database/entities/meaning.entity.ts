@@ -4,13 +4,15 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Word } from './word.entity';
-import { UserMeaning } from './user-meaning.entity';
-import { Card } from './card.entity';
 
+/**
+ * A single sense/definition belonging to a word.
+ * Meanings are dictionary data only — they do NOT drive review state.
+ * Spaced repetition is tracked on the parent Word via the cards table.
+ */
 @Entity('meanings')
 @Index(['wordId', 'definition', 'partOfSpeech'], { unique: true })
 export class Meaning {
@@ -38,10 +40,4 @@ export class Meaning {
   @ManyToOne(() => Word, (word) => word.meanings, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'word_id' })
   word: Word;
-
-  @OneToMany(() => UserMeaning, (um) => um.meaning)
-  userMeanings: UserMeaning[];
-
-  @OneToMany(() => Card, (card) => card.meaning)
-  cards: Card[];
 }

@@ -9,22 +9,41 @@ export class NextCardDto {
   cardId: string;
 
   @ApiProperty({ example: 'uuid-v4' })
-  meaningId: string;
+  wordId: string;
 
   @ApiProperty({ example: 'ephemeral' })
   word: string;
 
-  @ApiProperty({ example: '/ɪˈfem.ər.əl/', nullable: true })
+  @ApiProperty({ example: 'ɪˈfɛmərəl', nullable: true })
   transcription: string | null;
+
+  @ApiProperty({ example: 'His fame turned out to be ephemeral.', nullable: true })
+  example: string | null;
+}
+
+export class CardMeaningDto {
+  @ApiProperty({ example: 'uuid-v4' })
+  id: string;
+
+  @ApiProperty({ example: 'lasting a very short time' })
+  definition: string;
 
   @ApiProperty({ example: 'adjective', nullable: true })
   partOfSpeech: string | null;
 
-  @ApiProperty({ example: 'An ephemeral trend.', nullable: true })
-  example: string | null;
+  @ApiProperty({ example: ['His fame turned out to be ephemeral.'], type: [String] })
+  examples: string[];
 
-  @ApiProperty({ example: 3 })
-  meaningCount: number;
+  @ApiProperty({ example: '1a', nullable: true })
+  senseNumber: string | null;
+
+  @ApiProperty({ example: ['short-lived', 'transient'], type: [String] })
+  synonyms: string[];
+}
+
+export class CardAnswerDto {
+  @ApiProperty({ type: [CardMeaningDto] })
+  meanings: CardMeaningDto[];
 }
 
 export class ReviewProgressDto {
@@ -93,10 +112,7 @@ function applySmTwo(
   }
 }
 
-// ── Streak helper ────────────────────────────────────────────────────────────
-
 function computeStreak(days: string[]): number {
-  // days: ISO date strings ordered DESC, e.g. ['2024-06-15', '2024-06-14', ...]
   if (days.length === 0) return 0;
 
   const today = new Date();
@@ -108,11 +124,9 @@ function computeStreak(days: string[]): number {
   for (const day of days) {
     const date = new Date(day);
     date.setUTCHours(0, 0, 0, 0);
-
     if (date.getTime() !== expected.getTime()) break;
-
     streak++;
-    expected = new Date(expected.getTime() - 86_400_000); // step back one day
+    expected = new Date(expected.getTime() - 86_400_000);
   }
 
   return streak;
@@ -173,32 +187,28 @@ export class ReviewsService {
   // ── GET /reviews/next ────────────────────────────────────────────────────
 
   async getNextCard(userId: string): Promise<NextCardDto | null> {
-    const rows = await this.dataSource.query<
-      {
-        cardId: string;
-        meaningId: string;
-        word: string;
-        transcription: string | null;
-        partOfSpeech: string | null;
-        examples: string[];
-        meaningCount: string; // pg returns bigint as string
-      }[]
-    >(
+    const rows = await this.dataSource.query<{
+      cardId: string;
+      wordId: string;
+      word: string;
+      transcription: string | null;
+      example: string | null;
+    }[]>(
       `SELECT
-         c.id             AS "cardId",
-         m.id             AS "meaningId",
-         w.text           AS "word",
-         w.transcription  AS "transcription",
-         m.part_of_speech AS "partOfSpeech",
-         m.examples       AS "examples",
+         c.id            AS "cardId",
+         w.id            AS "wordId",
+         w.text          AS "word",
+         w.transcription AS "transcription",
+         -- Pull the first non-empty example from any meaning for front-card context
          (
-           SELECT COUNT(*)
-           FROM meanings m2
-           WHERE m2.word_id = w.id
-         )                AS "meaningCount"
+           SELECT m.examples[1]
+           FROM meanings m
+           WHERE m.word_id = w.id
+             AND array_length(m.examples, 1) > 0
+           LIMIT 1
+         )               AS "example"
        FROM cards c
-       JOIN meanings m ON m.id = c.meaning_id
-       JOIN words   w ON w.id = m.word_id
+       JOIN words w ON w.id = c.word_id
        WHERE c.user_id = $1
          AND c.next_review <= CURRENT_DATE
        ORDER BY c.next_review ASC, c.id ASC
@@ -208,39 +218,39 @@ export class ReviewsService {
 
     if (rows.length === 0) return null;
 
-    const row = rows[0];
-    return {
-      cardId: row.cardId,
-      meaningId: row.meaningId,
-      word: row.word,
-      transcription: row.transcription ?? null,
-      partOfSpeech: row.partOfSpeech,
-      example: row.examples?.[0] ?? null,
-      meaningCount: Number(row.meaningCount),
-    };
+    return rows[0];
   }
 
   // ── GET /reviews/answer/:cardId ──────────────────────────────────────────
+  // Returns ALL meanings for the card's word so the review back-side can
+  // show the complete dictionary entry.
 
-  async getAnswer(
-    userId: string,
-    cardId: string,
-  ): Promise<{ definition: string; examples: string[] }> {
-    const rows = await this.dataSource.query<
-      { definition: string; examples: string[] }[]
-    >(
-      `SELECT m.definition, m.examples
-       FROM cards c
-       JOIN meanings m ON m.id = c.meaning_id
-       WHERE c.id = $1 AND c.user_id = $2`,
+  async getAnswer(userId: string, cardId: string): Promise<CardAnswerDto> {
+    // Verify card ownership
+    const card = await this.dataSource.query<{ word_id: string }[]>(
+      `SELECT word_id FROM cards WHERE id = $1 AND user_id = $2`,
       [cardId, userId],
     );
 
-    if (rows.length === 0) {
+    if (card.length === 0) {
       throw new NotFoundException(`Card ${cardId} not found`);
     }
 
-    return { definition: rows[0].definition, examples: rows[0].examples };
+    const meanings = await this.dataSource.query<CardMeaningDto[]>(
+      `SELECT
+         id,
+         definition,
+         part_of_speech AS "partOfSpeech",
+         examples,
+         sense_number   AS "senseNumber",
+         synonyms
+       FROM meanings
+       WHERE word_id = $1
+       ORDER BY sense_number NULLS LAST`,
+      [card[0].word_id],
+    );
+
+    return { meanings };
   }
 
   // ── POST /reviews/:cardId ────────────────────────────────────────────────
@@ -255,7 +265,6 @@ export class ReviewsService {
     await qr.startTransaction();
 
     try {
-      // Lock the row inside the transaction — FOR UPDATE is only effective here
       const current = (await qr.query(
         `SELECT interval, ease_factor FROM cards WHERE id = $1 AND user_id = $2 FOR UPDATE`,
         [cardId, userId],
@@ -270,9 +279,9 @@ export class ReviewsService {
 
       const updated = (await qr.query(
         `UPDATE cards
-         SET interval     = $1,
-             ease_factor  = $2,
-             next_review  = CURRENT_DATE + ($3 * INTERVAL '1 day')
+         SET interval    = $1,
+             ease_factor = $2,
+             next_review = CURRENT_DATE + ($3 * INTERVAL '1 day')
          WHERE id = $4 AND user_id = $5
          RETURNING next_review`,
         [next.interval, next.easeFactor, next.interval, cardId, userId],

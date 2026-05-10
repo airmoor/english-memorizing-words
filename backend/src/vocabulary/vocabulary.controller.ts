@@ -15,11 +15,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { VocabularyService, VocabularyItemDto } from './vocabulary.service';
-import {
-  AuthUser,
-  CurrentUser,
-} from '../common/decorators/current-user.decorator';
+import { VocabularyService, VocabularyWordDto } from './vocabulary.service';
+import { AuthUser, CurrentUser } from '../common/decorators/current-user.decorator';
 
 @ApiTags('vocabulary')
 @ApiBearerAuth()
@@ -28,52 +25,42 @@ import {
 export class VocabularyController {
   constructor(private readonly vocabularyService: VocabularyService) {}
 
-  @Post('meanings/:meaningId')
+  // Save a word (and create its card) — idempotent
+  @Post('words/:wordId')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Save a single meaning to the user vocabulary' })
-  @ApiResponse({ status: 200, description: 'Meaning saved (idempotent)' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 404, description: 'Meaning not found' })
-  saveMeaning(
-    @CurrentUser() user: AuthUser,
-    @Param('meaningId') meaningId: string,
-  ): Promise<void> {
-    return this.vocabularyService.saveMeaning(user.id, meaningId);
-  }
-
-  @Post('words/:wordId/save-all')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Save all meanings of a word to the user vocabulary' })
-  @ApiResponse({ status: 200, description: 'Returns count of newly saved meanings' })
+  @ApiOperation({ summary: 'Save a word to the user vocabulary' })
+  @ApiResponse({ status: 200, description: 'Word saved (idempotent)' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Word not found' })
-  saveAllMeanings(
+  saveWord(
     @CurrentUser() user: AuthUser,
     @Param('wordId') wordId: string,
-  ): Promise<{ saved: number }> {
-    return this.vocabularyService.saveAllMeanings(user.id, wordId);
+  ): Promise<void> {
+    return this.vocabularyService.saveWord(user.id, wordId);
   }
 
+  // Get all saved words with nested meanings
   @Get()
-  @ApiOperation({ summary: 'Get all saved meanings for the authenticated user' })
-  @ApiResponse({ status: 200, description: 'List of saved vocabulary items', type: [VocabularyItemDto] })
+  @ApiOperation({ summary: 'Get all saved words for the authenticated user' })
+  @ApiResponse({ status: 200, description: 'List of saved words with meanings', type: [VocabularyWordDto] })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   getUserVocabulary(
     @CurrentUser() user: AuthUser,
-  ): Promise<VocabularyItemDto[]> {
+  ): Promise<VocabularyWordDto[]> {
     return this.vocabularyService.getUserVocabulary(user.id);
   }
 
-  @Delete('meanings/:meaningId')
+  // Remove a word from vocabulary (cascades card + review logs)
+  @Delete('words/:wordId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Remove a meaning from the user vocabulary' })
-  @ApiResponse({ status: 204, description: 'Meaning removed' })
+  @ApiOperation({ summary: 'Remove a word from the user vocabulary' })
+  @ApiResponse({ status: 204, description: 'Word removed' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 404, description: 'Meaning not in vocabulary' })
-  removeMeaning(
+  @ApiResponse({ status: 404, description: 'Word not in vocabulary' })
+  removeWord(
     @CurrentUser() user: AuthUser,
-    @Param('meaningId') meaningId: string,
+    @Param('wordId') wordId: string,
   ): Promise<void> {
-    return this.vocabularyService.removeMeaning(user.id, meaningId);
+    return this.vocabularyService.removeWord(user.id, wordId);
   }
 }

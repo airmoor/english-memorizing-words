@@ -1,5 +1,7 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Meaning } from './meaning.entity';
+import { UserWord } from './user-word.entity';
+import { Card } from './card.entity';
 
 @Entity('words')
 export class Word {
@@ -20,4 +22,10 @@ export class Word {
 
   @OneToMany(() => Meaning, (meaning) => meaning.word)
   meanings: Meaning[];
+
+  @OneToMany(() => UserWord, (uw) => uw.word)
+  userWords: UserWord[];
+
+  @OneToMany(() => Card, (card) => card.word)
+  cards: Card[];
 }

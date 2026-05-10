@@ -1,1 +1,1 @@
-export type { VocabularyEntry } from './model/types'
+export type { VocabularyWord, VocabularyMeaning } from './model/types'

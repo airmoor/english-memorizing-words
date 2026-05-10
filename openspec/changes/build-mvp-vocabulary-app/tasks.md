@@ -150,6 +150,19 @@
 - [x] 11.8 Add standalone-mode CSS in index.css: safe-area insets, overscroll-behavior: none, tap highlight disabled
 - [x] 11.9 Update README with PWA install instructions, local testing steps, iOS limitations
 
+## 11b. Architecture Migration — Canonical Word-Based Cards
+
+- [x] 11b.1 Delete old user_meanings-based migrations (8 files); write 6 clean migrations: CreateUsers, CreateWords, CreateMeanings, CreateUserWords, CreateCards (word_id FK), CreateReviewLogs
+- [x] 11b.2 New `user_words` entity replaces `UserMeaning`; UNIQUE(user_id, word_id); `Card` references word_id not meaning_id
+- [x] 11b.3 Backend `VocabularyService`: saveWord (idempotent ON CONFLICT DO NOTHING for user_words + cards), getUserVocabulary (VocabularyWordDto with nested meanings[]), removeWord (cascade)
+- [x] 11b.4 Backend `ReviewsService`: getNextCard joins cards→words directly; getAnswer returns all meanings for the word (CardMeaningDto[])
+- [x] 11b.5 Frontend entity types: VocabularyWord (wordId, meanings[]), NextCard (wordId, no meaningCount/partOfSpeech), CardAnswer (meanings: CardMeaning[])
+- [x] 11b.6 Frontend search: single "Save word" button at WordEntry level; Sense component is pure content renderer (no save buttons)
+- [x] 11b.7 Frontend vocabulary: VocabularyItem shows word + transcription + up to 3 meanings; VocabularyList counts words not meanings
+- [x] 11b.8 Frontend review: Flashcard back renders all meanings as a list with definition, partOfSpeech badge, examples, synonyms
+- [x] 11b.9 DB reset and all 6 migrations applied cleanly on fresh schema
+- [x] 11b.10 Frontend TypeScript compile clean (npx tsc --noEmit — zero errors)
+
 ## 12. Integration & Validation
 
 - [ ] 12.1 End-to-end smoke test: register → search word → save meaning → review card → rate card

@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import type { VocabularyEntry } from '../../../entities/vocabulary/model/types'
+import type { VocabularyWord } from '../../../entities/vocabulary/model/types'
 import { Text } from '../../../shared/ui/Typography/Typography'
 import { Button } from '../../../shared/ui/Button/Button'
 import { Stack } from '../../../shared/ui/Stack/Stack'
@@ -7,8 +7,8 @@ import { VocabularyItem } from './VocabularyItem'
 import styles from './VocabularyList.module.css'
 
 interface Props {
-  items: VocabularyEntry[]
-  onRemove: (meaningId: string) => void
+  items: VocabularyWord[]
+  onRemove: (wordId: string) => void
 }
 
 export function VocabularyList({ items, onRemove }: Props) {
@@ -22,7 +22,7 @@ export function VocabularyList({ items, onRemove }: Props) {
           No words saved yet
         </Text>
         <Text variant="body" color="secondary" as="p" className={styles.emptyText}>
-          Search for English words and save meanings to build your vocabulary.
+          Search for English words and save them to build your vocabulary.
         </Text>
         <Button onClick={() => navigate('/search')} variant="secondary">
           Go to Search
@@ -35,14 +35,14 @@ export function VocabularyList({ items, onRemove }: Props) {
     <Stack gap="sm">
       <div className={styles.header}>
         <Text variant="body" color="secondary" as="span">
-          {items.length} saved meaning{items.length !== 1 ? 's' : ''}
+          {items.length} word{items.length !== 1 ? 's' : ''}
         </Text>
       </div>
 
       <ul className={styles.list}>
         {items.map((item) => (
           <VocabularyItem
-            key={item.meaningId}
+            key={item.wordId}
             item={item}
             onRemove={onRemove}
           />

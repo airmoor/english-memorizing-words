@@ -1,11 +1,11 @@
-import type { VocabularyEntry } from '../../../entities/vocabulary/model/types'
+import type { VocabularyWord } from '../../../entities/vocabulary/model/types'
 import { Card } from '../../../shared/ui/Card/Card'
 import { Text } from '../../../shared/ui/Typography/Typography'
 import styles from './VocabularyItem.module.css'
 
 interface Props {
-  item: VocabularyEntry
-  onRemove: (meaningId: string) => void
+  item: VocabularyWord
+  onRemove: (wordId: string) => void
 }
 
 export function VocabularyItem({ item, onRemove }: Props) {
@@ -16,19 +16,37 @@ export function VocabularyItem({ item, onRemove }: Props) {
           <Text variant="label" as="span" className={styles.word}>
             {item.wordText}
           </Text>
-          {item.partOfSpeech && (
-            <span className={styles.pos}>{item.partOfSpeech}</span>
+          {item.transcription && (
+            <span className={styles.transcription}>/{item.transcription}/</span>
           )}
         </div>
 
-        <Text variant="caption" color="secondary" as="p" className={styles.definition}>
-          {item.definition}
-        </Text>
+        {item.meanings.length > 0 && (
+          <ul className={styles.meanings}>
+            {item.meanings.slice(0, 3).map((m) => (
+              <li key={m.id} className={styles.meaning}>
+                {m.partOfSpeech && (
+                  <span className={styles.pos}>{m.partOfSpeech}</span>
+                )}
+                <Text variant="caption" color="secondary" as="span" className={styles.definition}>
+                  {m.definition}
+                </Text>
+              </li>
+            ))}
+            {item.meanings.length > 3 && (
+              <li className={styles.moreCount}>
+                <Text variant="caption" color="secondary" as="span">
+                  +{item.meanings.length - 3} more
+                </Text>
+              </li>
+            )}
+          </ul>
+        )}
       </div>
 
       <button
         className={styles.removeBtn}
-        onClick={() => onRemove(item.meaningId)}
+        onClick={() => onRemove(item.wordId)}
         aria-label={`Remove ${item.wordText}`}
         title="Remove from vocabulary"
       >

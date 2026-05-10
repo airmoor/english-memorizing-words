@@ -5,7 +5,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { UserMeaning } from './user-meaning.entity';
+import { UserWord } from './user-word.entity';
 import { Card } from './card.entity';
 
 @Entity('users')
@@ -22,8 +22,8 @@ export class User {
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
-  @OneToMany(() => UserMeaning, (um) => um.user)
-  userMeanings: UserMeaning[];
+  @OneToMany(() => UserWord, (uw) => uw.user)
+  userWords: UserWord[];
 
   @OneToMany(() => Card, (card) => card.user)
   cards: Card[];

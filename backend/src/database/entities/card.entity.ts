@@ -10,11 +10,16 @@ import {
   Unique,
 } from 'typeorm';
 import { User } from './user.entity';
-import { Meaning } from './meaning.entity';
+import { Word } from './word.entity';
 import { ReviewLog } from './review-log.entity';
 
+/**
+ * One card per (user, word) pair.
+ * Spaced-repetition state belongs to the canonical word — not to a sense/meaning.
+ * Updating or refreshing dictionary meanings never resets learning progress.
+ */
 @Entity('cards')
-@Unique(['userId', 'meaningId'])
+@Unique(['userId', 'wordId'])
 @Index(['userId', 'nextReview'])
 export class Card {
   @PrimaryGeneratedColumn('uuid')
@@ -23,8 +28,8 @@ export class Card {
   @Column({ name: 'user_id', type: 'uuid' })
   userId: string;
 
-  @Column({ name: 'meaning_id', type: 'uuid' })
-  meaningId: string;
+  @Column({ name: 'word_id', type: 'uuid' })
+  wordId: string;
 
   @Column({ name: 'ease_factor', type: 'float', default: 2.5 })
   easeFactor: number;
@@ -38,13 +43,13 @@ export class Card {
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
-  @ManyToOne(() => User, (user) => user.cards, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => Meaning, (meaning) => meaning.cards, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'meaning_id' })
-  meaning: Meaning;
+  @ManyToOne(() => Word, (word) => word.cards, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'word_id' })
+  word: Word;
 
   @OneToMany(() => ReviewLog, (log) => log.card)
   reviewLogs: ReviewLog[];
