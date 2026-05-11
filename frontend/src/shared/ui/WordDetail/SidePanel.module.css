@@ -1,0 +1,115 @@
+/* ── SidePanel ───────────────────────────────────────────────────────────────
+   Desktop inspector panel. Pushes the list rather than overlaying it.
+   The parent layout must use display:flex + flex-direction:row.
+   See WordDetailContainer for how this integrates with VocabularyPage.
+──────────────────────────────────────────────────────────────────────────── */
+
+.panel {
+  --panel-width: 380px;
+
+  width: var(--panel-width);
+  min-width: var(--panel-width);
+  flex-shrink: 0;
+
+  /*
+   * Sticky panel: stays visible while the list scrolls.
+   * top accounts for the AppHeader height (~60px) plus a small gap.
+   * max-height prevents it from growing beyond the viewport.
+   */
+  position: sticky;
+  top: 68px;
+  max-height: calc(100svh - 80px);
+  align-self: flex-start;
+
+  display: flex;
+  flex-direction: column;
+
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+
+  /* Slide in from the right edge */
+  animation: panelIn 220ms var(--ease-out) both;
+  will-change: transform;
+}
+
+.panelExiting {
+  animation: panelOut 160ms ease-in both;
+}
+
+@keyframes panelIn {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes panelOut {
+  from { transform: translateX(0); }
+  to   { transform: translateX(100%); }
+}
+
+/* ── Panel header ─────────────────────────────────────────────────────────── */
+.header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.closeBtn {
+  /* 44×44px touch / pointer target */
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: var(--font-md);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.08s ease, border-color 0.08s ease, background 0.08s ease;
+}
+
+.closeBtn:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+  background: var(--color-bg-primary);
+}
+
+/* ── Scrollable content area ──────────────────────────────────────────────── */
+.body {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-lg) var(--space-lg) var(--space-xxl);
+}
+
+/* ── Content cross-fade during word-to-word navigation (§6.4, §18) ──────────
+   Applied to the inner content wrapper, not the panel itself.
+   The panel stays open; only the content transitions.
+──────────────────────────────────────────────────────────────────────────── */
+.contentVisible {
+  opacity: 1;
+  transition: opacity 150ms ease-in-out;
+}
+
+.contentFading {
+  opacity: 0;
+  transition: opacity 150ms ease-in-out;
+}
+
+/* ── Reduced motion ───────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .panel,
+  .panelExiting,
+  .contentVisible,
+  .contentFading {
+    animation-duration: 0ms !important;
+    transition-duration: 0ms !important;
+  }
+}

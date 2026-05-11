@@ -16,6 +16,12 @@ export class VocabularyMeaningDto {
 
   @ApiProperty({ example: '1a', nullable: true })
   senseNumber: string | null;
+
+  @ApiProperty({ example: ['transitory', 'fleeting'], type: [String] })
+  synonyms: string[];
+
+  @ApiProperty({ example: ['his fame proved ephemeral'], type: [String] })
+  examples: string[];
 }
 
 export class VocabularyWordDto {
@@ -31,8 +37,26 @@ export class VocabularyWordDto {
   @ApiProperty({ example: 'ɪˈfɛmərəl', nullable: true })
   transcription: string | null;
 
+  @ApiProperty({ example: 'merriam-webster' })
+  provider: string;
+
   @ApiProperty({ example: '2024-01-01T00:00:00.000Z' })
   savedAt: Date;
+
+  // ── Learning state (from cards table) ─────────────────────────────────────
+  // Null when no card exists (defensive — saveWord always creates a card).
+
+  @ApiProperty({ example: '2024-01-03T00:00:00.000Z', nullable: true })
+  nextReview: Date | null;
+
+  @ApiProperty({ example: '2024-01-01T00:00:00.000Z', nullable: true })
+  lastReviewedAt: Date | null;
+
+  @ApiProperty({ example: 1, nullable: true })
+  intervalDays: number | null;
+
+  @ApiProperty({ example: 2.5, nullable: true })
+  easeFactor: number | null;
 
   @ApiProperty({ type: [VocabularyMeaningDto] })
   meanings: VocabularyMeaningDto[];
@@ -87,22 +111,33 @@ export class VocabularyService {
   // Returns one entry per saved word, with all its meanings nested.
 
   async getUserVocabulary(userId: string): Promise<VocabularyWordDto[]> {
-    // Fetch all saved words with word-level fields
+    // Fetch all saved words with word-level fields + card SRS state
     const words = await this.dataSource.query<{
       userWordId: string;
       wordId: string;
       wordText: string;
       transcription: string | null;
+      provider: string;
       savedAt: Date;
+      nextReview: Date | null;
+      lastReviewedAt: Date | null;
+      intervalDays: number | null;
+      easeFactor: number | null;
     }[]>(
       `SELECT
-         uw.id            AS "userWordId",
-         uw.saved_at      AS "savedAt",
-         w.id             AS "wordId",
-         w.text           AS "wordText",
-         w.transcription
+         uw.id               AS "userWordId",
+         uw.saved_at         AS "savedAt",
+         w.id                AS "wordId",
+         w.text              AS "wordText",
+         w.transcription,
+         w.provider,
+         c.next_review       AS "nextReview",
+         c.last_reviewed_at  AS "lastReviewedAt",
+         c.interval_days     AS "intervalDays",
+         c.ease_factor       AS "easeFactor"
        FROM user_words uw
        JOIN words w ON w.id = uw.word_id
+       LEFT JOIN cards c ON c.user_id = uw.user_id AND c.word_id = uw.word_id
        WHERE uw.user_id = $1
        ORDER BY uw.saved_at DESC`,
       [userId],
@@ -110,7 +145,7 @@ export class VocabularyService {
 
     if (words.length === 0) return [];
 
-    // Fetch all meanings for those words in one query
+    // Fetch all meanings for those words in one query — includes synonyms + examples
     const wordIds = words.map((w) => w.wordId);
     const meanings = await this.dataSource.query<{
       wordId: string;
@@ -118,13 +153,17 @@ export class VocabularyService {
       definition: string;
       partOfSpeech: string | null;
       senseNumber: string | null;
+      synonyms: string[];
+      examples: string[];
     }[]>(
       `SELECT
-         word_id       AS "wordId",
+         word_id        AS "wordId",
          id,
          definition,
          part_of_speech AS "partOfSpeech",
-         sense_number   AS "senseNumber"
+         sense_number   AS "senseNumber",
+         synonyms,
+         examples
        FROM meanings
        WHERE word_id = ANY($1)
        ORDER BY sense_number NULLS LAST`,
@@ -135,7 +174,14 @@ export class VocabularyService {
     const meaningsByWord = new Map<string, VocabularyMeaningDto[]>();
     for (const m of meanings) {
       const list = meaningsByWord.get(m.wordId) ?? [];
-      list.push({ id: m.id, definition: m.definition, partOfSpeech: m.partOfSpeech, senseNumber: m.senseNumber });
+      list.push({
+        id: m.id,
+        definition: m.definition,
+        partOfSpeech: m.partOfSpeech,
+        senseNumber: m.senseNumber,
+        synonyms: m.synonyms ?? [],
+        examples: m.examples ?? [],
+      });
       meaningsByWord.set(m.wordId, list);
     }
 

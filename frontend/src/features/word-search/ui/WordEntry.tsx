@@ -1,8 +1,7 @@
 import { Card } from '../../../shared/ui/Card/Card'
-import { Button } from '../../../shared/ui/Button/Button'
-import { Text } from '../../../shared/ui/Typography/Typography'
-import type { Meaning, WordResult } from '../../../entities/word/model/types'
-import { Sense } from './Sense'
+import { WordDetailContent } from '../../../shared/ui/WordDetail/WordDetailContent'
+import type { WordPayload } from '../../../shared/ui/WordDetail/types'
+import type { WordResult } from '../../../entities/word/model/types'
 import styles from './WordEntry.module.css'
 
 interface Props {
@@ -12,82 +11,37 @@ interface Props {
   isSaving: boolean
 }
 
-function groupByPos(meanings: Meaning[]): { pos: string | null; meanings: Meaning[] }[] {
-  const groups: { pos: string | null; meanings: Meaning[] }[] = []
-  for (const m of meanings) {
-    const last = groups[groups.length - 1]
-    if (last && last.pos === m.partOfSpeech) {
-      last.meanings.push(m)
-    } else {
-      groups.push({ pos: m.partOfSpeech, meanings: [m] })
-    }
-  }
-  return groups
-}
-
-function isSubSense(senseNumber: string | null): boolean {
-  return senseNumber !== null && /[a-zA-Z]/.test(senseNumber)
-}
-
 /**
- * Single canonical dictionary entry for a word.
- * Save is at the word level — the user saves the whole word, not individual senses.
+ * Search-page wrapper for WordDetailContent.
+ *
+ * Converts WordResult (search API DTO) to WordPayload (detail boundary type)
+ * and renders it inside a Card with the search-page animation.
+ *
+ * Learning state from the search context: we pass `learningState = null` when
+ * not saved (save action is the primary CTA) and a minimal stub when saved
+ * (the Saved ✓ badge is shown; full card state is not available here).
+ *
+ * TODO(Phase 5): pass real LearningState derived from vocabulary cache when
+ * the word is saved, so the detail shows review status from search context.
  */
 export function WordEntry({ word, isSaved, onSave, isSaving }: Props) {
-  const groups = groupByPos(word.meanings)
+  // Convert WordResult → WordPayload (structurally identical shapes)
+  const wordPayload: WordPayload = word
 
   return (
     <Card padding="lg" className={styles.entry}>
-      {/* Header: word, transcription, word-level save */}
-      <header className={styles.header}>
-        <div className={styles.wordBlock}>
-          <Text variant="heading" as="h2" className={styles.word}>{word.text}</Text>
-          {word.transcription && (
-            <Text variant="caption" color="secondary" as="span" className={styles.transcription}>
-              /{word.transcription}/
-            </Text>
-          )}
-        </div>
-
-        {isSaved ? (
-          <span className={styles.allSavedBadge}>Saved ✓</span>
-        ) : (
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => onSave(word.id)}
-            disabled={isSaving}
-          >
-            {isSaving ? 'Saving…' : 'Save word'}
-          </Button>
-        )}
-      </header>
-
-      {/* Senses grouped by part of speech */}
-      {groups.map((group, gi) => (
-        <section key={gi} className={styles.group}>
-          {group.pos && (
-            <Text variant="label" color="secondary" as="span" className={styles.pos}>
-              {group.pos}
-            </Text>
-          )}
-          <ol className={styles.senses}>
-            {group.meanings.map((meaning) => (
-              <Sense
-                key={meaning.id}
-                meaning={meaning}
-                isSubSense={isSubSense(meaning.senseNumber)}
-              />
-            ))}
-          </ol>
-        </section>
-      ))}
-
-      <footer className={styles.footer}>
-        <Text variant="caption" color="secondary" as="span">
-          Source: {word.provider === 'merriam-webster' ? 'Merriam-Webster Learner\'s' : 'Free Dictionary'}
-        </Text>
-      </footer>
+      <WordDetailContent
+        word={wordPayload}
+        // When saved, we don't have card state in search context yet (Phase 5).
+        // Pass a sentinel non-null value so DictionaryHeader shows "Saved ✓".
+        // LearningSection is omitted (no real state to show).
+        learningState={isSaved ? { nextReview: '', lastReviewedAt: null, intervalDays: 0, easeFactor: 2.5 } : null}
+        onSave={() => onSave(word.id)}
+        onRemove={() => {
+          // TODO(Phase 5): wire remove from search context via useSavedWords
+        }}
+        isMutating={isSaving}
+      />
     </Card>
   )
 }

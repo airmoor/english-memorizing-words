@@ -1,0 +1,31 @@
+/* ── WordDetailContent ────────────────────────────────────────────────────────
+   Layout-agnostic inner content. Works identically inside BottomSheet,
+   SidePanel, or a standalone WordDetailPage.
+   Containers handle scroll, sizing, and positioning; this handles spacing only.
+──────────────────────────────────────────────────────────────────────────── */
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* ── Dictionary layer ─────────────────────────────────────────────────────── */
+
+.meanings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* ── Learning layer separator ─────────────────────────────────────────────── */
+/* Visual rule between dictionary data and personal learning state (§4, §16). */
+.learningSeparator {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 0;
+}
+
+/* ── Learning layer ─────────────────────────────────────────────────────────
+   TODO(P1.T3): LearningSection component added in a later task.
+──────────────────────────────────────────────────────────────────────────── */

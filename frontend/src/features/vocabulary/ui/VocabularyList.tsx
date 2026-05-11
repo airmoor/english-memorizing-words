@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { useMemo } from 'react'
 import type { VocabularyWord } from '../../../entities/vocabulary/model/types'
 import { Text } from '../../../shared/ui/Typography/Typography'
 import { Button } from '../../../shared/ui/Button/Button'
@@ -13,6 +14,14 @@ interface Props {
 
 export function VocabularyList({ items, onRemove }: Props) {
   const navigate = useNavigate()
+
+  // The source list for panel navigation — stable word ID array in display order.
+  // Passed to every VocabularyItem so they can provide it on open.
+  // useMemo ensures referential stability when items hasn't changed.
+  const sourceList = useMemo(
+    () => items.map((item) => item.wordId),
+    [items],
+  )
 
   if (items.length === 0) {
     return (
@@ -45,6 +54,7 @@ export function VocabularyList({ items, onRemove }: Props) {
             key={item.wordId}
             item={item}
             onRemove={onRemove}
+            sourceList={sourceList}
           />
         ))}
       </ul>

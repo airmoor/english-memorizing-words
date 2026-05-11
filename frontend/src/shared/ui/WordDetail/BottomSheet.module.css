@@ -1,0 +1,162 @@
+/* ── BottomSheet ────────────────────────────────────────────────────────────
+   Mobile-first contextual inspector. Slides up from bottom, dims the list.
+   The list behind it is always visible — contextual focus, not navigation.
+──────────────────────────────────────────────────────────────────────────── */
+
+/* ── Backdrop ─────────────────────────────────────────────────────────────── */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 200;
+  /* Fade in */
+  animation: backdropIn 220ms var(--ease-out) both;
+}
+
+.backdropExiting {
+  animation: backdropOut 160ms ease-in both;
+}
+
+@keyframes backdropIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes backdropOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* ── Sheet ────────────────────────────────────────────────────────────────── */
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 201;
+
+  /* Default snap: 70vh height */
+  height: 70svh;
+  max-height: 95svh;
+
+  background: var(--color-bg-card);
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
+
+  display: flex;
+  flex-direction: column;
+
+  /* Slide up on enter */
+  animation: sheetIn 220ms var(--ease-out) both;
+
+  /* Will be overridden inline during drag */
+  transform: translateY(0);
+  transition: transform 0.35s var(--ease-out);
+  will-change: transform;
+}
+
+.sheetExiting {
+  animation: sheetOut 160ms ease-in both;
+}
+
+@keyframes sheetIn {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes sheetOut {
+  from { transform: translateY(0); }
+  to   { transform: translateY(100%); }
+}
+
+/* ── Drag handle ──────────────────────────────────────────────────────────── */
+.handle {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  padding: var(--space-sm) 0 var(--space-xs);
+  touch-action: none; /* prevent scroll during drag on the handle */
+  cursor: grab;
+}
+
+.handle:active {
+  cursor: grabbing;
+}
+
+.handleBar {
+  width: 36px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+}
+
+/* ── Scrollable content area ──────────────────────────────────────────────── */
+.body {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--space-md) var(--space-lg) var(--space-xxl);
+}
+
+/* ── Navigation bar ───────────────────────────────────────────────────────── */
+.nav {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg-card);
+}
+
+.navBtn {
+  /* 44×44px minimum touch target */
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-md);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.08s ease, border-color 0.08s ease, background 0.08s ease;
+}
+
+.navBtn:hover:not(:disabled) {
+  color: var(--color-text-primary);
+  border-color: var(--color-accent);
+  background: var(--color-accent-subtle);
+}
+
+.navBtn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.navLabel {
+  font-size: var(--font-xs);
+  color: var(--color-text-secondary);
+  user-select: none;
+}
+
+/* ── Expanded state (95svh) ───────────────────────────────────────────────── */
+.sheetExpanded {
+  height: 95svh;
+}
+
+/* ── Reduced motion ───────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .sheet,
+  .sheetExiting,
+  .backdrop,
+  .backdropExiting {
+    animation-duration: 0ms !important;
+    transition-duration: 0ms !important;
+  }
+}

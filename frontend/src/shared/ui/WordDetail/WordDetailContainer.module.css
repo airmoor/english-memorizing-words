@@ -1,0 +1,29 @@
+/* ── WordDetailContainer ────────────────────────────────────────────────────
+   The outer page layout when the detail panel is open on desktop.
+   Switches from a single-column layout to a two-column (list + panel) layout.
+
+   On mobile, the BottomSheet is portaled to document.body — no layout changes.
+──────────────────────────────────────────────────────────────────────────── */
+
+/* The page content wrapper — always present */
+.pageWithPanel {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-height: 0;
+  /* Panel slides in from the right; the list column compresses */
+  transition: all 200ms var(--ease-out);
+}
+
+/* The list column — takes all remaining space beside the panel */
+.listColumn {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Reduced motion ───────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .pageWithPanel {
+    transition-duration: 0ms !important;
+  }
+}
