@@ -12,10 +12,12 @@ import {
   type DarkVariant,
   type ResolvedTheme,
 } from '../../shared/design/ThemeProvider'
+import { useLogout } from '../../features/auth/model/useLogout'
 import styles from './SettingsPage.module.css'
 
 export function SettingsPage() {
   const { settings, resolved, setMode, setLightVariant, setDarkVariant } = useTheme()
+  const logout = useLogout()
 
   const showLightVariants = settings.mode === 'light' || settings.mode === 'system'
   const showDarkVariants  = settings.mode === 'dark'  || settings.mode === 'system'
@@ -104,6 +106,27 @@ export function SettingsPage() {
           <Text variant="caption" color="secondary" as="p" className={styles.footnote}>
             Currently active: <strong>{resolved}</strong>
           </Text>
+
+          {/* ── Account ─────────────────────────────────────────────────────
+              Logout is accessible here on all screen sizes.
+              On mobile it is the primary logout path (not in the top bar).
+              On desktop it duplicates the header button for discoverability.
+          ─────────────────────────────────────────────────────────────────── */}
+          <Card padding="lg" className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <Text variant="label" as="h2" className={styles.sectionTitle}>Account</Text>
+              <Text variant="caption" color="secondary" as="p">
+                Sign out of Lexis on this device.
+              </Text>
+            </div>
+            <button
+              type="button"
+              onClick={logout}
+              className={styles.logoutBtn}
+            >
+              Log out
+            </button>
+          </Card>
         </div>
       </Container>
     </PageLayout>

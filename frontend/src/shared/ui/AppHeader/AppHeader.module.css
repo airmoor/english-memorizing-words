@@ -178,26 +178,33 @@
   background: var(--color-bg-primary);
 }
 
-@media (max-width: 480px) {
-  .installBtn { padding: 5px 8px; }
-  .installBtn span { display: none; }
+/* ── Mobile (≤1023px): compact header — nav tabs + logout move to bottom nav
+   / settings page. Only logo and settings icon remain in the top bar.
+─────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 1023px) {
+  .header {
+    /* Two-column: logo left, actions right */
+    grid-template-columns: 1fr auto;
+    height: 52px; /* compact vs 60px desktop */
+  }
+
+  /* Nav tabs handled by MobileBottomNav — hide from top bar */
+  .nav {
+    display: none;
+  }
+
+  /* Logout is accessible from the Settings page on mobile */
+  .logout {
+    display: none;
+  }
+
+  /* Install badge: hide text label on small screens */
+  .installBtn span {
+    display: none;
+  }
+
+  .installBtn {
+    padding: 5px 8px;
+  }
 }
 
-/* ── Responsive: collapse logo wordmark below 720px ─────────────────────── */
-@media (max-width: 720px) {
-  .header {
-    grid-template-columns: auto 1fr auto;
-    gap: var(--space-sm);
-  }
-  .logoLink :global(.wordmark),
-  .logoLink :global([class*='wordmark']) {
-    display: none;
-  }
-  .nav {
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .nav::-webkit-scrollbar {
-    display: none;
-  }
-}

@@ -1,0 +1,113 @@
+/* ── MobileBottomNav ─────────────────────────────────────────────────────────
+   Fixed bottom tab navigation for mobile (≤1023px).
+   Hidden on desktop via CSS — no JS media-query required.
+
+   Design references: iOS tab bar · Material You navigation bar
+   Character: lightweight · calm · native-feeling · generous touch targets
+
+   Z-index 100 keeps the nav above page content and below modal overlays
+   (FloatingInspector: 200/201, BottomSheet: 200/201).
+──────────────────────────────────────────────────────────────────────────── */
+
+/* Desktop: hidden — desktop uses the AppHeader top nav */
+.nav {
+  display: none;
+}
+
+/* ── Mobile (≤1023px) ────────────────────────────────────────────────────── */
+@media (max-width: 1023px) {
+  .nav {
+    display: flex;
+    align-items: stretch;
+
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+
+    /* Base visual height: 56px. Padding-bottom expands into the iOS home
+       indicator zone so the frosted background fills the safe area. */
+    padding-top: 4px;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+
+    background: color-mix(in srgb, var(--color-bg-secondary) 90%, transparent);
+    backdrop-filter: saturate(180%) blur(12px);
+    -webkit-backdrop-filter: saturate(180%) blur(12px);
+    border-top: 1px solid var(--glass-border);
+    box-shadow: 0 -1px 0 var(--glass-highlight);
+  }
+}
+
+/* ── Tab ─────────────────────────────────────────────────────────────────── */
+
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+
+  /* 52px minimum touch height — exceeds Apple's 44px minimum */
+  min-height: 52px;
+  padding: 6px 4px;
+
+  text-decoration: none;
+  color: var(--color-text-secondary);
+  -webkit-tap-highlight-color: transparent;
+
+  transition: color 0.15s var(--ease-out);
+}
+
+/* ── Icon wrapper — carries the active background pill ───────────────────── */
+
+.iconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 28px;
+  border-radius: var(--radius-md);
+
+  transition: background 0.18s var(--ease-out);
+}
+
+/* ── Label ───────────────────────────────────────────────────────────────── */
+
+.label {
+  font-size: 0.6875rem; /* 11px — readable, proportional to icon */
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.01em;
+  line-height: 1;
+  transition: font-weight 0.15s var(--ease-out);
+}
+
+/* ── Active state ────────────────────────────────────────────────────────── */
+
+.tabActive {
+  color: var(--color-accent);
+}
+
+.tabActive .iconWrap {
+  background: var(--color-accent-subtle);
+}
+
+.tabActive .label {
+  font-weight: var(--fw-semibold);
+}
+
+/* Focus visible — keyboard/switch navigation */
+.tab:focus-visible .iconWrap {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+/* ── Reduced motion ───────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .tab,
+  .iconWrap,
+  .label {
+    transition-duration: 0ms !important;
+  }
+}
