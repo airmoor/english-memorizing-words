@@ -1,0 +1,265 @@
+/* ── Toolbar container ────────────────────────────────────────────────────── */
+
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+/* ── Top row: search + controls ──────────────────────────────────────────── */
+
+.topRow {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+/* ── Search ──────────────────────────────────────────────────────────────── */
+
+.searchWrap {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  color: var(--color-text-secondary);
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 9px 36px 9px 36px;
+  background: var(--color-bg-card);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: var(--font-sm);
+  color: var(--color-text-primary);
+  transition: border-color 0.18s var(--ease-out), box-shadow 0.18s var(--ease-out);
+  /* Hide native clear button */
+  -webkit-appearance: none;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 12%, transparent);
+}
+
+.searchInput::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 0.7;
+}
+
+/* Remove native search input "x" */
+.searchInput::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+.clearBtn {
+  position: absolute;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  line-height: 1;
+  font-family: inherit;
+  transition: color 0.12s, background 0.12s;
+}
+
+.clearBtn:hover {
+  color: var(--color-text-primary);
+  background: var(--color-bg-card);
+}
+
+/* ── Controls cluster ─────────────────────────────────────────────────────── */
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex-shrink: 0;
+}
+
+.sortLabel {
+  font-size: var(--font-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* Hide "Sort" label text on very narrow screens */
+@media (max-width: 480px) {
+  .sortLabel { display: none; }
+}
+
+.sortSelect {
+  padding: 8px 10px;
+  background: var(--color-bg-card);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: var(--font-sm);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: border-color 0.15s;
+  /* Firefox: remove default arrow styling inconsistencies */
+  -moz-appearance: none;
+}
+
+.sortSelect:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 12%, transparent);
+}
+
+/* ── View mode toggle ────────────────────────────────────────────────────── */
+
+.viewToggle {
+  display: flex;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.viewBtn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-card);
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background 0.14s, color 0.14s;
+}
+
+.viewBtn + .viewBtn {
+  border-left: 1px solid var(--color-border);
+}
+
+.viewBtn:hover {
+  color: var(--color-text-primary);
+}
+
+.viewBtnActive {
+  background: var(--color-accent-subtle);
+  color: var(--color-accent);
+}
+
+/* ── Filter chips row ────────────────────────────────────────────────────── */
+
+.filterRow {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  /* Scroll snap on mobile for cleaner feel */
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 2px; /* prevent clipping of chip shadows */
+}
+
+.filterRow::-webkit-scrollbar {
+  display: none;
+}
+
+.filterDivider {
+  width: 1px;
+  background: var(--color-border);
+  flex-shrink: 0;
+  margin: 4px 2px;
+  align-self: stretch;
+}
+
+/* ── Filter chip ─────────────────────────────────────────────────────────── */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  background: var(--color-bg-card);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-family: inherit;
+  font-size: var(--font-xs);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: border-color 0.14s, background 0.14s, color 0.14s;
+}
+
+.chip:hover {
+  border-color: color-mix(in srgb, var(--color-accent) 50%, var(--color-border));
+  color: var(--color-text-primary);
+}
+
+.chipActive {
+  background: var(--color-accent-subtle);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── State dots inside chips ─────────────────────────────────────────────── */
+
+.chipDot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.dot_new       { background: var(--color-text-secondary); opacity: 0.5; }
+.dot_learning  { background: var(--color-warning); }
+.dot_review    { background: var(--color-accent); }
+.dot_mature    { background: var(--color-success); }
+.dot_difficult { background: var(--color-danger); }
+
+/* ── Result count ────────────────────────────────────────────────────────── */
+
+.resultCount {
+  margin: 0;
+  font-size: var(--font-xs);
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.clearFiltersBtn {
+  padding: 2px 8px;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-family: inherit;
+  font-size: var(--font-xs);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s;
+}
+
+.clearFiltersBtn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}

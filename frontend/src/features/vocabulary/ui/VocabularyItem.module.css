@@ -10,7 +10,16 @@
   gap: var(--space-md);
   cursor: pointer;
   animation: fadeIn 0.22s var(--ease-out) both;
+  /* Left border color indicates card state — subtle accent, not intrusive */
+  border-left-width: 3px;
 }
+
+/* State-colored left border — one visual cue per card, no text label noise */
+.state_new       { border-left-color: var(--color-border); }
+.state_learning  { border-left-color: var(--color-warning); }
+.state_review    { border-left-color: var(--color-accent); }
+.state_mature    { border-left-color: var(--color-success); }
+.state_difficult { border-left-color: var(--color-danger); }
 
 /* The main row body is now a button for accessibility (§17.3) */
 .rowButton {

@@ -120,8 +120,16 @@ export function useWordDetailUrl({
     prevWordId.current = detail.activeWordId
 
     if (isFirstOpen) {
-      // Initial open → pushState (creates back-button entry per §8.3)
-      setSearchParams({ [WORD_PARAM]: currentWordText }, { replace: false })
+      // Initial open → pushState (creates back-button entry per §8.3).
+      // Merge into existing params so filter/sort params are preserved.
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+          next.set(WORD_PARAM, currentWordText)
+          return next
+        },
+        { replace: false },
+      )
     } else {
       // Word-to-word navigation → replaceState (no history entry per §8.3)
       setSearchParams((prev) => {

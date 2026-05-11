@@ -4,6 +4,7 @@ import { Card } from '../../../shared/ui/Card/Card'
 import { Text } from '../../../shared/ui/Typography/Typography'
 import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog/ConfirmDialog'
 import { useWordDetail } from '../../../shared/ui/WordDetail/WordDetailContext'
+import { getCardState } from '../model/cardState'
 import styles from './VocabularyItem.module.css'
 
 interface Props {
@@ -47,6 +48,7 @@ export function VocabularyItem({ item, onRemove, sourceList }: Props) {
   const { open, activeWordId } = useWordDetail()
   const isActive = activeWordId === item.wordId
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const state = getCardState(item)
 
   const handleOpen = () => {
     open(item.wordId, sourceList)
@@ -74,7 +76,7 @@ export function VocabularyItem({ item, onRemove, sourceList }: Props) {
         as="li"
         padding="md"
         interactive
-        className={styles.item}
+        className={[styles.item, styles[`state_${state}`]].join(' ')}
         onClick={handleOpen}
       >
         {/* Main row body — content + keyboard activation */}
