@@ -11,11 +11,11 @@ interface Props {
   onRemove: () => void
   isMutating?: boolean
   /**
-   * When provided, replaces the save/remove action with a close × button.
-   * Used in vocabulary context where all words are already saved and the
-   * "Saved ✓" badge is redundant — the close button provides a cleaner action.
+   * In 'vocabulary' context all words are already saved — the save/remove
+   * action area is hidden. The container chrome (SidePanel ×, BottomSheet
+   * close button) provides the close action instead.
    */
-  onClose?: () => void
+  context?: 'vocabulary' | 'search'
 }
 
 const PROVIDER_LABELS: Record<string, string> = {
@@ -40,7 +40,7 @@ export function DictionaryHeader({
   onSave,
   onRemove,
   isMutating = false,
-  onClose,
+  context = 'search',
 }: Props) {
   const isSaved = learningState !== null
 
@@ -60,36 +60,30 @@ export function DictionaryHeader({
         </Text>
       </div>
 
-      {/* Action area: vocabulary context shows close ×; search context shows save/remove */}
-      {onClose ? (
-        <button
-          className={styles.headerCloseBtn}
-          onClick={onClose}
-          aria-label="Close word detail"
-          title="Close (Esc)"
-        >
-          ×
-        </button>
-      ) : isSaved ? (
-        <button
-          className={styles.savedBadge}
-          onClick={onRemove}
-          disabled={isMutating}
-          aria-label={`Remove ${word.text} from vocabulary`}
-          title="Click to remove from vocabulary"
-        >
-          Saved ✓
-        </button>
-      ) : (
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={onSave}
-          disabled={isMutating}
-          className={styles.saveButton}
-        >
-          {isMutating ? 'Saving…' : 'Save word'}
-        </Button>
+      {/* Action area: hidden in vocabulary context (panel chrome handles close);
+          shows save/remove in search context. */}
+      {context !== 'vocabulary' && (
+        isSaved ? (
+          <button
+            className={styles.savedBadge}
+            onClick={onRemove}
+            disabled={isMutating}
+            aria-label={`Remove ${word.text} from vocabulary`}
+            title="Click to remove from vocabulary"
+          >
+            Saved ✓
+          </button>
+        ) : (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={onSave}
+            disabled={isMutating}
+            className={styles.saveButton}
+          >
+            {isMutating ? 'Saving…' : 'Save word'}
+          </Button>
+        )
       )}
     </header>
   )

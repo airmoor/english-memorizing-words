@@ -94,9 +94,10 @@ export interface WordDetailContentProps {
   /** Whether a save or remove mutation is in flight. Disables the action button. */
   isMutating?: boolean
   /**
-   * When provided, a close × button is rendered in the DictionaryHeader action area
-   * instead of the save/remove button. Use in vocabulary context where the word is
-   * always saved and the "Saved ✓" badge is redundant.
+   * The context the word detail is opened in.
+   * - 'vocabulary': word is already saved; hides save/remove action area entirely.
+   *   The SidePanel / BottomSheet chrome provides the close action.
+   * - 'search': standard save/remove action shown.
    */
-  onClose?: () => void
+  context?: 'vocabulary' | 'search'
 }

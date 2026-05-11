@@ -12,7 +12,7 @@ interface CardProps extends HTMLAttributes<HTMLElement> {
    * floating — opaque surface with elevated shadow + top-edge highlight;
    *            use for widgets, stat tiles, settings sections, list cards.
    */
-  variant?: 'default' | 'glass' | 'floating'
+  variant?: 'default' | 'glass' | 'floating' 
   as?: ElementType
 }
 

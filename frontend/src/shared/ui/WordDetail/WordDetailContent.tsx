@@ -25,7 +25,7 @@ export function WordDetailContent({
   onSave,
   onRemove,
   isMutating = false,
-  onClose,
+  context = 'search',
 }: WordDetailContentProps) {
   const groups = groupByPos(word.meanings)
 
@@ -38,7 +38,7 @@ export function WordDetailContent({
         onSave={onSave}
         onRemove={onRemove}
         isMutating={isMutating}
-        onClose={onClose}
+        context={context}
       />
 
       <div className={styles.meanings}>

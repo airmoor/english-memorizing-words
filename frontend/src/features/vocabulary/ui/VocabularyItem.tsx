@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import type { VocabularyWord } from '../../../entities/vocabulary/model/types'
 import { Card } from '../../../shared/ui/Card/Card'
 import { Text } from '../../../shared/ui/Typography/Typography'
+import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog/ConfirmDialog'
 import { useWordDetail } from '../../../shared/ui/WordDetail/WordDetailContext'
 import styles from './VocabularyItem.module.css'
 
@@ -11,80 +13,131 @@ interface Props {
   sourceList: string[]
 }
 
+/** Trash bin icon (16×16 outline). */
+function TrashIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+      <path d="M10 11v6M14 11v6" />
+      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+    </svg>
+  )
+}
+
 /**
  * A single vocabulary entry row.
  *
- * Clicking the main body opens WordDetailContainer via useWordDetail.
- * The remove button is preserved and does not open the panel.
- *
- * NOTE: This is the Phase 1 wiring layer. Phase 2 will replace this with
- * VocabularyRow — an editorial row with 72–88px height, definition snippet,
- * living library signals, and ⋯ action menu.
+ * - Clicking anywhere on the card opens the word detail panel.
+ * - The trash button opens a confirmation dialog before removing.
+ * - Active state: accent dot shown while this word is open in the panel.
  */
 export function VocabularyItem({ item, onRemove, sourceList }: Props) {
   const { open, activeWordId } = useWordDetail()
   const isActive = activeWordId === item.wordId
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   const handleOpen = () => {
     open(item.wordId, sourceList)
   }
 
-  const handleRemove = (e: React.MouseEvent) => {
-    e.stopPropagation() // prevent triggering the row open
+  const handleRemoveClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setConfirmOpen(true)
+  }
+
+  const handleConfirmRemove = () => {
+    setConfirmOpen(false)
     onRemove(item.wordId)
   }
 
+  const handleCancelRemove = () => {
+    setConfirmOpen(false)
+  }
+
   return (
-    <Card as="li" padding="md" interactive className={styles.item}>
-      {/* Main row body — opens word detail */}
-      <button
-        className={styles.rowButton}
+    <>
+      {/* Full card is clickable — onClick propagates from inner rowButton naturally.
+          The card-level onClick catches clicks on padding/whitespace areas. */}
+      <Card
+        as="li"
+        padding="md"
+        interactive
+        className={styles.item}
         onClick={handleOpen}
-        aria-label={`Open detail for ${item.wordText}`}
-        aria-pressed={isActive}
       >
-        <div className={styles.wordRow}>
-          <Text variant="label" as="span" className={styles.word}>
-            {item.wordText}
-          </Text>
-          {item.transcription && (
-            <span className={styles.transcription}>/{item.transcription}/</span>
+        {/* Main row body — content + keyboard activation */}
+        <div
+          className={styles.rowButton}
+          aria-label={`Open detail for ${item.wordText}`}
+          aria-pressed={isActive}
+          tabIndex={0}
+        >
+          <div className={styles.wordRow}>
+            <Text variant="label" as="span" className={styles.word}>
+              {item.wordText}
+            </Text>
+            {item.transcription && (
+              <span className={styles.transcription}>/{item.transcription}/</span>
+            )}
+            {isActive && <span className={styles.activeDot} aria-hidden="true" />}
+          </div>
+
+          {item.meanings.length > 0 && (
+            <ul className={styles.meanings}>
+              {item.meanings.slice(0, 3).map((m) => (
+                <li key={m.id} className={styles.meaning}>
+                  {m.partOfSpeech && (
+                    <span className={styles.pos}>{m.partOfSpeech}</span>
+                  )}
+                  <Text variant="caption" color="secondary" as="span" className={styles.definition}>
+                    {m.definition}
+                  </Text>
+                </li>
+              ))}
+              {item.meanings.length > 3 && (
+                <li className={styles.moreCount}>
+                  <Text variant="caption" color="secondary" as="span">
+                    +{item.meanings.length - 3} more
+                  </Text>
+                </li>
+              )}
+            </ul>
           )}
-          {isActive && <span className={styles.activeDot} aria-hidden="true" />}
         </div>
 
-        {item.meanings.length > 0 && (
-          <ul className={styles.meanings}>
-            {item.meanings.slice(0, 3).map((m) => (
-              <li key={m.id} className={styles.meaning}>
-                {m.partOfSpeech && (
-                  <span className={styles.pos}>{m.partOfSpeech}</span>
-                )}
-                <Text variant="caption" color="secondary" as="span" className={styles.definition}>
-                  {m.definition}
-                </Text>
-              </li>
-            ))}
-            {item.meanings.length > 3 && (
-              <li className={styles.moreCount}>
-                <Text variant="caption" color="secondary" as="span">
-                  +{item.meanings.length - 3} more
-                </Text>
-              </li>
-            )}
-          </ul>
-        )}
-      </button>
+        {/* Delete button — opens confirmation dialog, does not open the panel */}
+        <button
+          className={styles.removeBtn}
+          onClick={handleRemoveClick}
+          aria-label={`Delete ${item.wordText} from vocabulary`}
+          title="Delete word"
+        >
+          <TrashIcon />
+        </button>
+      </Card>
 
-      {/* Remove button — independent of row open */}
-      <button
-        className={styles.removeBtn}
-        onClick={handleRemove}
-        aria-label={`Remove ${item.wordText}`}
-        title="Remove from vocabulary"
-      >
-        ✕
-      </button>
-    </Card>
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        title={`Delete "${item.wordText}"?`}
+        body="This word will be removed from your vocabulary. Any review progress will be lost."
+        confirmLabel="Delete"
+        cancelLabel="Keep it"
+        onConfirm={handleConfirmRemove}
+        onCancel={handleCancelRemove}
+        danger
+      />
+    </>
   )
 }

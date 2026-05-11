@@ -247,6 +247,12 @@
   box-sizing: border-box;
 }
 
+/* Reserve scrollbar gutter so the layout width never shifts between pages
+   with and without a scrollbar. Eliminates the horizontal reflow on navigation. */
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   margin: 0;
   font-family: var(--font-sans);

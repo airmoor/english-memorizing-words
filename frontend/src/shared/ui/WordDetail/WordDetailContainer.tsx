@@ -136,11 +136,6 @@ export function WordDetailContainer({ children, onSave, onRemove, context = 'voc
       ? `${state.activeIndex + 1} / ${state.sourceList.length}`
       : undefined
 
-  // ── onClose for vocabulary context ────────────────────────────────────────
-  // In vocabulary context the DictionaryHeader shows a close × button instead
-  // of the "Saved ✓" badge. Pass actions.close so clicking it closes the panel.
-  const headerOnClose = context === 'vocabulary' ? actions.close : undefined
-
   // ── Content to render inside the container ────────────────────────────────
   const detailContent = isLoading ? (
     <Spinner />
@@ -154,7 +149,7 @@ export function WordDetailContainer({ children, onSave, onRemove, context = 'voc
       learningState={learningState}
       onSave={handleSave}
       onRemove={handleRemove}
-      onClose={headerOnClose}
+      context={context}
     />
   ) : null
 
