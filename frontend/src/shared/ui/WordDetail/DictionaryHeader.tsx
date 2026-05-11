@@ -4,7 +4,7 @@ import { Button } from '../Button/Button'
 import styles from './DictionaryHeader.module.css'
 
 interface Props {
-  word: Pick<WordPayload, 'text' | 'transcription' | 'provider'>
+  word: Pick<WordPayload, 'text' | 'transcription'>
   /** Determines save vs. remove action. Null = word not saved. */
   learningState: LearningState | null
   onSave: () => void
@@ -16,11 +16,6 @@ interface Props {
    * close button) provides the close action instead.
    */
   context?: 'vocabulary' | 'search'
-}
-
-const PROVIDER_LABELS: Record<string, string> = {
-  'merriam-webster': "Merriam-Webster Learner's",
-  'free-dictionary': 'Free Dictionary',
 }
 
 /**
@@ -55,9 +50,6 @@ export function DictionaryHeader({
             /{word.transcription}/
           </Text>
         )}
-        <Text variant="caption" color="secondary" as="span">
-          {PROVIDER_LABELS[word.provider] ?? word.provider}
-        </Text>
       </div>
 
       {/* Action area: hidden in vocabulary context (panel chrome handles close);

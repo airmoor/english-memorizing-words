@@ -1,15 +1,14 @@
 .row {
   display: flex;
   gap: var(--space-sm);
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: var(--space-lg);
+  /* No flex-wrap — all 4 buttons stay on a single row at every breakpoint.
+     The wrapper (.wrapper in Flashcard.module.css) constrains the max-width. */
+  flex-wrap: nowrap;
 }
 
 .btn {
   flex: 1;
-  min-width: 72px;
-  max-width: 100px;
+  /* No min-width / max-width — let flex distribute space equally. */
   padding: var(--space-sm) 0;
   border-radius: var(--radius-md);
   font-size: var(--font-sm);
@@ -17,6 +16,7 @@
   font-family: inherit;
   cursor: pointer;
   background: transparent;
+  white-space: nowrap;
   transition: background 0.15s, color 0.15s, opacity 0.15s;
 }
 
@@ -25,7 +25,6 @@
   cursor: not-allowed;
 }
 
-/* Rating-specific — these are feature-level semantic colors */
 .again { border: 2px solid var(--color-danger);  color: var(--color-danger); }
 .hard  { border: 2px solid var(--color-warning); color: var(--color-warning); }
 .good  { border: 2px solid var(--color-success); color: var(--color-success); }

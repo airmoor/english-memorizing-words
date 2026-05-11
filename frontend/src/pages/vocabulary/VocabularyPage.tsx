@@ -62,7 +62,7 @@ export function VocabularyPage() {
            */}
           {!isLoading && !isError && items.length > 0 && (
             <Text variant="body" color="secondary" as="p" className={styles.wordCount}>
-              {items.length} word{items.length !== 1 ? 's' : ''}
+              {items.length} saved word{items.length !== 1 ? 's' : ''}
             </Text>
           )}
         </div>

@@ -52,9 +52,12 @@ export function WordDetailContent({
       </div>
 
       {/* ── Learning layer ────────────────────────────────────────────── */}
-      {/* The separator and LearningSection are rendered only once LearningSection
-          is implemented (TODO P2). Rendering an orphan <hr> with no content below
-          it creates a "bottom placeholder" — omitted until P2 lands. */}
+      {/* TODO(P2): LearningSection added once learning state is surfaced in UI. */}
+
+      {/* ── Source attribution — subtle, at the very bottom ──────────── */}
+      {/* <p className={styles.attribution}>
+        {PROVIDER_LABELS[word.provider] ?? word.provider}
+      </p> */}
     </div>
   )
 }

@@ -3,6 +3,7 @@
    The review card must remain the clear visual focus — this is supporting info.
 ───────────────────────────────────────────────────────────────────────────── */
 .bar {
+  max-width: 520px;
   width: 100%;
   margin-inline: auto;
   display: flex;
