@@ -12,8 +12,8 @@ interface Props {
   onClose: () => void
   children: ReactNode
   /**
-   * When activeWordId changes while the panel is open, the content cross-fades.
-   * Pass the activeWordId here so the panel can trigger the fade on change.
+   * Changes when the active word changes.
+   * Used to reset scroll position when navigating between words.
    */
   contentKey?: string | null
 }
@@ -22,23 +22,22 @@ interface Props {
  * Desktop side panel container for word detail.
  *
  * Behavior (spec §5.2):
- * - Fixed 380px panel width that pushes the list (layout compression, not overlay).
+ * - Sticky panel beside the vocabulary list (CSS grid layout in WordDetailContainer).
  * - role="complementary" — coexists with main content without trapping focus.
  * - Escape key closes the panel; focus returns to the active list row.
- * - Content cross-fade (150ms) when contentKey changes — word-to-word navigation.
+ * - Scroll-to-top when contentKey changes (word-to-word navigation).
  * - No focus trap — users tab freely between the list and the panel.
- *
- * Layout requirement:
- * The parent element must be display:flex + flex-direction:row so the panel
- * sits beside the list rather than over it. WordDetailContainer handles this.
+ * - Floating × close button pinned to the top-right corner of the panel
+ *   (always visible regardless of scroll position in the content body).
  *
  * Reduced motion: transitions collapse to 0ms (§17.6, §18.5).
  */
 export function SidePanel({ isOpen, onClose, children, contentKey }: Props) {
   const triggerRef = useRef<Element | null>(null)
   const panelRef = useRef<HTMLElement>(null)
+  const bodyRef = useRef<HTMLDivElement>(null)
+  const prevContentKey = useRef(contentKey)
   const [isExiting, setIsExiting] = useState(false)
-  const [isFading, setIsFading] = useState(false)
 
   // ── Capture trigger element for focus restoration ─────────────────────────
   useEffect(() => {
@@ -80,17 +79,16 @@ export function SidePanel({ isOpen, onClose, children, contentKey }: Props) {
     return () => document.removeEventListener('keydown', handler)
   }, [isOpen, handleClose])
 
-  // ── Content cross-fade on word-to-word navigation ─────────────────────────
-  // When contentKey changes (different word selected), briefly fade to 0
-  // then fade back in. See spec §6.4, §18.
-  const prevContentKey = useRef(contentKey)
+  // ── Scroll-to-top on word change ──────────────────────────────────────────
+  // When contentKey changes the body snaps to the top so the new word's
+  // heading is always visible without a leftover scroll offset.
   useEffect(() => {
     if (!isOpen) return
     if (contentKey !== prevContentKey.current) {
       prevContentKey.current = contentKey
-      setIsFading(true)
-      const id = setTimeout(() => setIsFading(false), 150)
-      return () => clearTimeout(id)
+      if (bodyRef.current) {
+        bodyRef.current.scrollTop = 0
+      }
     }
   }, [contentKey, isOpen])
 
@@ -108,26 +106,18 @@ export function SidePanel({ isOpen, onClose, children, contentKey }: Props) {
         isExiting ? styles.panelExiting : '',
       ].filter(Boolean).join(' ')}
     >
-      {/* Panel header — close button only */}
-      <div className={styles.header}>
-        <button
-          className={styles.closeBtn}
-          onClick={handleClose}
-          aria-label="Close word detail"
-        >
-          ×
-        </button>
-      </div>
-
-      {/* Scrollable content — cross-fades on word-to-word navigation */}
-      <div
-        className={isFading ? styles.contentFading : styles.contentVisible}
-        aria-live="polite"
-        aria-atomic="true"
+      {/* Floating close button — stays visible regardless of scroll position */}
+      <button
+        className={styles.closeBtn}
+        onClick={handleClose}
+        aria-label="Close word detail"
       >
-        <div className={styles.body}>
-          {children}
-        </div>
+        ×
+      </button>
+
+      {/* Scrollable content body */}
+      <div ref={bodyRef} className={styles.body}>
+        {children}
       </div>
     </aside>
   )

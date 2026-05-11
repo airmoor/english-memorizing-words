@@ -3,7 +3,6 @@ import { useMemo } from 'react'
 import type { VocabularyWord } from '../../../entities/vocabulary/model/types'
 import { Text } from '../../../shared/ui/Typography/Typography'
 import { Button } from '../../../shared/ui/Button/Button'
-import { Stack } from '../../../shared/ui/Stack/Stack'
 import { VocabularyItem } from './VocabularyItem'
 import styles from './VocabularyList.module.css'
 
@@ -41,23 +40,15 @@ export function VocabularyList({ items, onRemove }: Props) {
   }
 
   return (
-    <Stack gap="sm">
-      <div className={styles.header}>
-        <Text variant="body" color="secondary" as="span">
-          {items.length} word{items.length !== 1 ? 's' : ''}
-        </Text>
-      </div>
-
-      <ul className={styles.list}>
-        {items.map((item) => (
-          <VocabularyItem
-            key={item.wordId}
-            item={item}
-            onRemove={onRemove}
-            sourceList={sourceList}
-          />
-        ))}
-      </ul>
-    </Stack>
+    <ul className={styles.list}>
+      {items.map((item) => (
+        <VocabularyItem
+          key={item.wordId}
+          item={item}
+          onRemove={onRemove}
+          sourceList={sourceList}
+        />
+      ))}
+    </ul>
   )
 }

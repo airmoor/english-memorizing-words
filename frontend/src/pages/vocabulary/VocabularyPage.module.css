@@ -1,3 +1,11 @@
+.pageHeader {
+  margin-bottom: var(--space-xl);
+}
+
 .heading {
-  margin: 0 0 var(--space-xl);
+  margin: 0 0 var(--space-xs);
+}
+
+.wordCount {
+  margin: 0;
 }

@@ -1,29 +1,35 @@
 /* ── WordDetailContainer ────────────────────────────────────────────────────
-   The outer page layout when the detail panel is open on desktop.
-   Switches from a single-column layout to a two-column (list + panel) layout.
+   Desktop split-view layout.
 
-   On mobile, the BottomSheet is portaled to document.body — no layout changes.
+   Applied only while the SidePanel is open — when closed, the list takes
+   full container width and no grid columns are reserved.
+
+   Design goals (vs. the old flex push layout):
+   - CSS grid instead of flex: the list column has a fixed width and does NOT
+     compress as the panel grows. The panel column takes whatever is left.
+   - Larger gap (--space-xxl = 48px) between the list and the panel for an
+     airy, editorial feel rather than a dense dashboard look.
+   - align-items: start allows the panel to be position:sticky and scroll
+     independently of the list without stretching to the list height.
 ──────────────────────────────────────────────────────────────────────────── */
 
-/* The page content wrapper — always present */
+/* ── Split grid — active while panel is open ────────────────────────────── */
 .pageWithPanel {
-  display: flex;
-  flex-direction: row;
-  flex: 1;
-  min-height: 0;
-  /* Panel slides in from the right; the list column compresses */
-  transition: all 200ms var(--ease-out);
+  display: grid;
+  /* List: fixed 420px. Panel: fills remaining space (1fr). */
+  grid-template-columns: 420px 1fr;
+  gap: var(--space-xxl); /* 48px — intentionally larger than before */
+  align-items: start;
 }
 
-/* The list column — takes all remaining space beside the panel */
+/* ── List column ─────────────────────────────────────────────────────────── */
 .listColumn {
-  flex: 1;
-  min-width: 0;
+  min-width: 0; /* prevent overflow blowout inside grid */
 }
 
 /* ── Reduced motion ───────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .pageWithPanel {
-    transition-duration: 0ms !important;
+    /* no transitions on this element; SidePanel handles its own */
   }
 }

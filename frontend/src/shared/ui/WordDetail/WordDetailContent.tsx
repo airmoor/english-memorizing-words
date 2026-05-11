@@ -25,6 +25,7 @@ export function WordDetailContent({
   onSave,
   onRemove,
   isMutating = false,
+  onClose,
 }: WordDetailContentProps) {
   const groups = groupByPos(word.meanings)
 
@@ -37,6 +38,7 @@ export function WordDetailContent({
         onSave={onSave}
         onRemove={onRemove}
         isMutating={isMutating}
+        onClose={onClose}
       />
 
       <div className={styles.meanings}>
@@ -50,14 +52,9 @@ export function WordDetailContent({
       </div>
 
       {/* ── Learning layer ────────────────────────────────────────────── */}
-      {/* Separator and LearningSection only when the word is saved.
-          LearningSection component added in a later task (see spec §15). */}
-      {learningState !== null && (
-        <>
-          <hr className={styles.learningSeparator} aria-hidden="true" />
-          {/* TODO(P2): <LearningSection state={learningState} /> */}
-        </>
-      )}
+      {/* The separator and LearningSection are rendered only once LearningSection
+          is implemented (TODO P2). Rendering an orphan <hr> with no content below
+          it creates a "bottom placeholder" — omitted until P2 lands. */}
     </div>
   )
 }

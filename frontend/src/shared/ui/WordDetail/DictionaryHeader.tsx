@@ -10,6 +10,12 @@ interface Props {
   onSave: () => void
   onRemove: () => void
   isMutating?: boolean
+  /**
+   * When provided, replaces the save/remove action with a close × button.
+   * Used in vocabulary context where all words are already saved and the
+   * "Saved ✓" badge is redundant — the close button provides a cleaner action.
+   */
+  onClose?: () => void
 }
 
 const PROVIDER_LABELS: Record<string, string> = {
@@ -34,6 +40,7 @@ export function DictionaryHeader({
   onSave,
   onRemove,
   isMutating = false,
+  onClose,
 }: Props) {
   const isSaved = learningState !== null
 
@@ -53,7 +60,17 @@ export function DictionaryHeader({
         </Text>
       </div>
 
-      {isSaved ? (
+      {/* Action area: vocabulary context shows close ×; search context shows save/remove */}
+      {onClose ? (
+        <button
+          className={styles.headerCloseBtn}
+          onClick={onClose}
+          aria-label="Close word detail"
+          title="Close (Esc)"
+        >
+          ×
+        </button>
+      ) : isSaved ? (
         <button
           className={styles.savedBadge}
           onClick={onRemove}

@@ -93,4 +93,10 @@ export interface WordDetailContentProps {
   onRemove: () => void
   /** Whether a save or remove mutation is in flight. Disables the action button. */
   isMutating?: boolean
+  /**
+   * When provided, a close × button is rendered in the DictionaryHeader action area
+   * instead of the save/remove button. Use in vocabulary context where the word is
+   * always saved and the "Saved ✓" badge is redundant.
+   */
+  onClose?: () => void
 }

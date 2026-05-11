@@ -42,10 +42,30 @@ export function VocabularyPage() {
 
   return (
     <PageLayout>
+      {/*
+       * width="wide" (1080px) accommodates the desktop split-view:
+       * list column (420px) + gap (48px) + panel column (≈516px) = 984px.
+       * The wider container is only visually meaningful when the SidePanel is
+       * open; when closed the list renders normally at its natural width.
+       */}
       <Container as="main" width="wide">
-        <Text variant="title" as="h1" className={styles.heading}>
-          My Vocabulary
-        </Text>
+        <div className={styles.pageHeader}>
+          <Text variant="title" as="h1" className={styles.heading}>
+            My Vocabulary
+          </Text>
+
+          {/*
+           * Word count sits ABOVE the WordDetailProvider grid so the list
+           * column and the detail panel both start at the same Y position —
+           * the top of the first vocabulary item (not the word-count label).
+           * This satisfies the "panel aligns with first list card" requirement.
+           */}
+          {!isLoading && !isError && items.length > 0 && (
+            <Text variant="body" color="secondary" as="p" className={styles.wordCount}>
+              {items.length} word{items.length !== 1 ? 's' : ''}
+            </Text>
+          )}
+        </div>
 
         {isLoading && <Spinner />}
 
@@ -57,12 +77,11 @@ export function VocabularyPage() {
 
         {/*
          * WordDetailProvider wraps the list so VocabularyItem rows can open the
-         * panel via useWordDetail(). WordDetailContainer mounts one BottomSheet
-         * or SidePanel for the entire page. Container width is "wide" (1080px)
-         * to comfortably accommodate list (700px) + panel (380px).
+         * panel via useWordDetail(). context="vocabulary" activates the close ×
+         * button in DictionaryHeader (replaces the "Saved ✓" badge).
          */}
         {!isLoading && !isError && (
-          <WordDetailProvider onRemove={remove}>
+          <WordDetailProvider onRemove={remove} context="vocabulary">
             <VocabularyPageContent items={items} onRemove={remove} />
           </WordDetailProvider>
         )}

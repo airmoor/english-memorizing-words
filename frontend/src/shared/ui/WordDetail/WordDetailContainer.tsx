@@ -1,4 +1,4 @@
-import { useMemo, useId, type ReactNode } from 'react'
+import { useMemo, useId, useState, useEffect, type ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useWordDetailState } from './useWordDetailState'
 import { useWordDetailData } from './useWordDetailData'
@@ -19,17 +19,36 @@ import styles from './WordDetailContainer.module.css'
  * - coarse pointer OR viewport < 1024px → BottomSheet
  * - fine pointer AND viewport ≥ 1024px  → SidePanel
  *
- * Evaluated once on mount and on window resize.
- * Uses matchMedia — SSR-safe with a sensible default.
+ * Uses window.matchMedia change listeners so the variant updates immediately
+ * on viewport resize — no page reload required.
  */
 function useContainerVariant(): 'bottomSheet' | 'sidePanel' {
-  // useMemo with no deps = evaluated once on mount, stable for the component lifetime
-  return useMemo(() => {
+  const [variant, setVariant] = useState<'bottomSheet' | 'sidePanel'>(() => {
     if (typeof window === 'undefined') return 'bottomSheet'
     const isCoarse = window.matchMedia('(pointer: coarse)').matches
-    const isNarrow = window.innerWidth < 1024
+    const isNarrow = window.matchMedia('(max-width: 1023px)').matches
     return isCoarse || isNarrow ? 'bottomSheet' : 'sidePanel'
+  })
+
+  useEffect(() => {
+    const coarseQuery = window.matchMedia('(pointer: coarse)')
+    const narrowQuery = window.matchMedia('(max-width: 1023px)')
+
+    const update = () => {
+      setVariant(
+        coarseQuery.matches || narrowQuery.matches ? 'bottomSheet' : 'sidePanel',
+      )
+    }
+
+    coarseQuery.addEventListener('change', update)
+    narrowQuery.addEventListener('change', update)
+    return () => {
+      coarseQuery.removeEventListener('change', update)
+      narrowQuery.removeEventListener('change', update)
+    }
   }, [])
+
+  return variant
 }
 
 // ── Props ─────────────────────────────────────────────────────────────────
@@ -46,6 +65,12 @@ interface Props {
    * Provided by the page via WordDetailProvider — defaults to no-op.
    */
   onRemove?: (wordId: string) => void
+  /**
+   * The context in which the panel is used.
+   * - 'vocabulary': replaces DictionaryHeader save/remove with a close × button.
+   * - 'search': standard save/remove actions in DictionaryHeader.
+   */
+  context?: 'vocabulary' | 'search'
 }
 
 /**
@@ -57,7 +82,7 @@ interface Props {
  *
  * Used internally by WordDetailProvider — never imported directly by pages.
  */
-export function WordDetailContainer({ children, onSave, onRemove }: Props) {
+export function WordDetailContainer({ children, onSave, onRemove, context = 'vocabulary' }: Props) {
   const variant = useContainerVariant()
   const [state, actions] = useWordDetailState()
   const queryClient = useQueryClient()
@@ -111,6 +136,11 @@ export function WordDetailContainer({ children, onSave, onRemove }: Props) {
       ? `${state.activeIndex + 1} / ${state.sourceList.length}`
       : undefined
 
+  // ── onClose for vocabulary context ────────────────────────────────────────
+  // In vocabulary context the DictionaryHeader shows a close × button instead
+  // of the "Saved ✓" badge. Pass actions.close so clicking it closes the panel.
+  const headerOnClose = context === 'vocabulary' ? actions.close : undefined
+
   // ── Content to render inside the container ────────────────────────────────
   const detailContent = isLoading ? (
     <Spinner />
@@ -124,6 +154,7 @@ export function WordDetailContainer({ children, onSave, onRemove }: Props) {
       learningState={learningState}
       onSave={handleSave}
       onRemove={handleRemove}
+      onClose={headerOnClose}
     />
   ) : null
 
@@ -131,9 +162,12 @@ export function WordDetailContainer({ children, onSave, onRemove }: Props) {
   return (
     <WordDetailContext.Provider value={contextValue}>
       {variant === 'sidePanel' ? (
-        // Desktop: wrap children + panel in a flex row so panel pushes the list
-        <div className={styles.pageWithPanel}>
-          <div className={styles.listColumn}>
+        // Desktop: CSS grid split-view. Grid class applied only while panel is open
+        // so the list takes full width when closed (no wasted whitespace).
+        // The grid stays active through the SidePanel exit animation because
+        // state.isOpen remains true until after the animation timer fires.
+        <div className={state.isOpen ? styles.pageWithPanel : undefined}>
+          <div className={state.isOpen ? styles.listColumn : undefined}>
             {children}
           </div>
           <SidePanel
@@ -141,16 +175,15 @@ export function WordDetailContainer({ children, onSave, onRemove }: Props) {
             onClose={actions.close}
             contentKey={state.activeWordId}
           >
-            {/* Heading element with the ID used for aria-labelledby on BottomSheet
-                and for the live region announcement on SidePanel */}
+            {/* Hidden heading for aria-labelledby */}
             {word && (
-              <span
+              <h2
                 id={headingId}
                 style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }}
                 aria-hidden="true"
               >
                 {word.text}
-              </span>
+              </h2>
             )}
             {detailContent}
           </SidePanel>

@@ -50,10 +50,11 @@
     var(--gradient-b, #a78bfa) 50%,
     var(--gradient-c, #f9a8d4) 100%
   );
-  /* Fixed at card width — gradient spectrum stays stable at any fill level */
-  background-size: 520px 100%;
-  background-repeat: no-repeat;
-  border-radius: var(--radius-full);
+  /* No border-radius here: the parent track's overflow:hidden handles corner
+     clipping. A self-applied radius creates a 3px inward curve at full width
+     that leaves a visible gray gap at the right edge of the filled bar.
+     No fixed background-size: a 520px constraint exposed the gray track on
+     viewports wider than 520px where the gradient didn't reach the fill edge. */
   box-shadow: 0 0 5px var(--gradient-glow, rgba(167, 139, 250, 0.25));
   transition: width 0.5s var(--ease-out);
 }
@@ -64,7 +65,5 @@
     var(--gradient-a, #2dd4bf) 0%,
     var(--color-success)        100%
   );
-  background-size: 520px 100%;
-  background-repeat: no-repeat;
   box-shadow: 0 0 5px rgba(34, 197, 94, 0.22);
 }

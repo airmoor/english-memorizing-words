@@ -7,6 +7,14 @@ interface Props {
   onSave?: (wordId: string) => void
   /** Called when the user removes the current word. Closes the panel automatically. */
   onRemove?: (wordId: string) => void
+  /**
+   * The page context in which the detail panel is used.
+   *
+   * - 'vocabulary' (default): all words are already saved; the "Saved ✓" badge
+   *   is replaced with a close × button in the DictionaryHeader action area.
+   * - 'search': standard save/remove actions are shown in DictionaryHeader.
+   */
+  context?: 'vocabulary' | 'search'
 }
 
 /**
@@ -29,9 +37,9 @@ interface Props {
  * </WordDetailProvider>
  * ```
  */
-export function WordDetailProvider({ children, onSave, onRemove }: Props) {
+export function WordDetailProvider({ children, onSave, onRemove, context = 'vocabulary' }: Props) {
   return (
-    <WordDetailContainer onSave={onSave} onRemove={onRemove}>
+    <WordDetailContainer onSave={onSave} onRemove={onRemove} context={context}>
       {children}
     </WordDetailContainer>
   )
