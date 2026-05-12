@@ -5,11 +5,64 @@ import { fetchVocabularyPage } from '../../features/vocabulary/api/vocabularyApi
 import { Card } from '../../shared/ui/Card/Card'
 import { Button } from '../../shared/ui/Button/Button'
 import { Text } from '../../shared/ui/Typography/Typography'
-import { Spinner } from '../../shared/ui/Spinner'
 import { Container } from '../../shared/ui/layout/Container'
 import { PageLayout } from '../../shared/ui/layout/PageLayout'
 import { DashboardGrid, DashboardCell } from '../../shared/ui/layout/DashboardGrid'
 import styles from './HomePage.module.css'
+
+// Skeleton label widths approximate real StatTile label lengths
+const STAT_LABEL_WIDTHS = [68, 52, 104, 72]
+// Recent row widths: [wordWidth, posWidth] — varying lengths look natural
+const RECENT_ROWS: [number, number][] = [[80, 38], [114, 52], [62, 42], [96, 58], [74, 36]]
+
+function HomePageSkeleton() {
+  return (
+    <>
+      {/* Hero */}
+      <DashboardCell span="full">
+        <Card padding="lg" variant="glass" className={styles.hero}>
+          <div className={styles.skeletonHeroContent}>
+            <div className={styles.skeletonLine} style={{ width: '48%' }} />
+            <div className={styles.skeletonLine} style={{ width: '72%', height: 15 }} />
+          </div>
+          <div className={styles.skeletonBtn} />
+        </Card>
+      </DashboardCell>
+
+      {/* Stats */}
+      <DashboardCell span="auto">
+        <div className={styles.stats}>
+          {STAT_LABEL_WIDTHS.map((w, i) => (
+            <Card key={i} variant="floating" padding="md" className={styles.statTile}>
+              <div className={styles.skeletonIcon} />
+              <div className={styles.skeletonNum} />
+              <div className={styles.skeletonLine} style={{ width: w }} />
+            </Card>
+          ))}
+        </div>
+      </DashboardCell>
+
+      {/* Recent words */}
+      <DashboardCell>
+        <Card variant="floating" padding="lg" className={styles.recent}>
+          <div className={styles.recentHeader}>
+            <div className={styles.skeletonLine} style={{ width: 132, height: 20 }} />
+            <div className={styles.skeletonLine} style={{ width: 52, height: 14 }} />
+          </div>
+          <ul className={styles.recentList}>
+            {RECENT_ROWS.map(([wordW, posW], i) => (
+              <li key={i} className={styles.recentItem}>
+                <div className={styles.skeletonLine} style={{ width: wordW, height: 15 }} />
+                <div className={styles.skeletonLine} style={{ width: posW, height: 13 }} />
+                <div className={styles.skeletonLine} style={{ height: 13 }} />
+              </li>
+            ))}
+          </ul>
+        </Card>
+      </DashboardCell>
+    </>
+  )
+}
 
 export function HomePage() {
   const navigate = useNavigate()
@@ -48,13 +101,11 @@ export function HomePage() {
           </DashboardCell>
 
           {isLoading ? (
-            <DashboardCell span="full">
-              <div className={styles.loading}><Spinner /></div>
-            </DashboardCell>
+            <HomePageSkeleton />
           ) : (
             <>
               {/* Hero CTA: due today — always full width */}
-              <DashboardCell span="full">
+              <DashboardCell span="full" className={styles.contentCell}>
                 <Card padding="lg" variant="glass" className={styles.hero}>
                   <div className={styles.heroBody}>
                     {dueToday > 0 ? (
@@ -99,7 +150,7 @@ export function HomePage() {
               </DashboardCell>
 
               {/* Stats — Bento left column on desktop, full-width stack on mobile */}
-              <DashboardCell span={recent.length === 0 ? 'full' : 'auto'}>
+              <DashboardCell span={recent.length === 0 ? 'full' : 'auto'} className={styles.contentCell}>
                 <div className={styles.stats}>
                   <StatTile
                     icon="🔥"
@@ -131,7 +182,7 @@ export function HomePage() {
 
               {/* Recently saved — Bento right column on desktop */}
               {recent.length > 0 && (
-                <DashboardCell>
+                <DashboardCell className={styles.contentCell}>
                   <Card variant="floating" padding="lg" className={styles.recent}>
                     <div className={styles.recentHeader}>
                       <Text variant="title" as="h3">Recently saved</Text>
