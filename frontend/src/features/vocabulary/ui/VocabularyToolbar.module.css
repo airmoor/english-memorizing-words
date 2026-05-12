@@ -96,36 +96,96 @@
   flex-shrink: 0;
 }
 
-.sortLabel {
-  font-size: var(--font-xs);
-  color: var(--color-text-secondary);
-  white-space: nowrap;
-  user-select: none;
+/* ── Sort — icon-only trigger + popover ─────────────────────────────────── */
+
+.sortWrap {
+  position: relative;
+  flex-shrink: 0;
 }
 
-/* Hide "Sort" label text on very narrow screens */
-@media (max-width: 480px) {
-  .sortLabel { display: none; }
-}
-
-.sortSelect {
-  padding: 8px 10px;
+/* Matches view toggle button sizing and visual weight */
+.sortBtn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: var(--color-bg-card);
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md);
-  font-family: inherit;
-  font-size: var(--font-sm);
-  color: var(--color-text-primary);
+  color: var(--color-text-secondary);
   cursor: pointer;
-  transition: border-color 0.15s;
-  /* Firefox: remove default arrow styling inconsistencies */
-  -moz-appearance: none;
+  flex-shrink: 0;
+  transition: border-color 0.14s, color 0.14s, background 0.14s;
 }
 
-.sortSelect:focus {
-  outline: none;
+.sortBtn:hover {
+  color: var(--color-text-primary);
+  border-color: color-mix(in srgb, var(--color-accent) 50%, var(--color-border));
+}
+
+/* Accent state when a non-default sort is active */
+.sortBtnActive {
+  background: var(--color-accent-subtle);
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 12%, transparent);
+  color: var(--color-accent);
+}
+
+.sortDropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 50;
+  background: var(--color-bg-card);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  min-width: 152px;
+  animation: dropdownIn 0.14s var(--ease-out) both;
+}
+
+@keyframes dropdownIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.sortOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 9px 12px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  font-family: inherit;
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  transition: background 0.1s, color 0.1s;
+}
+
+.sortOption:last-child {
+  border-bottom: none;
+}
+
+.sortOption:hover {
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+.sortOptionActive {
+  color: var(--color-accent);
+  font-weight: var(--fw-medium);
+}
+
+.sortOptionCheck {
+  flex-shrink: 0;
+  margin-left: var(--space-sm);
+  color: var(--color-accent);
 }
 
 /* ── View mode toggle ────────────────────────────────────────────────────── */

@@ -3,14 +3,32 @@
   flex-direction: column;
 }
 
+/* Spacing above SessionProgress (the Container has no padY on this page) */
+.sessionHeader {
+  padding-top: var(--space-lg);
+}
+
 .main {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  padding-top: var(--space-xxl);
+  padding-top: var(--space-xl);
   padding-bottom: var(--space-xxl);
   gap: var(--space-xl);
+}
+
+/* Tighter vertical rhythm on mobile */
+@media (max-width: 1023px) {
+  .sessionHeader {
+    padding-top: var(--space-md);
+  }
+
+  .main {
+    padding-top: var(--space-md);
+    padding-bottom: var(--space-md);
+    gap: var(--space-lg);
+  }
 }
 
 .empty {

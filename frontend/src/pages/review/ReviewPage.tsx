@@ -35,7 +35,7 @@ export function ReviewPage() {
   return (
     <PageLayout className={styles.flexPage}>
        <Container as="main" width="default">
-       <SessionProgress />
+       <div className={styles.sessionHeader}><SessionProgress /></div>
        <div className={styles.main}>
         {isPending && <Spinner />}
 

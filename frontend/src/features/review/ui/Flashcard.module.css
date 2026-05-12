@@ -150,8 +150,28 @@
 
 /* ── Rating buttons entry ──────────────────────────────────────────────────── */
 
+/* Stick above the viewport bottom so buttons stay reachable on long cards.
+   Desktop uses a generous gap from the bottom edge; mobile sits above the
+   fixed bottom nav with a frosted-glass surface so content scrolls cleanly
+   behind it. */
 .ratingSlot {
+  position: sticky;
+  bottom: 0;
   animation: fadeUp 0.25s var(--ease-out) 0.15s both;
+  background-color: var(--color-bg-primary);
+  padding: var(--space-sm) var(--space-sm) calc(20px + var(--space-sm));
+}
+
+@media (max-width: 1023px) {
+  .ratingSlot {
+    bottom: calc(56px + env(safe-area-inset-bottom, 0px) + var(--space-sm));
+    background-color: var(--color-bg-primary);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding-top: var(--space-sm);
+    padding-bottom: var(--space-xs);
+    margin-top: var(--space-sm);
+  }
 }
 
 /* ── Error ─────────────────────────────────────────────────────────────────── */

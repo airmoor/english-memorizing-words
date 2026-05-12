@@ -9,7 +9,7 @@
 .wide    { max-width: var(--content-wide); }
 
 .padY {
-  padding-block: var(--space-xl);
+  padding-block: var(--space-lg);
 }
 
 @media (min-width: 1024px) {

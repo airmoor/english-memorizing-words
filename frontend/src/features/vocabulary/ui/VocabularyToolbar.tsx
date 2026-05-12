@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import type { VocabularyFilter, SortOption } from '../model/cardState'
 import { CARD_STATE_LABELS, SORT_LABELS } from '../model/cardState'
 import styles from './VocabularyToolbar.module.css'
@@ -45,8 +45,29 @@ export function VocabularyToolbar({
   onSortChange,
   onViewModeChange,
 }: Props) {
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef  = useRef<HTMLInputElement>(null)
+  const sortRef   = useRef<HTMLDivElement>(null)
+  const [sortOpen, setSortOpen] = useState(false)
   const isFiltered = activeFilters.length > 0 || query.trim().length > 0
+
+  // Close sort dropdown on outside click or Escape
+  useEffect(() => {
+    if (!sortOpen) return
+    function onPointer(e: PointerEvent) {
+      if (sortRef.current && !sortRef.current.contains(e.target as Node)) {
+        setSortOpen(false)
+      }
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setSortOpen(false)
+    }
+    document.addEventListener('pointerdown', onPointer)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('pointerdown', onPointer)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [sortOpen])
 
   return (
     <div className={styles.toolbar}>
@@ -80,19 +101,37 @@ export function VocabularyToolbar({
         </div>
 
         <div className={styles.controls}>
-          {/* Sort */}
-          <label className={styles.sortLabel} htmlFor="vocab-sort">Sort</label>
-          <select
-            id="vocab-sort"
-            className={styles.sortSelect}
-            value={sort}
-            onChange={(e) => onSortChange(e.target.value as SortOption)}
-            aria-label="Sort vocabulary"
-          >
-            {(Object.keys(SORT_LABELS) as SortOption[]).map((s) => (
-              <option key={s} value={s}>{SORT_LABELS[s]}</option>
-            ))}
-          </select>
+          {/* Sort — icon-only trigger with popover */}
+          <div className={styles.sortWrap} ref={sortRef}>
+            <button
+              type="button"
+              className={[styles.sortBtn, sort !== 'newest' ? styles.sortBtnActive : ''].join(' ')}
+              onClick={() => setSortOpen((o) => !o)}
+              aria-haspopup="listbox"
+              aria-expanded={sortOpen}
+              aria-label={`Sort: ${SORT_LABELS[sort]}`}
+              title={`Sort: ${SORT_LABELS[sort]}`}
+            >
+              <SortIcon />
+            </button>
+            {sortOpen && (
+              <div className={styles.sortDropdown} role="listbox" aria-label="Sort vocabulary">
+                {(Object.keys(SORT_LABELS) as SortOption[]).map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    role="option"
+                    aria-selected={sort === s}
+                    className={[styles.sortOption, sort === s ? styles.sortOptionActive : ''].join(' ')}
+                    onClick={() => { onSortChange(s); setSortOpen(false) }}
+                  >
+                    {SORT_LABELS[s]}
+                    {sort === s && <CheckIcon className={styles.sortOptionCheck} />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* View mode toggle */}
           <div className={styles.viewToggle} role="group" aria-label="View mode">
@@ -181,6 +220,24 @@ function FilterChip({
       {stateKey && <span className={[styles.chipDot, styles[`dot_${stateKey}`]].join(' ')} aria-hidden="true" />}
       {label}
     </button>
+  )
+}
+
+function SortIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="3" y1="6"  x2="21" y2="6" />
+      <line x1="6" y1="12" x2="18" y2="12" />
+      <line x1="9" y1="18" x2="15" y2="18" />
+    </svg>
+  )
+}
+
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={className}>
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
   )
 }
 
