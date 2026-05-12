@@ -218,7 +218,6 @@
   background: var(--color-accent-subtle);
   border-color: var(--color-accent);
   color: var(--color-accent);
-  font-weight: var(--fw-semibold);
 }
 
 /* ── State dots inside chips ─────────────────────────────────────────────── */

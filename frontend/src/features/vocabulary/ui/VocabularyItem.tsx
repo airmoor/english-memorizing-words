@@ -74,7 +74,7 @@ export function VocabularyItem({ item, onRemove, sourceList }: Props) {
           The card-level onClick catches clicks on padding/whitespace areas. */}
       <Card
         as="li"
-        padding="md"
+        padding="sm"
         interactive
         className={[styles.item, styles[`state_${state}`]].join(' ')}
         onClick={handleOpen}
