@@ -164,7 +164,7 @@
 
 @media (max-width: 1023px) {
   .ratingSlot {
-    bottom: calc(56px + env(safe-area-inset-bottom, 0px) + var(--space-sm));
+    bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px) + var(--space-sm));
     background-color: var(--color-bg-primary);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);

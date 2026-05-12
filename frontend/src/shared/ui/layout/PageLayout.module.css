@@ -7,10 +7,9 @@
 /* ── Mobile bottom nav clearance ────────────────────────────────────────────
    The MobileBottomNav is position:fixed so it doesn't participate in page
    flow. This padding ensures the last content item is never hidden behind it.
-   56px = visual bar height  +  env(safe-area-inset-bottom) for iPhone notch.
 ──────────────────────────────────────────────────────────────────────────── */
 @media (max-width: 1023px) {
   .page {
-    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px));
   }
 }

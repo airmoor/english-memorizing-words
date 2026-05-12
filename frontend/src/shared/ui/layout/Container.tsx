@@ -22,7 +22,7 @@ interface Props {
  * Centralised page container.
  *
  * Every authenticated page wraps its main content in this so all routes share
- * the same max-width and responsive horizontal padding (--content-padding-x).
+ * the same max-width and responsive horizontal padding (--page-padding-x).
  * Eliminates the layout "jump" that previously happened when navigating
  * between routes with bespoke max-widths.
  */

@@ -1,7 +1,7 @@
 .grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--space-lg);
+  gap: var(--space-xl);
 }
 
 /* Bento: stats (left, compact) beside recent (right, wider) */

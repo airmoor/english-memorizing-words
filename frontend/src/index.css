@@ -14,13 +14,17 @@
   --color-success:      #22c55e;
   --color-warning:      #f59e0b;
 
-  /* Spacing */
-  --space-xs:  4px;
-  --space-sm:  8px;
-  --space-md:  16px;
-  --space-lg:  24px;
-  --space-xl:  32px;
-  --space-xxl: 48px;
+  /* Spacing — fluid scale from ≈360px (mobile) to ≈1024px (desktop).
+     Each token clamps between a compact mobile floor and its current
+     desktop value so all components automatically feel tighter on phones
+     without any component-level media queries.
+     Formula: clamp(mobile-floor, vw-anchor + px-offset, desktop-ceiling) */
+  --space-xs:  clamp(3px,  0.2vw  + 2.5px,  4px);
+  --space-sm:  clamp(6px,  0.3vw  + 4.9px,  8px);
+  --space-md:  clamp(12px, 0.6vw  + 9.8px,  16px);
+  --space-lg:  clamp(16px, 1.2vw  + 11.7px, 24px);
+  --space-xl:  clamp(20px, 1.8vw  + 13.5px, 32px);
+  --space-xxl: clamp(28px, 3vw    + 17px,   48px);
 
   /* Border radius */
   --radius-sm:   6px;
@@ -33,13 +37,14 @@
   --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
 
-  /* Typography sizing */
+  /* Typography sizing — xs through lg are fixed (already comfortable at all sizes).
+     xl and xxl scale fluidly so titles and headings feel proportionate on mobile. */
   --font-xs:  0.75rem;
   --font-sm:  0.875rem;
   --font-md:  1rem;
   --font-lg:  1.125rem;
-  --font-xl:  1.5rem;
-  --font-xxl: 2.25rem;
+  --font-xl:  clamp(1.25rem, 1.2vw + 0.8rem, 1.5rem);
+  --font-xxl: clamp(1.75rem, 2.5vw + 1rem,   2.25rem);
 
   --fw-regular:  400;
   --fw-medium:   500;
@@ -73,23 +78,19 @@
   --glass-highlight: rgba(255, 255, 255, 0.22);
 
   /* ── Layout system ───────────────────────────────────────────────── */
-  /* All authenticated pages flow through Container.tsx, which honours
-     these tokens. Adjust here to retune the entire app's rhythm. */
+  /* All authenticated pages flow through Container.tsx.
+     Adjust these tokens to retune the entire app's rhythm. */
   --content-width:  880px;
   --content-narrow: 640px;
   --content-wide:   1080px;
 
-  /* Horizontal padding tightens on mobile and grows on laptops/desktops
-     for an airy editorial feel. Vertical rhythm uses --space-* tokens. */
-  --content-padding-x: var(--space-md);
-}
+  /* ── Semantic layout tokens ─────────────────────────────────────── */
+  /* Fluid horizontal page padding — replaces the old stepped breakpoint
+     approach. Reaches 48px at ~1200px and never goes below 16px on mobile. */
+  --page-padding-x: clamp(16px, 4vw, 48px);
 
-@media (min-width: 720px) {
-  :root { --content-padding-x: var(--space-xl); }
-}
-
-@media (min-width: 1024px) {
-  :root { --content-padding-x: var(--space-xxl); }
+  /* Fixed-height constants referenced by layout components */
+  --mobile-nav-height: 56px;   /* MobileBottomNav visual bar height */
 }
 
 /* Heavier shadows in all dark themes for atmospheric depth */

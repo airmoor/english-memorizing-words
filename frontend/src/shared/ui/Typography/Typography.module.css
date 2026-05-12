@@ -29,16 +29,6 @@
   line-height: 1.4;
 }
 
-/* ── Responsive type scale — mobile only ─────────────────────────────────────
-   Desktop sizes are the design authority; these rules only shrink them slightly
-   on narrow viewports for better readability without abrupt jumps.
-   720px matches --content-padding-x's first step-up breakpoint.              */
-@media (max-width: 719px) {
-  .heading { font-size: 1.75rem; }    /* 2.25rem → 1.75rem */
-  .title   { font-size: 1.125rem; }   /* 1.5rem  → 1.125rem */
-  .body    { font-size: 0.9375rem; }  /* 1rem    → ~15px */
-}
-
 /* colors */
 .color-primary   { color: var(--color-text-primary); }
 .color-secondary { color: var(--color-text-secondary); }
