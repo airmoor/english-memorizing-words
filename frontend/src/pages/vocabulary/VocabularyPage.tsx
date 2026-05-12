@@ -1,6 +1,5 @@
 import { useCallback, useState, useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Spinner } from '../../shared/ui/Spinner'
 import { Text } from '../../shared/ui/Typography/Typography'
 import { Container } from '../../shared/ui/layout/Container'
 import { PageLayout } from '../../shared/ui/layout/PageLayout'
@@ -14,6 +13,69 @@ import type { VocabularyFilter, SortOption } from '../../features/vocabulary/mod
 import type { ViewMode } from '../../features/vocabulary/ui/VocabularyToolbar'
 import type { VocabularyWord } from '../../entities/vocabulary/model/types'
 import styles from './VocabularyPage.module.css'
+
+// ── Skeleton loading placeholders ─────────────────────────────────────────────
+// Pre-allocate the spatial footprint of toolbar + list so the page layout
+// doesn't reflow when data arrives. Skeleton dimensions closely match the
+// real components so the swap is a smooth fade rather than a jump.
+
+function ToolbarSkeleton() {
+  return (
+    <div className={styles.skeletonToolbar} aria-hidden="true">
+      <div className={styles.skeletonTopRow}>
+        <div className={styles.skeletonSearch} />
+        <div className={styles.skeletonControl} style={{ width: 94 }} />
+        <div className={styles.skeletonControl} style={{ width: 74 }} />
+      </div>
+      <div className={styles.skeletonChipRow}>
+        {/* State chips — widths approximate real label lengths */}
+        <div className={styles.skeletonChip} style={{ width: 54 }} />
+        <div className={styles.skeletonChip} style={{ width: 88 }} />
+        <div className={styles.skeletonChip} style={{ width: 76 }} />
+        <div className={styles.skeletonChip} style={{ width: 76 }} />
+        <div className={styles.skeletonChip} style={{ width: 96 }} />
+        <div className={styles.skeletonDivider} />
+        {/* Special chips */}
+        <div className={styles.skeletonChip} style={{ width: 84 }} />
+        <div className={styles.skeletonChip} style={{ width: 122 }} />
+        <div className={styles.skeletonChip} style={{ width: 116 }} />
+        <div className={styles.skeletonChip} style={{ width: 136 }} />
+      </div>
+    </div>
+  )
+}
+
+// Skeleton card data — (wordWidth, defWidths[])
+// Varying proportions give a natural look without randomness.
+const SKELETON_CARDS: [number, number[]][] = [
+  [130, [1, 0.82]],
+  [96,  [1]],
+  [158, [1, 0.74, 0.58]],
+  [112, [1, 0.88]],
+  [80,  [1, 0.65]],
+]
+
+function ListSkeleton() {
+  return (
+    <div className={styles.skeletonList} aria-hidden="true">
+      {SKELETON_CARDS.map(([wordWidth, defs], i) => (
+        <div key={i} className={styles.skeletonCard}>
+          <div className={styles.skeletonCardBody}>
+            <div className={styles.skeletonWord} style={{ width: wordWidth }} />
+            {defs.map((pct, j) => (
+              <div
+                key={j}
+                className={styles.skeletonDef}
+                style={{ width: `${Math.round(pct * 100)}%` }}
+              />
+            ))}
+          </div>
+          <div className={styles.skeletonTrash} />
+        </div>
+      ))}
+    </div>
+  )
+}
 
 // ── View mode persistence ─────────────────────────────────────────────────────
 
@@ -102,8 +164,6 @@ export function VocabularyPage() {
   const [inputValue, setInputValue]         = useState(() => searchParams.get('q') ?? '')
   const [debouncedQuery, setDebouncedQuery] = useState(() => searchParams.get('q') ?? '')
 
-  // Sync inputValue → debouncedQuery + URL after 300 ms pause in typing.
-  // When the input is cleared we skip the delay (instant clear).
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => {
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
@@ -226,43 +286,45 @@ export function VocabularyPage() {
           )}
         </div>
 
-        {isLoading && <Spinner />}
-
-        {isError && (
+        {/* ── Loading: skeleton placeholders occupy the same space as the
+            real toolbar + list so no layout reflow occurs when data arrives.
+            ── Loaded: toolbar + list fade in as one unit via .contentArea. */}
+        {isLoading ? (
+          <>
+            <ToolbarSkeleton />
+            <ListSkeleton />
+          </>
+        ) : isError ? (
           <Text variant="body" color="secondary" as="p">
             Failed to load vocabulary. Please try again.
           </Text>
-        )}
-
-        {/* Toolbar is always rendered once we know to show it, regardless of
-            whether the result list is empty. This prevents hiding the search
-            input and filter controls when a filter returns 0 results. */}
-        {showToolbar && (
-          <VocabularyToolbar
-            query={inputValue}
-            activeFilters={activeFilters}
-            sort={sort}
-            viewMode={viewMode}
-            filteredCount={total}
-            onQueryChange={handleQueryChange}
-            onFilterToggle={handleFilterToggle}
-            onSortChange={handleSortChange}
-            onViewModeChange={setViewMode}
-          />
-        )}
-
-        {!isLoading && !isError && (
-          <WordDetailProvider onRemove={remove} context="vocabulary">
-            <VocabularyPageContent
-              items={items}
-              onRemove={remove}
-              viewMode={viewMode}
-              isEmpty={isEmpty}
-              hasNextPage={hasNextPage}
-              isFetchingNextPage={isFetchingNextPage}
-              onLoadMore={fetchNextPage}
-            />
-          </WordDetailProvider>
+        ) : (
+          <div className={styles.contentArea}>
+            {showToolbar && (
+              <VocabularyToolbar
+                query={inputValue}
+                activeFilters={activeFilters}
+                sort={sort}
+                viewMode={viewMode}
+                filteredCount={total}
+                onQueryChange={handleQueryChange}
+                onFilterToggle={handleFilterToggle}
+                onSortChange={handleSortChange}
+                onViewModeChange={setViewMode}
+              />
+            )}
+            <WordDetailProvider onRemove={remove} context="vocabulary">
+              <VocabularyPageContent
+                items={items}
+                onRemove={remove}
+                viewMode={viewMode}
+                isEmpty={isEmpty}
+                hasNextPage={hasNextPage}
+                isFetchingNextPage={isFetchingNextPage}
+                onLoadMore={fetchNextPage}
+              />
+            </WordDetailProvider>
+          </div>
         )}
       </Container>
     </PageLayout>
