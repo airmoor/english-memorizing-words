@@ -84,32 +84,60 @@ export function VocabularyPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [viewMode, setViewMode]         = useViewMode()
 
-  // ── URL-backed filter state ────────────────────────────────────────────────
+  // ── URL-backed filter state (filters + sort sync immediately) ─────────────
 
-  const query         = searchParams.get('q') ?? ''
   const activeFilters = (searchParams.get('f') ?? '').split(',').filter(Boolean) as VocabularyFilter[]
   const sort          = (searchParams.get('s') ?? 'newest') as SortOption
 
-  // Debounce search query — update URL only after user pauses typing
+  // ── Search input — decoupled from URL ─────────────────────────────────────
+  //
+  // Three distinct layers:
+  //   inputValue     — immediate, controls the <input> element
+  //   debouncedQuery — 300 ms delayed, drives the API call and URL ?q= param
+  //   URL ?q=        — output of debouncedQuery (never read back into inputValue)
+  //
+  // This ensures typing always feels native and instant while network requests
+  // remain debounced. Same pattern as SearchPage.
+
+  const [inputValue, setInputValue]         = useState(() => searchParams.get('q') ?? '')
+  const [debouncedQuery, setDebouncedQuery] = useState(() => searchParams.get('q') ?? '')
+
+  // Sync inputValue → debouncedQuery + URL after 300 ms pause in typing.
+  // When the input is cleared we skip the delay (instant clear).
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const handleQueryChange = useCallback(
-    (q: string) => {
-      if (debounceRef.current) clearTimeout(debounceRef.current)
-      debounceRef.current = setTimeout(() => {
-        setSearchParams(
-          (prev) => {
-            const next = new URLSearchParams(prev)
-            if (q) next.set('q', q)
-            else next.delete('q')
-            return next
-          },
-          { replace: true },
-        )
-      }, 300)
-    },
-    [setSearchParams],
-  )
-  useEffect(() => () => { if (debounceRef.current) clearTimeout(debounceRef.current) }, [])
+  useEffect(() => {
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
+  }, [])
+
+  const handleQueryChange = useCallback((q: string) => {
+    setInputValue(q)
+
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+
+    if (q === '') {
+      // Instant clear — no debounce when emptying the field
+      setDebouncedQuery('')
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev)
+        next.delete('q')
+        return next
+      }, { replace: true })
+      return
+    }
+
+    debounceRef.current = setTimeout(() => {
+      const trimmed = q.trim()
+      setDebouncedQuery(trimmed)
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev)
+        if (trimmed) next.set('q', trimmed)
+        else next.delete('q')
+        return next
+      }, { replace: true })
+    }, 300)
+  }, [setSearchParams])
+
+  // ── Filter / sort handlers (immediate, no debounce needed) ────────────────
 
   const handleFilterToggle = useCallback(
     (f: VocabularyFilter) => {
@@ -145,7 +173,7 @@ export function VocabularyPage() {
     [setSearchParams],
   )
 
-  // ── Data ───────────────────────────────────────────────────────────────────
+  // ── Data — driven by debouncedQuery, not inputValue ───────────────────────
 
   const {
     items,
@@ -156,21 +184,33 @@ export function VocabularyPage() {
     isFetchingNextPage,
     fetchNextPage,
     remove,
-  } = useVocabularyInfinite({ query, activeFilters, sort })
+  } = useVocabularyInfinite({ query: debouncedQuery, activeFilters, sort })
+
+  // ── Display state ─────────────────────────────────────────────────────────
 
   // Track total unfiltered word count for the page header.
-  // Updated whenever the unfiltered query resolves (no search/filters active).
+  // Only updated when no search/filter is active so it reflects the real total.
   const [knownTotal, setKnownTotal] = useState<number | null>(null)
   useEffect(() => {
-    if (!query && activeFilters.length === 0 && !isLoading && !isError) {
+    if (!debouncedQuery && activeFilters.length === 0 && !isLoading && !isError) {
       setKnownTotal(total)
     }
-  }, [total, query, activeFilters.length, isLoading, isError])
+  }, [total, debouncedQuery, activeFilters.length, isLoading, isError])
 
-  const isFiltering = query.length > 0 || activeFilters.length > 0
-  const showToolbar = !isLoading && !isError && (knownTotal !== null && knownTotal > 0)
-  // Truly empty: no words saved at all (unfiltered total is 0)
-  const isEmpty     = !isLoading && !isError && !isFiltering && total === 0
+  // Active filtering: either the committed query or any filter chip is on.
+  const isFiltering = debouncedQuery.length > 0 || activeFilters.length > 0
+
+  // Toolbar is always shown once loading resolves — as long as the user has
+  // words OR there are active filters (user must be able to clear them).
+  // This prevents the broken dead-end state after a refresh with ?q= in the URL.
+  const showToolbar = !isLoading && !isError && (
+    isFiltering ||
+    items.length > 0 ||
+    (knownTotal !== null && knownTotal > 0)
+  )
+
+  // Truly empty: user has zero saved words (unfiltered, confirmed by server).
+  const isEmpty = !isLoading && !isError && !isFiltering && total === 0
 
   return (
     <PageLayout>
@@ -194,9 +234,12 @@ export function VocabularyPage() {
           </Text>
         )}
 
+        {/* Toolbar is always rendered once we know to show it, regardless of
+            whether the result list is empty. This prevents hiding the search
+            input and filter controls when a filter returns 0 results. */}
         {showToolbar && (
           <VocabularyToolbar
-            query={query}
+            query={inputValue}
             activeFilters={activeFilters}
             sort={sort}
             viewMode={viewMode}
