@@ -249,13 +249,15 @@ export function VocabularyPage() {
   // ── Display state ─────────────────────────────────────────────────────────
 
   // Track total unfiltered word count for the page header.
-  // Only updated when no search/filter is active so it reflects the real total.
-  const [knownTotal, setKnownTotal] = useState<number | null>(null)
-  useEffect(() => {
-    if (!debouncedQuery && activeFilters.length === 0 && !isLoading && !isError) {
-      setKnownTotal(total)
-    }
-  }, [total, debouncedQuery, activeFilters.length, isLoading, isError])
+  // A ref updated synchronously during render — no useState/useEffect — so
+  // the count is available in the exact same render pass that flips
+  // isLoading → false. Prevents the blank-frame gap that a setState in an
+  // effect would cause (skeleton → nothing → count).
+  const knownTotalRef = useRef<number | null>(null)
+  if (!isLoading && !isError && !debouncedQuery && activeFilters.length === 0) {
+    knownTotalRef.current = total
+  }
+  const knownTotal = knownTotalRef.current
 
   // Active filtering: either the committed query or any filter chip is on.
   const isFiltering = debouncedQuery.length > 0 || activeFilters.length > 0

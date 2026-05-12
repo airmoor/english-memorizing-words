@@ -8,6 +8,9 @@
 
 .wordCount {
   margin: 0;
+  /* Fades in with the same timing as .contentArea so header and body
+     appear as one cohesive unit rather than at different moments. */
+  animation: contentEnter 0.22s var(--ease-out) both;
 }
 
 /* Skeleton placeholder for the "N saved words" subtitle */
