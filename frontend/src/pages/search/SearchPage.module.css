@@ -11,9 +11,10 @@
 
 .searchWrap {
   /* Slight elevation so it feels like a sticky search area */
-  position: sticky;
-  top: 72px; /* header height (56px) + 16px gap */
-  z-index: 5;
+  /* position: sticky; */
+  /* top: 72px; */
+   /* header height (56px) + 16px gap */
+  /* z-index: 5; */
 }
 
 .results {

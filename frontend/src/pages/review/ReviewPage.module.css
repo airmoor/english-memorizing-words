@@ -5,7 +5,8 @@
 
 /* Spacing above SessionProgress (the Container has no padY on this page) */
 .sessionHeader {
-  padding-top: var(--space-lg);
+  padding-top: var(--space-xs);
+  padding-bottom: var(--space-sm);
 }
 
 .main {
@@ -21,7 +22,8 @@
 /* Tighter vertical rhythm on mobile */
 @media (max-width: 1023px) {
   .sessionHeader {
-    padding-top: var(--space-md);
+    padding-top: var(--space-sm);
+    padding-bottom: var(--space-sm);
   }
 
   .main {
