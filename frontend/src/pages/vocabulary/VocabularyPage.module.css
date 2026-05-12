@@ -10,6 +10,14 @@
   margin: 0;
 }
 
+/* Skeleton placeholder for the "N saved words" subtitle */
+.skeletonWordCount {
+  height: 26px;
+  width: 112px;
+  border-radius: var(--radius-sm);
+  margin-top: var(--space-xs);
+}
+
 /* ── Skeleton loading placeholders ──────────────────────────────────────────
    Skeleton elements share the same spatial footprint as the real content so
    the layout doesn't reflow when data arrives. A gentle pulse keeps them
@@ -22,6 +30,7 @@
 }
 
 /* Apply animation + base style to every skeleton shape element */
+.skeletonWordCount,
 .skeletonSearch,
 .skeletonControl,
 .skeletonChip,

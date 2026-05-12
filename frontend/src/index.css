@@ -251,7 +251,11 @@
    with and without a scrollbar. Eliminates the horizontal reflow on navigation. */
 html {
   scrollbar-gutter: stable;
-  background:  var(--color-bg-primary);
+  /* Base canvas color — matches the gradient's bottom layer so there is no
+     visible shift when the App.tsx fixed background div renders after React
+     hydrates. The bootstrap script in index.html sets --color-bg-primary to
+     the user's saved theme before React runs, eliminating FOUC. */
+  background: var(--color-bg-primary);
 }
 
 /* Background gradient lives in App.tsx → .background (position:fixed).

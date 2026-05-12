@@ -279,11 +279,13 @@ export function VocabularyPage() {
           <Text variant="title" as="h1" className={styles.heading}>
             My Vocabulary
           </Text>
-          {knownTotal !== null && knownTotal > 0 && (
+          {isLoading ? (
+            <div className={styles.skeletonWordCount} aria-hidden="true" />
+          ) : knownTotal !== null && knownTotal > 0 ? (
             <Text variant="body" color="secondary" as="p" className={styles.wordCount}>
               {knownTotal} saved word{knownTotal !== 1 ? 's' : ''}
             </Text>
-          )}
+          ) : null}
         </div>
 
         {/* ── Loading: skeleton placeholders occupy the same space as the

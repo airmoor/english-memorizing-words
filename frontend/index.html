@@ -26,6 +26,34 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Theme bootstrap — runs synchronously before React to prevent FOUC.
+         Reads saved theme from localStorage, resolves the correct palette,
+         and sets --color-bg-primary on <html> so the CSS background rule
+         uses the right value in the very first paint.
+         ThemeProvider's useEffect later confirms the same values; no conflict. -->
+    <script>
+      (function () {
+        try {
+          var s = localStorage.getItem('lexis.theme.settings');
+          if (!s) return;
+          var p = JSON.parse(s);
+          var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var isDark  = p.mode === 'dark' || (p.mode === 'system' && sysDark);
+          var theme   = isDark
+            ? ({ standard: 'dark', midnight: 'midnight', violetLibrary: 'violetLibrary', emeraldDepths: 'emeraldDepths', sakuraNight: 'sakuraNight', neon: 'neon' }[p.darkVariant]  || 'dark')
+            : ({ standard: 'light', sepia: 'sepia', marshmallow: 'marshmallow', arcticGlass: 'arcticGlass', solarEditorial: 'solarEditorial' }[p.lightVariant] || 'light');
+          var bg = {
+            light: '#f4f5f9', sepia: '#f3ead7', marshmallow: '#fef0f5',
+            arcticGlass: '#f0f7ff', solarEditorial: '#faf6f0',
+            dark: '#0e0e1a', midnight: '#0a0e1a', violetLibrary: '#140d2a',
+            emeraldDepths: '#061a14', sakuraNight: '#120a1a', neon: '#0a0a14',
+          };
+          var el = document.documentElement;
+          el.setAttribute('data-theme', theme);
+          el.style.setProperty('--color-bg-primary', bg[theme] || '#f4f5f9');
+        } catch (e) {}
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
