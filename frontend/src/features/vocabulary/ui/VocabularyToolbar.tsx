@@ -26,9 +26,8 @@ interface Props {
   activeFilters: VocabularyFilter[]
   sort: SortOption
   viewMode: ViewMode
-  /** Items visible after filtering (for count display). */
+  /** Total items matching current filters (from server). */
   filteredCount: number
-  totalCount: number
   onQueryChange: (q: string) => void
   onFilterToggle: (f: VocabularyFilter) => void
   onSortChange: (s: SortOption) => void
@@ -41,7 +40,6 @@ export function VocabularyToolbar({
   sort,
   viewMode,
   filteredCount,
-  totalCount,
   onQueryChange,
   onFilterToggle,
   onSortChange,
@@ -143,9 +141,7 @@ export function VocabularyToolbar({
       {/* ── Result count ─────────────────────────────────────────────────── */}
       {isFiltered && (
         <p className={styles.resultCount}>
-          {filteredCount === totalCount
-            ? `${totalCount} word${totalCount !== 1 ? 's' : ''}`
-            : `${filteredCount} of ${totalCount} word${totalCount !== 1 ? 's' : ''}`}
+          {`${filteredCount} word${filteredCount !== 1 ? 's' : ''}`}
           {activeFilters.length > 0 && (
             <button
               className={styles.clearFiltersBtn}

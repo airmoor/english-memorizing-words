@@ -28,8 +28,8 @@ interface UseWordDetailUrlOptions {
   vocabularyItems: VocabularyWord[]
   /** Open function from detail context */
   open: WordDetailContextValue['open']
-  /** Close function from detail context */
-  close: WordDetailContextValue['close']
+  /** Close function from detail context (reserved for future back-button close support) */
+  close?: WordDetailContextValue['close']
 }
 
 /**
@@ -46,7 +46,6 @@ export function useWordDetailUrl({
   detail,
   vocabularyItems,
   open,
-  close,
 }: UseWordDetailUrlOptions) {
   const [searchParams, setSearchParams] = useSearchParams()
   const isRestoringFromUrl = useRef(false)

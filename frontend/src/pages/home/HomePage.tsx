@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getProgress } from '../../features/review/api/getProgress'
-import { fetchVocabulary } from '../../features/vocabulary/api/vocabularyApi'
+import { fetchVocabularyPage } from '../../features/vocabulary/api/vocabularyApi'
 import { Card } from '../../shared/ui/Card/Card'
 import { Button } from '../../shared/ui/Button/Button'
 import { Text } from '../../shared/ui/Typography/Typography'
@@ -20,17 +20,16 @@ export function HomePage() {
     staleTime: 30_000,
   })
 
-  // Re-uses the existing vocabulary cache key so /vocabulary and /home share one fetch
   const vocabQuery = useQuery({
-    queryKey: ['vocabulary'],
-    queryFn: fetchVocabulary,
+    queryKey: ['vocabulary-home'],
+    queryFn: () => fetchVocabularyPage({ sort: 'newest', limit: 5 }),
     staleTime: 30_000,
   })
 
   const isLoading = progressQuery.isPending || vocabQuery.isPending
 
-  const stats = progressQuery.data
-  const recent = vocabQuery.data?.slice(0, 5) ?? []
+  const stats  = progressQuery.data
+  const recent = vocabQuery.data?.items ?? []
 
   const dueToday = stats?.dueToday ?? 0
   const reviewedToday = stats?.reviewedToday ?? 0
@@ -144,15 +143,20 @@ export function HomePage() {
                       </button>
                     </div>
                     <ul className={styles.recentList}>
-                      {recent.map((entry) => (
-                        <li key={entry.userMeaningId} className={styles.recentItem}>
-                          <span className={styles.recentWord}>{entry.wordText}</span>
-                          {entry.partOfSpeech && (
-                            <span className={styles.recentPos}>{entry.partOfSpeech}</span>
-                          )}
-                          <span className={styles.recentDef}>{entry.definition}</span>
-                        </li>
-                      ))}
+                      {recent.map((entry) => {
+                        const firstMeaning = entry.meanings[0]
+                        return (
+                          <li key={entry.wordId} className={styles.recentItem}>
+                            <span className={styles.recentWord}>{entry.wordText}</span>
+                            {firstMeaning?.partOfSpeech && (
+                              <span className={styles.recentPos}>{firstMeaning.partOfSpeech}</span>
+                            )}
+                            {firstMeaning && (
+                              <span className={styles.recentDef}>{firstMeaning.definition}</span>
+                            )}
+                          </li>
+                        )
+                      })}
                     </ul>
                   </Card>
                 </DashboardCell>

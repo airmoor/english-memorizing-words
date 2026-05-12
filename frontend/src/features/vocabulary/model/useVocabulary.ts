@@ -1,13 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { fetchVocabulary, deleteWord } from '../api/vocabularyApi'
-import type { VocabularyWord } from '../../../entities/vocabulary/model/types'
+import { fetchVocabularyPage, deleteWord } from '../api/vocabularyApi'
 
 export function useVocabulary() {
   const queryClient = useQueryClient()
 
   const query = useQuery({
     queryKey: ['vocabulary'],
-    queryFn: fetchVocabulary,
+    queryFn: () => fetchVocabularyPage({}),
     staleTime: 30_000,
   })
 
@@ -16,20 +15,11 @@ export function useVocabulary() {
 
     onMutate: async (wordId) => {
       await queryClient.cancelQueries({ queryKey: ['vocabulary'] })
-
-      const prev = queryClient.getQueryData<VocabularyWord[]>(['vocabulary'])
-
-      queryClient.setQueryData<VocabularyWord[]>(['vocabulary'], (old = []) =>
-        old.filter((item) => item.wordId !== wordId),
-      )
-
-      return { prev }
+      return { wordId }
     },
 
-    onError: (_err, _id, ctx) => {
-      if (ctx?.prev !== undefined) {
-        queryClient.setQueryData(['vocabulary'], ctx.prev)
-      }
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: ['vocabulary'] })
     },
 
     onSettled: () => {
@@ -38,7 +28,7 @@ export function useVocabulary() {
   })
 
   return {
-    items: query.data ?? [],
+    items: query.data?.items ?? [],
     isLoading: query.isPending,
     isError: query.isError,
     remove: (wordId: string) => removeMutation.mutate(wordId),

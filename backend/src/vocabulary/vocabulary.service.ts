@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsNumberString, IsOptional, IsString } from 'class-validator';
 import { DataSource } from 'typeorm';
 
 // ── DTOs ────────────────────────────────────────────────────────────────────
@@ -62,6 +63,67 @@ export class VocabularyWordDto {
   meanings: VocabularyMeaningDto[];
 }
 
+export class VocabularyQueryDto {
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional({ example: 'ephemeral', description: 'Text search (word or definition)' })
+  q?: string;
+
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional({ example: 'new,learning', description: 'Comma-separated filter names' })
+  filters?: string;
+
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional({ example: 'newest', description: 'Sort order', enum: ['newest', 'oldest', 'alphabetical', 'hardest', 'easiest', 'nextReview'] })
+  sort?: string;
+
+  @IsOptional()
+  @IsNumberString()
+  @ApiPropertyOptional({ example: '50', description: 'Page size (1–100, default 50)' })
+  limit?: string;
+
+  @IsOptional()
+  @IsNumberString()
+  @ApiPropertyOptional({ example: '0', description: 'Number of items to skip (default 0)' })
+  offset?: string;
+}
+
+export class PaginatedVocabularyDto {
+  @ApiProperty({ type: [VocabularyWordDto] })
+  items: VocabularyWordDto[];
+
+  @ApiProperty({ example: 123, description: 'Total items matching current filters' })
+  total: number;
+
+  @ApiProperty({ example: true })
+  hasMore: boolean;
+}
+
+// ── Filter → SQL condition mapping ────────────────────────────────────────────
+
+const FILTER_CONDITIONS: Record<string, string> = {
+  difficult:       '(c.ease_factor IS NOT NULL AND c.ease_factor < 2.0)',
+  new:             'c.last_reviewed_at IS NULL',
+  learning:        '(c.last_reviewed_at IS NOT NULL AND c.interval_days < 7)',
+  review:          '(c.interval_days >= 7 AND c.interval_days < 21)',
+  mature:          'c.interval_days >= 21',
+  dueToday:        'c.next_review <= NOW()',
+  neverReviewed:   'c.last_reviewed_at IS NULL',
+  savedRecently:   "uw.saved_at >= NOW() - INTERVAL '7 days'",
+  reviewedRecently: "c.last_reviewed_at >= NOW() - INTERVAL '7 days'",
+}
+
+const SORT_MAP: Record<string, string> = {
+  newest:       'uw.saved_at DESC',
+  oldest:       'uw.saved_at ASC',
+  alphabetical: 'w.text ASC',
+  hardest:      'c.ease_factor ASC NULLS FIRST',
+  easiest:      'c.ease_factor DESC NULLS LAST',
+  nextReview:   'c.next_review ASC NULLS LAST',
+}
+
 // ── Service ──────────────────────────────────────────────────────────────────
 
 @Injectable()
@@ -108,10 +170,66 @@ export class VocabularyService {
   }
 
   // ── GET /vocabulary ───────────────────────────────────────────────────────
-  // Returns one entry per saved word, with all its meanings nested.
+  // Returns a paginated, filtered, sorted list of saved words with nested meanings.
 
-  async getUserVocabulary(userId: string): Promise<VocabularyWordDto[]> {
-    // Fetch all saved words with word-level fields + card SRS state
+  async getUserVocabulary(
+    userId: string,
+    dto: VocabularyQueryDto,
+  ): Promise<PaginatedVocabularyDto> {
+    const q      = (dto.q ?? '').trim()
+    const sort   = SORT_MAP[dto.sort ?? ''] ?? SORT_MAP.newest
+    const limit  = Math.min(Math.max(parseInt(dto.limit  ?? '50',  10) || 50,  1), 100)
+    const offset = Math.max(parseInt(dto.offset ?? '0', 10) || 0, 0)
+
+    const activeFilters = (dto.filters ?? '')
+      .split(',')
+      .map((f) => f.trim())
+      .filter(Boolean)
+
+    // ── Build WHERE clause ────────────────────────────────────────────────
+    const params: unknown[] = [userId]
+    const where: string[]   = ['uw.user_id = $1']
+
+    if (q) {
+      params.push(`%${q}%`)
+      const p = params.length
+      where.push(`(
+        w.text ILIKE $${p}
+        OR EXISTS (
+          SELECT 1 FROM meanings m2
+          WHERE m2.word_id = w.id AND m2.definition ILIKE $${p}
+        )
+      )`)
+    }
+
+    if (activeFilters.length > 0) {
+      const conds = activeFilters
+        .map((f) => FILTER_CONDITIONS[f])
+        .filter(Boolean)
+      if (conds.length > 0) {
+        where.push(`(${conds.join(' OR ')})`)
+      }
+    }
+
+    const whereClause = where.join(' AND ')
+
+    // ── COUNT ──────────────────────────────────────────────────────────────
+    const [{ total }] = await this.dataSource.query<[{ total: string }]>(
+      `SELECT COUNT(*) AS total
+       FROM user_words uw
+       JOIN words w ON w.id = uw.word_id
+       LEFT JOIN cards c ON c.user_id = uw.user_id AND c.word_id = uw.word_id
+       WHERE ${whereClause}`,
+      params,
+    )
+    const totalCount = parseInt(total, 10)
+    if (totalCount === 0) return { items: [], total: 0, hasMore: false }
+
+    // ── Items ──────────────────────────────────────────────────────────────
+    const itemParams = [...params, limit, offset]
+    const limitIdx   = itemParams.length - 1
+    const offsetIdx  = itemParams.length
+
     const words = await this.dataSource.query<{
       userWordId: string;
       wordId: string;
@@ -138,15 +256,16 @@ export class VocabularyService {
        FROM user_words uw
        JOIN words w ON w.id = uw.word_id
        LEFT JOIN cards c ON c.user_id = uw.user_id AND c.word_id = uw.word_id
-       WHERE uw.user_id = $1
-       ORDER BY uw.saved_at DESC`,
-      [userId],
-    );
+       WHERE ${whereClause}
+       ORDER BY ${sort}
+       LIMIT $${limitIdx} OFFSET $${offsetIdx}`,
+      itemParams,
+    )
 
-    if (words.length === 0) return [];
+    if (words.length === 0) return { items: [], total: totalCount, hasMore: false }
 
-    // Fetch all meanings for those words in one query — includes synonyms + examples
-    const wordIds = words.map((w) => w.wordId);
+    // ── Meanings (batch, one query) ────────────────────────────────────────
+    const wordIds = words.map((w) => w.wordId)
     const meanings = await this.dataSource.query<{
       wordId: string;
       id: string;
@@ -168,27 +287,32 @@ export class VocabularyService {
        WHERE word_id = ANY($1)
        ORDER BY sense_number NULLS LAST`,
       [wordIds],
-    );
+    )
 
-    // Group meanings by wordId
-    const meaningsByWord = new Map<string, VocabularyMeaningDto[]>();
+    const meaningsByWord = new Map<string, VocabularyMeaningDto[]>()
     for (const m of meanings) {
-      const list = meaningsByWord.get(m.wordId) ?? [];
+      const list = meaningsByWord.get(m.wordId) ?? []
       list.push({
-        id: m.id,
-        definition: m.definition,
+        id:           m.id,
+        definition:   m.definition,
         partOfSpeech: m.partOfSpeech,
-        senseNumber: m.senseNumber,
-        synonyms: m.synonyms ?? [],
-        examples: m.examples ?? [],
-      });
-      meaningsByWord.set(m.wordId, list);
+        senseNumber:  m.senseNumber,
+        synonyms:     m.synonyms ?? [],
+        examples:     m.examples ?? [],
+      })
+      meaningsByWord.set(m.wordId, list)
     }
 
-    return words.map((w) => ({
+    const items: VocabularyWordDto[] = words.map((w) => ({
       ...w,
       meanings: meaningsByWord.get(w.wordId) ?? [],
-    }));
+    }))
+
+    return {
+      items,
+      total:   totalCount,
+      hasMore: offset + items.length < totalCount,
+    }
   }
 
   // ── DELETE /vocabulary/words/:wordId ─────────────────────────────────────

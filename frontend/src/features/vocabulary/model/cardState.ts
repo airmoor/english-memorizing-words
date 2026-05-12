@@ -1,6 +1,6 @@
 import type { VocabularyWord } from '../../../entities/vocabulary/model/types'
 
-// ── Card State ────────────────────────────────────────────────────────────────
+// ── Card State (derived client-side for UI display) ───────────────────────────
 
 /**
  * Simplified learning lifecycle states, inspired by Anki's model but
@@ -64,99 +64,4 @@ export const SORT_LABELS: Record<SortOption, string> = {
   hardest:     'Hardest first',
   easiest:     'Easiest first',
   nextReview:  'Next review',
-}
-
-// ── Filter predicates ─────────────────────────────────────────────────────────
-
-function isDueToday(word: VocabularyWord): boolean {
-  return !!word.nextReview && new Date(word.nextReview) <= new Date()
-}
-
-function isSavedRecently(word: VocabularyWord): boolean {
-  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
-  return new Date(word.savedAt).getTime() >= sevenDaysAgo
-}
-
-function isReviewedRecently(word: VocabularyWord): boolean {
-  if (!word.lastReviewedAt) return false
-  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
-  return new Date(word.lastReviewedAt).getTime() >= sevenDaysAgo
-}
-
-function matchesFilter(word: VocabularyWord, filter: VocabularyFilter): boolean {
-  switch (filter) {
-    case 'dueToday':        return isDueToday(word)
-    case 'neverReviewed':   return word.lastReviewedAt === null
-    case 'savedRecently':   return isSavedRecently(word)
-    case 'reviewedRecently': return isReviewedRecently(word)
-    default:                return getCardState(word) === filter
-  }
-}
-
-// ── Apply filters + sort ──────────────────────────────────────────────────────
-
-export interface VocabularyViewOptions {
-  query: string
-  /** Active filters — matched with OR logic (any filter match shows the word). */
-  activeFilters: VocabularyFilter[]
-  sort: SortOption
-}
-
-export function applyVocabularyView(
-  items: VocabularyWord[],
-  { query, activeFilters, sort }: VocabularyViewOptions,
-): VocabularyWord[] {
-  let result = items.slice()
-
-  // Text search — word text or any definition
-  const q = query.trim().toLowerCase()
-  if (q) {
-    result = result.filter(
-      (w) =>
-        w.wordText.toLowerCase().includes(q) ||
-        w.meanings.some((m) => m.definition.toLowerCase().includes(q)),
-    )
-  }
-
-  // State/special filters — OR semantics
-  if (activeFilters.length > 0) {
-    result = result.filter((word) =>
-      activeFilters.some((f) => matchesFilter(word, f)),
-    )
-  }
-
-  // Sort
-  result.sort((a, b) => {
-    switch (sort) {
-      case 'newest':
-        return new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime()
-      case 'oldest':
-        return new Date(a.savedAt).getTime() - new Date(b.savedAt).getTime()
-      case 'alphabetical':
-        return a.wordText.localeCompare(b.wordText)
-      case 'hardest': {
-        // Lower ease = harder. Null (new cards) ranked as hardest.
-        const ea = a.easeFactor ?? -1
-        const eb = b.easeFactor ?? -1
-        return ea - eb
-      }
-      case 'easiest': {
-        // Higher ease = easier. Null ranked as easiest to avoid confusion.
-        const ea = a.easeFactor ?? 999
-        const eb = b.easeFactor ?? 999
-        return eb - ea
-      }
-      case 'nextReview': {
-        // Null (never reviewed) goes last
-        if (!a.nextReview && !b.nextReview) return 0
-        if (!a.nextReview) return 1
-        if (!b.nextReview) return -1
-        return new Date(a.nextReview).getTime() - new Date(b.nextReview).getTime()
-      }
-      default:
-        return 0
-    }
-  })
-
-  return result
 }

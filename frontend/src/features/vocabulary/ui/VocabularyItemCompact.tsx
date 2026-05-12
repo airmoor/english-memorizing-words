@@ -61,15 +61,17 @@ export function VocabularyItemCompact({ item, onRemove, sourceList }: Props) {
           title={state.charAt(0).toUpperCase() + state.slice(1)}
         />
 
-        {/* Word */}
-        <span className={styles.word}>{item.wordText}</span>
+        <div className={styles.wordBlock}>
+          {/* Word */}
+          <span className={styles.word}>{item.wordText}</span>
 
-        {/* Transcription */}
-        {item.transcription ? (
-          <span className={styles.transcription}>/{item.transcription}/</span>
-        ) : (
-          <span />
-        )}
+          {/* Transcription */}
+          {item.transcription ? (
+            <span className={styles.transcription}>/{item.transcription}/</span>
+          ) : (
+            <span />
+          )}
+        </div>
 
         {/* Delete */}
         <button

@@ -17,6 +17,12 @@ export interface VocabularyMeaning {
  * learning state (card SRS fields) so WordDetailContent can be rendered
  * without a secondary fetch. See §4.5 of the vocabulary-discovery spec.
  */
+export interface PaginatedVocabulary {
+  items: VocabularyWord[]
+  total: number
+  hasMore: boolean
+}
+
 export interface VocabularyWord {
   userWordId: string
   wordId: string

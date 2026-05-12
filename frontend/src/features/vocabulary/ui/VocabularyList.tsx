@@ -1,54 +1,55 @@
 import { useNavigate } from 'react-router-dom'
-import { useMemo, useState, useEffect, useRef } from 'react'
+import { useMemo, useEffect, useRef } from 'react'
 import type { VocabularyWord } from '../../../entities/vocabulary/model/types'
 import { Text } from '../../../shared/ui/Typography/Typography'
 import { Button } from '../../../shared/ui/Button/Button'
+import { Spinner } from '../../../shared/ui/Spinner'
 import { VocabularyItem } from './VocabularyItem'
 import { VocabularyItemCompact } from './VocabularyItemCompact'
 import type { ViewMode } from './VocabularyToolbar'
 import styles from './VocabularyList.module.css'
 
-const PAGE_SIZE = 50
-
 interface Props {
   items: VocabularyWord[]
   onRemove: (wordId: string) => void
   viewMode?: ViewMode
-  /** When true, shows the empty-vocab prompt (all words gone). When false + empty, it means filters excluded everything. */
+  /** True when the user has no words at all (not filtered out). */
   isEmpty?: boolean
+  hasNextPage?: boolean
+  isFetchingNextPage?: boolean
+  onLoadMore?: () => void
 }
 
-export function VocabularyList({ items, onRemove, viewMode = 'detailed', isEmpty = false }: Props) {
-  const navigate = useNavigate()
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+export function VocabularyList({
+  items,
+  onRemove,
+  viewMode = 'detailed',
+  isEmpty = false,
+  hasNextPage = false,
+  isFetchingNextPage = false,
+  onLoadMore,
+}: Props) {
+  const navigate    = useNavigate()
   const sentinelRef = useRef<HTMLDivElement>(null)
 
-  // Reset pagination whenever the filtered list changes
-  useEffect(() => {
-    setVisibleCount(PAGE_SIZE)
-  }, [items])
-
-  // Intersection-observer auto-load-more — fires when sentinel enters viewport
+  // Trigger onLoadMore when the sentinel scrolls into view
   useEffect(() => {
     const el = sentinelRef.current
-    if (!el) return
+    if (!el || !hasNextPage || !onLoadMore) return
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
-          setVisibleCount((c) => Math.min(c + PAGE_SIZE, items.length))
+        if (entries[0].isIntersecting && !isFetchingNextPage) {
+          onLoadMore()
         }
       },
       { threshold: 0.1 },
     )
     observer.observe(el)
     return () => observer.disconnect()
-  }, [items.length])
+  }, [hasNextPage, isFetchingNextPage, onLoadMore])
 
-  // Source list for panel navigation — reflects the current filtered + sorted order
+  // Source list for panel navigation — ordered by current view
   const sourceList = useMemo(() => items.map((item) => item.wordId), [items])
-
-  // Slice to the current page window
-  const visibleItems = items.slice(0, visibleCount)
 
   // ── Empty: no words saved at all ─────────────────────────────────────────
   if (isEmpty) {
@@ -86,7 +87,7 @@ export function VocabularyList({ items, onRemove, viewMode = 'detailed', isEmpty
   return (
     <div>
       <ul className={viewMode === 'compact' ? styles.listCompact : styles.list}>
-        {visibleItems.map((item) =>
+        {items.map((item) =>
           viewMode === 'compact' ? (
             <VocabularyItemCompact
               key={item.wordId}
@@ -105,10 +106,11 @@ export function VocabularyList({ items, onRemove, viewMode = 'detailed', isEmpty
         )}
       </ul>
 
-      {/* Intersection sentinel — triggers next batch load when scrolled into view */}
-      {visibleCount < items.length && (
+      {/* Sentinel — triggers backend fetch of next page */}
+      {hasNextPage && (
         <div ref={sentinelRef} className={styles.sentinel} aria-hidden="true" />
       )}
+      {isFetchingNextPage && <Spinner />}
     </div>
   )
 }

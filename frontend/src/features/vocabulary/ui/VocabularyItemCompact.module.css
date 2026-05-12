@@ -3,7 +3,7 @@
 .row {
   display: grid;
   /* dot  |  word  |  transcription (flex-fill)  |  delete */
-  grid-template-columns: 10px 1fr auto 32px;
+  grid-template-columns: 10px 1fr 32px;
   align-items: center;
   gap: var(--space-md);
   padding: 10px var(--space-md);
@@ -21,7 +21,7 @@
 .row:hover {
   border-color: var(--color-accent);
   background: color-mix(in srgb, var(--color-bg-card) 97%, var(--color-accent));
-  transform: translateY(-1px);
+  /* transform: translateY(-1px); */
 }
 
 .row:focus-visible {
@@ -51,6 +51,13 @@
 .dot_difficult { background: var(--color-danger); }
 
 /* ── Word ────────────────────────────────────────────────────────────────── */
+
+.wordBlock {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
 
 .word {
   font-family: var(--font-serif);
@@ -86,7 +93,7 @@
   background: none;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
-  color: transparent;
+  color: var(--color-text-secondary);
   cursor: pointer;
   transition: color 0.12s, border-color 0.12s, background 0.12s;
   justify-self: center;
@@ -114,8 +121,5 @@
 @media (max-width: 380px) {
   .row {
     grid-template-columns: 10px 1fr 32px;
-  }
-  .transcription {
-    display: none;
   }
 }

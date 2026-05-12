@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, useEffect, useRef } from 'react'
+import { useCallback, useState, useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Spinner } from '../../shared/ui/Spinner'
 import { Text } from '../../shared/ui/Typography/Typography'
@@ -9,8 +9,7 @@ import { useWordDetail } from '../../shared/ui/WordDetail/WordDetailContext'
 import { useWordDetailUrl } from '../../shared/ui/WordDetail/useWordDetailUrl'
 import { VocabularyList } from '../../features/vocabulary/ui/VocabularyList'
 import { VocabularyToolbar } from '../../features/vocabulary/ui/VocabularyToolbar'
-import { useVocabulary } from '../../features/vocabulary/model/useVocabulary'
-import { applyVocabularyView } from '../../features/vocabulary/model/cardState'
+import { useVocabularyInfinite } from '../../features/vocabulary/model/useVocabularyInfinite'
 import type { VocabularyFilter, SortOption } from '../../features/vocabulary/model/cardState'
 import type { ViewMode } from '../../features/vocabulary/ui/VocabularyToolbar'
 import type { VocabularyWord } from '../../entities/vocabulary/model/types'
@@ -39,20 +38,30 @@ function useViewMode(): [ViewMode, (m: ViewMode) => void] {
 // ── Inner component — inside WordDetailProvider, has access to useWordDetail ──
 
 interface ContentProps {
-  allItems: VocabularyWord[]   // full list for URL word restoration
-  items: VocabularyWord[]      // filtered list for navigation + render
+  items: VocabularyWord[]
   onRemove: (wordId: string) => void
   viewMode: ViewMode
   isEmpty: boolean
+  hasNextPage: boolean
+  isFetchingNextPage: boolean
+  onLoadMore: () => void
 }
 
-function VocabularyPageContent({ allItems, items, onRemove, viewMode, isEmpty }: ContentProps) {
+function VocabularyPageContent({
+  items,
+  onRemove,
+  viewMode,
+  isEmpty,
+  hasNextPage,
+  isFetchingNextPage,
+  onLoadMore,
+}: ContentProps) {
   const detail = useWordDetail()
 
   useWordDetailUrl({
     detail,
-    vocabularyItems: allItems,
-    open: detail.open,
+    vocabularyItems: items,
+    open:  detail.open,
     close: detail.close,
   })
 
@@ -62,6 +71,9 @@ function VocabularyPageContent({ allItems, items, onRemove, viewMode, isEmpty }:
       onRemove={onRemove}
       viewMode={viewMode}
       isEmpty={isEmpty}
+      hasNextPage={hasNextPage}
+      isFetchingNextPage={isFetchingNextPage}
+      onLoadMore={onLoadMore}
     />
   )
 }
@@ -69,18 +81,14 @@ function VocabularyPageContent({ allItems, items, onRemove, viewMode, isEmpty }:
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export function VocabularyPage() {
-  const { items, isLoading, isError, remove } = useVocabulary()
   const [searchParams, setSearchParams] = useSearchParams()
-  const [viewMode, setViewMode] = useViewMode()
+  const [viewMode, setViewMode]         = useViewMode()
 
   // ── URL-backed filter state ────────────────────────────────────────────────
 
-  const query = searchParams.get('q') ?? ''
-  const activeFilters = useMemo(
-    () => (searchParams.get('f') ?? '').split(',').filter(Boolean) as VocabularyFilter[],
-    [searchParams],
-  )
-  const sort = (searchParams.get('s') ?? 'newest') as SortOption
+  const query         = searchParams.get('q') ?? ''
+  const activeFilters = (searchParams.get('f') ?? '').split(',').filter(Boolean) as VocabularyFilter[]
+  const sort          = (searchParams.get('s') ?? 'newest') as SortOption
 
   // Debounce search query — update URL only after user pauses typing
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -97,7 +105,7 @@ export function VocabularyPage() {
           },
           { replace: true },
         )
-      }, 200)
+      }, 300)
     },
     [setSearchParams],
   )
@@ -107,7 +115,7 @@ export function VocabularyPage() {
     (f: VocabularyFilter) => {
       setSearchParams(
         (prev) => {
-          const next = new URLSearchParams(prev)
+          const next    = new URLSearchParams(prev)
           const current = (prev.get('f') ?? '').split(',').filter(Boolean) as VocabularyFilter[]
           const updated = current.includes(f)
             ? current.filter((x) => x !== f)
@@ -137,23 +145,32 @@ export function VocabularyPage() {
     [setSearchParams],
   )
 
-  // Clear all active filters at once
-  const handleClearFilters = useCallback(() => {
-    activeFilters.forEach(handleFilterToggle)
-  }, [activeFilters, handleFilterToggle])
+  // ── Data ───────────────────────────────────────────────────────────────────
 
-  // ── Filtered + sorted list ─────────────────────────────────────────────────
+  const {
+    items,
+    total,
+    isLoading,
+    isError,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    remove,
+  } = useVocabularyInfinite({ query, activeFilters, sort })
 
-  const filteredItems = useMemo(
-    () =>
-      isLoading || isError
-        ? []
-        : applyVocabularyView(items, { query, activeFilters, sort }),
-    [items, query, activeFilters, sort, isLoading, isError],
-  )
+  // Track total unfiltered word count for the page header.
+  // Updated whenever the unfiltered query resolves (no search/filters active).
+  const [knownTotal, setKnownTotal] = useState<number | null>(null)
+  useEffect(() => {
+    if (!query && activeFilters.length === 0 && !isLoading && !isError) {
+      setKnownTotal(total)
+    }
+  }, [total, query, activeFilters.length, isLoading, isError])
 
-  const showToolbar = !isLoading && !isError && items.length > 0
-  const isEmpty = !isLoading && !isError && items.length === 0
+  const isFiltering = query.length > 0 || activeFilters.length > 0
+  const showToolbar = !isLoading && !isError && (knownTotal !== null && knownTotal > 0)
+  // Truly empty: no words saved at all (unfiltered total is 0)
+  const isEmpty     = !isLoading && !isError && !isFiltering && total === 0
 
   return (
     <PageLayout>
@@ -162,9 +179,9 @@ export function VocabularyPage() {
           <Text variant="title" as="h1" className={styles.heading}>
             My Vocabulary
           </Text>
-          {!isLoading && !isError && items.length > 0 && (
+          {knownTotal !== null && knownTotal > 0 && (
             <Text variant="body" color="secondary" as="p" className={styles.wordCount}>
-              {items.length} saved word{items.length !== 1 ? 's' : ''}
+              {knownTotal} saved word{knownTotal !== 1 ? 's' : ''}
             </Text>
           )}
         </div>
@@ -183,8 +200,7 @@ export function VocabularyPage() {
             activeFilters={activeFilters}
             sort={sort}
             viewMode={viewMode}
-            filteredCount={filteredItems.length}
-            totalCount={items.length}
+            filteredCount={total}
             onQueryChange={handleQueryChange}
             onFilterToggle={handleFilterToggle}
             onSortChange={handleSortChange}
@@ -195,11 +211,13 @@ export function VocabularyPage() {
         {!isLoading && !isError && (
           <WordDetailProvider onRemove={remove} context="vocabulary">
             <VocabularyPageContent
-              allItems={items}
-              items={filteredItems}
+              items={items}
               onRemove={remove}
               viewMode={viewMode}
               isEmpty={isEmpty}
+              hasNextPage={hasNextPage}
+              isFetchingNextPage={isFetchingNextPage}
+              onLoadMore={fetchNextPage}
             />
           </WordDetailProvider>
         )}

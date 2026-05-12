@@ -6,16 +6,23 @@ import {
   HttpStatus,
   Param,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { VocabularyService, VocabularyWordDto } from './vocabulary.service';
+import {
+  PaginatedVocabularyDto,
+  VocabularyQueryDto,
+  VocabularyService,
+  VocabularyWordDto,
+} from './vocabulary.service';
 import { AuthUser, CurrentUser } from '../common/decorators/current-user.decorator';
 
 @ApiTags('vocabulary')
@@ -39,15 +46,21 @@ export class VocabularyController {
     return this.vocabularyService.saveWord(user.id, wordId);
   }
 
-  // Get all saved words with nested meanings
+  // Get paginated, filtered, sorted saved words
   @Get()
-  @ApiOperation({ summary: 'Get all saved words for the authenticated user' })
-  @ApiResponse({ status: 200, description: 'List of saved words with meanings', type: [VocabularyWordDto] })
+  @ApiOperation({ summary: 'Get saved words (paginated, filterable, sortable)' })
+  @ApiQuery({ name: 'q',       required: false, description: 'Text search' })
+  @ApiQuery({ name: 'filters', required: false, description: 'Comma-separated filter names' })
+  @ApiQuery({ name: 'sort',    required: false, description: 'Sort order', enum: ['newest', 'oldest', 'alphabetical', 'hardest', 'easiest', 'nextReview'] })
+  @ApiQuery({ name: 'limit',   required: false, description: 'Page size (1–100)' })
+  @ApiQuery({ name: 'offset',  required: false, description: 'Items to skip' })
+  @ApiResponse({ status: 200, description: 'Paginated vocabulary', type: PaginatedVocabularyDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   getUserVocabulary(
     @CurrentUser() user: AuthUser,
-  ): Promise<VocabularyWordDto[]> {
-    return this.vocabularyService.getUserVocabulary(user.id);
+    @Query() query: VocabularyQueryDto,
+  ): Promise<PaginatedVocabularyDto> {
+    return this.vocabularyService.getUserVocabulary(user.id, query);
   }
 
   // Remove a word from vocabulary (cascades card + review logs)
