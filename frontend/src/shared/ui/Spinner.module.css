@@ -1,13 +1,19 @@
 .spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid #e5e7eb;
-  border-top-color: #6366f1;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+  border: 2.5px solid var(--color-border);
+  border-top-color: var(--color-accent);
   margin: 2rem auto;
+
+  /* Start invisible so fast requests never flash the spinner.
+     After 150ms the element becomes visible and starts rotating.
+     If it unmounts before 150ms it is never seen. */
+  opacity: 0;
+  animation:
+    spinner-appear 0s linear 150ms forwards,
+    spinner-spin   0.65s linear 150ms infinite;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spinner-spin   { to { transform: rotate(360deg); } }
+@keyframes spinner-appear { to { opacity: 1; } }

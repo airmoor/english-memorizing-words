@@ -41,13 +41,46 @@
   margin-top: var(--space-sm);
 }
 
+/* ── Answer reveal — CSS grid-template-rows trick ────────────────────────────
+   Animating height: 0 → auto is impossible with CSS alone.
+   grid-template-rows: 0fr → 1fr achieves the same effect cleanly:
+   the single-row grid collapses/expands the inner cell, which overflows
+   hidden. No JS layout reads, no resize observers, no requestAnimationFrame.
+───────────────────────────────────────────────────────────────────────────── */
+
+.answerSlot {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.32s var(--ease-out);
+}
+
+.answerSlotOpen {
+  grid-template-rows: 1fr;
+}
+
+/* Clip overflow during collapse/expand */
+.answerInner {
+  overflow: hidden;
+  min-height: 0;
+}
+
 /* ── Back face (revealed definitions) ─────────────────────────────────────── */
 
 .back {
   border-top: 1px solid var(--color-border);
   margin-top: var(--space-lg);
   padding-top: var(--space-lg);
-  animation: fadeUp 0.2s ease;
+  /* Fade content in slightly after the grid starts opening */
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity   0.22s var(--ease-out) 0.1s,
+    transform 0.22s var(--ease-out) 0.1s;
+}
+
+.answerSlotOpen .back {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* ── Meaning list ──────────────────────────────────────────────────────────── */
@@ -113,6 +146,12 @@
   border-radius: var(--radius-full);
   font-size: var(--font-xs);
   color: var(--color-text-secondary);
+}
+
+/* ── Rating buttons entry ──────────────────────────────────────────────────── */
+
+.ratingSlot {
+  animation: fadeUp 0.25s var(--ease-out) 0.15s both;
 }
 
 /* ── Error ─────────────────────────────────────────────────────────────────── */

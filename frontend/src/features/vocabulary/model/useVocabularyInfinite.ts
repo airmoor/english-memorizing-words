@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useInfiniteQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import type { InfiniteData } from '@tanstack/react-query'
 import { fetchVocabularyPage, deleteWord } from '../api/vocabularyApi'
 import type { PaginatedVocabulary, VocabularyWord } from '../../../entities/vocabulary/model/types'
@@ -35,6 +35,9 @@ export function useVocabularyInfinite(params: VocabularyQueryParams) {
       return lastPage.hasMore ? fetched : undefined
     },
     staleTime: 30_000,
+    // Keep the previous filter's results visible while the new query loads.
+    // Prevents the vocabulary list from flashing empty on every filter change.
+    placeholderData: keepPreviousData,
   })
 
   const items: VocabularyWord[] =

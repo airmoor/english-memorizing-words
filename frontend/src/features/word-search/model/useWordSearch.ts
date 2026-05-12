@@ -12,7 +12,7 @@ export type SearchStatus =
   | { status: 'success'; word: WordResult }
 
 export function useWordSearch(query: string): SearchStatus {
-  const { data, isPending, isError, error, isFetching } = useQuery({
+  const { data, isPending, isError, error } = useQuery({
     queryKey: ['word', query],
     queryFn: () => fetchWord(query),
     enabled: query.length > 0,
@@ -22,7 +22,10 @@ export function useWordSearch(query: string): SearchStatus {
   })
 
   if (!query) return { status: 'idle' }
-  if (isPending || isFetching) return { status: 'loading' }
+  // isPending is only true when there is genuinely no data yet (including no
+  // placeholder). With keepPreviousData, switching queries keeps the previous
+  // result visible instead of flashing the spinner.
+  if (isPending) return { status: 'loading' }
   if (isError) {
     if (error instanceof ApiError && error.status === 404) return { status: 'notFound' }
     if (error instanceof ApiError && error.status === 503) return { status: 'unavailable' }

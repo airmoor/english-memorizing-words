@@ -58,61 +58,66 @@ export function Flashcard({ card }: Props) {
           )}
         </Stack>
 
-        {/* Back — definitions only; rating buttons live below the card */}
-        {revealed && (
-          <div className={styles.back}>
-            {answerQuery.isPending && (
-              <Text variant="caption" color="secondary">Loading…</Text>
-            )}
+        {/* Back — always rendered; CSS grid collapses/expands it smoothly.
+            The inner element has overflow:hidden so collapsed state is invisible. */}
+        <div className={[styles.answerSlot, revealed ? styles.answerSlotOpen : ''].join(' ')}>
+          <div className={styles.answerInner}>
+            <div className={styles.back}>
+              {answerQuery.isPending && revealed && (
+                <Text variant="caption" color="secondary">Loading…</Text>
+              )}
 
-            {answerQuery.data && (
-              <Stack gap="md">
-                <ol className={styles.meanings}>
-                  {answerQuery.data.meanings.map((m) => (
-                    <li key={m.id} className={styles.meaning}>
-                      <Stack gap="xs">
-                        {m.partOfSpeech && (
-                          <span className={styles.badge}>{m.partOfSpeech}</span>
-                        )}
-                        <Text variant="body" as="p" className={styles.definition}>{m.definition}</Text>
-                        {m.examples.length > 0 && (
-                          <ul className={styles.examples}>
-                            {m.examples.map((ex, j) => (
-                              <li key={j}>
-                                <Text variant="caption" color="secondary" as="span">"{ex}"</Text>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                        {m.synonyms.length > 0 && (
-                          <div className={styles.synonyms}>
-                            {m.synonyms.map((s) => (
-                              <span key={s} className={styles.synonym}>{s}</span>
-                            ))}
-                          </div>
-                        )}
-                      </Stack>
-                    </li>
-                  ))}
-                </ol>
-              </Stack>
-            )}
+              {answerQuery.data && (
+                <Stack gap="md">
+                  <ol className={styles.meanings}>
+                    {answerQuery.data.meanings.map((m) => (
+                      <li key={m.id} className={styles.meaning}>
+                        <Stack gap="xs">
+                          {m.partOfSpeech && (
+                            <span className={styles.badge}>{m.partOfSpeech}</span>
+                          )}
+                          <Text variant="body" as="p" className={styles.definition}>{m.definition}</Text>
+                          {m.examples.length > 0 && (
+                            <ul className={styles.examples}>
+                              {m.examples.map((ex, j) => (
+                                <li key={j}>
+                                  <Text variant="caption" color="secondary" as="span">"{ex}"</Text>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                          {m.synonyms.length > 0 && (
+                            <div className={styles.synonyms}>
+                              {m.synonyms.map((s) => (
+                                <span key={s} className={styles.synonym}>{s}</span>
+                              ))}
+                            </div>
+                          )}
+                        </Stack>
+                      </li>
+                    ))}
+                  </ol>
+                </Stack>
+              )}
 
-            {rateMutation.isError && (
-              <Text variant="caption" color="danger" as="p" className={styles.errorMsg}>
-                Failed to save. Try again.
-              </Text>
-            )}
+              {rateMutation.isError && (
+                <Text variant="caption" color="danger" as="p" className={styles.errorMsg}>
+                  Failed to save. Try again.
+                </Text>
+              )}
+            </div>
           </div>
-        )}
+        </div>
       </Card>
 
-      {/* Rating buttons sit below the card so they don't compete with content */}
+      {/* Rating buttons sit below the card and animate in after the reveal */}
       {revealed && (
-        <RatingButtons
-          onRate={(r) => rateMutation.mutate(r)}
-          disabled={rateMutation.isPending}
-        />
+        <div className={styles.ratingSlot}>
+          <RatingButtons
+            onRate={(r) => rateMutation.mutate(r)}
+            disabled={rateMutation.isPending}
+          />
+        </div>
       )}
     </div>
   )
