@@ -1,0 +1,37 @@
+/* ── Viewport-anchored background layer ─────────────────────────────────────
+   A single fixed element that covers the viewport and never participates in
+   page layout. Because it is position:fixed, the browser composites it
+   independently of scroll and document height — the gradient is always
+   anchored to the viewport corners, not to the content box.
+
+   z-index:-1 puts it behind every sibling in the stacking context.
+   body must be transparent (see index.css) for this to be visible.
+────────────────────────────────────────────────────────────────────────────── */
+.background {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+
+  background:
+    /* Top-center glow — brand accent bloom */
+    radial-gradient(ellipse 80% 45% at 50% -5%,
+      var(--gradient-glow) 0%,
+      transparent 70%
+    ),
+    /* Left-mid accent orb */
+    radial-gradient(ellipse 55% 35% at 15% 65%,
+      color-mix(in srgb, var(--gradient-a) 8%, transparent) 0%,
+      transparent 65%
+    ),
+    /* Right-mid accent orb */
+    radial-gradient(ellipse 50% 30% at 88% 40%,
+      color-mix(in srgb, var(--gradient-b) 6%, transparent) 0%,
+      transparent 60%
+    ),
+    /* Base surface color */
+    var(--color-bg-primary);
+
+  /* Smooth palette shift when the user switches themes */
+  transition: background 0.25s var(--ease-out);
+}

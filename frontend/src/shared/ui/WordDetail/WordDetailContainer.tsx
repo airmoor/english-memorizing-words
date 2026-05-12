@@ -1,5 +1,5 @@
 import { useMemo, useId, useState, useEffect, type ReactNode } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQueryClient, type InfiniteData } from '@tanstack/react-query'
 import { useWordDetailState } from './useWordDetailState'
 import { useWordDetailData } from './useWordDetailData'
 import { WordDetailContext } from './WordDetailContext'
@@ -7,7 +7,7 @@ import { BottomSheet } from './BottomSheet'
 import { SidePanel } from './SidePanel'
 import { WordDetailContent } from './WordDetailContent'
 import { Spinner } from '../Spinner'
-import type { VocabularyWord } from '../../../entities/vocabulary/model/types'
+import type { PaginatedVocabulary } from '../../../entities/vocabulary/model/types'
 import styles from './WordDetailContainer.module.css'
 
 // ── Pointer + viewport detection ──────────────────────────────────────────
@@ -94,8 +94,17 @@ export function WordDetailContainer({ children, onSave, onRemove, context = 'voc
   // will be null until the vocab cache loads — the API fetch then uses the URL param.
   const wordText = useMemo(() => {
     if (!state.activeWordId) return null
-    const vocabCache = queryClient.getQueryData<VocabularyWord[]>(['vocabulary'])
-    return vocabCache?.find((v) => v.wordId === state.activeWordId)?.wordText ?? null
+    const allVocabData = queryClient.getQueriesData<InfiniteData<PaginatedVocabulary>>(
+      { queryKey: ['vocabulary'] }
+    )
+    for (const [, data] of allVocabData) {
+      if (!data) continue
+      for (const page of data.pages) {
+        const found = page.items.find((v) => v.wordId === state.activeWordId)
+        if (found) return found.wordText
+      }
+    }
+    return null
   }, [state.activeWordId, queryClient])
 
   const { word, learningState, isLoading, error } = useWordDetailData(

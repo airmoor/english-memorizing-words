@@ -247,21 +247,15 @@
   box-sizing: border-box;
 }
 
-/* ── Viewport-anchored background ────────────────────────────────────────────
-   The CSS spec guarantees that the root element's background propagates to
-   the canvas (viewport), rendering at viewport-relative positions regardless
-   of document height. This prevents the gradient from "sliding" as content
-   height changes — no background-attachment:fixed needed (poor mobile perf).
-   body is transparent so this always shows through. ────────────────────── */
+/* Reserve scrollbar gutter so the layout width never shifts between pages
+   with and without a scrollbar. Eliminates the horizontal reflow on navigation. */
 html {
   scrollbar-gutter: stable;
-  background:
-    radial-gradient(ellipse 80% 45% at 50% -5%,  var(--gradient-glow) 0%, transparent 70%),
-    radial-gradient(ellipse 55% 35% at 15% 65%,  color-mix(in srgb, var(--gradient-a) 8%, transparent) 0%, transparent 65%),
-    radial-gradient(ellipse 50% 30% at 88% 40%,  color-mix(in srgb, var(--gradient-b) 6%, transparent) 0%, transparent 60%),
-    var(--color-bg-primary);
-  transition: background 0.25s var(--ease-out);
+  background:  var(--color-bg-primary);
 }
+
+/* Background gradient lives in App.tsx → .background (position:fixed).
+   See App.module.css for the gradient definition. */
 
 /* ── Custom scrollbar — themed, subtle, integrated with the design system ── */
 
