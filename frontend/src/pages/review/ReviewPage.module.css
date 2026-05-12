@@ -11,7 +11,6 @@
   padding-top: var(--space-xxl);
   padding-bottom: var(--space-xxl);
   gap: var(--space-xl);
-  background: radial-gradient(ellipse 65% 55% at 50% 28%, var(--gradient-glow) 0%, transparent 68%);
 }
 
 .empty {
