@@ -74,7 +74,7 @@
   --glass-blur:      8px;
   --glass-saturate:  150%;
   --glass-bg:        rgba(255, 255, 255, 0.70);
-  --glass-border:    rgba(255, 255, 255, 0.50);
+  --glass-border:    rgba(214, 206, 206, 0.7);
   --glass-highlight: rgba(255, 255, 255, 0.22);
 
   /* ── Layout system ───────────────────────────────────────────────── */
