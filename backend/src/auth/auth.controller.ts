@@ -30,12 +30,12 @@ const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 const IS_PROD = process.env.NODE_ENV === 'production';
 
 @ApiTags('auth')
-@Public()
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
+  @Public()
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @ApiOperation({ summary: 'Register a new user' })
   @ApiResponse({ status: 201, description: 'User created, returns access token', type: TokenResponseDto })
@@ -50,6 +50,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @Public()
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @ApiOperation({ summary: 'Log in with email and password' })
@@ -65,6 +66,7 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @Public()
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 30, ttl: 60_000 } })
   @ApiOperation({ summary: 'Obtain a new access token using the refresh cookie' })
@@ -81,6 +83,7 @@ export class AuthController {
   }
 
   @Post('logout')
+  @Public()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Clear the refresh cookie' })
   @ApiResponse({ status: 204 })
