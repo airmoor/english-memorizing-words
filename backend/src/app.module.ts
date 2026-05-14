@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { dataSourceOptions } from './data-source';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { AuthModule } from './auth/auth.module';
+import { HealthModule } from './health/health.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { WordsModule } from './words/words.module';
 import { VocabularyModule } from './vocabulary/vocabulary.module';
@@ -19,6 +20,7 @@ import { VocabularyModule } from './vocabulary/vocabulary.module';
       autoLoadEntities: true,
     }),
     AuthModule,
+    HealthModule,
     ReviewsModule,
     WordsModule,
     VocabularyModule,
