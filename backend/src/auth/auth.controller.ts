@@ -8,7 +8,8 @@ import {
   Res,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { IsEmail, MinLength } from 'class-validator';
+import { Throttle } from '@nestjs/throttler';
+import { IsEmail, IsStrongPassword, MinLength } from 'class-validator';
 import { Request, Response } from 'express';
 import { AuthService, TokenResponseDto } from './auth.service';
 
@@ -17,13 +18,15 @@ export class AuthCredentialsDto {
   @IsEmail()
   email: string;
 
-  @ApiProperty({ example: 'secret123', minLength: 6 })
-  @MinLength(6)
+  @ApiProperty({ example: 'MyP@ssw0rd!', minLength: 8 })
+  @MinLength(8)
+  @IsStrongPassword({ minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 })
   password: string;
 }
 
 const COOKIE_NAME = 'refresh_token';
-const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days in ms
+const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
+const IS_PROD = process.env.NODE_ENV === 'production';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -31,6 +34,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @ApiOperation({ summary: 'Register a new user' })
   @ApiResponse({ status: 201, description: 'User created, returns access token', type: TokenResponseDto })
   @ApiResponse({ status: 409, description: 'Email already registered' })
@@ -45,6 +49,7 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @ApiOperation({ summary: 'Log in with email and password' })
   @ApiResponse({ status: 200, description: 'Returns access token', type: TokenResponseDto })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
@@ -59,6 +64,7 @@ export class AuthController {
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
   @ApiOperation({ summary: 'Obtain a new access token using the refresh cookie' })
   @ApiResponse({ status: 200, description: 'Returns new access token', type: TokenResponseDto })
   @ApiResponse({ status: 401, description: 'Refresh token missing or invalid' })
@@ -80,7 +86,7 @@ export class AuthController {
     res.clearCookie(COOKIE_NAME, {
       httpOnly: true,
       sameSite: 'lax',
-      secure: false,
+      secure: IS_PROD,
       path: '/',
     });
   }
@@ -89,7 +95,7 @@ export class AuthController {
     res.cookie(COOKIE_NAME, token, {
       httpOnly: true,
       sameSite: 'lax',
-      secure: false,
+      secure: IS_PROD,
       maxAge: COOKIE_MAX_AGE,
       path: '/',
     });

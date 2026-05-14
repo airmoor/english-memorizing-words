@@ -14,6 +14,7 @@ import { normalizeMerriamEntry } from './merriam.normalizer';
 
 const MW_BASE =
   'https://www.dictionaryapi.com/api/v3/references/learners/json';
+const FETCH_TIMEOUT_MS = 8_000;
 
 @Injectable()
 export class MerriamProvider implements IDictionaryProvider {
@@ -38,18 +39,23 @@ export class MerriamProvider implements IDictionaryProvider {
   async fetchWord(text: string): Promise<NormalizedWord | null> {
     const key = this.apiKey;
     if (!key) {
-      // isAvailable() should have gated this; throw so the selector can fall back
       throw new ServiceUnavailableException('MERRIAM_API_KEY not configured');
     }
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
     let response: Response;
     try {
       response = await fetch(
         `${MW_BASE}/${encodeURIComponent(text)}?key=${key}`,
+        { signal: controller.signal },
       );
     } catch (err) {
       this.logger.warn(`MW fetch threw for "${text}": ${String(err)}`);
       throw new ServiceUnavailableException('Merriam-Webster API unreachable');
+    } finally {
+      clearTimeout(timer);
     }
 
     if (!response.ok) {
@@ -61,7 +67,6 @@ export class MerriamProvider implements IDictionaryProvider {
 
     const data = (await response.json()) as MwResponse;
 
-    // Empty array OR string[] (MW's "did you mean…" suggestion shape) → not found
     if (
       !Array.isArray(data) ||
       data.length === 0 ||
@@ -70,12 +75,10 @@ export class MerriamProvider implements IDictionaryProvider {
       return null;
     }
 
-    // Per design.md: consume only entries[0]
     const firstEntry = data[0] as MwEntry;
     const normalized = normalizeMerriamEntry(text, firstEntry);
 
     if (normalized.meanings.length === 0) {
-      // MW returned an entry shape but no parseable senses — treat as miss
       return null;
     }
 

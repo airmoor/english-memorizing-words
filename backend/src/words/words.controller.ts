@@ -1,8 +1,10 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { WordsService, WordResponseDto } from './words.service';
 
 @ApiTags('words')
+@UseGuards(JwtAuthGuard)
 @Controller('words')
 export class WordsController {
   constructor(private readonly wordsService: WordsService) {}

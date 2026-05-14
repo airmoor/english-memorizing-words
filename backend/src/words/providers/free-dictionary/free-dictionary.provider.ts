@@ -12,6 +12,7 @@ import type { FdEntry } from './free-dictionary.dto';
 import { normalizeFreeDictionary } from './free-dictionary.normalizer';
 
 const FD_BASE = 'https://api.dictionaryapi.dev/api/v2/entries/en';
+const FETCH_TIMEOUT_MS = 8_000;
 
 @Injectable()
 export class FreeDictionaryProvider implements IDictionaryProvider {
@@ -19,16 +20,24 @@ export class FreeDictionaryProvider implements IDictionaryProvider {
   private readonly logger = new Logger(FreeDictionaryProvider.name);
 
   isAvailable(): boolean {
-    return true; // no key, always reachable in principle
+    return true;
   }
 
   async fetchWord(text: string): Promise<NormalizedWord | null> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
     let response: Response;
     try {
-      response = await fetch(`${FD_BASE}/${encodeURIComponent(text)}`);
+      response = await fetch(
+        `${FD_BASE}/${encodeURIComponent(text)}`,
+        { signal: controller.signal },
+      );
     } catch (err) {
       this.logger.warn(`FD fetch threw for "${text}": ${String(err)}`);
       throw new ServiceUnavailableException('Free Dictionary API unreachable');
+    } finally {
+      clearTimeout(timer);
     }
 
     if (response.status === 404) return null;

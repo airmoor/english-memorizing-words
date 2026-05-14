@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ApiProperty } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -18,6 +18,12 @@ interface TokenPair {
 
 const ACCESS_EXPIRY = '15m';
 const REFRESH_EXPIRY = '7d';
+
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) throw new InternalServerErrorException(`Missing required env var: ${name}`);
+  return value;
+}
 
 @Injectable()
 export class AuthService {
@@ -54,7 +60,7 @@ export class AuthService {
     if (!rawToken) throw new UnauthorizedException('No refresh token');
     try {
       const payload = this.jwtService.verify<{ sub: string }>(rawToken, {
-        secret: process.env.JWT_REFRESH_SECRET ?? 'change-me-refresh-secret',
+        secret: requireEnv('JWT_REFRESH_SECRET'),
       });
       return this.issueTokens(payload.sub);
     } catch {
@@ -65,11 +71,11 @@ export class AuthService {
   private issueTokens(userId: string): TokenPair {
     const accessToken = this.jwtService.sign(
       { sub: userId },
-      { secret: process.env.JWT_SECRET ?? 'change-me-secret', expiresIn: ACCESS_EXPIRY },
+      { secret: requireEnv('JWT_ACCESS_SECRET'), expiresIn: ACCESS_EXPIRY },
     );
     const refreshToken = this.jwtService.sign(
       { sub: userId },
-      { secret: process.env.JWT_REFRESH_SECRET ?? 'change-me-refresh-secret', expiresIn: REFRESH_EXPIRY },
+      { secret: requireEnv('JWT_REFRESH_SECRET'), expiresIn: REFRESH_EXPIRY },
     );
     return { accessToken, refreshToken };
   }
