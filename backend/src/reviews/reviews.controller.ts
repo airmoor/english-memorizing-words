@@ -6,7 +6,6 @@ import {
   HttpStatus,
   Param,
   Post,
-  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -16,7 +15,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { IsIn } from 'class-validator';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AuthUser, CurrentUser } from '../common/decorators/current-user.decorator';
 import {
   CardAnswerDto,
@@ -34,7 +32,6 @@ export class ReviewRatingDto {
 
 @ApiTags('reviews')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('reviews')
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}

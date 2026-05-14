@@ -7,7 +7,6 @@ import {
   Param,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -16,7 +15,6 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
   PaginatedVocabularyDto,
   VocabularyQueryDto,
@@ -27,7 +25,6 @@ import { AuthUser, CurrentUser } from '../common/decorators/current-user.decorat
 
 @ApiTags('vocabulary')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('vocabulary')
 export class VocabularyController {
   constructor(private readonly vocabularyService: VocabularyService) {}

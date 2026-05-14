@@ -11,6 +11,7 @@ import { ApiOperation, ApiProperty, ApiResponse, ApiTags } from '@nestjs/swagger
 import { Throttle } from '@nestjs/throttler';
 import { IsEmail, IsStrongPassword, MinLength } from 'class-validator';
 import { Request, Response } from 'express';
+import { Public } from '../common/decorators/public.decorator';
 import { AuthService, TokenResponseDto } from './auth.service';
 
 export class AuthCredentialsDto {
@@ -29,6 +30,7 @@ const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 const IS_PROD = process.env.NODE_ENV === 'production';
 
 @ApiTags('auth')
+@Public()
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
