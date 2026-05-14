@@ -5,12 +5,13 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
+
 FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 COPY package*.json ./
 RUN npm ci --omit=dev && npm cache clean --force
-COPY --from=builder /app/dist ./dist
+COPY --chown=node:node --from=builder /app/dist ./dist
 USER node
 EXPOSE 3000
-CMD ["npm", "run", "start:prod"]
+CMD ["node", "dist/main.js"]
