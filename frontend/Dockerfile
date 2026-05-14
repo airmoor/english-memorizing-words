@@ -11,5 +11,7 @@ RUN npm run build
 
 FROM nginx:alpine AS runner
 COPY --from=builder /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80
+# Stored as a template — PORT is substituted at container start by the CMD below
+COPY nginx.conf /etc/nginx/nginx.conf.template
+# envsubst '$PORT' substitutes only $PORT, leaving nginx variables like $uri untouched
+CMD ["/bin/sh", "-c", "envsubst '$PORT' < /etc/nginx/nginx.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]

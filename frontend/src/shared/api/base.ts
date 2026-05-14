@@ -1,6 +1,8 @@
 import { tokenStore } from '../lib/tokenStore'
 
-const BASE = '/api'
+// In development VITE_API_URL is unset — Vite's dev server proxies /api to the backend.
+// In production it must be the backend root URL (no trailing slash), e.g. https://api.example.com
+const BASE = `${import.meta.env.VITE_API_URL ?? ''}/api`
 
 export class ApiError extends Error {
   status: number

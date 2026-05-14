@@ -28,6 +28,12 @@ export class AuthCredentialsDto {
 const COOKIE_NAME = 'refresh_token';
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 const IS_PROD = process.env.NODE_ENV === 'production';
+// SameSite=None allows the refresh cookie to be sent on cross-origin requests
+// (frontend and backend on separate Railway/Coolify subdomains). Requires Secure=true,
+// which IS_PROD already enforces. In dev, Lax is fine because requests stay same-origin
+// via the Vite proxy.
+const SAME_SITE = IS_PROD ? 'none' : 'lax';
+// const SAME_SITE = 'lax';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -90,7 +96,7 @@ export class AuthController {
   logout(@Res({ passthrough: true }) res: Response): void {
     res.clearCookie(COOKIE_NAME, {
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: SAME_SITE,
       secure: IS_PROD,
       path: '/',
     });
@@ -99,7 +105,7 @@ export class AuthController {
   private setRefreshCookie(res: Response, token: string): void {
     res.cookie(COOKIE_NAME, token, {
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: SAME_SITE,
       secure: IS_PROD,
       maxAge: COOKIE_MAX_AGE,
       path: '/',
