@@ -11,14 +11,14 @@ import { Card } from './card.entity';
 
 /**
  * User-authored plain-text note for a card. One note per card maximum.
- * The unique constraint on card_id is enforced at the database level.
+ * The UNIQUE constraint on card_id is enforced at the database level.
  *
- * body is stored as TEXT NOT NULL DEFAULT '' rather than nullable.
- * An empty body after trim signals deletion — the application layer
- * deletes the row rather than persisting an empty string.
+ * body is TEXT NOT NULL DEFAULT ''. When the user clears the note, the
+ * application layer deletes this row entirely rather than persisting an
+ * empty string — empty notes are not intended to persist long-term.
  *
  * Future: may be superseded by a card_blocks table with a type discriminator,
- * supporting multiple content blocks per card.
+ * supporting multiple typed content blocks per card.
  */
 @Entity('card_notes')
 export class CardNote {

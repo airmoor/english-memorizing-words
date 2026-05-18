@@ -16,9 +16,10 @@ import { CardBoard } from './card-board.entity';
  * A named, user-owned collection. Cards are linked to boards via CardBoard.
  * Deleting a board cascades to CardBoard rows only — cards are unaffected.
  *
- * name is stored as citext in the database (case-insensitive text).
- * TypeORM sees it as 'text'; the actual column type is managed by the migration.
- * The application layer normalises/trims the name before writing.
+ * name is stored as citext (PostgreSQL case-insensitive text, extension enabled
+ * in migration 1747000007000). The UNIQUE(user_id, name) constraint is therefore
+ * case-insensitive at the database level. The application layer trims the name
+ * before writing to produce consistent stored values.
  */
 @Entity('boards')
 @Unique(['userId', 'name'])
@@ -29,7 +30,7 @@ export class Board {
   @Column({ name: 'user_id', type: 'uuid' })
   userId: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'citext' })
   name: string;
 
   @Column({ type: 'text', nullable: true })

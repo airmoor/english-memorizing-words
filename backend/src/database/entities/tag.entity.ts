@@ -16,9 +16,10 @@ import { CardTag } from './card-tag.entity';
  * A lightweight, user-scoped label applied to cards for filtering.
  * Tags carry no structural weight — they are descriptive metadata only.
  *
- * name is stored as citext (case-insensitive). The application layer
- * additionally normalises names to lowercase before writing so that
- * stored values are consistent regardless of DB collation.
+ * name is stored as citext (PostgreSQL case-insensitive text, extension enabled
+ * in migration 1747000007000). The UNIQUE(user_id, name) constraint is therefore
+ * case-insensitive at the database level. The application layer additionally
+ * normalises names to lowercase before writing so stored values are consistent.
  */
 @Entity('tags')
 @Unique(['userId', 'name'])
@@ -29,7 +30,7 @@ export class Tag {
   @Column({ name: 'user_id', type: 'uuid' })
   userId: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'citext' })
   name: string;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
