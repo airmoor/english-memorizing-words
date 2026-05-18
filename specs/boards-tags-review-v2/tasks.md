@@ -1,7 +1,7 @@
 # Implementation Tasks: boards-tags-review-v2
 
-**Status:** Planned  
-**Last updated:** 2026-05-17
+**Status:** In Progress  
+**Last updated:** 2026-05-18
 
 ---
 
@@ -20,19 +20,19 @@ Phases 1–2 are backend-only and can be deployed without any visible frontend c
 **Dependencies:** None. This phase is a prerequisite for all others.
 
 **Risks:**
-- Index creation on large tables (if the `cards` table is large) may lock writes. Use `CREATE INDEX CONCURRENTLY` in migration.
-- The `lower(name)` unique index on boards and tags may require the `citext` extension or explicit lowercase normalisation. Verify PostgreSQL version support.
+- ~~Index creation on large tables (if the `cards` table is large) may lock writes. Use `CREATE INDEX CONCURRENTLY` in migration.~~ New tables are empty at migration time — regular `CREATE INDEX` is safe and simpler (CONCURRENTLY cannot run inside a transaction, which TypeORM migrations use).
+- ~~The `lower(name)` unique index on boards and tags may require the `citext` extension or explicit lowercase normalisation.~~ Resolved: `citext` extension was already enabled (migration 007). `boards.name` and `tags.name` are stored as `CITEXT` — unique constraint is case-insensitive by default.
 
 **Deliverables:**
 
-- [ ] TypeORM migration: create `boards` table
-- [ ] TypeORM migration: create `card_boards` join table with FK cascades
-- [ ] TypeORM migration: create `tags` table with `lower(name)` unique constraint
-- [ ] TypeORM migration: create `card_tags` join table with FK cascades
-- [ ] TypeORM migration: create `card_notes` table with unique constraint on `card_id`
-- [ ] TypeORM entities: `Board`, `CardBoard`, `Tag`, `CardTag`, `CardNote`
-- [ ] Indexes: `card_boards(board_id)`, `card_tags(tag_id)`, verify `cards(next_review_date, user_id)` index exists
-- [ ] Migration tested on local development database
+- [x] TypeORM migration: create `boards` table (`1748000001000-CreateBoards.ts`)
+- [x] TypeORM migration: create `card_boards` join table with FK cascades (`1748000002000-CreateCardBoards.ts`)
+- [x] TypeORM migration: create `tags` table with `citext` unique constraint (`1748000003000-CreateTags.ts`)
+- [x] TypeORM migration: create `card_tags` join table with FK cascades (`1748000004000-CreateCardTags.ts`)
+- [x] TypeORM migration: create `card_notes` table with unique constraint on `card_id` (`1748000005000-CreateCardNotes.ts`)
+- [x] TypeORM entities: `Board`, `CardBoard`, `Tag`, `CardTag`, `CardNote`
+- [x] Indexes: `idx_card_boards_board_id`, `idx_card_boards_card_id`, `idx_card_tags_tag_id`, `idx_card_tags_card_id`, `idx_boards_user_id`, `idx_boards_user_position`, `idx_tags_user_id`. `idx_cards_user_next` already exists from migration 005/007.
+- [x] Migration tested on local development database (up/down/up verified)
 - [ ] Migration tested on a production-representative dataset (if available)
 
 ---
