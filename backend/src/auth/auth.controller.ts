@@ -117,8 +117,11 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<void> {
     const raw = req.cookies?.[REFRESH_COOKIE_NAME] as string | undefined;
-    await this.authService.logout(raw);
-    clearRefreshCookie(res);
+    try {
+      await this.authService.logout(raw);
+    } finally {
+      clearRefreshCookie(res);
+    }
   }
 
   @Post('update-password')

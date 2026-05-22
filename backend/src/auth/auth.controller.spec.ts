@@ -182,6 +182,16 @@ describe('AuthController', () => {
       expect(authService.logout).toHaveBeenCalledWith(undefined);
       expect(clearCookie).toHaveBeenCalledWith(res);
     });
+
+    it('clears cookie even when service throws (try/finally guarantee)', async () => {
+      authService.logout.mockRejectedValue(new Error('DB down'));
+      const clearCookie = jest.spyOn(cookieUtil, 'clearRefreshCookie').mockImplementation(() => undefined);
+      const { res } = mockResponse();
+      const req = mockRequest({ cookies: { [COOKIE_NAME]: REFRESH_TOKEN } });
+
+      await expect(controller.logout(req, res)).rejects.toThrow('DB down');
+      expect(clearCookie).toHaveBeenCalledWith(res);
+    });
   });
 
   // ── updatePassword ────────────────────────────────────────────────────────

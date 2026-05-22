@@ -20,7 +20,7 @@ import { JwtStrategy } from './jwt.strategy';
       useFactory: (config: ConfigService) => {
         const secret = config.get<string>('JWT_ACCESS_SECRET');
         if (!secret) throw new Error('JWT_ACCESS_SECRET env var is required');
-        return { secret, signOptions: { expiresIn: config.get('ACCESS_TOKEN_TTL') ?? '15m' } };
+        return { secret };
       },
     }),
   ],

@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { DataSource, QueryFailedError } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
 import { User } from '../database/entities/user.entity';
@@ -164,6 +164,18 @@ describe('AuthService', () => {
 
     it('throws ConflictException if email already registered', async () => {
       usersRepo.findOne.mockResolvedValue(makeUser());
+
+      await expect(service.register(EMAIL, PASSWORD)).rejects.toThrow(ConflictException);
+    });
+
+    it('throws ConflictException on concurrent duplicate (pg 23505 from save)', async () => {
+      usersRepo.findOne.mockResolvedValue(null); // TOCTOU: passes the pre-check
+      usersRepo.create.mockReturnValue(makeUser());
+      // Simulate DB unique violation raised between findOne and save.
+      // QueryFailedError does Object.assign(this, driverError), so code lands on pgError.
+      const driverError = Object.assign(new Error('duplicate key value'), { code: '23505' });
+      const pgError = new QueryFailedError('INSERT', [], driverError);
+      usersRepo.save.mockRejectedValue(pgError);
 
       await expect(service.register(EMAIL, PASSWORD)).rejects.toThrow(ConflictException);
     });
@@ -400,6 +412,18 @@ describe('AuthService', () => {
 
       await expect(service.resetPassword(OLD_RAW_TOKEN, 'NewP@ssw0rd1!')).rejects.toThrow(UnauthorizedException);
       expect(resetTokensRepo.delete).toHaveBeenCalledWith({ id: 'reset-uuid-1' });
+    });
+
+    it('throws UnauthorizedException when token already consumed concurrently (race condition guard)', async () => {
+      resetTokensRepo.findOne.mockResolvedValue(makeResetToken({ tokenHash: OLD_TOKEN_HASH }));
+      usersRepo.findOne.mockResolvedValue(makeUser());
+      jest.spyOn(bcrypt, 'compare').mockResolvedValueOnce(false as never); // new password differs
+      // Simulate: concurrent request deleted the token first inside the transaction
+      txManager.delete.mockResolvedValueOnce({ affected: 0 });
+
+      await expect(service.resetPassword(OLD_RAW_TOKEN, 'NewP@ssw0rd1!')).rejects.toThrow(UnauthorizedException);
+      // Password must NOT be updated when the token delete was a no-op
+      expect(txManager.update).not.toHaveBeenCalled();
     });
   });
 });

@@ -9,7 +9,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ApiProperty } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, QueryFailedError, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from '../database/entities/user.entity';
 import { RefreshSession } from '../database/entities/refresh-session.entity';
@@ -75,7 +75,14 @@ export class AuthService implements OnModuleInit {
 
     const passwordHash = await bcrypt.hash(password, 12);
     const user = this.usersRepo.create({ email: normalizedEmail, passwordHash });
-    await this.usersRepo.save(user);
+    try {
+      await this.usersRepo.save(user);
+    } catch (err: unknown) {
+      if (err instanceof QueryFailedError && (err as unknown as { code?: string }).code === '23505') {
+        throw new ConflictException('Email already registered');
+      }
+      throw err;
+    }
 
     return this.issueTokens(user.id, userAgent, ip);
   }
@@ -201,8 +208,11 @@ export class AuthService implements OnModuleInit {
     const newHash = await bcrypt.hash(newPassword, 12);
 
     await this.dataSource.transaction(async (manager) => {
+      // Delete the token first as the atomic gate. If a concurrent request already
+      // consumed this token, affected === 0 and we bail before updating the password.
+      const result = await manager.delete(PasswordResetToken, { id: tokenRecord.id });
+      if (!result.affected) throw new UnauthorizedException('Invalid or expired reset token');
       await manager.update(User, { id: tokenRecord.userId }, { passwordHash: newHash });
-      await manager.delete(PasswordResetToken, { id: tokenRecord.id });
       await manager.delete(RefreshSession, { userId: tokenRecord.userId });
     });
   }
