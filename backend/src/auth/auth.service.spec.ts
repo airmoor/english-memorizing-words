@@ -25,7 +25,7 @@ const PASSWORD = 'MyP@ssw0rd1!';
 const HASH = '$2b$12$fakehashedpassword00000000000000000000000000000000000000';
 const ACCESS_TOKEN = 'access.jwt.token';
 
-// Use real hash so findOne lookup is consistent with what the service computes
+// Real hash so findOne lookup is consistent with what the service computes
 const OLD_RAW_TOKEN = 'a'.repeat(64);
 const OLD_TOKEN_HASH = hashToken(OLD_RAW_TOKEN);
 
@@ -68,7 +68,6 @@ function makeResetToken(overrides: Partial<PasswordResetToken> = {}): PasswordRe
     tokenHash: OLD_TOKEN_HASH,
     expiresAt: FUTURE,
     createdAt: new Date(),
-    used: false,
     user: makeUser(),
     ...overrides,
   } as PasswordResetToken;
@@ -93,7 +92,7 @@ describe('AuthService', () => {
     jwtService = { sign: jest.fn().mockReturnValue(ACCESS_TOKEN) };
     emailService = { sendPasswordResetEmail: jest.fn().mockResolvedValue(undefined) };
     txManager = {
-      delete: jest.fn().mockResolvedValue(undefined),
+      delete: jest.fn().mockResolvedValue({ affected: 1 }),
       update: jest.fn().mockResolvedValue(undefined),
       save: jest.fn().mockResolvedValue(undefined),
       create: jest.fn().mockImplementation((_entity: unknown, data: unknown) => ({ ...data as object })),
@@ -106,6 +105,9 @@ describe('AuthService', () => {
 
     process.env.JWT_ACCESS_SECRET = 'test-secret';
 
+    // Mock bcrypt.hash so onModuleInit doesn't run a real 250ms bcrypt computation per test.
+    jest.spyOn(bcrypt, 'hash').mockResolvedValue(HASH as never);
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
@@ -117,6 +119,9 @@ describe('AuthService', () => {
         { provide: DataSource, useValue: dataSource },
       ],
     }).compile();
+
+    // onModuleInit fires here — bcrypt.hash is mocked so it resolves to HASH instantly
+    await module.init();
 
     service = module.get(AuthService);
   });
@@ -186,14 +191,18 @@ describe('AuthService', () => {
       await expect(service.login(EMAIL, 'WrongPass1!')).rejects.toThrow(UnauthorizedException);
     });
 
-    it('throws UnauthorizedException for nonexistent user (no enumeration)', async () => {
+    it('throws UnauthorizedException (not 500) for nonexistent user', async () => {
       usersRepo.findOne.mockResolvedValue(null);
+      // dummyHash (set by onModuleInit mock) is a valid hash — compare must not throw
       jest.spyOn(bcrypt, 'compare').mockResolvedValueOnce(false as never);
 
-      await expect(service.login('nobody@example.com', PASSWORD)).rejects.toThrow(UnauthorizedException);
+      const err = await service.login('nobody@example.com', PASSWORD).catch((e) => e);
+
+      expect(err).toBeInstanceOf(UnauthorizedException);
+      expect(err.getStatus()).toBe(401);
     });
 
-    it('returns the same error message for wrong password and missing user', async () => {
+    it('uses the same error message for wrong password and missing user', async () => {
       usersRepo.findOne.mockResolvedValue(null);
       jest.spyOn(bcrypt, 'compare').mockResolvedValueOnce(false as never);
       const err1 = await service.login('nobody@example.com', PASSWORD).catch((e) => e);
@@ -203,6 +212,15 @@ describe('AuthService', () => {
       const err2 = await service.login(EMAIL, 'WrongPass1!').catch((e) => e);
 
       expect(err1.message).toBe(err2.message);
+    });
+
+    it('always calls bcrypt.compare even for nonexistent users (timing mitigation)', async () => {
+      usersRepo.findOne.mockResolvedValue(null);
+      const compareSpy = jest.spyOn(bcrypt, 'compare').mockResolvedValueOnce(false as never);
+
+      await service.login('nobody@example.com', PASSWORD).catch(() => undefined);
+
+      expect(compareSpy).toHaveBeenCalled();
     });
   });
 
@@ -238,21 +256,24 @@ describe('AuthService', () => {
       expect(sessionsRepo.delete).toHaveBeenCalledWith({ id: SESSION_ID });
     });
 
-    it('old token cannot be reused after rotation (session removed)', async () => {
+    it('old token cannot be reused after rotation (session removed from DB)', async () => {
       sessionsRepo.findOne
-        .mockResolvedValueOnce(makeSession({ tokenHash: OLD_TOKEN_HASH })) // first call finds session
-        .mockResolvedValueOnce(null);                                       // second call: session gone
+        .mockResolvedValueOnce(makeSession({ tokenHash: OLD_TOKEN_HASH }))
+        .mockResolvedValueOnce(null);
 
       await service.refresh(OLD_RAW_TOKEN);
 
       await expect(service.refresh(OLD_RAW_TOKEN)).rejects.toThrow(UnauthorizedException);
     });
 
-    it('uses invalid signature token as not found', async () => {
-      const badToken = 'z'.repeat(64);
-      sessionsRepo.findOne.mockResolvedValue(null);
+    it('concurrent second request is rejected when affected === 0 (race condition fix)', async () => {
+      sessionsRepo.findOne.mockResolvedValue(makeSession({ tokenHash: OLD_TOKEN_HASH }));
+      // Simulate: another request already deleted the session before this transaction commits
+      txManager.delete.mockResolvedValueOnce({ affected: 0 });
 
-      await expect(service.refresh(badToken)).rejects.toThrow(UnauthorizedException);
+      await expect(service.refresh(OLD_RAW_TOKEN)).rejects.toThrow(UnauthorizedException);
+      // New session must NOT be saved when the old one was already gone
+      expect(txManager.save).not.toHaveBeenCalled();
     });
   });
 
@@ -325,16 +346,14 @@ describe('AuthService', () => {
   // ── requestPasswordReset ──────────────────────────────────────────────────
 
   describe('requestPasswordReset', () => {
-    it('deletes old tokens, saves new token, sends email', async () => {
+    it('atomically replaces any existing token and sends email', async () => {
       usersRepo.findOne.mockResolvedValue(makeUser());
-      resetTokensRepo.delete.mockResolvedValue(undefined);
-      resetTokensRepo.create.mockReturnValue(makeResetToken());
-      resetTokensRepo.save.mockResolvedValue(makeResetToken());
 
       await service.requestPasswordReset(EMAIL);
 
-      expect(resetTokensRepo.delete).toHaveBeenCalledWith({ userId: USER_ID });
-      expect(resetTokensRepo.save).toHaveBeenCalled();
+      expect(dataSource.transaction).toHaveBeenCalled();
+      expect(txManager.delete).toHaveBeenCalledWith(PasswordResetToken, { userId: USER_ID });
+      expect(txManager.save).toHaveBeenCalled();
       expect(emailService.sendPasswordResetEmail).toHaveBeenCalledWith(EMAIL, expect.any(String));
     });
 
@@ -343,6 +362,7 @@ describe('AuthService', () => {
 
       await expect(service.requestPasswordReset('nobody@example.com')).resolves.toBeUndefined();
       expect(emailService.sendPasswordResetEmail).not.toHaveBeenCalled();
+      expect(dataSource.transaction).not.toHaveBeenCalled();
     });
   });
 
@@ -351,6 +371,8 @@ describe('AuthService', () => {
   describe('resetPassword', () => {
     it('updates password and invalidates all sessions', async () => {
       resetTokensRepo.findOne.mockResolvedValue(makeResetToken({ tokenHash: OLD_TOKEN_HASH }));
+      usersRepo.findOne.mockResolvedValue(makeUser());
+      jest.spyOn(bcrypt, 'compare').mockResolvedValueOnce(false as never); // not same password
 
       await service.resetPassword(OLD_RAW_TOKEN, 'NewP@ssw0rd1!');
 
@@ -359,14 +381,16 @@ describe('AuthService', () => {
       expect(txManager.delete).toHaveBeenCalledWith(RefreshSession, { userId: USER_ID });
     });
 
-    it('throws UnauthorizedException for unknown token', async () => {
-      resetTokensRepo.findOne.mockResolvedValue(null);
+    it('throws BadRequestException when new password is the same as current', async () => {
+      resetTokensRepo.findOne.mockResolvedValue(makeResetToken({ tokenHash: OLD_TOKEN_HASH }));
+      usersRepo.findOne.mockResolvedValue(makeUser());
+      jest.spyOn(bcrypt, 'compare').mockResolvedValueOnce(true as never); // same password
 
-      await expect(service.resetPassword(OLD_RAW_TOKEN, 'NewP@ssw0rd1!')).rejects.toThrow(UnauthorizedException);
+      await expect(service.resetPassword(OLD_RAW_TOKEN, PASSWORD)).rejects.toThrow(BadRequestException);
     });
 
-    it('throws UnauthorizedException for already-used token', async () => {
-      resetTokensRepo.findOne.mockResolvedValue(makeResetToken({ used: true }));
+    it('throws UnauthorizedException for unknown token', async () => {
+      resetTokensRepo.findOne.mockResolvedValue(null);
 
       await expect(service.resetPassword(OLD_RAW_TOKEN, 'NewP@ssw0rd1!')).rejects.toThrow(UnauthorizedException);
     });

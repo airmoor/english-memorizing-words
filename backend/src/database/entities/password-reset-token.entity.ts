@@ -30,7 +30,4 @@ export class PasswordResetToken {
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
-
-  @Column({ name: 'used', type: 'boolean', default: false })
-  used: boolean;
 }

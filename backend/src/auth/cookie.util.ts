@@ -10,11 +10,14 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 // Requires Secure=true, which IS_PROD enforces. In dev, Lax is fine via the Vite proxy.
 const SAME_SITE: 'none' | 'lax' = IS_PROD ? 'none' : 'lax';
 
+// Restrict cookie to auth routes so it is not sent with every API request.
+// NOTE: if existing users have a cookie set with path '/', they must log in
+// again once (the old cookie simply won't be sent to /api/auth and will expire).
 const BASE_OPTS = {
   httpOnly: true,
   sameSite: SAME_SITE,
   secure: IS_PROD,
-  path: '/',
+  path: '/api/auth',
 } as const;
 
 export function setRefreshCookie(res: Response, token: string): void {

@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  OnModuleInit,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -40,7 +41,12 @@ function requireEnv(name: string): string {
 }
 
 @Injectable()
-export class AuthService {
+export class AuthService implements OnModuleInit {
+  // A valid bcrypt hash used as a stand-in when the login user doesn't exist,
+  // so bcrypt.compare always runs and timing is consistent.
+  // Generated once at module init to guarantee a well-formed hash.
+  private dummyHash!: string;
+
   constructor(
     @InjectRepository(User)
     private readonly usersRepo: Repository<User>,
@@ -52,6 +58,10 @@ export class AuthService {
     private readonly emailService: EmailService,
     private readonly dataSource: DataSource,
   ) {}
+
+  async onModuleInit(): Promise<void> {
+    this.dummyHash = await bcrypt.hash('', 12);
+  }
 
   async register(
     email: string,
@@ -78,9 +88,9 @@ export class AuthService {
   ): Promise<TokenPair> {
     const normalizedEmail = email.toLowerCase().trim();
     const user = await this.usersRepo.findOne({ where: { email: normalizedEmail } });
-    // Compare against a dummy hash to prevent timing attacks on nonexistent accounts
-    const dummyHash = '$2b$12$invalidhashpaddingtoensureconstanttimexxxxxxxxxxxxxxxxxxx';
-    const candidateHash = user?.passwordHash ?? dummyHash;
+    // Always run bcrypt.compare to prevent timing-based user enumeration.
+    // dummyHash is a valid bcrypt hash guaranteed by onModuleInit.
+    const candidateHash = user?.passwordHash ?? this.dummyHash;
     const valid = await bcrypt.compare(password, candidateHash);
     if (!user || !valid) throw new UnauthorizedException('Invalid credentials');
 
@@ -108,7 +118,10 @@ export class AuthService {
     const expiresAt = new Date(Date.now() + REFRESH_TTL_MS);
 
     await this.dataSource.transaction(async (manager) => {
-      await manager.delete(RefreshSession, { id: session.id });
+      // Atomic swap: if a concurrent request already rotated this token,
+      // affected === 0 → throw so only one request wins per token.
+      const result = await manager.delete(RefreshSession, { id: session.id });
+      if (!result.affected) throw new UnauthorizedException('Invalid refresh token');
       const newSession = manager.create(RefreshSession, {
         userId,
         tokenHash: newTokenHash,
@@ -119,12 +132,7 @@ export class AuthService {
       await manager.save(RefreshSession, newSession);
     });
 
-    const accessToken = this.jwtService.sign(
-      { sub: userId },
-      { secret: requireEnv('JWT_ACCESS_SECRET'), expiresIn: ACCESS_TTL_SECONDS },
-    );
-
-    return { accessToken, refreshToken: newRawToken };
+    return { accessToken: this.signAccessToken(userId), refreshToken: newRawToken };
   }
 
   async logout(rawToken: string | undefined): Promise<void> {
@@ -160,15 +168,16 @@ export class AuthService {
     const user = await this.usersRepo.findOne({ where: { email: normalizedEmail } });
     if (!user) return; // Silent — prevents email enumeration
 
-    // Invalidate any existing reset tokens for this user
-    await this.resetTokensRepo.delete({ userId: user.id });
-
     const rawToken = generateOpaqueToken();
     const tokenHash = hashToken(rawToken);
     const expiresAt = new Date(Date.now() + PASSWORD_RESET_TTL_MS);
 
-    const resetToken = this.resetTokensRepo.create({ userId: user.id, tokenHash, expiresAt });
-    await this.resetTokensRepo.save(resetToken);
+    // Transactional: ensures at most one valid reset token exists per user at any time.
+    await this.dataSource.transaction(async (manager) => {
+      await manager.delete(PasswordResetToken, { userId: user.id });
+      const resetToken = manager.create(PasswordResetToken, { userId: user.id, tokenHash, expiresAt });
+      await manager.save(PasswordResetToken, resetToken);
+    });
 
     await this.emailService.sendPasswordResetEmail(user.email, rawToken);
   }
@@ -177,13 +186,17 @@ export class AuthService {
     const tokenHash = hashToken(rawToken);
     const tokenRecord = await this.resetTokensRepo.findOne({ where: { tokenHash } });
 
-    if (!tokenRecord || tokenRecord.used) {
-      throw new UnauthorizedException('Invalid or expired reset token');
-    }
+    if (!tokenRecord) throw new UnauthorizedException('Invalid or expired reset token');
     if (tokenRecord.expiresAt < new Date()) {
       await this.resetTokensRepo.delete({ id: tokenRecord.id });
       throw new UnauthorizedException('Reset token expired');
     }
+
+    const user = await this.usersRepo.findOne({ where: { id: tokenRecord.userId } });
+    if (!user) throw new UnauthorizedException('Invalid or expired reset token');
+
+    const samePassword = await bcrypt.compare(newPassword, user.passwordHash);
+    if (samePassword) throw new BadRequestException('New password must differ from current password');
 
     const newHash = await bcrypt.hash(newPassword, 12);
 
@@ -194,16 +207,18 @@ export class AuthService {
     });
   }
 
+  private signAccessToken(userId: string): string {
+    return this.jwtService.sign(
+      { sub: userId },
+      { secret: requireEnv('JWT_ACCESS_SECRET'), expiresIn: ACCESS_TTL_SECONDS },
+    );
+  }
+
   private async issueTokens(
     userId: string,
     userAgent?: string,
     ip?: string,
   ): Promise<TokenPair> {
-    const accessToken = this.jwtService.sign(
-      { sub: userId },
-      { secret: requireEnv('JWT_ACCESS_SECRET'), expiresIn: ACCESS_TTL_SECONDS },
-    );
-
     const rawRefreshToken = generateOpaqueToken();
     const tokenHash = hashToken(rawRefreshToken);
     const expiresAt = new Date(Date.now() + REFRESH_TTL_MS);
@@ -217,6 +232,6 @@ export class AuthService {
     });
     await this.sessionsRepo.save(session);
 
-    return { accessToken, refreshToken: rawRefreshToken };
+    return { accessToken: this.signAccessToken(userId), refreshToken: rawRefreshToken };
   }
 }

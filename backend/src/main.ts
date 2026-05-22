@@ -35,6 +35,7 @@ async function bootstrap() {
       .setDescription('API for vocabulary learning app (MVP)')
       .setVersion('1.0')
       .addBearerAuth()
+      .addCookieAuth('refresh_token')
       .build();
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api/docs', app, document);
