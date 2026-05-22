@@ -29,6 +29,12 @@ export class RatingPreviewsDto {
   easy: RatingPreviewDto;
 }
 
+// ── Time constants ────────────────────────────────────────────────────────────
+
+const MS_PER_MIN  = 60 * 1000;
+const MS_PER_HOUR = 60 * MS_PER_MIN;
+const MS_PER_DAY  = 24 * MS_PER_HOUR;
+
 // ── Humanisation ──────────────────────────────────────────────────────────────
 //
 // Format table (from review-system.md):
@@ -93,10 +99,6 @@ export function humaniseReviewTime(target: Date, now: Date): string {
 
   return 'In over a year';
 }
-
-const MS_PER_MIN  = 60 * 1000;
-const MS_PER_HOUR = 60 * MS_PER_MIN;
-const MS_PER_DAY  = 24 * MS_PER_HOUR;
 
 // ── Service ──────────────────────────────────────────────────────────────────
 

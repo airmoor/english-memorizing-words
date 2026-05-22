@@ -54,6 +54,7 @@ export class TagsController {
   @Patch('tags/:tagId')
   @ApiOperation({ summary: 'Rename a tag' })
   @ApiResponse({ status: 200, description: 'Tag renamed', type: TagDto })
+  @ApiResponse({ status: 400, description: 'name is required' })
   @ApiResponse({ status: 404, description: 'Tag not found' })
   @ApiResponse({ status: 409, description: 'Tag name already exists' })
   renameTag(

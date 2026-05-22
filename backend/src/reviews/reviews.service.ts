@@ -285,6 +285,12 @@ export class ReviewsService {
         [next.intervalDays, next.easeFactor, next.intervalDays, cardId, userId],
       )) as { next_review: Date }[];
 
+      // Guard: SELECT FOR UPDATE guarantees the card exists; this branch is
+      // theoretically unreachable, but checked before commit for safety.
+      if (updated.length === 0) {
+        throw new NotFoundException(`Card ${cardId} not found`);
+      }
+
       await qr.query(
         `INSERT INTO review_logs (id, card_id, rating)
          VALUES (gen_random_uuid(), $1, $2)`,
@@ -292,10 +298,6 @@ export class ReviewsService {
       );
 
       await qr.commitTransaction();
-
-      if (updated.length === 0) {
-        throw new NotFoundException(`Card ${cardId} not found during update`);
-      }
 
       return {
         nextReview: updated[0].next_review,

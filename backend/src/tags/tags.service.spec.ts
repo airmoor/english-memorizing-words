@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { TagsService, CreateTagDto, FindOrCreateTagDto } from './tags.service';
 
@@ -139,8 +139,8 @@ describe('TagsService', () => {
       expect(err.message).toBe('Tag name already exists');
     });
 
-    it('throws ConflictException when name is missing', async () => {
-      await expect(service.renameTag(USER_ID, TAG_ID, {})).rejects.toThrow(ConflictException);
+    it('throws BadRequestException when name is missing', async () => {
+      await expect(service.renameTag(USER_ID, TAG_ID, {})).rejects.toThrow(BadRequestException);
       expect(dataSource.query).not.toHaveBeenCalled();
     });
   });

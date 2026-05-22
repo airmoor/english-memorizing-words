@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Post,
   Query,
 } from '@nestjs/common';
@@ -64,7 +65,7 @@ export class ReviewsController {
   @ApiResponse({ status: 404, description: 'Card not found' })
   getAnswer(
     @CurrentUser() user: AuthUser,
-    @Param('cardId') cardId: string,
+    @Param('cardId', new ParseUUIDPipe()) cardId: string,
   ): Promise<CardAnswerDto> {
     return this.reviewsService.getAnswer(user.id, cardId);
   }
@@ -77,7 +78,7 @@ export class ReviewsController {
   @ApiResponse({ status: 404, description: 'Card not found' })
   reviewCard(
     @CurrentUser() user: AuthUser,
-    @Param('cardId') cardId: string,
+    @Param('cardId', new ParseUUIDPipe()) cardId: string,
     @Body() dto: ReviewRatingDto,
   ): Promise<ReviewResultDto> {
     return this.reviewsService.reviewCard(user.id, cardId, dto.rating);

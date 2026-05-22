@@ -43,7 +43,7 @@ export class VocabularyController {
   @ApiResponse({ status: 404, description: 'Word not found' })
   saveWord(
     @CurrentUser() user: AuthUser,
-    @Param('wordId') wordId: string,
+    @Param('wordId', new ParseUUIDPipe()) wordId: string,
   ): Promise<void> {
     return this.vocabularyService.saveWord(user.id, wordId);
   }
@@ -111,7 +111,7 @@ export class VocabularyController {
   @ApiResponse({ status: 404, description: 'Word not in vocabulary' })
   removeWord(
     @CurrentUser() user: AuthUser,
-    @Param('wordId') wordId: string,
+    @Param('wordId', new ParseUUIDPipe()) wordId: string,
   ): Promise<void> {
     return this.vocabularyService.removeWord(user.id, wordId);
   }

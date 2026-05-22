@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -116,7 +117,7 @@ export class TagsService {
 
   async renameTag(userId: string, tagId: string, dto: RenameTagDto): Promise<TagDto> {
     if (!dto.name) {
-      throw new ConflictException('name is required');
+      throw new BadRequestException('name is required');
     }
 
     const name = normaliseTagName(dto.name);

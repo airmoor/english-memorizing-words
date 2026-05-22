@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { VocabularyService, VocabularyQueryDto } from './vocabulary.service';
 
@@ -260,23 +260,32 @@ describe('VocabularyService', () => {
     });
 
     it('adds boardId EXISTS filter to WHERE when boardId is provided', async () => {
+      const BOARD_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
       mockFullFetch({ count: '0' });
-      await service.getUserVocabulary(userId, { boardId: 'board-uuid' });
+      await service.getUserVocabulary(userId, { boardId: BOARD_ID });
       const countCall = dataSource.query.mock.calls[0] as [string, unknown[]];
       expect(countCall[0]).toContain('card_boards');
-      expect(countCall[1]).toContain('board-uuid');
+      expect(countCall[1]).toContain(BOARD_ID);
     });
 
     it('adds one EXISTS per tag when tagIds is a comma-separated list', async () => {
+      const TAG_A = '11111111-1111-1111-1111-111111111111';
+      const TAG_B = '22222222-2222-2222-2222-222222222222';
       mockFullFetch({ count: '0' });
-      await service.getUserVocabulary(userId, { tagIds: 'tag-1,tag-2' });
+      await service.getUserVocabulary(userId, { tagIds: `${TAG_A},${TAG_B}` });
       const countSql = (dataSource.query.mock.calls[0] as [string, unknown[]])[0];
       const countParams = (dataSource.query.mock.calls[0] as [string, unknown[]])[1];
       // Two EXISTS subqueries — one per tag
       const tagMatches = (countSql.match(/card_tags/g) ?? []).length;
       expect(tagMatches).toBe(2);
-      expect(countParams).toContain('tag-1');
-      expect(countParams).toContain('tag-2');
+      expect(countParams).toContain(TAG_A);
+      expect(countParams).toContain(TAG_B);
+    });
+
+    it('throws BadRequestException for non-UUID tagIds', async () => {
+      await expect(
+        service.getUserVocabulary(userId, { tagIds: 'not-a-uuid' }),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('adds reviewState filter to WHERE', async () => {

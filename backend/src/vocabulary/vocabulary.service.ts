@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsNumberString, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 import { DataSource } from 'typeorm';
@@ -201,15 +201,20 @@ export class PaginatedVocabularyDto {
   hasMore: boolean;
 }
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 // ── Review state computation ──────────────────────────────────────────────────
 
 function computeReviewState(
   lastReviewedAt: Date | null,
   intervalDays: number | null,
   nextReview: Date | null,
+  now: Date,
 ): string {
   if (lastReviewedAt === null) return 'new';
-  if (nextReview !== null && nextReview <= new Date()) return 'due';
+  if (nextReview !== null && nextReview <= now) return 'due';
   const days = intervalDays ?? 0;
   if (days < 7) return 'learning';
   if (days < 21) return 'review';
@@ -338,7 +343,7 @@ export class VocabularyService {
 
     // Part-of-speech filter: word must have ≥1 meaning with matching PoS
     if (dto.partOfSpeech) {
-      params.push(dto.partOfSpeech)
+      params.push(dto.partOfSpeech.trim())
       where.push(`EXISTS (
         SELECT 1 FROM meanings m3
         WHERE m3.word_id = w.id AND m3.part_of_speech = $${params.length}
@@ -349,6 +354,9 @@ export class VocabularyService {
     if (dto.tagIds) {
       const tagIdList = dto.tagIds.split(',').map((s) => s.trim()).filter(Boolean)
       for (const tagId of tagIdList) {
+        if (!UUID_RE.test(tagId)) {
+          throw new BadRequestException(`Invalid tag ID: ${tagId}`)
+        }
         params.push(tagId)
         where.push(`EXISTS (
           SELECT 1 FROM card_tags ct
@@ -525,7 +533,7 @@ export class VocabularyService {
       lastReviewedAt:  w.lastReviewedAt,
       intervalDays:    w.intervalDays,
       easeFactor:      w.easeFactor,
-      reviewState:     computeReviewState(w.lastReviewedAt, w.intervalDays, w.nextReview),
+      reviewState:     computeReviewState(w.lastReviewedAt, w.intervalDays, w.nextReview, now),
       nextReviewHuman: w.nextReview ? humaniseReviewTime(w.nextReview, now) : null,
       boards:          boardsByCard.get(w.cardId) ?? [],
       tags:            tagsByCard.get(w.cardId) ?? [],
