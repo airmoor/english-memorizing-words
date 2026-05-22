@@ -1,3 +1,4 @@
+import { useState, type FormEvent } from 'react'
 import { Container } from '../../shared/ui/layout/Container'
 import { PageLayout } from '../../shared/ui/layout/PageLayout'
 import { Card } from '../../shared/ui/Card/Card'
@@ -13,6 +14,7 @@ import {
   type ResolvedTheme,
 } from '../../shared/design/ThemeProvider'
 import { useLogout } from '../../features/auth/model/useLogout'
+import { changePasswordApi } from '../../features/auth/api/changePassword'
 import styles from './SettingsPage.module.css'
 
 export function SettingsPage() {
@@ -107,6 +109,17 @@ export function SettingsPage() {
             Currently active: <strong>{resolved}</strong>
           </Text>
 
+          {/* ── Change Password ──────────────────────────────────────────── */}
+          <Card padding="lg" className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <Text variant="label" as="h2" className={styles.sectionTitle}>Change password</Text>
+              <Text variant="caption" color="secondary" as="p">
+                All your other sessions will be signed out automatically.
+              </Text>
+            </div>
+            <ChangePasswordForm />
+          </Card>
+
           {/* ── Account ─────────────────────────────────────────────────────
               Logout is accessible here on all screen sizes.
               On mobile it is the primary logout path (not in the top bar).
@@ -134,6 +147,102 @@ export function SettingsPage() {
 }
 
 // ── Tiles ─────────────────────────────────────────────────────────────────────
+
+// ── Change Password Form ──────────────────────────────────────────────────────
+
+function ChangePasswordForm() {
+  const [current, setCurrent] = useState('')
+  const [next, setNext] = useState('')
+  const [confirm, setConfirm] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    setError(null)
+    setSuccess(false)
+
+    if (next !== confirm) {
+      setError('New passwords do not match.')
+      return
+    }
+    if (next.length < 8) {
+      setError('New password must be at least 8 characters.')
+      return
+    }
+
+    setLoading(true)
+    try {
+      await changePasswordApi(current, next)
+      setSuccess(true)
+      setCurrent('')
+      setNext('')
+      setConfirm('')
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Something went wrong.'
+      if (msg.toLowerCase().includes('incorrect') || msg.toLowerCase().includes('current')) {
+        setError('Current password is incorrect.')
+      } else if (msg.toLowerCase().includes('same') || msg.toLowerCase().includes('differ')) {
+        setError('New password must be different from current.')
+      } else {
+        setError(msg)
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className={styles.changePasswordForm}>
+      <label className={styles.pwLabel}>
+        <Text variant="caption" color="secondary" as="span">Current password</Text>
+        <input
+          type="password"
+          value={current}
+          onChange={(e) => setCurrent(e.target.value)}
+          className={styles.pwInput}
+          autoComplete="current-password"
+          required
+        />
+      </label>
+      <label className={styles.pwLabel}>
+        <Text variant="caption" color="secondary" as="span">New password</Text>
+        <input
+          type="password"
+          value={next}
+          onChange={(e) => setNext(e.target.value)}
+          className={styles.pwInput}
+          placeholder="Min. 8 characters"
+          autoComplete="new-password"
+          required
+        />
+      </label>
+      <label className={styles.pwLabel}>
+        <Text variant="caption" color="secondary" as="span">Confirm new password</Text>
+        <input
+          type="password"
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+          className={styles.pwInput}
+          autoComplete="new-password"
+          required
+        />
+      </label>
+
+      {error && <Text variant="caption" color="danger" as="p">{error}</Text>}
+      {success && (
+        <Text variant="caption" as="p" className={styles.successMsg}>
+          Password updated successfully.
+        </Text>
+      )}
+
+      <button type="submit" disabled={loading} className={styles.logoutBtn}>
+        {loading ? 'Updating…' : 'Update password'}
+      </button>
+    </form>
+  )
+}
 
 function ModeTile({
   value, label, icon, active, onClick,

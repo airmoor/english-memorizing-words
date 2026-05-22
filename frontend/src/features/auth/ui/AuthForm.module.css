@@ -16,6 +16,23 @@
   gap: var(--space-xs);
 }
 
+.labelRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.forgotLink {
+  font-size: var(--font-xs);
+  color: var(--color-accent);
+  text-decoration: none;
+  font-weight: var(--fw-medium);
+}
+
+.forgotLink:hover {
+  text-decoration: underline;
+}
+
 .input {
   padding: 0.625rem var(--space-md);
   border: 1.5px solid var(--color-border);

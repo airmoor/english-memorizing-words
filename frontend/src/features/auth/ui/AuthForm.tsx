@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { Card } from '../../../shared/ui/Card/Card'
 import { Button } from '../../../shared/ui/Button/Button'
 import { Text } from '../../../shared/ui/Typography/Typography'
@@ -69,7 +70,14 @@ export function AuthForm({ mode, onSubmit, onToggle }: Props) {
             </label>
 
             <label className={styles.label}>
-              <Text variant="label" as="span">Password</Text>
+              <span className={styles.labelRow}>
+                <Text variant="label" as="span">Password</Text>
+                {isLogin && (
+                  <Link to="/forgot-password" className={styles.forgotLink}>
+                    Forgot password?
+                  </Link>
+                )}
+              </span>
               <input
                 type="password"
                 value={password}

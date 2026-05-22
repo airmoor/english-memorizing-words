@@ -1,6 +1,8 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { RequireAuth } from '../../features/auth/ui/RequireAuth'
 import { AuthPage } from '../../pages/auth/AuthPage'
+import { ForgotPasswordPage } from '../../pages/auth/ForgotPasswordPage'
+import { ResetPasswordPage } from '../../pages/auth/ResetPasswordPage'
 import { HomePage } from '../../pages/home/HomePage'
 import { SearchPage } from '../../pages/search/SearchPage'
 import { ReviewPage } from '../../pages/review/ReviewPage'
@@ -21,6 +23,8 @@ export function AppRouter() {
       />
       <Route path="/login" element={<AuthPage />} />
       <Route path="/register" element={<AuthPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route
         path="/home"
         element={
