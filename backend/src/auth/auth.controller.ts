@@ -7,33 +7,29 @@ import {
   Req,
   Res,
 } from '@nestjs/common';
-import { ApiOperation, ApiProperty, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiCookieAuth,
+  ApiOperation,
+  ApiProperty,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
-import { IsEmail, IsStrongPassword, MinLength } from 'class-validator';
 import { Request, Response } from 'express';
+import { AuthUser, CurrentUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
 import { AuthService, TokenResponseDto } from './auth.service';
+import { AuthCredentialsDto } from './dto/auth-credentials.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
+import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { clearRefreshCookie, REFRESH_COOKIE_NAME, setRefreshCookie } from './cookie.util';
 
-export class AuthCredentialsDto {
-  @ApiProperty({ example: 'user@example.com' })
-  @IsEmail()
-  email: string;
-
-  @ApiProperty({ example: 'MyP@ssw0rd!', minLength: 8 })
-  @MinLength(8)
-  @IsStrongPassword({ minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 })
-  password: string;
+class MessageResponseDto {
+  @ApiProperty()
+  message: string;
 }
-
-const COOKIE_NAME = 'refresh_token';
-const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
-const IS_PROD = process.env.NODE_ENV === 'production';
-// SameSite=None allows the refresh cookie to be sent on cross-origin requests
-// (frontend and backend on separate Railway/Coolify subdomains). Requires Secure=true,
-// which IS_PROD already enforces. In dev, Lax is fine because requests stay same-origin
-// via the Vite proxy.
-const SAME_SITE = IS_PROD ? 'none' : 'lax';
-// const SAME_SITE = 'lax';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -48,10 +44,16 @@ export class AuthController {
   @ApiResponse({ status: 409, description: 'Email already registered' })
   async register(
     @Body() dto: AuthCredentialsDto,
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<TokenResponseDto> {
-    const { accessToken, refreshToken } = await this.authService.register(dto.email, dto.password);
-    this.setRefreshCookie(res, refreshToken);
+    const { accessToken, refreshToken } = await this.authService.register(
+      dto.email,
+      dto.password,
+      req.headers['user-agent'],
+      req.ip,
+    );
+    setRefreshCookie(res, refreshToken);
     return { accessToken };
   }
 
@@ -64,10 +66,16 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(
     @Body() dto: AuthCredentialsDto,
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<TokenResponseDto> {
-    const { accessToken, refreshToken } = await this.authService.login(dto.email, dto.password);
-    this.setRefreshCookie(res, refreshToken);
+    const { accessToken, refreshToken } = await this.authService.login(
+      dto.email,
+      dto.password,
+      req.headers['user-agent'],
+      req.ip,
+    );
+    setRefreshCookie(res, refreshToken);
     return { accessToken };
   }
 
@@ -75,40 +83,84 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 30, ttl: 60_000 } })
-  @ApiOperation({ summary: 'Obtain a new access token using the refresh cookie' })
+  @ApiCookieAuth('refresh_token')
+  @ApiOperation({ summary: 'Rotate refresh token and obtain a new access token' })
   @ApiResponse({ status: 200, description: 'Returns new access token', type: TokenResponseDto })
-  @ApiResponse({ status: 401, description: 'Refresh token missing or invalid' })
+  @ApiResponse({ status: 401, description: 'Refresh token missing, invalid, or expired' })
   async refresh(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<TokenResponseDto> {
-    const raw = req.cookies?.[COOKIE_NAME] as string | undefined;
-    const { accessToken, refreshToken } = await this.authService.refresh(raw);
-    this.setRefreshCookie(res, refreshToken);
-    return { accessToken };
+    const raw = req.cookies?.[REFRESH_COOKIE_NAME] as string | undefined;
+    try {
+      const { accessToken, refreshToken } = await this.authService.refresh(
+        raw,
+        req.headers['user-agent'],
+        req.ip,
+      );
+      setRefreshCookie(res, refreshToken);
+      return { accessToken };
+    } catch (err) {
+      clearRefreshCookie(res);
+      throw err;
+    }
   }
 
   @Post('logout')
   @Public()
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Clear the refresh cookie' })
+  @ApiCookieAuth('refresh_token')
+  @ApiOperation({ summary: 'Invalidate refresh session and clear cookie' })
   @ApiResponse({ status: 204 })
-  logout(@Res({ passthrough: true }) res: Response): void {
-    res.clearCookie(COOKIE_NAME, {
-      httpOnly: true,
-      sameSite: SAME_SITE,
-      secure: IS_PROD,
-      path: '/',
-    });
+  async logout(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<void> {
+    const raw = req.cookies?.[REFRESH_COOKIE_NAME] as string | undefined;
+    await this.authService.logout(raw);
+    clearRefreshCookie(res);
   }
 
-  private setRefreshCookie(res: Response, token: string): void {
-    res.cookie(COOKIE_NAME, token, {
-      httpOnly: true,
-      sameSite: SAME_SITE,
-      secure: IS_PROD,
-      maxAge: COOKIE_MAX_AGE,
-      path: '/',
-    });
+  @Post('update-password')
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update password for the authenticated user' })
+  @ApiResponse({ status: 200, description: 'Password updated', type: MessageResponseDto })
+  @ApiResponse({ status: 400, description: 'New password is the same as current' })
+  @ApiResponse({ status: 401, description: 'Not authenticated or current password wrong' })
+  async updatePassword(
+    @CurrentUser() user: AuthUser,
+    @Body() dto: UpdatePasswordDto,
+  ): Promise<MessageResponseDto> {
+    await this.authService.updatePassword(user.id, dto.currentPassword, dto.newPassword);
+    return { message: 'Password updated' };
+  }
+
+  @Post('request-password-reset')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 3, ttl: 60_000 } })
+  @ApiOperation({ summary: 'Request a password reset email' })
+  @ApiResponse({ status: 200, description: 'Always succeeds (no email enumeration)', type: MessageResponseDto })
+  async requestPasswordReset(
+    @Body() dto: RequestPasswordResetDto,
+  ): Promise<MessageResponseDto> {
+    await this.authService.requestPasswordReset(dto.email);
+    return { message: 'If an account with that email exists, a reset link has been sent.' };
+  }
+
+  @Post('reset-password')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @ApiOperation({ summary: 'Reset password using a one-time token' })
+  @ApiResponse({ status: 200, description: 'Password reset successfully', type: MessageResponseDto })
+  @ApiResponse({ status: 401, description: 'Invalid, expired, or already-used token' })
+  async resetPassword(
+    @Body() dto: ResetPasswordDto,
+  ): Promise<MessageResponseDto> {
+    await this.authService.resetPassword(dto.token, dto.newPassword);
+    return { message: 'Password reset successfully' };
   }
 }
