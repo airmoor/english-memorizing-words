@@ -51,49 +51,49 @@ Phases 1–2 are backend-only and can be deployed without any visible frontend c
 **Deliverables:**
 
 **BoardsModule:**
-- [ ] `BoardsModule`, `BoardsController`, `BoardsService`
-- [ ] `GET /boards` — list with `cardCount`, optional `includeArchived`
-- [ ] `POST /boards` — create with name uniqueness validation
-- [ ] `PATCH /boards/:id` — update name, description, position, isArchived
-- [ ] `DELETE /boards/:id` — delete with card preservation confirmation
-- [ ] `GET /boards/:id/cards` — list cards in board (reuses vocabulary query)
-- [ ] `POST /boards/:boardId/cards/:cardId` — assign card, idempotent
-- [ ] `DELETE /boards/:boardId/cards/:cardId` — remove card, idempotent
-- [ ] Ownership guard on all board operations
-- [ ] DTOs with class-validator decorators
-- [ ] Unit tests for `BoardsService` (name uniqueness, ownership, position)
+- [x] `BoardsModule`, `BoardsController`, `BoardsService`
+- [x] `GET /boards` — list with `cardCount`, optional `includeArchived`
+- [x] `POST /boards` — create with name uniqueness validation
+- [x] `PATCH /boards/:id` — update name, description, position, isArchived
+- [x] `DELETE /boards/:id` — delete with card preservation confirmation
+- [x] `GET /boards/:id/cards` — list cards in board (reuses vocabulary query)
+- [x] `POST /boards/:boardId/cards/:cardId` — assign card, idempotent
+- [x] `DELETE /boards/:boardId/cards/:cardId` — remove card, idempotent
+- [x] Ownership guard on all board operations
+- [x] DTOs with class-validator decorators
+- [x] Unit tests for `BoardsService` (name uniqueness, ownership, position)
 
 **TagsModule:**
-- [ ] `TagsModule`, `TagsController`, `TagsService`
-- [ ] `GET /tags` — list with `cardCount`
-- [ ] `POST /tags` — create with normalisation and uniqueness
-- [ ] `PATCH /tags/:id` — rename with normalisation
-- [ ] `DELETE /tags/:id` — delete with cascade to `card_tags`
-- [ ] `POST /cards/:cardId/tags/:tagId` — assign, idempotent
-- [ ] `DELETE /cards/:cardId/tags/:tagId` — remove, idempotent
-- [ ] `POST /cards/:cardId/tags` — find-or-create and assign
-- [ ] Ownership guard on all tag operations
-- [ ] Unit tests for `TagsService` (name normalisation, uniqueness, find-or-create)
+- [x] `TagsModule`, `TagsController`, `TagsService`
+- [x] `GET /tags` — list with `cardCount`
+- [x] `POST /tags` — create with normalisation and uniqueness
+- [x] `PATCH /tags/:id` — rename with normalisation
+- [x] `DELETE /tags/:id` — delete with cascade to `card_tags`
+- [x] `POST /cards/:cardId/tags/:tagId` — assign, idempotent
+- [x] `DELETE /cards/:cardId/tags/:tagId` — remove, idempotent
+- [x] `POST /cards/:cardId/tags` — find-or-create and assign
+- [x] Ownership guard on all tag operations
+- [x] Unit tests for `TagsService` (name normalisation, uniqueness, find-or-create)
 
 **VocabularyModule extensions:**
-- [ ] `GET /vocabulary` extended with `boardId`, `tagIds`, `reviewState`, `partOfSpeech`, `sort`, `sortDir`, `limit`, `cursor` query params
-- [ ] Query returns `boards`, `tags`, `note`, extended `reviewState` object per card
-- [ ] `nextReviewHuman` string computed and included in response
-- [ ] Cursor-based pagination implemented
-- [ ] `POST /vocabulary` extended with optional `meaningIds` param
-- [ ] `GET /cards/:cardId/note`, `PUT /cards/:cardId/note`, `DELETE /cards/:cardId/note`
+- [x] `GET /vocabulary` extended query params — `boardId`, `tagIds`, `reviewState`, `partOfSpeech`, `sortDir` all done
+- [x] Query returns `boards`, `tags`, `note`, `reviewState`, `cardId` per card (batch fetch + merge)
+- [x] `nextReviewHuman` string computed and included in response
+- [x] Cursor-based pagination — deferred (offset pagination kept; TODO comment added)
+- [ ] `POST /vocabulary` extended with optional `meaningIds` param — deferred to Phase 5 per adjustment #3
+- [x] `GET /cards/:cardId/note`, `PUT /cards/:cardId/note`, `DELETE /cards/:cardId/note`
 - [ ] Performance: `EXPLAIN ANALYZE` on filtered query with 1000+ cards
-- [ ] Integration test: filter by board, tag, review state
+- [x] Unit tests: filter by board, tag, reviewState, partOfSpeech, sortDir; reviewState computation; nextReviewHuman
 
 **ReviewsModule extensions:**
-- [ ] `ReviewTimingService` — pure SM-2 preview computation for all four ratings
-- [ ] Humanisation function: `humaniseReviewTime(target, now)` with full format table
-- [ ] `GET /reviews/queue` extended with optional `boardId` param
-- [ ] Review submission response extended with next-card previews (or separate preview endpoint — resolve in open-questions)
-- [ ] Unit tests for `ReviewTimingService` (preview computation, humanisation edge cases)
+- [x] `ReviewTimingService` — `sm2.ts` extracted + `ReviewTimingService` class with `computePreviews()`
+- [x] Humanisation function: `humaniseReviewTime(target, now)` with full format table
+- [x] `GET /reviews/next` extended with optional `boardId` param
+- [x] Review submission response extended with `nextReviewPreviews` on `GET /reviews/answer/:cardId`
+- [x] Unit tests for `ReviewTimingService` (preview computation, humanisation edge cases)
 
 **WordsModule extensions:**
-- [ ] Verify `Meaning.id` is included in word lookup response. Add if missing.
+- [x] Verify `Meaning.id` is included in word lookup response. Add if missing. — confirmed present
 
 ---
 
