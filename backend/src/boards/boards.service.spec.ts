@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { BoardsService, CreateBoardDto, UpdateBoardDto } from './boards.service';
 
@@ -16,7 +16,7 @@ const BOARD_ROW = {
   colorAccent: null,
   position:    0,
   isArchived:  false,
-  cardCount:   '0',
+  cardCount:   0,
   createdAt:   new Date('2024-01-01'),
   updatedAt:   new Date('2024-01-01'),
 };
@@ -43,23 +43,41 @@ describe('BoardsService', () => {
   // ── listBoards ─────────────────────────────────────────────────────────────
 
   describe('listBoards', () => {
-    it('returns boards ordered by position', async () => {
+    it('returns boards ordered by position (archived excluded by default)', async () => {
       const rows = [BOARD_ROW, { ...BOARD_ROW, id: 'board-2', name: 'B', position: 1 }];
       dataSource.query.mockResolvedValueOnce(rows);
 
-      const result = await service.listBoards(USER_ID);
+      const result = await service.listBoards(USER_ID, {});
 
       expect(result).toEqual(rows);
       expect(dataSource.query).toHaveBeenCalledWith(
         expect.stringContaining('FROM boards b'),
-        [USER_ID],
+        [USER_ID, false],
+      );
+    });
+
+    it('passes includeArchived=true when requested', async () => {
+      dataSource.query.mockResolvedValueOnce([]);
+
+      await service.listBoards(USER_ID, { includeArchived: 'true' });
+
+      expect(dataSource.query).toHaveBeenCalledWith(
+        expect.any(String),
+        [USER_ID, true],
       );
     });
 
     it('returns empty array when user has no boards', async () => {
       dataSource.query.mockResolvedValueOnce([]);
-      const result = await service.listBoards(USER_ID);
+      const result = await service.listBoards(USER_ID, {});
       expect(result).toEqual([]);
+    });
+
+    it('uses COUNT::int cast in SQL', async () => {
+      dataSource.query.mockResolvedValueOnce([]);
+      await service.listBoards(USER_ID, {});
+      const [sql] = dataSource.query.mock.calls[0];
+      expect(sql).toContain('::int');
     });
   });
 
@@ -81,9 +99,11 @@ describe('BoardsService', () => {
       );
     });
 
-    it('throws ConflictException on duplicate name', async () => {
+    it('throws ConflictException with static message on duplicate name', async () => {
       dataSource.query.mockRejectedValueOnce({ code: '23505' });
-      await expect(service.createBoard(USER_ID, dto)).rejects.toThrow(ConflictException);
+      const err = await service.createBoard(USER_ID, dto).catch((e) => e);
+      expect(err).toBeInstanceOf(ConflictException);
+      expect(err.message).toBe('Board name already exists');
     });
 
     it('rethrows unknown errors', async () => {
@@ -108,10 +128,8 @@ describe('BoardsService', () => {
   // ── updateBoard ────────────────────────────────────────────────────────────
 
   describe('updateBoard', () => {
-    it('updates a board and returns it with cardCount', async () => {
-      dataSource.query
-        .mockResolvedValueOnce([{ ...BOARD_ROW, name: 'Updated' }])
-        .mockResolvedValueOnce([{ count: '5' }]);
+    it('updates a board and returns it with cardCount from subquery', async () => {
+      dataSource.query.mockResolvedValueOnce([{ ...BOARD_ROW, name: 'Updated', cardCount: 5 }]);
 
       const dto: UpdateBoardDto = { name: 'Updated' };
       const result = await service.updateBoard(USER_ID, BOARD_ID, dto);
@@ -120,23 +138,34 @@ describe('BoardsService', () => {
       expect(result.cardCount).toBe(5);
     });
 
-    it('throws NotFoundException when board does not exist', async () => {
-      dataSource.query.mockResolvedValueOnce([]);
-      await expect(service.updateBoard(USER_ID, BOARD_ID, {})).rejects.toThrow(NotFoundException);
+    it('embeds COUNT subquery in UPDATE RETURNING', async () => {
+      dataSource.query.mockResolvedValueOnce([BOARD_ROW]);
+      await service.updateBoard(USER_ID, BOARD_ID, { name: 'x' });
+      const [sql] = dataSource.query.mock.calls[0];
+      expect(sql).toContain('SELECT COUNT');
+      expect(sql).toContain('RETURNING');
     });
 
-    it('throws ConflictException on duplicate name', async () => {
+    it('throws BadRequestException on empty body', async () => {
+      await expect(service.updateBoard(USER_ID, BOARD_ID, {})).rejects.toThrow(BadRequestException);
+      expect(dataSource.query).not.toHaveBeenCalled();
+    });
+
+    it('throws NotFoundException when board does not exist', async () => {
+      dataSource.query.mockResolvedValueOnce([]);
+      await expect(service.updateBoard(USER_ID, BOARD_ID, { name: 'x' })).rejects.toThrow(NotFoundException);
+    });
+
+    it('throws ConflictException with static message on duplicate name', async () => {
       dataSource.query.mockRejectedValueOnce({ code: '23505' });
-      await expect(service.updateBoard(USER_ID, BOARD_ID, { name: 'Dup' })).rejects.toThrow(ConflictException);
+      const err = await service.updateBoard(USER_ID, BOARD_ID, { name: 'Dup' }).catch((e) => e);
+      expect(err).toBeInstanceOf(ConflictException);
+      expect(err.message).toBe('Board name already exists');
     });
 
     it('includes only provided fields in SET clause', async () => {
-      dataSource.query
-        .mockResolvedValueOnce([BOARD_ROW])
-        .mockResolvedValueOnce([{ count: '0' }]);
-
+      dataSource.query.mockResolvedValueOnce([BOARD_ROW]);
       await service.updateBoard(USER_ID, BOARD_ID, { isArchived: true });
-
       const [sql] = dataSource.query.mock.calls[0];
       expect(sql).toContain('is_archived');
       expect(sql).not.toContain('name =');
@@ -160,7 +189,7 @@ describe('BoardsService', () => {
   // ── assignCard ─────────────────────────────────────────────────────────────
 
   describe('assignCard', () => {
-    it('verifies board and card ownership then inserts', async () => {
+    it('verifies board and card ownership in parallel then inserts', async () => {
       dataSource.query
         .mockResolvedValueOnce([{ id: BOARD_ID }]) // board ownership
         .mockResolvedValueOnce([{ id: CARD_ID }])  // card ownership
@@ -175,7 +204,9 @@ describe('BoardsService', () => {
     });
 
     it('throws NotFoundException when board not found', async () => {
-      dataSource.query.mockResolvedValueOnce([]);
+      dataSource.query
+        .mockResolvedValueOnce([])                // board not found
+        .mockResolvedValueOnce([{ id: CARD_ID }]);
       await expect(service.assignCard(USER_ID, BOARD_ID, CARD_ID)).rejects.toThrow(NotFoundException);
     });
 
@@ -206,7 +237,7 @@ describe('BoardsService', () => {
     it('is idempotent — no error if card not in board', async () => {
       dataSource.query
         .mockResolvedValueOnce([{ id: BOARD_ID }])
-        .mockResolvedValueOnce([]); // DELETE returns nothing — still ok
+        .mockResolvedValueOnce([]);
 
       await expect(service.removeCard(USER_ID, BOARD_ID, CARD_ID)).resolves.toBeUndefined();
     });
@@ -214,6 +245,20 @@ describe('BoardsService', () => {
     it('throws NotFoundException when board not found', async () => {
       dataSource.query.mockResolvedValueOnce([]);
       await expect(service.removeCard(USER_ID, BOARD_ID, CARD_ID)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  // ── assertBoardOwnership ───────────────────────────────────────────────────
+
+  describe('assertBoardOwnership', () => {
+    it('resolves when board belongs to user', async () => {
+      dataSource.query.mockResolvedValueOnce([{ id: BOARD_ID }]);
+      await expect(service.assertBoardOwnership(USER_ID, BOARD_ID)).resolves.toBeUndefined();
+    });
+
+    it('throws NotFoundException when board not found', async () => {
+      dataSource.query.mockResolvedValueOnce([]);
+      await expect(service.assertBoardOwnership(USER_ID, BOARD_ID)).rejects.toThrow(NotFoundException);
     });
   });
 });

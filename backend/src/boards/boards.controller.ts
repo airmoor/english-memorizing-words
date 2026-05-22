@@ -6,8 +6,10 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -17,9 +19,15 @@ import {
 } from '@nestjs/swagger';
 import { AuthUser, CurrentUser } from '../common/decorators/current-user.decorator';
 import {
+  PaginatedVocabularyDto,
+  VocabularyQueryDto,
+} from '../vocabulary/vocabulary.service';
+import { VocabularyService } from '../vocabulary/vocabulary.service';
+import {
   BoardDto,
   BoardsService,
   CreateBoardDto,
+  ListBoardsQueryDto,
   UpdateBoardDto,
 } from './boards.service';
 
@@ -27,13 +35,19 @@ import {
 @ApiBearerAuth()
 @Controller('boards')
 export class BoardsController {
-  constructor(private readonly boardsService: BoardsService) {}
+  constructor(
+    private readonly boardsService: BoardsService,
+    private readonly vocabularyService: VocabularyService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'List all boards for the authenticated user' })
   @ApiResponse({ status: 200, description: 'User boards', type: [BoardDto] })
-  listBoards(@CurrentUser() user: AuthUser): Promise<BoardDto[]> {
-    return this.boardsService.listBoards(user.id);
+  listBoards(
+    @CurrentUser() user: AuthUser,
+    @Query() query: ListBoardsQueryDto,
+  ): Promise<BoardDto[]> {
+    return this.boardsService.listBoards(user.id, query);
   }
 
   @Post()
@@ -50,11 +64,12 @@ export class BoardsController {
   @Patch(':boardId')
   @ApiOperation({ summary: 'Update a board' })
   @ApiResponse({ status: 200, description: 'Board updated', type: BoardDto })
+  @ApiResponse({ status: 400, description: 'No fields provided' })
   @ApiResponse({ status: 404, description: 'Board not found' })
   @ApiResponse({ status: 409, description: 'Board name already exists' })
   updateBoard(
     @CurrentUser() user: AuthUser,
-    @Param('boardId') boardId: string,
+    @Param('boardId', new ParseUUIDPipe()) boardId: string,
     @Body() dto: UpdateBoardDto,
   ): Promise<BoardDto> {
     return this.boardsService.updateBoard(user.id, boardId, dto);
@@ -67,9 +82,22 @@ export class BoardsController {
   @ApiResponse({ status: 404, description: 'Board not found' })
   deleteBoard(
     @CurrentUser() user: AuthUser,
-    @Param('boardId') boardId: string,
+    @Param('boardId', new ParseUUIDPipe()) boardId: string,
   ): Promise<void> {
     return this.boardsService.deleteBoard(user.id, boardId);
+  }
+
+  @Get(':boardId/cards')
+  @ApiOperation({ summary: 'List vocabulary cards scoped to a board' })
+  @ApiResponse({ status: 200, description: 'Paginated cards in the board', type: PaginatedVocabularyDto })
+  @ApiResponse({ status: 404, description: 'Board not found' })
+  async getBoardCards(
+    @CurrentUser() user: AuthUser,
+    @Param('boardId', new ParseUUIDPipe()) boardId: string,
+    @Query() query: VocabularyQueryDto,
+  ): Promise<PaginatedVocabularyDto> {
+    await this.boardsService.assertBoardOwnership(user.id, boardId);
+    return this.vocabularyService.getUserVocabulary(user.id, { ...query, boardId });
   }
 
   @Post(':boardId/cards/:cardId')
@@ -79,8 +107,8 @@ export class BoardsController {
   @ApiResponse({ status: 404, description: 'Board or card not found' })
   assignCard(
     @CurrentUser() user: AuthUser,
-    @Param('boardId') boardId: string,
-    @Param('cardId') cardId: string,
+    @Param('boardId', new ParseUUIDPipe()) boardId: string,
+    @Param('cardId', new ParseUUIDPipe()) cardId: string,
   ): Promise<void> {
     return this.boardsService.assignCard(user.id, boardId, cardId);
   }
@@ -92,8 +120,8 @@ export class BoardsController {
   @ApiResponse({ status: 404, description: 'Board not found' })
   removeCard(
     @CurrentUser() user: AuthUser,
-    @Param('boardId') boardId: string,
-    @Param('cardId') cardId: string,
+    @Param('boardId', new ParseUUIDPipe()) boardId: string,
+    @Param('cardId', new ParseUUIDPipe()) cardId: string,
   ): Promise<void> {
     return this.boardsService.removeCard(user.id, boardId, cardId);
   }

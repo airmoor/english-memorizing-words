@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNumberString, IsOptional, IsString } from 'class-validator';
+import { IsNumberString, IsOptional, IsString, IsUUID } from 'class-validator';
 import { DataSource } from 'typeorm';
 
 // ── DTOs ────────────────────────────────────────────────────────────────────
@@ -88,6 +88,11 @@ export class VocabularyQueryDto {
   @IsNumberString()
   @ApiPropertyOptional({ example: '0', description: 'Number of items to skip (default 0)' })
   offset?: string;
+
+  @IsOptional()
+  @IsUUID()
+  @ApiPropertyOptional({ example: 'uuid-v4', description: 'Restrict results to cards in this board' })
+  boardId?: string;
 }
 
 export class PaginatedVocabularyDto {
@@ -209,6 +214,14 @@ export class VocabularyService {
       if (conds.length > 0) {
         where.push(`(${conds.join(' OR ')})`)
       }
+    }
+
+    if (dto.boardId) {
+      params.push(dto.boardId)
+      where.push(`EXISTS (
+        SELECT 1 FROM card_boards cb
+        WHERE cb.card_id = c.id AND cb.board_id = $${params.length}
+      )`)
     }
 
     const whereClause = where.join(' AND ')

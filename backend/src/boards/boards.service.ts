@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -6,6 +7,7 @@ import {
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
+  IsBooleanString,
   IsInt,
   IsOptional,
   IsString,
@@ -38,11 +40,18 @@ export class BoardDto {
   @ApiProperty({ example: 12 })
   cardCount: number;
 
-  @ApiProperty({ example: '2024-01-01T00:00:00.000Z' })
+  @ApiProperty({ type: String, format: 'date-time', example: '2024-01-01T00:00:00.000Z' })
   createdAt: Date;
 
-  @ApiProperty({ example: '2024-01-01T00:00:00.000Z' })
+  @ApiProperty({ type: String, format: 'date-time', example: '2024-01-01T00:00:00.000Z' })
   updatedAt: Date;
+}
+
+export class ListBoardsQueryDto {
+  @ApiPropertyOptional({ example: false })
+  @IsOptional()
+  @IsBooleanString()
+  includeArchived?: string;
 }
 
 export class CreateBoardDto {
@@ -109,24 +118,27 @@ export class BoardsService {
 
   // ── GET /boards ──────────────────────────────────────────────────────────
 
-  async listBoards(userId: string): Promise<BoardDto[]> {
+  async listBoards(userId: string, query: ListBoardsQueryDto): Promise<BoardDto[]> {
+    const includeArchived = query.includeArchived === 'true';
+
     return this.dataSource.query<BoardDto[]>(
       `SELECT
          b.id,
          b.name,
          b.description,
-         b.color_accent    AS "colorAccent",
+         b.color_accent       AS "colorAccent",
          b.position,
-         b.is_archived     AS "isArchived",
-         b.created_at      AS "createdAt",
-         b.updated_at      AS "updatedAt",
-         COUNT(cb.card_id) AS "cardCount"
+         b.is_archived        AS "isArchived",
+         b.created_at         AS "createdAt",
+         b.updated_at         AS "updatedAt",
+         COUNT(cb.card_id)::int AS "cardCount"
        FROM boards b
        LEFT JOIN card_boards cb ON cb.board_id = b.id
        WHERE b.user_id = $1
+         AND ($2 OR b.is_archived = false)
        GROUP BY b.id
        ORDER BY b.position ASC, b.created_at ASC`,
-      [userId],
+      [userId, includeArchived],
     );
   }
 
@@ -153,7 +165,7 @@ export class BoardsService {
       );
     } catch (err: unknown) {
       if (isUniqueViolation(err)) {
-        throw new ConflictException(`Board "${dto.name}" already exists`);
+        throw new ConflictException('Board name already exists');
       }
       throw err;
     }
@@ -168,6 +180,10 @@ export class BoardsService {
     boardId: string,
     dto: UpdateBoardDto,
   ): Promise<BoardDto> {
+    if (Object.keys(dto).length === 0) {
+      throw new BadRequestException('No fields provided');
+    }
+
     const sets: string[] = ['updated_at = NOW()'];
     const params: unknown[] = [boardId, userId];
 
@@ -192,9 +208,9 @@ export class BoardsService {
       sets.push(`is_archived = $${params.length}`);
     }
 
-    let rows: Omit<BoardDto, 'cardCount'>[];
+    let rows: BoardDto[];
     try {
-      rows = await this.dataSource.query<Omit<BoardDto, 'cardCount'>[]>(
+      rows = await this.dataSource.query<BoardDto[]>(
         `UPDATE boards
          SET ${sets.join(', ')}
          WHERE id = $1 AND user_id = $2
@@ -202,24 +218,20 @@ export class BoardsService {
            id, name, description,
            color_accent AS "colorAccent",
            position, is_archived AS "isArchived",
-           created_at AS "createdAt", updated_at AS "updatedAt"`,
+           created_at AS "createdAt", updated_at AS "updatedAt",
+           (SELECT COUNT(*)::int FROM card_boards WHERE board_id = boards.id) AS "cardCount"`,
         params,
       );
     } catch (err: unknown) {
       if (isUniqueViolation(err)) {
-        throw new ConflictException(`Board "${dto.name}" already exists`);
+        throw new ConflictException('Board name already exists');
       }
       throw err;
     }
 
     if (rows.length === 0) throw new NotFoundException(`Board ${boardId} not found`);
 
-    const [{ count }] = await this.dataSource.query<[{ count: string }]>(
-      `SELECT COUNT(*) AS count FROM card_boards WHERE board_id = $1`,
-      [boardId],
-    );
-
-    return { ...rows[0], cardCount: Number(count) };
+    return rows[0];
   }
 
   // ── DELETE /boards/:boardId ──────────────────────────────────────────────
@@ -236,8 +248,10 @@ export class BoardsService {
   // Idempotent: repeated assignment is a no-op.
 
   async assignCard(userId: string, boardId: string, cardId: string): Promise<void> {
-    await this.verifyBoardOwnership(userId, boardId);
-    await this.verifyCardOwnership(userId, cardId);
+    await Promise.all([
+      this.verifyBoardOwnership(userId, boardId),
+      this.verifyCardOwnership(userId, cardId),
+    ]);
 
     await this.dataSource.query(
       `INSERT INTO card_boards (card_id, board_id)
@@ -259,14 +273,18 @@ export class BoardsService {
     );
   }
 
-  // ── Private helpers ──────────────────────────────────────────────────────
+  // ── Ownership helpers ────────────────────────────────────────────────────
 
-  private async verifyBoardOwnership(userId: string, boardId: string): Promise<void> {
+  async assertBoardOwnership(userId: string, boardId: string): Promise<void> {
     const rows = await this.dataSource.query<{ id: string }[]>(
       `SELECT id FROM boards WHERE id = $1 AND user_id = $2`,
       [boardId, userId],
     );
     if (rows.length === 0) throw new NotFoundException(`Board ${boardId} not found`);
+  }
+
+  private async verifyBoardOwnership(userId: string, boardId: string): Promise<void> {
+    return this.assertBoardOwnership(userId, boardId);
   }
 
   private async verifyCardOwnership(userId: string, cardId: string): Promise<void> {

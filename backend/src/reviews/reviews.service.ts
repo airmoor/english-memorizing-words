@@ -65,7 +65,7 @@ export class ReviewProgressDto {
 }
 
 export class ReviewResultDto {
-  @ApiProperty({ example: '2024-06-15T00:00:00.000Z' })
+  @ApiProperty({ type: String, format: 'date-time', example: '2024-06-15T00:00:00.000Z' })
   nextReview: Date;
 
   @ApiProperty({ example: 4 })
