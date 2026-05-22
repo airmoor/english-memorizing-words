@@ -1,11 +1,14 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import {
@@ -16,7 +19,9 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  CardNoteDto,
   PaginatedVocabularyDto,
+  UpsertNoteDto,
   VocabularyQueryDto,
   VocabularyService,
   VocabularyWordDto,
@@ -38,7 +43,7 @@ export class VocabularyController {
   @ApiResponse({ status: 404, description: 'Word not found' })
   saveWord(
     @CurrentUser() user: AuthUser,
-    @Param('wordId') wordId: string,
+    @Param('wordId', new ParseUUIDPipe()) wordId: string,
   ): Promise<void> {
     return this.vocabularyService.saveWord(user.id, wordId);
   }
@@ -60,6 +65,43 @@ export class VocabularyController {
     return this.vocabularyService.getUserVocabulary(user.id, query);
   }
 
+  // ── Card note endpoints ─────────────────────────────────────────────────
+
+  @Get('cards/:cardId/note')
+  @ApiOperation({ summary: 'Get the note for a card' })
+  @ApiResponse({ status: 200, description: 'Note', type: CardNoteDto })
+  @ApiResponse({ status: 404, description: 'Card or note not found' })
+  getNote(
+    @CurrentUser() user: AuthUser,
+    @Param('cardId', new ParseUUIDPipe()) cardId: string,
+  ): Promise<CardNoteDto> {
+    return this.vocabularyService.getNote(user.id, cardId);
+  }
+
+  @Put('cards/:cardId/note')
+  @ApiOperation({ summary: 'Upsert a note for a card. Empty body deletes the note and returns null.' })
+  @ApiResponse({ status: 200, description: 'Note upserted (or deleted if body was empty)', type: CardNoteDto, nullable: true })
+  @ApiResponse({ status: 404, description: 'Card not found' })
+  upsertNote(
+    @CurrentUser() user: AuthUser,
+    @Param('cardId', new ParseUUIDPipe()) cardId: string,
+    @Body() dto: UpsertNoteDto,
+  ): Promise<CardNoteDto | null> {
+    return this.vocabularyService.upsertNote(user.id, cardId, dto);
+  }
+
+  @Delete('cards/:cardId/note')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete the note for a card (idempotent)' })
+  @ApiResponse({ status: 204, description: 'Note deleted' })
+  @ApiResponse({ status: 404, description: 'Card not found' })
+  deleteNote(
+    @CurrentUser() user: AuthUser,
+    @Param('cardId', new ParseUUIDPipe()) cardId: string,
+  ): Promise<void> {
+    return this.vocabularyService.deleteNote(user.id, cardId);
+  }
+
   // Remove a word from vocabulary (cascades card + review logs)
   @Delete('words/:wordId')
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -69,7 +111,7 @@ export class VocabularyController {
   @ApiResponse({ status: 404, description: 'Word not in vocabulary' })
   removeWord(
     @CurrentUser() user: AuthUser,
-    @Param('wordId') wordId: string,
+    @Param('wordId', new ParseUUIDPipe()) wordId: string,
   ): Promise<void> {
     return this.vocabularyService.removeWord(user.id, wordId);
   }

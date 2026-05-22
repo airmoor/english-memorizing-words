@@ -5,7 +5,9 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -19,6 +21,7 @@ import { AuthUser, CurrentUser } from '../common/decorators/current-user.decorat
 import {
   CardAnswerDto,
   NextCardDto,
+  NextCardQueryDto,
   ReviewProgressDto,
   ReviewResultDto,
   ReviewsService,
@@ -45,11 +48,14 @@ export class ReviewsController {
   }
 
   @Get('next')
-  @ApiOperation({ summary: 'Get the next due card for review' })
+  @ApiOperation({ summary: 'Get the next due card for review (optionally scoped to a board)' })
   @ApiResponse({ status: 200, description: 'Next due card, or null if none', type: NextCardDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  getNextCard(@CurrentUser() user: AuthUser): Promise<NextCardDto | null> {
-    return this.reviewsService.getNextCard(user.id);
+  getNextCard(
+    @CurrentUser() user: AuthUser,
+    @Query() query: NextCardQueryDto,
+  ): Promise<NextCardDto | null> {
+    return this.reviewsService.getNextCard(user.id, query);
   }
 
   @Get('answer/:cardId')
@@ -59,7 +65,7 @@ export class ReviewsController {
   @ApiResponse({ status: 404, description: 'Card not found' })
   getAnswer(
     @CurrentUser() user: AuthUser,
-    @Param('cardId') cardId: string,
+    @Param('cardId', new ParseUUIDPipe()) cardId: string,
   ): Promise<CardAnswerDto> {
     return this.reviewsService.getAnswer(user.id, cardId);
   }
@@ -72,7 +78,7 @@ export class ReviewsController {
   @ApiResponse({ status: 404, description: 'Card not found' })
   reviewCard(
     @CurrentUser() user: AuthUser,
-    @Param('cardId') cardId: string,
+    @Param('cardId', new ParseUUIDPipe()) cardId: string,
     @Body() dto: ReviewRatingDto,
   ): Promise<ReviewResultDto> {
     return this.reviewsService.reviewCard(user.id, cardId, dto.rating);

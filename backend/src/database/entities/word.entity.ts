@@ -16,10 +16,10 @@ export class Word {
   id: string;
 
   /**
-   * Stored as citext in PostgreSQL — lookups are case-insensitive at the DB level.
-   * TypeORM sees it as text; the actual column type is managed via migrations.
+   * Stored as citext in PostgreSQL (extension enabled in migration 1747000007000).
+   * Lookups are case-insensitive at the DB level via the citext operator class.
    */
-  @Column({ type: 'text', unique: true })
+  @Column({ type: 'citext', unique: true })
   text: string;
 
   @Column({ type: 'text', nullable: true })

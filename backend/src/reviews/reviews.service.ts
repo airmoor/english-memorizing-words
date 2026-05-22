@@ -1,6 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsOptional, IsUUID } from 'class-validator';
 import { DataSource } from 'typeorm';
+import { ReviewTimingService, RatingPreviewsDto } from './review-timing.service';
+import { applySmTwo, Rating } from './sm2';
 
 // ── DTOs ────────────────────────────────────────────────────────────────────
 
@@ -44,6 +47,16 @@ export class CardMeaningDto {
 export class CardAnswerDto {
   @ApiProperty({ type: [CardMeaningDto] })
   meanings: CardMeaningDto[];
+
+  @ApiProperty({ type: RatingPreviewsDto })
+  nextReviewPreviews: RatingPreviewsDto;
+}
+
+export class NextCardQueryDto {
+  @IsOptional()
+  @IsUUID()
+  @ApiPropertyOptional({ example: 'uuid-v4', description: 'Restrict queue to cards in this board' })
+  boardId?: string;
 }
 
 export class ReviewProgressDto {
@@ -64,7 +77,7 @@ export class ReviewProgressDto {
 }
 
 export class ReviewResultDto {
-  @ApiProperty({ example: '2024-06-15T00:00:00.000Z' })
+  @ApiProperty({ type: String, format: 'date-time', example: '2024-06-15T00:00:00.000Z' })
   nextReview: Date;
 
   @ApiProperty({ example: 4 })
@@ -75,42 +88,6 @@ export class ReviewResultDto {
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-
-type Rating = 'again' | 'hard' | 'good' | 'easy';
-
-function applySmTwo(
-  intervalDays: number,
-  easeFactor: number,
-  rating: Rating,
-): { intervalDays: number; easeFactor: number } {
-  switch (rating) {
-    case 'again':
-      return { intervalDays: 0, easeFactor: Math.max(1.3, easeFactor - 0.2) };
-
-    case 'hard':
-      return {
-        intervalDays: Math.max(1, Math.round(intervalDays * 1.2)),
-        easeFactor: Math.max(1.3, easeFactor - 0.15),
-      };
-
-    case 'good':
-      return {
-        intervalDays: intervalDays === 0 ? 1 : Math.round(intervalDays * easeFactor),
-        easeFactor,
-      };
-
-    case 'easy':
-      return {
-        intervalDays: intervalDays === 0 ? 2 : Math.round(intervalDays * easeFactor * 1.3),
-        easeFactor: easeFactor + 0.15,
-      };
-
-    default: {
-      const exhaustive: never = rating;
-      throw new Error(`Unsupported rating: ${exhaustive}`);
-    }
-  }
-}
 
 function computeStreak(days: string[]): number {
   if (days.length === 0) return 0;
@@ -136,7 +113,10 @@ function computeStreak(days: string[]): number {
 
 @Injectable()
 export class ReviewsService {
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly reviewTiming: ReviewTimingService,
+  ) {}
 
   // ── GET /reviews/progress ───────────────────────────────────────────────
 
@@ -186,7 +166,18 @@ export class ReviewsService {
 
   // ── GET /reviews/next ────────────────────────────────────────────────────
 
-  async getNextCard(userId: string): Promise<NextCardDto | null> {
+  async getNextCard(userId: string, query: NextCardQueryDto): Promise<NextCardDto | null> {
+    const params: unknown[] = [userId];
+    let boardFilter = '';
+
+    if (query.boardId) {
+      params.push(query.boardId);
+      boardFilter = `AND EXISTS (
+        SELECT 1 FROM card_boards cb
+        WHERE cb.card_id = c.id AND cb.board_id = $${params.length}
+      )`;
+    }
+
     const rows = await this.dataSource.query<{
       cardId: string;
       wordId: string;
@@ -199,7 +190,6 @@ export class ReviewsService {
          w.id            AS "wordId",
          w.text          AS "word",
          w.transcription AS "transcription",
-         -- Pull the first non-empty example from any meaning for front-card context
          (
            SELECT m.examples[1]
            FROM meanings m
@@ -211,30 +201,34 @@ export class ReviewsService {
        JOIN words w ON w.id = c.word_id
        WHERE c.user_id = $1
          AND c.next_review <= NOW()
+         ${boardFilter}
        ORDER BY c.next_review ASC, c.id ASC
        LIMIT 1`,
-      [userId],
+      params,
     );
 
     if (rows.length === 0) return null;
-
     return rows[0];
   }
 
   // ── GET /reviews/answer/:cardId ──────────────────────────────────────────
-  // Returns ALL meanings for the card's word so the review back-side can
-  // show the complete dictionary entry.
+  // Returns all meanings for the card's word (review back-side) plus SM-2
+  // previews showing projected next-review timing for each possible rating.
 
   async getAnswer(userId: string, cardId: string): Promise<CardAnswerDto> {
-    // Verify card ownership
-    const card = await this.dataSource.query<{ word_id: string }[]>(
-      `SELECT word_id FROM cards WHERE id = $1 AND user_id = $2`,
+    const cards = await this.dataSource.query<{
+      word_id: string;
+      interval_days: number;
+      ease_factor: number;
+    }[]>(
+      `SELECT word_id, interval_days, ease_factor
+       FROM cards WHERE id = $1 AND user_id = $2`,
       [cardId, userId],
     );
 
-    if (card.length === 0) {
-      throw new NotFoundException(`Card ${cardId} not found`);
-    }
+    if (cards.length === 0) throw new NotFoundException(`Card ${cardId} not found`);
+
+    const { word_id: wordId, interval_days: intervalDays, ease_factor: easeFactor } = cards[0];
 
     const meanings = await this.dataSource.query<CardMeaningDto[]>(
       `SELECT
@@ -247,10 +241,13 @@ export class ReviewsService {
        FROM meanings
        WHERE word_id = $1
        ORDER BY sense_number NULLS LAST`,
-      [card[0].word_id],
+      [wordId],
     );
 
-    return { meanings };
+    return {
+      meanings,
+      nextReviewPreviews: this.reviewTiming.computePreviews(intervalDays, easeFactor),
+    };
   }
 
   // ── POST /reviews/:cardId ────────────────────────────────────────────────
@@ -288,6 +285,12 @@ export class ReviewsService {
         [next.intervalDays, next.easeFactor, next.intervalDays, cardId, userId],
       )) as { next_review: Date }[];
 
+      // Guard: SELECT FOR UPDATE guarantees the card exists; this branch is
+      // theoretically unreachable, but checked before commit for safety.
+      if (updated.length === 0) {
+        throw new NotFoundException(`Card ${cardId} not found`);
+      }
+
       await qr.query(
         `INSERT INTO review_logs (id, card_id, rating)
          VALUES (gen_random_uuid(), $1, $2)`,
@@ -295,10 +298,6 @@ export class ReviewsService {
       );
 
       await qr.commitTransaction();
-
-      if (updated.length === 0) {
-        throw new NotFoundException(`Card ${cardId} not found during update`);
-      }
 
       return {
         nextReview: updated[0].next_review,

@@ -7,6 +7,8 @@ import {
 } from 'typeorm';
 import { UserWord } from './user-word.entity';
 import { Card } from './card.entity';
+import { Board } from './board.entity';
+import { Tag } from './tag.entity';
 
 @Entity('users')
 export class User {
@@ -27,4 +29,10 @@ export class User {
 
   @OneToMany(() => Card, (card) => card.user)
   cards: Card[];
+
+  @OneToMany(() => Board, (board) => board.user)
+  boards: Board[];
+
+  @OneToMany(() => Tag, (tag) => tag.user)
+  tags: Tag[];
 }

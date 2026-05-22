@@ -6,12 +6,16 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Word } from './word.entity';
 import { ReviewLog } from './review-log.entity';
+import { CardBoard } from './card-board.entity';
+import { CardTag } from './card-tag.entity';
+import { CardNote } from './card-note.entity';
 
 /**
  * One card per (user, word) pair.
@@ -53,7 +57,7 @@ export class Card {
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.cards, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
@@ -63,4 +67,13 @@ export class Card {
 
   @OneToMany(() => ReviewLog, (log) => log.card)
   reviewLogs: ReviewLog[];
+
+  @OneToMany(() => CardBoard, (cb) => cb.card)
+  cardBoards: CardBoard[];
+
+  @OneToMany(() => CardTag, (ct) => ct.card)
+  cardTags: CardTag[];
+
+  @OneToOne(() => CardNote, (note) => note.card)
+  note: CardNote;
 }
