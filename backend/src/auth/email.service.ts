@@ -1,5 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
+import {
+  buildResetPasswordHtml,
+  buildResetPasswordText,
+} from '../mail/templates/reset-password.template';
 
 @Injectable()
 export class EmailService {
@@ -8,144 +13,74 @@ export class EmailService {
   private readonly from: string;
   private readonly frontendUrl: string;
 
-  constructor() {
-    const apiKey = process.env.RESEND_API_KEY;
-    this.resend = apiKey ? new Resend(apiKey) : null;
-    this.from = process.env.EMAIL_FROM ?? 'Lexis <noreply@lexis.app>';
-    this.frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:5173';
+  constructor(private readonly configService: ConfigService) {
+    const apiKey = this.configService.get<string>('RESEND_API_KEY');
+    const rawFrontendUrl =
+      this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:5173';
 
-    if (!apiKey) {
-      this.logger.warn('RESEND_API_KEY not set — emails will be logged to console only');
+    // Fail fast on a malformed URL so we never silently build broken reset links.
+    // new URL() throws on values like "localhost:5173" (missing scheme).
+    try {
+      new URL(rawFrontendUrl);
+    } catch {
+      throw new Error(
+        `EmailService: FRONTEND_URL "${rawFrontendUrl}" is not a valid URL. ` +
+          'It must include a scheme, e.g. https://app.example.com or http://localhost:5173.',
+      );
+    }
+
+    this.frontendUrl = rawFrontendUrl;
+    this.from =
+      this.configService.get<string>('EMAIL_FROM') ?? 'Lexis <noreply@lexis.app>';
+
+    if (apiKey) {
+      this.resend = new Resend(apiKey);
+    } else {
+      this.resend = null;
+      // Warn at startup so the misconfiguration is visible without waiting for
+      // the first reset request to reveal it.
+      this.logger.warn(
+        'RESEND_API_KEY is not set — password reset emails will be simulated (dev mode only)',
+      );
     }
   }
 
   async sendPasswordResetEmail(email: string, token: string): Promise<void> {
+    // Build the reset URL here so neither the token nor the URL ever leaves
+    // this method via a log. Template functions receive the URL but must not
+    // log it — see JSDoc comments in the template file.
     const resetUrl = `${this.frontendUrl}/reset-password?token=${token}`;
 
     if (!this.resend) {
-      // Dev fallback: log URL without the raw token appearing in structured logs
-      this.logger.log(`[DEV] Password reset link → ${resetUrl}`);
+      // Dev mode: acknowledge the request without logging the token or URL.
+      // Logs can end up in cloud logging, Docker output, or CI pipelines where
+      // a raw reset token is a security liability.
+      this.logger.log(`[DEV] Password reset email simulated for: ${email}`);
       return;
     }
 
-    await this.resend.emails.send({
-      from: this.from,
-      to: email,
-      subject: 'Reset your Lexis password',
-      html: buildResetEmail(resetUrl),
-    });
+    try {
+      await this.resend.emails.send({
+        from: this.from,
+        to: email,
+        subject: 'Reset your Lexis password',
+        html: buildResetPasswordHtml(resetUrl),
+        // Plain-text version for clients that don't render HTML and for
+        // spam-filter scoring (multi-part MIME is more trustworthy).
+        text: buildResetPasswordText(resetUrl),
+      });
+    } catch (err: unknown) {
+      // Log the provider error without including the reset URL or token.
+      // We intentionally swallow this exception rather than propagating it:
+      //   - The auth endpoint always returns a generic 200 to prevent user
+      //     enumeration, so a delivery failure must not change that contract.
+      //   - An unhandled 500 here would still return the same generic message
+      //     to the client, but would also log a stack trace that might contain
+      //     the email address — swallowing gives us explicit control.
+      const message = err instanceof Error ? err.message : String(err);
+      this.logger.error(
+        `Password reset email delivery failed for ${email} — provider error: ${message}`,
+      );
+    }
   }
-}
-
-function buildResetEmail(resetUrl: string): string {
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reset your password</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f4f5f9;
-      color: #1a1a2e;
-      -webkit-font-smoothing: antialiased;
-    }
-    .wrapper {
-      max-width: 520px;
-      margin: 40px auto;
-      background: #ffffff;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-    }
-    .header {
-      background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
-      padding: 36px 40px;
-      text-align: center;
-    }
-    .logo {
-      font-size: 28px;
-      font-weight: 700;
-      color: #ffffff;
-      letter-spacing: -0.5px;
-    }
-    .logo span { opacity: 0.75; }
-    .body {
-      padding: 40px;
-    }
-    h1 {
-      font-size: 22px;
-      font-weight: 700;
-      color: #0f0f23;
-      margin-bottom: 12px;
-    }
-    p {
-      font-size: 15px;
-      line-height: 1.6;
-      color: #4b5563;
-      margin-bottom: 16px;
-    }
-    .btn-wrap {
-      text-align: center;
-      margin: 32px 0;
-    }
-    .btn {
-      display: inline-block;
-      padding: 14px 36px;
-      background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
-      color: #ffffff !important;
-      text-decoration: none;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 600;
-      letter-spacing: 0.2px;
-    }
-    .notice {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 14px 16px;
-      font-size: 13px;
-      color: #64748b;
-      margin-top: 24px;
-      line-height: 1.5;
-    }
-    .footer {
-      padding: 24px 40px;
-      border-top: 1px solid #f1f5f9;
-      text-align: center;
-      font-size: 12px;
-      color: #94a3b8;
-    }
-  </style>
-</head>
-<body>
-  <div class="wrapper">
-    <div class="header">
-      <div class="logo">Lexis<span>.</span></div>
-    </div>
-    <div class="body">
-      <h1>Reset your password</h1>
-      <p>
-        We received a request to reset the password for your Lexis account.
-        Click the button below to choose a new password.
-      </p>
-      <p>This link expires in <strong>30 minutes</strong>.</p>
-      <div class="btn-wrap">
-        <a href="${resetUrl}" class="btn">Reset Password</a>
-      </div>
-      <div class="notice">
-        <strong>Didn't request this?</strong> You can safely ignore this email.
-        Your password will not change and no further action is needed.
-        If you're concerned, please contact support.
-      </div>
-    </div>
-    <div class="footer">
-      © ${new Date().getFullYear()} Lexis · This is an automated message, please do not reply.
-    </div>
-  </div>
-</body>
-</html>`;
 }
