@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
-import type { VocabularyWord } from '../../../entities/vocabulary/model/types'
+import type { InfiniteData } from '@tanstack/react-query'
+import type { PaginatedVocabulary, VocabularyWord } from '../../../entities/vocabulary/model/types'
 import type { WordResult } from '../../../entities/word/model/types'
 import { fetchWord } from '../../../features/word-search/api/wordApi'
 import type { WordPayload, LearningState } from './types'
@@ -21,21 +22,59 @@ export interface WordDetailData {
   error: Error | null
 }
 
+// ── Cache lookup helper ───────────────────────────────────────────────────
+//
+// The vocabulary page uses useInfiniteQuery with key ['vocabulary', {...}].
+// useSavedWords uses useQuery with key ['saved-words'] (a DIFFERENT key so
+// the two shapes never collide in the cache).
+//
+// Reading from the cache therefore means iterating the InfiniteData pages —
+// getQueryData(['vocabulary']) no longer returns anything meaningful.
+
+/**
+ * Synchronous, zero-network search across all pages of every cached
+ * vocabulary infinite query.
+ *
+ * Uses a predicate so callers can match by wordId OR by normalised text
+ * without separate helpers.
+ *
+ * Skips any cache entry that doesn't have a `.pages` array — this guards
+ * against stale regular-query entries that could be left in the cache if
+ * the query key is later inadvertently reused.
+ */
+function findInVocabCache(
+  queryClient: ReturnType<typeof useQueryClient>,
+  predicate: (v: VocabularyWord) => boolean,
+): VocabularyWord | null {
+  const allData = queryClient.getQueriesData<InfiniteData<PaginatedVocabulary>>({
+    queryKey: ['vocabulary'],
+  })
+  for (const [, data] of allData) {
+    // Type guard: skip cache entries that aren't InfiniteData (e.g., a
+    // regular useQuery written to the same key prefix by mistake).
+    if (!data || !Array.isArray(data.pages)) continue
+    for (const page of data.pages) {
+      const found = page.items.find(predicate)
+      if (found) return found
+    }
+  }
+  return null
+}
+
 /**
  * Resolves the word payload and learning state using a three-path strategy.
  *
- * Path 1 — Vocabulary cache (['vocabulary'])  — instant, most common in Phase 1
- * Path 2 — Search cache (['word', wordText])  — instant when present (Phase 5+)
- * Path 3 — API fetch                          — async, only when both caches miss
+ * Path 1 — Vocabulary infinite cache (['vocabulary', {...}]) — instant, most common
+ * Path 2 — Search cache (['word', wordText])                 — instant when present
+ * Path 3 — API fetch                                         — async, only when both miss
  *
  * ─── Rules of Hooks compliance ────────────────────────────────────────────
  * ALL hooks (useQueryClient, useQuery) are called unconditionally at the top
  * of this function on every render. There are no conditional hook calls.
  *
  * The three-path logic below the hooks is pure JS. `enabled` on useQuery
- * uses synchronous cache reads (queryClient.getQueryData is NOT a hook) to
- * suppress the network request when a cache path will succeed — avoiding
- * background fetches on every vocabulary row open.
+ * uses synchronous cache reads (queryClient.getQueriesData is NOT a hook)
+ * to suppress the network request when a cache path will succeed.
  * ─────────────────────────────────────────────────────────────────────────
  */
 export function useWordDetailData(
@@ -50,10 +89,13 @@ export function useWordDetailData(
   // Normalise for cache key matching (search cache keys use lowercase, trimmed text)
   const normalizedText = activeWordText?.toLowerCase().trim() ?? null
 
-  // Synchronous cache reads — these are NOT hooks. Safe to call before useQuery.
-  // Used to determine whether a network fetch is actually needed.
-  const vocabCachePeek = queryClient.getQueryData<VocabularyWord[]>(['vocabulary'])
-  const hasVocabHit = !!(vocabCachePeek?.find((v) => v.wordId === activeWordId))
+  // Synchronous cache reads — these are NOT hooks.
+  // Used to decide whether a network fetch is actually needed.
+  const vocabEntry = activeWordId
+    ? findInVocabCache(queryClient, (v) => v.wordId === activeWordId)
+    : null
+  const hasVocabHit = vocabEntry !== null
+
   const hasSearchHit = normalizedText
     ? !!queryClient.getQueryData<WordResult>(['word', normalizedText])
     : false
@@ -78,11 +120,7 @@ export function useWordDetailData(
 
   // ── Step 2: pure path resolution — no hooks below this line ──────────────
 
-  // Re-read vocab cache (same reference as the peek above; no extra round-trip)
-  const vocabCache = vocabCachePeek
-
   // Path 1: vocabulary cache — full WordPayload + LearningState, zero network
-  const vocabEntry = vocabCache?.find((v) => v.wordId === activeWordId) ?? null
   if (vocabEntry) {
     return {
       word: vocabWordToWordPayload(vocabEntry),
@@ -98,8 +136,10 @@ export function useWordDetailData(
     : null
 
   if (searchCacheEntry) {
-    const vocabEntryByText =
-      vocabCache?.find((v) => v.wordText.toLowerCase() === normalizedText) ?? null
+    // Look up learning state by text in case the user has saved this word
+    const vocabEntryByText = normalizedText
+      ? findInVocabCache(queryClient, (v) => v.wordText.toLowerCase() === normalizedText)
+      : null
     return {
       word: wordResultToWordPayload(searchCacheEntry),
       learningState: vocabEntryByText ? vocabWordToLearningState(vocabEntryByText) : null,
@@ -110,8 +150,9 @@ export function useWordDetailData(
 
   // Path 3: result of the API fetch fired above
   if (fetchedWord) {
-    const vocabEntryByText =
-      vocabCache?.find((v) => v.wordText.toLowerCase() === (normalizedText ?? '')) ?? null
+    const vocabEntryByText = normalizedText
+      ? findInVocabCache(queryClient, (v) => v.wordText.toLowerCase() === (normalizedText ?? ''))
+      : null
     return {
       word: wordResultToWordPayload(fetchedWord),
       learningState: vocabEntryByText ? vocabWordToLearningState(vocabEntryByText) : null,

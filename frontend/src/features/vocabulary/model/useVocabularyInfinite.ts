@@ -81,6 +81,8 @@ export function useVocabularyInfinite(params: VocabularyQueryParams) {
 
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['vocabulary'] })
+      // Also refresh the saved-words cache used by the search page "Save" button
+      queryClient.invalidateQueries({ queryKey: ['saved-words'] })
     },
   })
 

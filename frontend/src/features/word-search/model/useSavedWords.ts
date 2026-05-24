@@ -11,8 +11,13 @@ import { fetchVocabulary, saveWord } from '../api/wordApi'
 export function useSavedWords() {
   const queryClient = useQueryClient()
 
+  // Key: ['saved-words'] — intentionally separate from the vocabulary page's
+  // ['vocabulary', {...}] infinite-query namespace. Both keys share no cache
+  // slot, which prevents WordDetailContainer's getQueriesData({ queryKey:
+  // ['vocabulary'] }) from receiving a VocabularyWord[] (flat array) and
+  // crashing when it tries to iterate `.pages` on it.
   const { data: vocabulary } = useQuery({
-    queryKey: ['vocabulary'],
+    queryKey: ['saved-words'],
     queryFn: fetchVocabulary,
     staleTime: 30_000,
   })
@@ -46,7 +51,12 @@ export function useSavedWords() {
     mutationFn: saveWord,
     onMutate: (wordId) => addOptimistic(wordId),
     onError: (_, wordId) => removeOptimistic(wordId),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['vocabulary'] }),
+    onSettled: () => {
+      // Refresh own cache so the "saved" button state is up-to-date
+      queryClient.invalidateQueries({ queryKey: ['saved-words'] })
+      // Also refresh the vocabulary list so it reflects the new word
+      queryClient.invalidateQueries({ queryKey: ['vocabulary'] })
+    },
   })
 
   return {
