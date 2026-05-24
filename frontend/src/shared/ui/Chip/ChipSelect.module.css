@@ -1,0 +1,51 @@
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  /* Caller can override to overflow-x:auto + flex-nowrap for scrollable bars */
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-sm);
+  font-weight: var(--fw-medium);
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.chip:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.chip:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.selected {
+  border-color: var(--color-accent);
+  background: var(--color-accent-subtle);
+  color: var(--color-accent);
+}
+
+.selected:hover:not(:disabled) {
+  background: var(--color-accent);
+  color: #fff;
+}

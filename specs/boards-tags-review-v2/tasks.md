@@ -110,33 +110,33 @@ Phases 1–2 are backend-only and can be deployed without any visible frontend c
 **Deliverables:**
 
 **shared/ui additions:**
-- [ ] `BottomSheet` component: portal rendering, backdrop, drag handle
-- [ ] `BottomSheet` dismiss: swipe-down gesture with threshold
-- [ ] `BottomSheet` keyboard avoidance: `visualViewport` listener, sheet translation
-- [ ] `BottomSheet` nested sheet support: `SheetContext` or stack management
-- [ ] `BottomSheet` accessibility: `role="dialog"`, `aria-modal`, focus trap
-- [ ] `ChipSelect` component: multi-select chip row
-- [ ] `TagChip` component: chip with optional remove button
-- [ ] `BoardChip` component: chip with optional remove button (distinct from TagChip)
-- [ ] `FilterBar` component: horizontal scrollable, sticky, clear button, sort button
-- [ ] `DragHandle` component
-- [ ] `ReviewTimingLabel` component: formatted timing string display
-- [ ] `RatingButton` extended with sub-label slot for timing preview
+- [x] `BottomSheet` component: portal rendering, backdrop, drag handle
+- [x] `BottomSheet` dismiss: swipe-down gesture with threshold
+- [x] `BottomSheet` keyboard avoidance: `visualViewport` listener, sheet translation
+- [x] `BottomSheet` nested sheet support: `SheetContext` or stack management
+- [x] `BottomSheet` accessibility: `role="dialog"`, `aria-modal`, focus trap
+- [x] `ChipSelect` component: multi-select chip row
+- [x] `TagChip` component: chip with optional remove button
+- [x] `BoardChip` component: chip with optional remove button (distinct from TagChip)
+- [x] `FilterBar` component: horizontal scrollable, sticky, clear button, sort button
+- [x] `DragHandle` component
+- [x] `ReviewTimingLabel` component: formatted timing string display
+- [x] `RatingButton` extended with sub-label slot for timing preview
 
 **shared/lib:**
-- [ ] `formatReviewTime(targetDate: Date, now: Date): string` — mirrors backend humanisation logic
-- [ ] Unit tests for `formatReviewTime` covering all format cases
+- [x] `formatReviewTime(targetDate: Date, now: Date): string` — mirrors backend humanisation logic
+- [x] Unit tests for `formatReviewTime` covering all format cases
 
 **entities layer:**
-- [ ] `entities/board` — `Board` type, `BoardSummary` type
-- [ ] `entities/tag` — `Tag` type, `TagSummary` type
-- [ ] `entities/card-note` — `CardNote` type
-- [ ] `entities/vocabulary` extended — `VocabularyCard` extended type with `boards`, `tags`, `note`, extended `reviewState`
-- [ ] `entities/review` extended — `ReviewCard` extended with `nextReviewPreviews`
+- [x] `entities/board` — `Board` type, `BoardSummary` type
+- [x] `entities/tag` — `Tag` type, `TagSummary` type
+- [x] `entities/card-note` — `CardNote` type
+- [x] `entities/vocabulary` extended — `VocabularyCard` extended type with `boards`, `tags`, `note`, extended `reviewState`
+- [x] `entities/review` extended — `ReviewCard` extended with `nextReviewPreviews`
 
 **Filter state infrastructure:**
-- [ ] `useVocabularyFilters` hook (filter state, setFilter, clearFilters, hasActiveFilters)
-- [ ] `VocabularyFilters` type definition
+- [x] `useVocabularyFilters` hook (filter state, setFilter, clearFilters, hasActiveFilters)
+- [x] `VocabularyFilters` type definition
 
 ---
 

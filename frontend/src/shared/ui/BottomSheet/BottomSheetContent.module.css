@@ -1,0 +1,9 @@
+.content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* Ensure momentum scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: var(--space-md) var(--space-md) env(safe-area-inset-bottom, 0px);
+}

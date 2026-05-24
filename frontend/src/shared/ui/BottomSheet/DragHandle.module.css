@@ -1,0 +1,25 @@
+.track {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0 6px;
+  /* Extend touch target beyond the pill itself */
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.track:active {
+  cursor: grabbing;
+}
+
+.pill {
+  width: 36px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+  transition: background 0.15s;
+}
+
+.track:hover .pill {
+  background: var(--color-text-secondary);
+}

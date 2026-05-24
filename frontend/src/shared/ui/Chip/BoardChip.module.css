@@ -1,0 +1,55 @@
+/* Board chip uses a neutral/secondary palette to distinguish from TagChip's accent */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: var(--font-xs);
+  font-weight: var(--fw-medium);
+  white-space: nowrap;
+  max-width: 160px;
+}
+
+.icon {
+  font-size: 10px;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  border-radius: var(--radius-full);
+  transition: background 0.12s, color 0.12s;
+}
+
+.remove:hover {
+  background: var(--color-danger);
+  color: #fff;
+}
+
+.remove:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}

@@ -1,0 +1,122 @@
+.root {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-bg);
+  /* Subtle separator from content scrolling beneath */
+  border-bottom: 1px solid var(--color-border);
+}
+
+.scroll {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: var(--space-xs) var(--space-md);
+  /* Hide scrollbar on all browsers — navigation is via swipe/drag */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Fade edges to hint scroll affordance */
+.root::before,
+.root::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 1px; /* sit above the border */
+  width: 20px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.root::before {
+  left: 0;
+  background: linear-gradient(to right, var(--color-bg), transparent);
+}
+
+.root::after {
+  right: 0;
+  background: linear-gradient(to left, var(--color-bg), transparent);
+}
+
+/* Clear and Sort end-caps stay visible above the fade */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.clearBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-danger);
+  background: transparent;
+  color: var(--color-danger);
+  font-size: var(--font-xs);
+  font-weight: var(--fw-medium);
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+
+.clearBtn:hover {
+  background: var(--color-danger);
+  color: #fff;
+}
+
+.clearBtn:focus-visible {
+  outline: 2px solid var(--color-danger);
+  outline-offset: 2px;
+}
+
+.sortBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-xs);
+  font-weight: var(--fw-medium);
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.sortBtn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.sortBtn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.sortActive {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.divider {
+  width: 1px;
+  height: 20px;
+  background: var(--color-border);
+  flex-shrink: 0;
+}

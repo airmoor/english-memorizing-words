@@ -23,10 +23,33 @@ export interface CardMeaning {
 }
 
 /**
- * The back side of a review card — all meanings for the word.
+ * Per-rating timing preview — what SM-2 would schedule if the user picks
+ * that rating. Mirrors RatingPreviewDto from the backend.
+ */
+export interface RatingPreview {
+  intervalDays: number
+  nextReview: string   // ISO 8601
+  human: string        // e.g. "In 3 days", "Tomorrow", "In a moment"
+}
+
+/**
+ * All four rating previews, returned alongside the card answer so the
+ * rating buttons can show their timing sub-labels without an extra request.
+ */
+export interface NextReviewPreviews {
+  again: RatingPreview
+  hard: RatingPreview
+  good: RatingPreview
+  easy: RatingPreview
+}
+
+/**
+ * The back side of a review card — all meanings for the word, plus
+ * timing previews for each rating option.
  */
 export interface CardAnswer {
   meanings: CardMeaning[]
+  nextReviewPreviews: NextReviewPreviews
 }
 
 export interface ReviewResult {

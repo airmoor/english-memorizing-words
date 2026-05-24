@@ -1,0 +1,49 @@
+.portal {
+  /* Portal root — no layout impact, just a mount point */
+}
+
+.panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-sheet, 201);
+  background: var(--color-bg);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  /* Shadow to separate from page content */
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
+  /* Flex column so DragHandle + BottomSheetContent stack vertically */
+  display: flex;
+  flex-direction: column;
+  /* Max-height: never taller than 92% of the viewport */
+  max-height: 92dvh;
+  max-height: 92vh; /* dvh fallback */
+  /* Respect device notch at the bottom */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  /* Entrance / exit animation via CSS transform */
+  will-change: transform;
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Enter: slide up from off-screen */
+.panelEnter {
+  transform: translateY(100%);
+}
+
+.panelEnterActive {
+  transform: translateY(0);
+}
+
+/* Exit: slide back down */
+.panelExit {
+  transform: translateY(0);
+}
+
+.panelExitActive {
+  transform: translateY(100%);
+}
+
+/* Visible state (resting) */
+.panelVisible {
+  transform: translateY(0);
+}

@@ -18,6 +18,29 @@
   background: transparent;
   white-space: nowrap;
   transition: background 0.15s, color 0.15s, opacity 0.15s;
+  /* Default: single-line layout */
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+/* When a sub-label is present, give slightly more vertical room */
+.withSub {
+  padding: var(--space-xs) 0;
+}
+
+.mainLabel {
+  display: block;
+  line-height: 1.2;
+}
+
+.subLabel {
+  display: block;
+  font-size: 10px;
+  font-weight: var(--fw-medium);
+  opacity: 0.8;
+  line-height: 1.2;
 }
 
 .btn:disabled {

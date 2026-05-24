@@ -17,8 +17,22 @@ function AuthBootstrap({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Attempt to restore session from httpOnly refresh cookie on every page load.
     // Always resolves — on failure isInitialized is still set so RequireAuth
-    // can redirect to / instead of showing a spinner forever.
-    refreshToken().finally(() => setInitialized())
+    // can redirect to /login instead of showing a spinner forever.
+    //
+    // `cancelled` guard: React StrictMode double-invokes effects (mount →
+    // unmount → mount). Without this guard, the cleanup of the first invocation
+    // races with both `setInitialized` calls. The `cancelled` flag ensures only
+    // the active (second) invocation marks the app as initialized, while the
+    // stale first invocation's callback is discarded.
+    //
+    // The underlying `refreshToken()` is a singleton promise (see base.ts), so
+    // both invocations share one network request — the server only sees one
+    // refresh attempt regardless of StrictMode.
+    let cancelled = false
+    refreshToken().finally(() => {
+      if (!cancelled) setInitialized()
+    })
+    return () => { cancelled = true }
   }, [setInitialized])
 
   return <>{children}</>

@@ -1,0 +1,16 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: var(--z-sheet-backdrop, 200);
+  /* Entrance animation */
+  animation: fadeIn 0.22s ease-out both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* When dismissing, the parent removes the element; the sheet itself
+   handles the exit animation, so no exit keyframe is needed here. */

@@ -1,1 +1,6 @@
-export type { VocabularyWord, VocabularyMeaning } from './model/types'
+export type {
+  VocabularyWord,
+  VocabularyMeaning,
+  PaginatedVocabulary,
+  ReviewState,
+} from './model/types'
