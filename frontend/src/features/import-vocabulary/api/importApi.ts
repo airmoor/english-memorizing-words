@@ -9,6 +9,10 @@ interface ImportRowPayload {
   tags?: string[]
   board?: string
   notes?: string
+  /** Echoed back in execute error rows for frontend row highlighting. */
+  clientRowId?: string
+  /** Echoed back in execute error rows for frontend row highlighting. */
+  lineNumber?: number
 }
 
 interface ImportRequestPayload {
@@ -29,6 +33,9 @@ function buildPayload(rows: ParsedRow[], settings: ImportSettings): ImportReques
       ...(row.tags && row.tags.length > 0 ? { tags: row.tags } : {}),
       ...(row.board ? { board: row.board } : {}),
       ...(row.notes ? { notes: row.notes } : {}),
+      // Tracking fields — echoed back in error rows for row highlighting
+      clientRowId: row.clientRowId,
+      lineNumber: row.lineNumber,
     })),
     settings: {
       ...(settings.boardId ? { boardId: settings.boardId } : {}),
@@ -44,21 +51,27 @@ function buildPayload(rows: ParsedRow[], settings: ImportSettings): ImportReques
  * POST /import/preview
  * Returns per-row validation results without writing any data.
  * No dictionary calls — only vocabulary duplicate check.
+ *
+ * @param signal Optional AbortSignal — cancels the in-flight request.
  */
 export function postImportPreview(
   rows: ParsedRow[],
   settings: ImportSettings,
+  signal?: AbortSignal,
 ): Promise<ImportPreviewResult> {
-  return apiClient.post<ImportPreviewResult>('/import/preview', buildPayload(rows, settings))
+  return apiClient.post<ImportPreviewResult>('/import/preview', buildPayload(rows, settings), signal)
 }
 
 /**
  * POST /import/execute
  * Enriches words and creates cards. Returns ImportExecuteResult with ImportStatus.
+ *
+ * @param signal Optional AbortSignal — cancels the in-flight request.
  */
 export function postImportExecute(
   rows: ParsedRow[],
   settings: ImportSettings,
+  signal?: AbortSignal,
 ): Promise<ImportExecuteResult> {
-  return apiClient.post<ImportExecuteResult>('/import/execute', buildPayload(rows, settings))
+  return apiClient.post<ImportExecuteResult>('/import/execute', buildPayload(rows, settings), signal)
 }

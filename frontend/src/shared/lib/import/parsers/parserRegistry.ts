@@ -2,38 +2,52 @@ import type { ImportParser, ParserInput } from './types'
 import { txtParser } from './txtParser'
 import { csvParser } from './csvParser'
 import { ankiParser } from './ankiParser'
+import { emitParserEvent } from './telemetry'
 
 /**
- * Ordered list of registered parsers.
- * Parsers are tried in order; the first one whose canParse() returns true is used.
- *
- * Priority order:
- *   1. csvParser  — .csv files and recognised-header delimited content
- *   2. ankiParser — tab-separated or unrecognised multi-column CSV (Anki exports)
- *   3. txtParser  — plain text / .txt files (fallback)
+ * Registered parsers.
+ * Order is irrelevant — the registry selects by highest score(), not by position.
  */
 const parsers: ImportParser[] = [
-  csvParser,   // Highest: .csv with recognised headers
-  ankiParser,  // Middle: tab-separated / unrecognised CSV → requires column mapping
-  txtParser,   // Fallback: plain text word list
+  csvParser,   // 1.0 for .csv files, 0.7 for comma-heavy content
+  ankiParser,  // 0.9 for tab-separated, 0.6 for unrecognised multi-column CSV
+  txtParser,   // 0.8 for .txt files, 0.2 plain-text fallback
 ]
 
 /**
  * Select the appropriate parser for the given input.
- * Falls back to txtParser if no parser claims the input.
+ *
+ * Each parser returns a confidence score [0–1] via score().
+ * The parser with the highest score is chosen.
+ * txtParser always returns a non-zero score for plain text so it acts
+ * as the universal fallback when no other parser claims the input.
  */
 export function selectParser(input: ParserInput): ImportParser {
+  let best      = txtParser
+  let bestScore = 0
+
   for (const parser of parsers) {
-    if (parser.canParse(input)) return parser
+    const s = parser.score(input)
+    if (s > bestScore) {
+      bestScore = s
+      best = parser
+    }
   }
-  // Safe fallback — txtParser handles anything
-  return txtParser
+
+  emitParserEvent('parser_selected', {
+    parser: best === txtParser ? 'txt' : best === csvParser ? 'csv' : 'anki',
+    score: bestScore,
+    filename: input.filename,
+  })
+
+  return best
 }
 
 /**
- * Register a parser at a given priority (0 = highest).
- * Used by Phase 3+ to insert csvParser and ankiParser.
+ * Register an additional parser.
+ * The registry is score-based, so priority parameter is not used —
+ * the parser competes purely on its score() return value.
  */
-export function registerParser(parser: ImportParser, priority = parsers.length): void {
-  parsers.splice(priority, 0, parser)
+export function registerParser(parser: ImportParser): void {
+  parsers.push(parser)
 }

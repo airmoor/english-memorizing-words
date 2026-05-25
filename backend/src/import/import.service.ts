@@ -15,9 +15,18 @@ const ENRICH_CONCURRENCY = 5;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-/** Normalise a raw word: trim and lowercase. */
+/**
+ * Normalise a raw word for storage and deduplication.
+ * Steps:
+ *   1. NFKC Unicode normalisation — collapses compatibility equivalents (e.g. ﬁ → fi)
+ *   2. Trim surrounding whitespace
+ *   3. Collapse internal runs of whitespace to a single space
+ *   4. Locale-aware lowercase (en) — consistent across server locales
+ *
+ * Must match frontend `normalizeWord()` in shared/lib/import/normalizeWord.ts.
+ */
 function normalizeWord(raw: string): string {
-  return raw.trim().toLowerCase();
+  return raw.normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('en');
 }
 
 /**
@@ -145,6 +154,8 @@ export class ImportService {
       tags: string[];
       board?: string;
       notes?: string;
+      clientRowId?: string;
+      lineNumber?: number;
     }> = [];
 
     for (const row of dto.words) {
@@ -162,6 +173,8 @@ export class ImportService {
         tags: (row.tags ?? []).map((t: string) => normalizeWord(t)).filter(Boolean),
         board: row.board?.trim() || undefined,
         notes,
+        clientRowId: row.clientRowId,
+        lineNumber: row.lineNumber,
       });
     }
 
@@ -265,7 +278,12 @@ export class ImportService {
           result.error.message.includes('No results')
             ? 'Word not found in dictionary'
             : `Import failed: ${result.error.message}`;
-        errorRows.push({ word, reason });
+        errorRows.push({
+          word,
+          reason,
+          ...(toEnrich[i].clientRowId ? { clientRowId: toEnrich[i].clientRowId } : {}),
+          ...(toEnrich[i].lineNumber  ? { lineNumber:  toEnrich[i].lineNumber }  : {}),
+        });
       }
     }
 
@@ -285,6 +303,11 @@ export class ImportService {
 
   // ── DB helpers ────────────────────────────────────────────────────────────
 
+  /**
+   * Single-batch vocabulary lookup — no N+1 queries.
+   * The ANY($2) operator sends all words in one round-trip.
+   * Relies on index: `CREATE INDEX IF NOT EXISTS idx_words_text ON words (text);`
+   */
   private async getExistingVocabularySet(userId: string, words: string[]): Promise<Set<string>> {
     if (words.length === 0) return new Set();
 

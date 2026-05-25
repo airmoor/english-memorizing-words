@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ImportStatus } from './import-status';
 
 export class ImportErrorRowDto {
@@ -7,6 +7,20 @@ export class ImportErrorRowDto {
 
   @ApiProperty({ example: 'Word not found in dictionary' })
   reason: string;
+
+  /**
+   * Client-generated row identifier, echoed from the request payload.
+   * Allows the frontend to highlight the exact source row that failed.
+   */
+  @ApiPropertyOptional({ example: '550e8400-e29b-41d4-a716-446655440000' })
+  clientRowId?: string;
+
+  /**
+   * 1-based source line number, echoed from the request payload.
+   * Provides an alternative row anchor when clientRowId is not available.
+   */
+  @ApiPropertyOptional({ example: 3 })
+  lineNumber?: number;
 }
 
 export class ImportExecuteResultDto {

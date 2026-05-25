@@ -39,11 +39,18 @@ export function ImportUploader({ onParsed, onError }: ImportUploaderProps) {
   )
 
   const parseAndEmit = useCallback(
-    (text: string, filename?: string) => {
+    async (text: string, filename?: string) => {
       setInlineError(null)
       const input = { text, filename }
       const parser = selectParser(input)
-      const result = parser.parse(input)
+
+      let result
+      try {
+        result = await parser.parse(input)
+      } catch (err) {
+        handleInlineError('Failed to parse file. Please check the format and try again.')
+        return
+      }
 
       // If the parser requires column mapping (Anki), delegate to the parent
       if (result.requiresColumnMapping) {
@@ -72,7 +79,7 @@ export function ImportUploader({ onParsed, onError }: ImportUploaderProps) {
       if (debounceTimer.current) clearTimeout(debounceTimer.current)
       debounceTimer.current = setTimeout(() => {
         if (value.trim()) {
-          parseAndEmit(value)
+          void parseAndEmit(value)
         }
       }, 200)
     },
@@ -104,7 +111,7 @@ export function ImportUploader({ onParsed, onError }: ImportUploaderProps) {
           return
         }
         const text = stripBom(raw)
-        parseAndEmit(text, file.name)
+        void parseAndEmit(text, file.name)
       }
       reader.onerror = () => {
         handleInlineError('Could not read file. Please try again.')

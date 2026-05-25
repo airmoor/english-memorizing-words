@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import type { ParsedRow, ImportPreviewRow, ImportExecuteResult } from '../../../entities/import-session/model/types'
+import type { ParsedRow, ImportPreviewRow, ImportExecuteResult, ImportFlowError } from '../../../entities/import-session/model/types'
 
 // ── Step enum ─────────────────────────────────────────────────────────────────
 
@@ -19,7 +19,7 @@ interface ImportFlowState {
   parsedRows: ParsedRow[]
   serverPreviewRows: ImportPreviewRow[]
   result: ImportExecuteResult | null
-  error: string | null
+  error: ImportFlowError | null
 }
 
 const INITIAL_STATE: ImportFlowState = {
@@ -51,7 +51,7 @@ export function useImportFlow() {
     setState((prev) => ({ ...prev, result }))
   }, [])
 
-  const setError = useCallback((error: string) => {
+  const setError = useCallback((error: ImportFlowError) => {
     setState((prev) => ({ ...prev, error }))
   }, [])
 

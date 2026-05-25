@@ -1,6 +1,7 @@
 import type { ImportParser, ParserInput, ParseResult, ColumnSuggestion } from './types'
 import type { ParsedRow } from '../../../../entities/import-session/model/types'
 import { normalizeWord } from '../normalizeWord'
+import { emitParserEvent } from './telemetry'
 
 // Headers recognised by the CSV parser — if present, defer to csvParser
 const LEXIS_HEADERS = new Set(['word', 'term', 'vocabulary', 'english', 'tags', 'tag', 'board', 'notes', 'note'])
@@ -21,7 +22,7 @@ function hasLexisHeader(firstLine: string): boolean {
 function scoreColumns(rows: string[][], delimiter: '\t' | ','): ColumnSuggestion[] {
   if (rows.length === 0) return []
 
-  const colCount = Math.max(...rows.map((r) => r.length))
+  const colCount   = Math.max(...rows.map((r) => r.length))
   const suggestions: ColumnSuggestion[] = []
 
   for (let col = 0; col < colCount; col++) {
@@ -29,56 +30,63 @@ function scoreColumns(rows: string[][], delimiter: '\t' | ','): ColumnSuggestion
     if (values.length === 0) continue
 
     // Median length
-    const lengths = values.map((v) => v.length).sort((a, b) => a - b)
+    const lengths     = values.map((v) => v.length).sort((a, b) => a - b)
     const medianLength = lengths[Math.floor(lengths.length / 2)]
 
     // Single-token ratio (no spaces, no HTML)
-    const singleToken = values.filter((v) => !v.includes(' ') && !v.includes('<')).length
+    const singleToken      = values.filter((v) => !v.includes(' ') && !v.includes('<')).length
     const singleTokenRatio = singleToken / values.length
 
     // Combined score: low median length × high single-token ratio
-    const maxMedian = 50
+    const maxMedian   = 50
     const lengthScore = Math.max(0, 1 - medianLength / maxMedian)
-    const confidence = (lengthScore * 0.6 + singleTokenRatio * 0.4)
+    const confidence  = (lengthScore * 0.6 + singleTokenRatio * 0.4)
 
-    suggestions.push({
-      index: col,
-      samples: values.slice(0, 5),
-      confidence,
-    })
+    suggestions.push({ index: col, samples: values.slice(0, 5), confidence })
   }
 
   return suggestions.sort((a, b) => b.confidence - a.confidence)
 }
 
-// ── canParse ──────────────────────────────────────────────────────────────────
+// ── score ─────────────────────────────────────────────────────────────────────
 
-function canParse(input: ParserInput): boolean {
+/**
+ * Scoring strategy:
+ *   0.9 — tab-separated content (no Lexis header) — classic Anki export
+ *   0.6 — multi-column CSV with no recognised header — possible Anki CSV
+ *   0   — .txt extension, single-column, or has Lexis header (defer to csvParser)
+ */
+function score(input: ParserInput): number {
   // Never claim .txt files
   if (input.filename) {
     const ext = input.filename.split('.').pop()?.toLowerCase()
-    if (ext === 'txt') return false
+    if (ext === 'txt') return 0
   }
 
   const firstLine = input.text.split('\n')[0] ?? ''
 
-  // If text looks like a plain word list (no delimiters), decline
-  if (!firstLine.includes('\t') && !firstLine.includes(',')) return false
+  // Single-column or no delimiters — txtParser handles this
+  if (!firstLine.includes('\t') && !firstLine.includes(',')) return 0
 
-  // If it has a recognised Lexis header, let csvParser handle it
-  if (hasLexisHeader(firstLine)) return false
+  // Recognised Lexis header → csvParser handles this
+  if (hasLexisHeader(firstLine)) return 0
 
-  // Claim tab-separated or multi-column CSV with no recognised header
-  const isTabSeparated = firstLine.includes('\t')
-  const isMultiColumn = firstLine.split(',').length > 1
+  // Tab-separated without Lexis header → strong Anki signal
+  if (firstLine.includes('\t')) return 0.9
 
-  return isTabSeparated || isMultiColumn
+  // Multi-column comma CSV without recognised header → possible Anki CSV
+  if (firstLine.split(',').length > 1) return 0.6
+
+  return 0
 }
 
 // ── parse ─────────────────────────────────────────────────────────────────────
 
-function parseAnki(input: ParserInput, columnMap?: { wordColumnIndex: number; tagsColumnIndex?: number }): ParseResult {
-  const text = input.text
+async function parseAnki(
+  input: ParserInput,
+  columnMap?: { wordColumnIndex: number; tagsColumnIndex?: number },
+): Promise<ParseResult> {
+  const text      = input.text
   const firstLine = text.split('\n')[0] ?? ''
 
   // Determine delimiter
@@ -101,25 +109,28 @@ function parseAnki(input: ParserInput, columnMap?: { wordColumnIndex: number; ta
   // If no column map provided, return suggestions and require mapping
   if (columnMap === undefined) {
     const columnSuggestions = scoreColumns(dataRows, delimiter)
-    return {
-      rows: [],
-      requiresColumnMapping: true,
-      columnSuggestions,
-    }
+    emitParserEvent('parse_complete', {
+      parser: 'anki',
+      rowsParsed: 0,
+      filename: input.filename,
+    })
+    return { rows: [], requiresColumnMapping: true, columnSuggestions }
   }
 
   // Column map is provided — parse rows
   const { wordColumnIndex, tagsColumnIndex } = columnMap
   const rows: ParsedRow[] = []
-  const firstOccurrence = new Map<string, number>()
+  const firstOccurrence   = new Map<string, number>()
 
   // Check if first row looks like a header
   const firstRowWord = (dataRows[0]?.[wordColumnIndex] ?? '').trim()
-  const startIndex = LEXIS_HEADERS.has(firstRowWord.toLowerCase()) ? 1 : 0
+  const startIndex   = LEXIS_HEADERS.has(firstRowWord.toLowerCase()) ? 1 : 0
+
+  let duplicateCount = 0
 
   for (let i = startIndex; i < dataRows.length; i++) {
     const record = dataRows[i]
-    const rawWord = (record[wordColumnIndex] ?? '').trim()
+    const rawWord  = (record[wordColumnIndex] ?? '').trim()
     const lineNumber = i + 1
 
     if (!rawWord) continue
@@ -139,10 +150,12 @@ function parseAnki(input: ParserInput, columnMap?: { wordColumnIndex: number; ta
 
     const existing = firstOccurrence.get(word)
     if (existing !== undefined) {
+      duplicateCount++
       rows.push({
+        clientRowId: crypto.randomUUID(),
         word,
         lineNumber,
-        rawText: record.join(delimiter),
+        rawText: record.join(delimiter).slice(0, 500),
         status: 'duplicate_within_batch',
         reason: `Already in this list (line ${existing})`,
         ...(tags && tags.length > 0 ? { tags } : {}),
@@ -150,19 +163,27 @@ function parseAnki(input: ParserInput, columnMap?: { wordColumnIndex: number; ta
     } else {
       firstOccurrence.set(word, lineNumber)
       rows.push({
+        clientRowId: crypto.randomUUID(),
         word,
         lineNumber,
-        rawText: record.join(delimiter),
+        rawText: record.join(delimiter).slice(0, 500),
         status: 'valid',
         ...(tags && tags.length > 0 ? { tags } : {}),
       })
     }
   }
 
+  emitParserEvent('parse_complete', {
+    parser: 'anki',
+    rowsParsed: rows.length,
+    duplicates: duplicateCount,
+    filename: input.filename,
+  })
+
   return { rows, requiresColumnMapping: false }
 }
 
 export const ankiParser: ImportParser = {
-  canParse,
+  score,
   parse: parseAnki,
 }

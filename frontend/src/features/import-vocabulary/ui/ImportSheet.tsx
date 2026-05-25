@@ -9,7 +9,7 @@ import { ImportResult } from './ImportResult'
 import { AnkiColumnMapper } from './AnkiColumnMapper'
 import { Spinner } from '../../../shared/ui/Spinner'
 import { selectParser } from '../../../shared/lib/import/parsers/parserRegistry'
-import type { ParsedRow, ImportSettings } from '../../../entities/import-session/model/types'
+import type { ParsedRow, ImportSettings, ImportFlowError } from '../../../entities/import-session/model/types'
 import type { ColumnSuggestion } from '../../../shared/lib/import/parsers/types'
 import styles from './ImportSheet.module.css'
 
@@ -58,12 +58,21 @@ export function ImportSheet({ open, onClose }: ImportSheetProps) {
 
   // Called by AnkiColumnMapper once user confirms column selection
   const handleAnkiConfirm = useCallback(
-    (wordColumnIndex: number, tagsColumnIndex?: number) => {
+    async (wordColumnIndex: number, tagsColumnIndex?: number) => {
       if (!rawParseInput) return
       const parser = selectParser(rawParseInput)
-      const result = parser.parse(rawParseInput, { wordColumnIndex, tagsColumnIndex })
-      flow.setParsedRows(result.rows)
-      flow.goTo('preview')
+      try {
+        const result = await parser.parse(rawParseInput, { wordColumnIndex, tagsColumnIndex })
+        flow.setParsedRows(result.rows)
+        flow.goTo('preview')
+      } catch (err) {
+        const flowError: ImportFlowError = {
+          type: 'parse',
+          message: err instanceof Error ? err.message : 'Failed to parse file after column mapping.',
+        }
+        flow.setError(flowError)
+        flow.goTo('error')
+      }
     },
     [rawParseInput, flow],
   )
@@ -77,8 +86,11 @@ export function ImportSheet({ open, onClose }: ImportSheetProps) {
         flow.setResult(result)
         flow.goTo('complete')
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Import failed. Please try again.'
-        flow.setError(message)
+        const flowError: ImportFlowError = {
+          type: err instanceof Error && err.name === 'AbortError' ? 'network' : 'server',
+          message: err instanceof Error ? err.message : 'Import failed. Please try again.',
+        }
+        flow.setError(flowError)
         flow.goTo('error')
       }
     },
@@ -126,7 +138,7 @@ export function ImportSheet({ open, onClose }: ImportSheetProps) {
           <AnkiColumnMapper
             suggestions={ankiSuggestions}
             rawText={rawParseInput?.text ?? ''}
-            onConfirm={handleAnkiConfirm}
+            onConfirm={(wordCol, tagsCol) => void handleAnkiConfirm(wordCol, tagsCol)}
             onBack={() => flow.goTo('upload')}
           />
         )}
@@ -165,7 +177,7 @@ export function ImportSheet({ open, onClose }: ImportSheetProps) {
         {/* ── Error step ───────────────────────────────────────────────── */}
         {flow.step === 'error' && (
           <div className={styles.errorStep}>
-            <p className={styles.errorMessage}>{flow.error ?? 'Something went wrong.'}</p>
+            <p className={styles.errorMessage}>{flow.error?.message ?? 'Something went wrong.'}</p>
             <div className={styles.errorActions}>
               <button
                 type="button"
@@ -173,7 +185,7 @@ export function ImportSheet({ open, onClose }: ImportSheetProps) {
                 onClick={() => {
                   flow.goTo('upload')
                   executeMutation.reset()
-                  flow.setError('')
+                  flow.reset()
                 }}
               >
                 Try again
