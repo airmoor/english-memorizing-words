@@ -93,11 +93,12 @@ export function useVocabularyInfinite(params: VocabularyQueryParams) {
   return {
     items,
     total,
-    isLoading:         infiniteQuery.isPending,
-    isError:           infiniteQuery.isError,
-    hasNextPage:       infiniteQuery.hasNextPage,
+    isLoading:          infiniteQuery.isPending,
+    isError:            infiniteQuery.isError,
+    isFetching:         infiniteQuery.isFetching,
+    hasNextPage:        infiniteQuery.hasNextPage,
     isFetchingNextPage: infiniteQuery.isFetchingNextPage,
-    fetchNextPage:     infiniteQuery.fetchNextPage,
-    remove:            (wordId: string) => removeMutation.mutate(wordId),
+    fetchNextPage:      infiniteQuery.fetchNextPage,
+    remove:             (wordId: string) => removeMutation.mutate(wordId),
   }
 }

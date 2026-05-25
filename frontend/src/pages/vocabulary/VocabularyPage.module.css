@@ -152,6 +152,41 @@
   animation: contentEnter 0.22s var(--ease-out) both;
 }
 
+/* ── Filter-change loading indicator ──────────────────────────────────────
+   A thin progress bar appears at the top of the content area when a filter
+   change triggers a refetch. keepPreviousData keeps the stale list visible,
+   so this bar is the only signal that a new result is coming.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.fetchingBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, var(--color-accent) 0%, color-mix(in srgb, var(--color-accent) 40%, transparent) 100%);
+  animation: fetchSweep 1.4s ease-in-out infinite;
+  z-index: 10;
+}
+
+@keyframes fetchSweep {
+  0%   { transform: scaleX(0); transform-origin: left; }
+  50%  { transform: scaleX(1); transform-origin: left; }
+  51%  { transform: scaleX(1); transform-origin: right; }
+  100% { transform: scaleX(0); transform-origin: right; }
+}
+
+.contentAreaFetching {
+  position: relative;
+}
+
+/* Apply light opacity to list only (not toolbar/filter bar) during refetch */
+.listWrapper.fetching {
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+
 /* ── Spacing between FilterBar and the word list ──────────────────────────
    The FilterBar ends with a border-bottom. This wrapper creates visual
    breathing room between the chip row and the first vocabulary card.

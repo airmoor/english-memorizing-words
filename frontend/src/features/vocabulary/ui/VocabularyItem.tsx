@@ -6,6 +6,7 @@ import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog/ConfirmDialog'
 import { useWordDetail } from '../../../shared/ui/WordDetail/WordDetailContext'
 import { getCardState } from '../model/cardState'
 import { ReviewStateBadge } from './ReviewStateBadge'
+import { featureFlags } from '../../../shared/lib/featureFlags'
 import styles from './VocabularyItem.module.css'
 
 interface Props {
@@ -82,10 +83,12 @@ export function VocabularyItem({ item, onRemove, sourceList }: Props) {
       >
         {/* Main row body — content + keyboard activation */}
         <div
+          role="button"
           className={styles.rowButton}
           aria-label={`Open detail for ${item.wordText}`}
           aria-pressed={isActive}
           tabIndex={0}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpen() } }}
         >
           <div className={styles.wordRow}>
             <Text variant="label" as="span" className={styles.word}>
@@ -121,7 +124,7 @@ export function VocabularyItem({ item, onRemove, sourceList }: Props) {
           )}
 
           {/* Board / tag chips */}
-          {(item.boards.length > 0 || item.tags.length > 0) && (
+          {featureFlags.boardsTags && (item.boards.length > 0 || item.tags.length > 0) && (
             <div className={styles.metaChips}>
               {item.boards.slice(0, 2).map((b) => (
                 <span key={b.id} className={styles.boardChip}>{b.name}</span>

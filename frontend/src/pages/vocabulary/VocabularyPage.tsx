@@ -9,11 +9,13 @@ import { useWordDetailUrl } from '../../shared/ui/WordDetail/useWordDetailUrl'
 import { VocabularyList } from '../../features/vocabulary/ui/VocabularyList'
 import { VocabularyToolbar } from '../../features/vocabulary/ui/VocabularyToolbar'
 import { VocabularyFilterBar } from '../../features/vocabulary/ui/VocabularyFilterBar'
+import { BoardReviewBanner } from '../../features/vocabulary/ui/BoardReviewBanner'
 import { useVocabularyInfinite } from '../../features/vocabulary/model/useVocabularyInfinite'
 import { useVocabularyFilters } from '../../features/vocabulary/model/useVocabularyFilters'
 import type { VocabularyFilter, SortOption } from '../../features/vocabulary/model/cardState'
 import type { ViewMode } from '../../features/vocabulary/ui/VocabularyToolbar'
 import type { VocabularyWord } from '../../entities/vocabulary/model/types'
+import { featureFlags } from '../../shared/lib/featureFlags'
 import styles from './VocabularyPage.module.css'
 
 // ── Skeleton loading placeholders ─────────────────────────────────────────────
@@ -252,11 +254,16 @@ export function VocabularyPage() {
     total,
     isLoading,
     isError,
+    isFetching,
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
     remove,
   } = useVocabularyInfinite({ query: debouncedQuery, activeFilters, sort, apiFilters })
+
+  // True when a filter change (not initial load) is in flight — used for the
+  // thin progress bar and list opacity dim.
+  const isRefetching = isFetching && !isLoading
 
   // ── Display state ─────────────────────────────────────────────────────────
 
@@ -320,7 +327,8 @@ export function VocabularyPage() {
             Failed to load vocabulary. Please try again.
           </Text>
         ) : (
-          <div className={styles.contentArea}>
+          <div className={[styles.contentArea, isRefetching ? styles.contentAreaFetching : ''].join(' ').trim()}>
+            {isRefetching && <div className={styles.fetchingBar} aria-hidden="true" />}
             {showToolbar && (
               <>
                 <VocabularyToolbar
@@ -341,7 +349,12 @@ export function VocabularyPage() {
                 />
               </>
             )}
-            <div className={styles.listWrapper}>
+            {/* Board review entry point — shown when a board filter is active */}
+            {featureFlags.boardsTags && apiFilters.boardId && (
+              <BoardReviewBanner boardId={apiFilters.boardId} />
+            )}
+
+            <div className={[styles.listWrapper, isRefetching ? styles.fetching : ''].join(' ').trim()}>
               <WordDetailProvider onRemove={remove} context="vocabulary">
                 <VocabularyPageContent
                   items={items}

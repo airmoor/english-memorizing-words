@@ -5,6 +5,7 @@ import {
   assignTagByName,
 } from '../api/tagsApi'
 import { TAGS_KEY } from './useTagsQuery'
+import { toast } from '../../../shared/ui/Toast'
 
 export function useAssignTagByName() {
   const queryClient = useQueryClient()
@@ -14,6 +15,9 @@ export function useAssignTagByName() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vocabulary'] })
       queryClient.invalidateQueries({ queryKey: TAGS_KEY })
+    },
+    onError: () => {
+      toast.error("Couldn't add tag. Please try again.")
     },
   })
 }
@@ -27,6 +31,9 @@ export function useAssignTagToCard() {
       queryClient.invalidateQueries({ queryKey: ['vocabulary'] })
       queryClient.invalidateQueries({ queryKey: TAGS_KEY })
     },
+    onError: () => {
+      toast.error("Couldn't add tag. Please try again.")
+    },
   })
 }
 
@@ -38,6 +45,9 @@ export function useRemoveTagFromCard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vocabulary'] })
       queryClient.invalidateQueries({ queryKey: TAGS_KEY })
+    },
+    onError: () => {
+      toast.error("Couldn't remove tag. Please try again.")
     },
   })
 }

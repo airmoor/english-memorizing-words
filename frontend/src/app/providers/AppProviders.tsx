@@ -2,6 +2,7 @@ import { type ReactNode, useEffect } from 'react'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from '../../shared/design/ThemeProvider'
+import { Toaster } from '../../shared/ui/Toast'
 import { useAuthStore } from '../../features/auth/model/authStore'
 import { refreshToken } from '../../shared/api/base'
 
@@ -46,6 +47,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
           <AuthBootstrap>
             {children}
           </AuthBootstrap>
+          <Toaster />
         </ThemeProvider>
       </QueryClientProvider>
     </BrowserRouter>

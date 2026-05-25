@@ -1,0 +1,150 @@
+.summary {
+  text-align: center;
+  margin-top: var(--space-xxl);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* Ambient glow — mirrors ReviewPage.module.css .empty::before */
+.glow {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 320px;
+  height: 220px;
+  background: radial-gradient(
+    ellipse 80% 60% at 50% 50%,
+    color-mix(in srgb, var(--color-accent) 14%, transparent) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+.icon {
+  font-size: 3.2rem;
+  margin: 0 0 var(--space-xs);
+}
+
+.heading {
+  margin: 0;
+}
+
+/* Board chip — matches vocabulary list board chip style */
+.boardLabel {
+  margin: 0;
+}
+
+.boardChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-xs);
+  font-weight: 500;
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  color: var(--color-accent);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
+}
+
+.count {
+  margin: 0;
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+}
+
+/* ── Rating breakdown ─────────────────────────────────────────────────────── */
+
+.breakdown {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: var(--space-xs) 0;
+}
+
+.breakdownItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-xs);
+  font-weight: var(--fw-medium);
+  border: 1.5px solid;
+}
+
+.breakdownIcon {
+  font-size: 11px;
+  line-height: 1;
+}
+
+.breakdownLabel {
+  color: inherit;
+}
+
+.breakdownCount {
+  font-weight: var(--fw-semibold);
+  min-width: 14px;
+  text-align: right;
+}
+
+.item_again {
+  border-color: color-mix(in srgb, var(--color-danger)  40%, transparent);
+  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger)  8%, transparent);
+}
+.item_hard {
+  border-color: color-mix(in srgb, var(--color-warning) 40%, transparent);
+  color: var(--color-warning);
+  background: color-mix(in srgb, var(--color-warning) 8%, transparent);
+}
+.item_good {
+  border-color: color-mix(in srgb, var(--color-success) 40%, transparent);
+  color: var(--color-success);
+  background: color-mix(in srgb, var(--color-success) 8%, transparent);
+}
+.item_easy {
+  border-color: color-mix(in srgb, var(--color-accent)  40%, transparent);
+  color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent)  8%, transparent);
+}
+
+/* ── Next review label ────────────────────────────────────────────────────── */
+
+.nextLabel {
+  margin: var(--space-xs) 0 0;
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+}
+
+.nextTime {
+  color: var(--color-text-primary);
+  font-weight: var(--fw-medium);
+}
+
+/* ── Board fallback button ────────────────────────────────────────────────── */
+
+.fallbackBtn {
+  margin-top: var(--space-md);
+  background: none;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 8px 20px;
+  font-size: var(--font-sm);
+  font-family: var(--font-sans);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.fallbackBtn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}

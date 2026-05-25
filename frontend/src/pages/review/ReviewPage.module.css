@@ -63,3 +63,22 @@
   font-size: var(--font-sm);
   margin-top: var(--space-xs);
 }
+
+.fullQueueBtn {
+  margin-top: var(--space-lg);
+  background: none;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 9px 22px;
+  font-size: var(--font-sm);
+  font-family: var(--font-sans);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.fullQueueBtn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}

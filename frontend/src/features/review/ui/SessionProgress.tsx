@@ -2,13 +2,18 @@ import { useQuery } from '@tanstack/react-query'
 import { getProgress } from '../api/getProgress'
 import styles from './SessionProgress.module.css'
 
+interface SessionProgressProps {
+  /** When set, shows the board name in the progress label */
+  boardId?: string
+  boardName?: string
+}
+
 /**
  * In-session review progress experience.
  * Shows: today's progress bar (reviewed / due+reviewed) + streak badge.
- *
- * Replaces the older counter-style header — bulk stats now live on /home.
+ * When a board is active, surfaces the board name in the status text.
  */
-export function SessionProgress() {
+export function SessionProgress({ boardName }: SessionProgressProps) {
   const { data } = useQuery({
     queryKey: ['progress'],
     queryFn: getProgress,
@@ -17,21 +22,21 @@ export function SessionProgress() {
 
   if (!data) return <div className={styles.bar} aria-hidden />
 
-  // Total cards in today's session = those still due + those already reviewed
   const sessionTotal = data.dueToday + data.reviewedToday
   const percent = sessionTotal === 0 ? 0 : Math.round((data.reviewedToday / sessionTotal) * 100)
   const isDone = sessionTotal > 0 && data.dueToday === 0
 
+  const scopeLabel = boardName ? ` · ${boardName}` : ''
+  const statusText = sessionTotal === 0
+    ? `No cards due${boardName ? ` in ${boardName}` : ' today'}`
+    : isDone
+      ? `Session complete ✓${scopeLabel}`
+      : `${data.reviewedToday} of ${sessionTotal} reviewed${scopeLabel}`
+
   return (
     <div className={styles.bar}>
       <div className={styles.text}>
-        <span className={styles.label}>
-          {sessionTotal === 0
-            ? 'No cards due today'
-            : isDone
-            ? 'Session complete ✓'
-            : `${data.reviewedToday} of ${sessionTotal} reviewed`}
-        </span>
+        <span className={styles.label}>{statusText}</span>
         {data.streak > 0 && (
           <span className={styles.streak} title={`${data.streak} day streak`}>
             🔥 {data.streak}

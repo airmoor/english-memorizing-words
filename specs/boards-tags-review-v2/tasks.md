@@ -237,17 +237,17 @@ Phases 1–2 are backend-only and can be deployed without any visible frontend c
 
 **Deliverables:**
 
-- [ ] Rating buttons extended with timing sub-labels on card flip
-- [ ] `nextReviewPreviews` data fetched from API and displayed
-- [ ] Review state badge on vocabulary list cards ("Due", "In N days", "New", "Mastered")
-- [ ] Review info section in card detail bottom sheet
-- [ ] Board-filtered session: "Review this board" entry point on vocabulary list (when board filter active)
-- [ ] Board-filtered session: review queue limited to board cards
-- [ ] Session summary: breakdown by rating (Again/Hard/Good/Easy counts with icons)
-- [ ] Session summary: next session timing ("Next cards due: in 3 hours")
-- [ ] Session summary: board name shown if board-filtered
-- [ ] Empty session state: "No cards due in [Board Name]" with fallback to full queue
-- [ ] `features/review` extended: board filter param, summary breakdown, timing previews
+- [x] Rating buttons extended with timing sub-labels on card flip — `Flashcard` passes `previews={answerQuery.data?.nextReviewPreviews}` to `RatingButtons`
+- [x] `nextReviewPreviews` data fetched from API and displayed — `getAnswer` returns it; `RatingButtons` already has `previews` prop rendering; wired end-to-end
+- [x] Review state badge on vocabulary list cards ("Due", "In N days", "New", "Mastered") — `ReviewStateBadge` was already complete; verified correct
+- [x] Review info section in card detail bottom sheet — `ReviewInfoSection` was already complete; verified correct
+- [x] Board-filtered session: "Review this board" entry point on vocabulary list (when board filter active) — `BoardReviewBanner` component, shown below filter bar when `apiFilters.boardId` is set
+- [x] Board-filtered session: review queue limited to board cards — `getNextCard(boardId?)` passes `?boardId=` to backend; `ReviewPage` reads `boardId` from URL params
+- [x] Session summary: breakdown by rating (Again/Hard/Good/Easy counts with icons) — `SessionSummary` component with per-rating chips; counts tracked via `onRated` callback in `Flashcard`
+- [x] Session summary: next session timing ("Next cards due: in 3 hours") — `nextReviewHumanFromDate` converts `progress.nextReviewDate` to human label
+- [x] Session summary: board name shown if board-filtered — `SessionSummary` accepts `boardName` prop; shown as accent chip
+- [x] Empty session state: "No cards due in [Board Name]" with fallback to full queue — board-specific empty state with "Review all cards" button
+- [x] `features/review` extended: board filter param, summary breakdown, timing previews — `getNextCard`, `SessionSummary`, `SessionProgress`, `Flashcard` all extended
 
 ---
 
@@ -263,16 +263,16 @@ Phases 1–2 are backend-only and can be deployed without any visible frontend c
 
 **Deliverables:**
 
-- [ ] All empty states implemented (see ux.md for the full table)
-- [ ] Error states: network errors on board/tag mutations show toast, roll back optimistic update
-- [ ] Loading states: skeleton loaders for vocabulary list on first load and filter change
-- [ ] Accessibility audit: bottom sheets, filter bar, chip select, card detail
-- [ ] VoiceOver (iOS) and TalkBack (Android) spot-check for primary flows
-- [ ] Performance: vocabulary list scroll frame rate on device with 500+ cards
-- [ ] Performance: extended vocabulary query latency with 1000+ cards — confirm < 300ms p95
-- [ ] Keyboard navigation (desktop): focus order through filter bar, card list, card detail sheet
-- [ ] Animation: bottom sheet open/close is smooth (60fps) on low-end device
-- [ ] Feature flag: confirm boards/tags UI can be toggled off cleanly
+- [x] All empty states implemented (see ux.md for the full table) — vocabulary list (no cards, filtered), review queue (no cards due), board filtered empty all covered
+- [x] Error states: network errors on board/tag mutations show toast, roll back optimistic update — `Toaster` in AppProviders; all board/tag mutations call `toast.error()` on failure; optimistic rollback already in place
+- [x] Loading states: skeleton loaders for vocabulary list on first load and filter change — skeleton on initial load (Phases 3/4); `fetchingBar` progress indicator + list opacity dim on filter refetch via `isRefetching`
+- [x] Accessibility audit: bottom sheets, filter bar, chip select, card detail — BottomSheet: `role="dialog"`, `aria-modal`, focus trap, Escape key ✓; FilterBar: `role="toolbar"` ✓; ChipSelect: `role="radiogroup"/"group"` + `role="radio"/"checkbox"` per mode + arrow key nav ✓; VocabularyItem rowButton: `role="button"` + keyboard handler ✓
+- [ ] VoiceOver (iOS) and TalkBack (Android) spot-check for primary flows — requires device testing
+- [ ] Performance: vocabulary list scroll frame rate on device with 500+ cards — requires device testing
+- [ ] Performance: extended vocabulary query latency with 1000+ cards — confirm < 300ms p95 — requires production-representative dataset
+- [x] Keyboard navigation (desktop): focus order through filter bar, card list, card detail sheet — ChipSelect arrow nav, VocabularyItem Enter/Space, BottomSheet focus trap + Tab cycle all implemented
+- [ ] Animation: bottom sheet open/close is smooth (60fps) on low-end device — requires device testing
+- [x] Feature flag: confirm boards/tags UI can be toggled off cleanly — `featureFlags.boardsTags` from `VITE_BOARDS_TAGS_ENABLED` env var; gates VocabularyItem chips, BoardsSection, TagInputSection, BoardReviewBanner, and filter bar board/tag sections
 - [ ] Documentation: update README with new features and setup notes if needed
 - [ ] QA: end-to-end test of primary user flows (see ux.md Ideal User Flows A–E)
 

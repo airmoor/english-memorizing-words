@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { InfiniteData } from '@tanstack/react-query'
 import { assignCardToBoard, removeCardFromBoard } from '../api/boardsApi'
 import { BOARDS_KEY } from './useBoardsQuery'
+import { toast } from '../../../shared/ui/Toast'
 import type { PaginatedVocabulary } from '../../../entities/vocabulary/model/types'
 import type { Board } from '../../../entities/board/model/types'
 
@@ -58,6 +59,7 @@ export function useAssignCardToBoard() {
       ctx?.snapshots.forEach(([key, data]) => {
         queryClient.setQueryData(key, data)
       })
+      toast.error("Couldn't add to board. Please try again.")
     },
 
     onSettled: () => {
@@ -107,6 +109,7 @@ export function useRemoveCardFromBoard() {
       ctx?.snapshots.forEach(([key, data]) => {
         queryClient.setQueryData(key, data)
       })
+      toast.error("Couldn't remove from board. Please try again.")
     },
 
     onSettled: () => {

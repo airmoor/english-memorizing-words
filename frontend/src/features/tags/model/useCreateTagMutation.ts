@@ -1,12 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createTag, updateTag, deleteTag } from '../api/tagsApi'
 import { TAGS_KEY } from './useTagsQuery'
+import { toast } from '../../../shared/ui/Toast'
 
 export function useCreateTagMutation() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (name: string) => createTag({ name }),
     onSuccess: () => qc.invalidateQueries({ queryKey: TAGS_KEY }),
+    onError: () => { toast.error("Couldn't create tag. Please try again.") },
   })
 }
 
@@ -19,6 +21,7 @@ export function useUpdateTagMutation() {
       qc.invalidateQueries({ queryKey: TAGS_KEY })
       qc.invalidateQueries({ queryKey: ['vocabulary'] })
     },
+    onError: () => { toast.error("Couldn't rename tag. Please try again.") },
   })
 }
 
@@ -30,5 +33,6 @@ export function useDeleteTagMutation() {
       qc.invalidateQueries({ queryKey: TAGS_KEY })
       qc.invalidateQueries({ queryKey: ['vocabulary'] })
     },
+    onError: () => { toast.error("Couldn't delete tag. Please try again.") },
   })
 }

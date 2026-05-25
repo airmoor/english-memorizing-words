@@ -12,9 +12,11 @@ import styles from './Flashcard.module.css'
 
 interface Props {
   card: NextCard
+  /** Called after a rating is successfully submitted — lets the parent track session counts */
+  onRated?: (rating: Rating) => void
 }
 
-export function Flashcard({ card }: Props) {
+export function Flashcard({ card, onRated }: Props) {
   const [revealed, setRevealed] = useState(false)
   const queryClient = useQueryClient()
 
@@ -26,7 +28,8 @@ export function Flashcard({ card }: Props) {
 
   const rateMutation = useMutation({
     mutationFn: (rating: Rating) => submitRating(card.cardId, rating),
-    onSuccess: () => {
+    onSuccess: (_data, rating) => {
+      onRated?.(rating)
       queryClient.invalidateQueries({ queryKey: ['nextCard'] })
       queryClient.invalidateQueries({ queryKey: ['progress'] })
     },
@@ -116,6 +119,7 @@ export function Flashcard({ card }: Props) {
           <RatingButtons
             onRate={(r) => rateMutation.mutate(r)}
             disabled={rateMutation.isPending}
+            previews={answerQuery.data?.nextReviewPreviews}
           />
         </div>
       )}

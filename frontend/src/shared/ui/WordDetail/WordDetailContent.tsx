@@ -7,6 +7,7 @@ import { NoteSection } from '../../../features/card-note/ui/NoteSection'
 import { TagInputSection } from '../../../features/tags/ui/TagInputSection'
 import { BoardsSection } from './BoardsSection'
 import { ReviewInfoSection } from './ReviewInfoSection'
+import { featureFlags } from '../../../shared/lib/featureFlags'
 import styles from './WordDetailContent.module.css'
 
 /**
@@ -69,16 +70,20 @@ export function WordDetailContent({
             note={vocabCard.note}
           />
 
-          <BoardsSection
-            cardId={vocabCard.cardId}
-            wordId={vocabCard.wordId}
-            boards={vocabCard.boards}
-          />
+          {featureFlags.boardsTags && (
+            <BoardsSection
+              cardId={vocabCard.cardId}
+              wordId={vocabCard.wordId}
+              boards={vocabCard.boards}
+            />
+          )}
 
-          <TagInputSection
-            cardId={vocabCard.cardId}
-            tags={vocabCard.tags}
-          />
+          {featureFlags.boardsTags && (
+            <TagInputSection
+              cardId={vocabCard.cardId}
+              tags={vocabCard.tags}
+            />
+          )}
 
           <ReviewInfoSection
             reviewState={vocabCard.reviewState}

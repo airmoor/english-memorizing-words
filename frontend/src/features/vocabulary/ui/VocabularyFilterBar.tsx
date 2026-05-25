@@ -4,6 +4,7 @@ import { AdaptiveSheet } from '../../../shared/ui/AdaptiveSheet/AdaptiveSheet'
 import { BottomSheetContent } from '../../../shared/ui/BottomSheet/BottomSheetContent'
 import { useBoardsQuery } from '../../boards/model/useBoardsQuery'
 import { useTagsQuery } from '../../tags/model/useTagsQuery'
+import { featureFlags } from '../../../shared/lib/featureFlags'
 import type { VocabularyFilters } from '../../../entities/vocabulary/model/filters'
 import type { ReviewState } from '../../../entities/vocabulary/model/types'
 import type { PartOfSpeech } from '../../../entities/vocabulary/model/filters'
@@ -237,7 +238,7 @@ export function VocabularyFilterBar({
           </div>
 
           {/* Boards */}
-          {activeBoards.length > 0 && (
+          {featureFlags.boardsTags && activeBoards.length > 0 && (
             <div className={styles.filterGroup}>
               <p className={styles.groupLabel}>Board</p>
               <div className={styles.groupChips}>
@@ -261,7 +262,7 @@ export function VocabularyFilterBar({
           )}
 
           {/* Tags */}
-          {tags.length > 0 && (
+          {featureFlags.boardsTags && tags.length > 0 && (
             <div className={styles.filterGroup}>
               <p className={styles.groupLabel}>Tag</p>
               <div className={styles.groupChips}>
