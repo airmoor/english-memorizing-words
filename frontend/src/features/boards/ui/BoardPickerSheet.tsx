@@ -87,9 +87,6 @@ export function BoardPickerSheet({
                     aria-pressed={checked}
                   >
                     <span className={styles.rowName}>{board.name}</span>
-                    <span className={styles.rowCount} aria-hidden="true">
-                      {board.cardCount}
-                    </span>
                     <span className={[styles.checkbox, checked ? styles.checkboxChecked : ''].join(' ')} aria-hidden="true">
                       {checked && <CheckIcon />}
                     </span>

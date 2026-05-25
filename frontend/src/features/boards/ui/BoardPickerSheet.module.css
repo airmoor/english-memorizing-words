@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-lg) var(--space-lg) var(--space-md);
+  padding: var(--space-lg) var(--space-lg) var(--space-lg);
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -25,15 +25,15 @@
 .newBoardLink {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   background: none;
   border: none;
   color: var(--color-accent);
-  font-size: var(--font-xs);
+  font-size: var(--font-sm);
   font-family: var(--font-sans);
   font-weight: var(--fw-medium);
   cursor: pointer;
-  padding: 4px var(--space-sm);
+  padding: 6px var(--space-sm);
   border-radius: var(--radius-md);
   transition: background 0.12s;
   white-space: nowrap;
@@ -47,8 +47,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   background: none;
   border: none;
   border-radius: var(--radius-full);
@@ -69,7 +69,7 @@
   padding: var(--space-xl) var(--space-lg);
   text-align: center;
   color: var(--color-text-secondary);
-  font-size: var(--font-xs);
+  font-size: var(--font-sm);
 }
 
 /* ── Board list ───────────────────────────────────────────────────────────────── */
@@ -77,15 +77,17 @@
 .list {
   list-style: none;
   margin: 0;
-  padding: var(--space-xs) 0;
+  padding: var(--space-sm) 0;
 }
 
 .row {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: var(--space-md);
   width: 100%;
-  padding: 13px var(--space-lg);
+  /* 52px min-height — comfortable touch target without feeling bloated */
+  min-height: 52px;
+  padding: var(--space-sm) var(--space-lg);
   background: none;
   border: none;
   text-align: left;
@@ -110,21 +112,16 @@
 .rowName {
   flex: 1;
   font-size: var(--font-sm);
+  line-height: 1.4;
 }
 
-.rowCount {
-  font-size: var(--font-xs);
-  color: var(--color-text-secondary);
-  min-width: 20px;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
+/* .rowCount removed — counts add noise and compete with board names */
 
 /* ── Checkbox visual ──────────────────────────────────────────────────────────── */
 
 .checkbox {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: var(--radius-sm);
   border: 1.5px solid var(--color-border);
   background: transparent;
@@ -148,7 +145,7 @@
 }
 
 .archivedToggle {
-  padding: var(--space-sm) var(--space-lg);
+  padding: var(--space-md) var(--space-lg);
   font-size: var(--font-xs);
   color: var(--color-text-secondary);
   cursor: pointer;
