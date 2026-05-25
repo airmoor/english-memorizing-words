@@ -143,4 +143,11 @@ export type ImportFlowError = {
   type: 'network' | 'parse' | 'validation' | 'server'
   /** Human-readable message for display in the UI */
   message: string
+  /**
+   * Structured validation details — only present when type === 'validation'.
+   * Mirrors ValidationErrorDetail from base.ts.
+   * Used to: (a) mark affected preview rows as 'error', (b) render a smart
+   * grouped summary in the error step instead of raw paths.
+   */
+  details?: Array<{ path: string; constraint: string; message: string }>
 }

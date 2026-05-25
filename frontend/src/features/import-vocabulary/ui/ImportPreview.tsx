@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useImportPreviewMutation } from '../model/useImportPreviewMutation'
 import { ImportSettings } from './ImportSettings'
 import { Spinner } from '../../../shared/ui/Spinner'
+import { ApiError } from '../../../shared/api/base'
+import { buildRowErrorMap } from '../lib/formatValidationErrors'
 import type {
   ParsedRow,
   ImportPreviewRow,
@@ -131,9 +133,21 @@ export function ImportPreview({
           onSuccess: (result) => {
             setMergedRows(mergeServerStatus(rows, result.rows))
           },
-          onError: () => {
-            // Server preview failed — keep client-side state
-            setMergedRows(rows)
+          onError: (err) => {
+            // On HTTP 400 with structured validation errors: mark the affected
+            // rows as 'error' so the user can see which words are invalid
+            // (e.g. too long) directly in the preview table.
+            if (err instanceof ApiError && err.status === 400 && err.validationErrors?.length) {
+              const errorMap = buildRowErrorMap(err.validationErrors, checkRows)
+              const updated = rows.map((row) => {
+                const reason = errorMap.get(row.clientRowId)
+                return reason ? { ...row, status: 'error' as const, reason } : row
+              })
+              setMergedRows(updated)
+            } else {
+              // Other failures (network, 5xx) — keep client-side state silently
+              setMergedRows(rows)
+            }
           },
         },
       )
@@ -262,7 +276,9 @@ export function ImportPreview({
       </button>
 
       {settingsOpen && (
-        <ImportSettings settings={settings} onChange={handleSettingsChange} />
+        <div className={styles.settingsPanel}>
+          <ImportSettings settings={settings} onChange={handleSettingsChange} />
+        </div>
       )}
 
       {/* ── Row table ────────────────────────────────────────────────── */}

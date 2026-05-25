@@ -5,6 +5,7 @@ import * as cookieParser from 'cookie-parser';
 import * as express from 'express';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { validationExceptionFactory } from './common/validation-exception.factory';
 
 async function bootstrap() {
   const frontendUrl = process.env.FRONTEND_URL;
@@ -28,7 +29,16 @@ async function bootstrap() {
     exclude: [{ path: 'health', method: RequestMethod.GET }],
   });
   app.use(cookieParser());
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      // Returns structured { validationErrors: FlatValidationError[] } instead
+      // of raw class-validator paths like "words.1.word must be shorter than…".
+      // The frontend parses this and renders user-friendly summaries.
+      exceptionFactory: validationExceptionFactory,
+    }),
+  );
 
   if (process.env.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()

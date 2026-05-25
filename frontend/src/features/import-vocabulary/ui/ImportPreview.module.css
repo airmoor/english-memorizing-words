@@ -15,6 +15,9 @@
   gap: 12px;
   padding: 16px 24px 12px;
   border-bottom: 1px solid var(--color-border);
+  /* flex-shrink: 0 on every non-scrollable row prevents them from being
+     compressed by the parent's min-height: 0. Only .tableWrapper shrinks. */
+  flex-shrink: 0;
 }
 
 .backBtn {
@@ -46,6 +49,7 @@
   padding: 12px 24px;
   background: var(--color-bg-primary);
   border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
 }
 
 .summaryItem {
@@ -74,7 +78,13 @@
   padding: 8px 24px;
   border-bottom: 1px solid var(--color-border);
   background: var(--color-bg-secondary);
+  /* flex-shrink: 0 — never compress this row. Without it, the parent's
+     min-height:0 squishes filterTabs, and overflow-x:auto then forces
+     overflow-y to auto too (CSS spec), producing an unwanted scrollbar. */
+  flex-shrink: 0;
+  min-height: 44px;
   overflow-x: auto;
+  overflow-y: visible;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -122,6 +132,12 @@
   color: var(--color-danger);
 }
 
+/* ── Settings panel (open/closed) ───────────────────────────────────────── */
+
+.settingsPanel {
+  flex-shrink: 0;
+}
+
 /* ── Empty filter state ──────────────────────────────────────────────────── */
 
 .emptyFilter {
@@ -143,6 +159,7 @@
   cursor: pointer;
   padding: 8px 24px;
   text-align: left;
+  flex-shrink: 0;
 }
 
 .settingsToggle:hover {
@@ -289,6 +306,7 @@
   background: var(--color-bg-secondary);
   position: sticky;
   bottom: 0;
+  flex-shrink: 0;
   /* env(safe-area-inset-bottom) for notched iPhones */
   padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
 }

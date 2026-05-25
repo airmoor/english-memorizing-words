@@ -81,6 +81,17 @@
   line-height: 1.5;
 }
 
+.errorHint {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.5;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm, 6px);
+  background: var(--color-bg-primary);
+  border-left: 3px solid var(--color-warning);
+}
+
 .errorActions {
   display: flex;
   gap: 12px;

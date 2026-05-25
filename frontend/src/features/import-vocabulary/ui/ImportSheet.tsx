@@ -9,6 +9,8 @@ import { ImportResult } from './ImportResult'
 import { AnkiColumnMapper } from './AnkiColumnMapper'
 import { Spinner } from '../../../shared/ui/Spinner'
 import { selectParser } from '../../../shared/lib/import/parsers/parserRegistry'
+import { ApiError } from '../../../shared/api/base'
+import { buildValidationFlowError } from '../lib/formatValidationErrors'
 import type { ParsedRow, ImportSettings, ImportFlowError } from '../../../entities/import-session/model/types'
 import type { ColumnSuggestion } from '../../../shared/lib/import/parsers/types'
 import styles from './ImportSheet.module.css'
@@ -86,10 +88,20 @@ export function ImportSheet({ open, onClose }: ImportSheetProps) {
         flow.setResult(result)
         flow.goTo('complete')
       } catch (err) {
-        const flowError: ImportFlowError = {
-          type: err instanceof Error && err.name === 'AbortError' ? 'network' : 'server',
-          message: err instanceof Error ? err.message : 'Import failed. Please try again.',
+        let flowError: ImportFlowError
+
+        if (err instanceof ApiError && err.status === 400 && err.validationErrors?.length) {
+          // Structured validation failure — convert to user-friendly grouped message.
+          // This is a last-resort path: preview should already have marked invalid
+          // rows as 'error' before the user reaches execute.
+          flowError = buildValidationFlowError(err.validationErrors)
+        } else {
+          flowError = {
+            type: err instanceof Error && err.name === 'AbortError' ? 'network' : 'server',
+            message: err instanceof Error ? err.message : 'Import failed. Please try again.',
+          }
         }
+
         flow.setError(flowError)
         flow.goTo('error')
       }
@@ -189,6 +201,13 @@ export function ImportSheet({ open, onClose }: ImportSheetProps) {
           <div className={styles.stepContent}>
             <div className={styles.errorStep}>
               <p className={styles.errorMessage}>{flow.error?.message ?? 'Something went wrong.'}</p>
+              {/* For validation errors with multiple distinct groups, show a
+                  compact hint to go back and fix the highlighted rows. */}
+              {flow.error?.type === 'validation' && (
+                <p className={styles.errorHint}>
+                  Go back to preview — invalid rows are highlighted in red and can be removed before importing.
+                </p>
+              )}
               <div className={styles.errorActions}>
                 <button
                   type="button"

@@ -4,11 +4,32 @@ import { tokenStore } from '../lib/tokenStore'
 // In production it must be the backend root URL (no trailing slash), e.g. https://api.example.com
 const BASE = `${import.meta.env.VITE_API_URL ?? ''}/api`
 
+/**
+ * A single flattened validation error from the backend.
+ * Mirrors `FlatValidationError` in `validation-exception.factory.ts`.
+ */
+export interface ValidationErrorDetail {
+  /** Dot/bracket path from the request root. Example: "words[3].word" */
+  path: string
+  /** class-validator constraint name. Example: "maxLength", "isUUID" */
+  constraint: string
+  /** Raw validator message — for logging/debugging, never shown directly in UI. */
+  message: string
+}
+
 export class ApiError extends Error {
   status: number
-  constructor(status: number, message: string) {
+  /**
+   * Structured validation details present on HTTP 400 responses from
+   * endpoints that use the custom `validationExceptionFactory`.
+   * Undefined for all other error types.
+   */
+  validationErrors?: ValidationErrorDetail[]
+
+  constructor(status: number, message: string, validationErrors?: ValidationErrorDetail[]) {
     super(message)
     this.status = status
+    this.validationErrors = validationErrors
   }
 }
 
@@ -129,7 +150,12 @@ async function request<T>(path: string, init: RequestInit = {}, isRetry = false)
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
-    throw new ApiError(res.status, body.message ?? res.statusText)
+    // Extract structured validation details when present (HTTP 400 from
+    // validationExceptionFactory). Falls back to generic message for all other errors.
+    const message = Array.isArray(body.message)
+      ? body.message.join(', ')
+      : (body.message ?? res.statusText)
+    throw new ApiError(res.status, message, body.validationErrors)
   }
 
   if (res.status === 204) return undefined as T
