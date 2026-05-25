@@ -15,6 +15,12 @@ interface Props {
   /** word detail heading element ID — for aria-labelledby */
   labelId: string
   children: ReactNode
+  /**
+   * Changes when the displayed word changes (e.g. prev/next navigation).
+   * Used to reset scroll position so the new word's header is always visible.
+   * Mirrors the same prop on SidePanel.
+   */
+  contentKey?: string | null
   /** Whether prev navigation is available */
   canNavigatePrev?: boolean
   /** Whether next navigation is available */
@@ -47,14 +53,17 @@ export function BottomSheet({
   onClose,
   labelId,
   children,
+  contentKey,
   canNavigatePrev = false,
   canNavigateNext = false,
   onNavigatePrev,
   onNavigateNext,
   navLabel,
 }: Props) {
-  const sheetRef = useRef<HTMLDivElement>(null)
+  const sheetRef  = useRef<HTMLDivElement>(null)
+  const bodyRef   = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<Element | null>(null)
+  const prevContentKey = useRef(contentKey)
   const [isExiting, setIsExiting] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
 
@@ -86,6 +95,21 @@ export function BottomSheet({
     })
     return () => cancelAnimationFrame(id)
   }, [isOpen, isExiting])
+
+  // ── Scroll-to-top on word change ──────────────────────────────────────────
+  // When the user navigates prev/next, isOpen stays true but the word changes.
+  // Without this reset the .body div retains its previous scroll position and
+  // the header of the new word is hidden below the fold.
+  // Mirrors the identical logic in SidePanel.tsx.
+  useEffect(() => {
+    if (!isOpen) return
+    if (contentKey !== prevContentKey.current) {
+      prevContentKey.current = contentKey
+      if (bodyRef.current) {
+        bodyRef.current.scrollTop = 0
+      }
+    }
+  }, [contentKey, isOpen])
 
   // ── Close handler: animate out, then call onClose ────────────────────────
   const handleClose = useCallback(() => {
@@ -228,7 +252,7 @@ export function BottomSheet({
         </div>
 
         {/* Scrollable content */}
-        <div className={styles.body}>
+        <div ref={bodyRef} className={styles.body}>
           {children}
         </div>
 

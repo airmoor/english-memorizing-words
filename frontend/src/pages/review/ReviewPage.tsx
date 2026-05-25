@@ -61,9 +61,12 @@ export function ReviewPage() {
     queryFn: () => getNextCard(boardId),
   })
 
+  // Progress is board-scoped when boardId is present so that counts shown in
+  // the header and summary ("N of M reviewed") reflect only the board's queue,
+  // not the entire global queue.
   const { data: progress } = useQuery({
-    queryKey: ['progress'],
-    queryFn: getProgress,
+    queryKey: ['progress', { boardId }],
+    queryFn: () => getProgress(boardId),
     staleTime: 30_000,
   })
 

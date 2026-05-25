@@ -206,6 +206,7 @@ export function WordDetailContainer({ children, onSave, onRemove, context = 'voc
             isOpen={state.isOpen}
             onClose={actions.close}
             labelId={headingId}
+            contentKey={state.activeWordId}
             canNavigatePrev={canNavigatePrev}
             canNavigateNext={canNavigateNext}
             onNavigatePrev={actions.navigatePrev}

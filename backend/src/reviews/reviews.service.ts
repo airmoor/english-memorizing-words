@@ -119,8 +119,66 @@ export class ReviewsService {
   ) {}
 
   // ── GET /reviews/progress ───────────────────────────────────────────────
+  //
+  // When boardId is provided, due/total/reviewedToday/nextReviewDate are
+  // scoped to that board's card set. Streak is always global (it measures
+  // the user's daily review habit, not a per-board metric).
 
-  async getProgress(userId: string): Promise<ReviewProgressDto> {
+  async getProgress(userId: string, boardId?: string): Promise<ReviewProgressDto> {
+    if (boardId) {
+      // Board-scoped: JOIN with card_boards to restrict counts to one board.
+      const [[due], [total], [reviewed], reviewDays, [nextRow]] = await Promise.all([
+        this.dataSource.query<[{ count: string }]>(
+          `SELECT COUNT(*) AS count
+           FROM cards c
+           JOIN card_boards cb ON cb.card_id = c.id AND cb.board_id = $2
+           WHERE c.user_id = $1 AND c.next_review <= NOW()`,
+          [userId, boardId],
+        ),
+        this.dataSource.query<[{ count: string }]>(
+          `SELECT COUNT(*) AS count
+           FROM cards c
+           JOIN card_boards cb ON cb.card_id = c.id AND cb.board_id = $2
+           WHERE c.user_id = $1`,
+          [userId, boardId],
+        ),
+        this.dataSource.query<[{ count: string }]>(
+          `SELECT COUNT(*) AS count
+           FROM review_logs rl
+           JOIN cards c ON c.id = rl.card_id
+           JOIN card_boards cb ON cb.card_id = c.id AND cb.board_id = $2
+           WHERE c.user_id = $1
+             AND rl.reviewed_at::date = CURRENT_DATE`,
+          [userId, boardId],
+        ),
+        // Streak is global — same query regardless of board scope.
+        this.dataSource.query<{ day: string }[]>(
+          `SELECT DISTINCT rl.reviewed_at::date AS day
+           FROM review_logs rl
+           JOIN cards c ON c.id = rl.card_id
+           WHERE c.user_id = $1
+           ORDER BY day DESC`,
+          [userId],
+        ),
+        this.dataSource.query<[{ next_date: string | null }]>(
+          `SELECT MIN(c.next_review)::text AS next_date
+           FROM cards c
+           JOIN card_boards cb ON cb.card_id = c.id AND cb.board_id = $2
+           WHERE c.user_id = $1 AND c.next_review > NOW()`,
+          [userId, boardId],
+        ),
+      ]);
+
+      return {
+        dueToday: Number(due.count),
+        total: Number(total.count),
+        reviewedToday: Number(reviewed.count),
+        streak: computeStreak(reviewDays.map((r) => r.day)),
+        nextReviewDate: nextRow?.next_date ?? null,
+      };
+    }
+
+    // Global progress (no board filter)
     const [[due], [total], [reviewed], reviewDays, [nextRow]] = await Promise.all([
       this.dataSource.query<[{ count: string }]>(
         `SELECT COUNT(*) AS count FROM cards

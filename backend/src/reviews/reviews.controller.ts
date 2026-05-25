@@ -13,10 +13,11 @@ import {
   ApiBearerAuth,
   ApiOperation,
   ApiProperty,
+  ApiPropertyOptional,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { IsIn } from 'class-validator';
+import { IsIn, IsOptional, IsUUID } from 'class-validator';
 import { AuthUser, CurrentUser } from '../common/decorators/current-user.decorator';
 import {
   CardAnswerDto,
@@ -33,6 +34,13 @@ export class ReviewRatingDto {
   rating: 'again' | 'hard' | 'good' | 'easy';
 }
 
+export class ReviewProgressQueryDto {
+  @IsOptional()
+  @IsUUID()
+  @ApiPropertyOptional({ description: 'Scope progress counts to a specific board' })
+  boardId?: string;
+}
+
 @ApiTags('reviews')
 @ApiBearerAuth()
 @Controller('reviews')
@@ -40,11 +48,17 @@ export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
   @Get('progress')
-  @ApiOperation({ summary: 'Get daily review progress for the authenticated user' })
+  @ApiOperation({
+    summary: 'Get daily review progress for the authenticated user',
+    description: 'Pass boardId to scope due/reviewedToday/total/nextReviewDate to that board. Streak is always global.',
+  })
   @ApiResponse({ status: 200, description: 'Progress counts', type: ReviewProgressDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  getProgress(@CurrentUser() user: AuthUser): Promise<ReviewProgressDto> {
-    return this.reviewsService.getProgress(user.id);
+  getProgress(
+    @CurrentUser() user: AuthUser,
+    @Query() query: ReviewProgressQueryDto,
+  ): Promise<ReviewProgressDto> {
+    return this.reviewsService.getProgress(user.id, query.boardId);
   }
 
   @Get('next')
