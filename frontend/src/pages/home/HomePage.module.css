@@ -54,6 +54,42 @@
   gap: var(--space-xs);
 }
 
+/* ── Boards skeleton ──────────────────────────────────────────────────────── */
+
+.skeletonBoards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.skeletonBoardsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.skeletonBoardsRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.skeletonBoardsRow:first-of-type {
+  border-top: none;
+}
+
+.skeletonBoardsDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-border);
+  animation: skeletonPulse 1.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
 /* ── Content entrance ─────────────────────────────────────────────────────── */
 
 @keyframes contentEnter {

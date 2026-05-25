@@ -31,6 +31,26 @@ function HomePageSkeleton() {
         </Card>
       </DashboardCell>
 
+      {/* Boards — same position as the loaded boards card */}
+      {featureFlags.boardsTags && (
+        <DashboardCell span="full">
+          <Card variant="floating" padding="lg">
+            <div className={styles.skeletonBoards}>
+              <div className={styles.skeletonBoardsHeader}>
+                <div className={styles.skeletonLine} style={{ width: 92, height: 13 }} />
+              </div>
+              {([88, 112, 72, 96] as const).map((w, i) => (
+                <div key={i} className={styles.skeletonBoardsRow}>
+                  <div className={styles.skeletonBoardsDot} />
+                  <div className={styles.skeletonLine} style={{ width: w, height: 13, flexShrink: 0 }} />
+                  <div className={styles.skeletonLine} style={{ width: 44, height: 11, marginLeft: 'auto' }} />
+                </div>
+              ))}
+            </div>
+          </Card>
+        </DashboardCell>
+      )}
+
       {/* Stats */}
       <DashboardCell span="auto">
         <div className={styles.stats}>
@@ -71,7 +91,7 @@ export function HomePage() {
 
   const progressQuery = useQuery({
     queryKey: ['progress'],
-    queryFn: getProgress,
+    queryFn: () => getProgress(),
     staleTime: 30_000,
   })
 
