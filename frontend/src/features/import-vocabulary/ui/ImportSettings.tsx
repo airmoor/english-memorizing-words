@@ -46,15 +46,13 @@ export function ImportSettings({ settings, onChange }: ImportSettingsProps) {
             </option>
           ))}
         </select>
-        {settings.boardId ? (
-          <p className={styles.hintWarning}>
-            Board column in file will be ignored — all words go to the selected board.
-          </p>
-        ) : (
-          <p className={styles.hint}>
-            Board column used per row (CSV only). Select a board above to override.
-          </p>
-        )}
+        {/* Always rendered (not conditional) so the field height stays stable.
+            Background + color transition when the selection changes. */}
+        <p className={settings.boardId ? styles.hintWarning : styles.hint}>
+          {settings.boardId
+            ? 'Board column in file will be ignored — all words go to the selected board.'
+            : 'Board column used per row (CSV only). Select a board above to override.'}
+        </p>
       </div>
 
       {/* ── Duplicate mode ───────────────────────────────────────────── */}

@@ -28,7 +28,6 @@ export function ImportUploader({ onParsed, onError }: ImportUploaderProps) {
   const [inlineError, setInlineError] = useState<string | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const handleInlineError = useCallback(
     (message: string) => {
@@ -68,25 +67,38 @@ export function ImportUploader({ onParsed, onError }: ImportUploaderProps) {
     [onParsed, handleInlineError],
   )
 
-  // ── Paste textarea with 200ms debounce ────────────────────────────────────
+  // ── Paste textarea — update state only, no auto-parse ────────────────────
+  // Parsing happens only when the user explicitly clicks "Preview Import"
+  // or presses Cmd/Ctrl+Enter. File upload still auto-proceeds (intentional action).
 
   const handlePasteChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const value = e.target.value
-      setPasteValue(value)
+      setPasteValue(e.target.value)
       setInlineError(null)
-
-      if (debounceTimer.current) clearTimeout(debounceTimer.current)
-      debounceTimer.current = setTimeout(() => {
-        if (value.trim()) {
-          void parseAndEmit(value)
-        }
-      }, 200)
     },
-    [parseAndEmit],
+    [],
   )
 
-  // ── File reading ──────────────────────────────────────────────────────────
+  // Cmd/Ctrl+Enter triggers preview from anywhere in the textarea
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault()
+        if (pasteValue.trim()) {
+          void parseAndEmit(pasteValue)
+        }
+      }
+    },
+    [pasteValue, parseAndEmit],
+  )
+
+  const handlePreviewImport = useCallback(() => {
+    if (pasteValue.trim()) {
+      void parseAndEmit(pasteValue)
+    }
+  }, [pasteValue, parseAndEmit])
+
+  // ── File reading — auto-proceeds on select/drop ───────────────────────────
 
   const processFile = useCallback(
     (file: File) => {
@@ -155,6 +167,8 @@ export function ImportUploader({ onParsed, onError }: ImportUploaderProps) {
     [processFile],
   )
 
+  const canPreview = pasteValue.trim().length > 0
+
   return (
     <div className={styles.uploader}>
       <div className={styles.header}>
@@ -170,6 +184,7 @@ export function ImportUploader({ onParsed, onError }: ImportUploaderProps) {
         placeholder={'apple\nbanana\nephemeral\n…'}
         value={pasteValue}
         onChange={handlePasteChange}
+        onKeyDown={handleKeyDown}
         rows={8}
         aria-label="Paste words to import"
         spellCheck={false}
@@ -212,6 +227,24 @@ export function ImportUploader({ onParsed, onError }: ImportUploaderProps) {
           {inlineError}
         </p>
       )}
+
+      {/* ── Primary CTA ──────────────────────────────────────────────── */}
+      <div className={styles.footer}>
+        <button
+          type="button"
+          className={styles.previewBtn}
+          onClick={handlePreviewImport}
+          disabled={!canPreview}
+          aria-label="Parse and preview the pasted word list"
+        >
+          Preview Import
+        </button>
+        {canPreview && (
+          <p className={styles.shortcutHint} aria-hidden="true">
+            ⌘↩ to preview
+          </p>
+        )}
+      </div>
     </div>
   )
 }

@@ -1,7 +1,10 @@
 .preview {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
+  /* min-height: 0 is critical — overrides the implicit min-height: auto on
+     flex children so .tableWrapper can actually shrink and scroll. */
+  min-height: 0;
 }
 
 /* ── Header ──────────────────────────────────────────────────────────────── */
@@ -293,13 +296,10 @@
 /* ── Mobile layout overrides ─────────────────────────────────────────────── */
 
 @media (max-width: 1023px) {
-  .preview {
-    /* Take full viewport height on mobile */
-    min-height: 100dvh;
-  }
-
+  /* On mobile the BottomSheet drives the height — flex: 1 is sufficient.
+     The old min-height: 100dvh is removed because BottomSheet already
+     sizes itself; forcing 100dvh on the inner content caused scroll issues. */
   .tableWrapper {
-    /* Allow table to grow and push footer to bottom */
     flex: 1 1 auto;
   }
 }

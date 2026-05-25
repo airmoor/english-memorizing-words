@@ -34,8 +34,14 @@
     0 16px 48px rgba(0, 0, 0, 0.45),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 
-  width: min(480px, calc(100vw - 40px));
-  max-height: min(80vh, 660px);
+  /*
+   * Stable import modal dimensions — wide enough for the preview table,
+   * tall enough that short steps (upload, complete, error) don't shrink
+   * the modal. min-height prevents layout jumps between steps.
+   */
+  width: clamp(320px, 90vw, 920px);
+  max-height: min(90vh, 900px);
+  min-height: min(650px, 85vh);
   display: flex;
   flex-direction: column;
   overflow: hidden;

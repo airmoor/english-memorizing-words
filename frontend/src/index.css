@@ -60,6 +60,10 @@
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
+  /* Text selection — high-contrast accent highlight visible on all surfaces */
+  --selection-bg:   rgba(99, 102, 241, 0.28);
+  --selection-text: inherit;
+
   /* Animated gradient palette — aurora accents (light/standard defaults) */
   --gradient-a:    #2dd4bf;
   --gradient-b:    #a78bfa;
@@ -104,6 +108,8 @@
   --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.35);
   --shadow-md: 0 6px 28px rgba(0, 0, 0, 0.45);
   --shadow-lg: 0 14px 48px rgba(0, 0, 0, 0.55);
+  /* Brighter selection on dark backgrounds — accent tint at higher opacity */
+  --selection-bg: rgba(140, 150, 255, 0.38);
 }
 
 /* ── Glass surface tokens per theme ─────────────────────────────────────── */
@@ -327,10 +333,12 @@ button {
   font-family: inherit;
 }
 
-/* Selection — uses the theme accent for cohesion */
+/* Selection — high-contrast accent highlight, readable in both themes.
+   --selection-bg is defined per-theme above; defaults to an indigo tint
+   strong enough to notice but not jarring. */
 ::selection {
-  background: var(--color-accent-subtle);
-  color: var(--color-text-primary);
+  background: var(--selection-bg);
+  color: var(--selection-text);
 }
 
 /* Subtle focus ring everywhere */

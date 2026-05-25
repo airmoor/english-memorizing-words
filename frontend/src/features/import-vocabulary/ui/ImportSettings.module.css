@@ -37,20 +37,33 @@
   border-color: var(--color-accent);
 }
 
-.hint {
+/*
+ * Both hint variants share the same minimum height so the board field
+ * doesn't change size when switching between "no board selected" and
+ * "board selected" states. The padding/background difference of .hintWarning
+ * is absorbed by the reserved height.
+ */
+.hint,
+.hintWarning {
   font-size: 12px;
-  color: var(--color-text-secondary);
   margin: 0;
   line-height: 1.4;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-sm, 6px);
+  padding: 6px 10px;
+  /* Smooth color/background transition when the board selection changes */
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.hint {
+  color: var(--color-text-secondary);
+  background: transparent;
 }
 
 .hintWarning {
-  font-size: 12px;
   color: color-mix(in srgb, var(--color-warning) 80%, black);
-  margin: 0;
-  line-height: 1.4;
-  padding: 6px 10px;
-  border-radius: var(--radius-sm, 6px);
   background: color-mix(in srgb, var(--color-warning) 10%, transparent);
 }
 

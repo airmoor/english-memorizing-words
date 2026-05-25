@@ -130,69 +130,81 @@ export function ImportSheet({ open, onClose }: ImportSheetProps) {
       <div className={styles.sheet}>
         {/* ── Upload step ─────────────────────────────────────────────── */}
         {flow.step === 'upload' && (
-          <ImportUploader onParsed={handleParsed} />
+          <div className={styles.stepContent}>
+            <ImportUploader onParsed={handleParsed} />
+          </div>
         )}
 
         {/* ── Anki column mapping step ─────────────────────────────────── */}
         {flow.step === 'anki-map' && (
-          <AnkiColumnMapper
-            suggestions={ankiSuggestions}
-            rawText={rawParseInput?.text ?? ''}
-            onConfirm={(wordCol, tagsCol) => void handleAnkiConfirm(wordCol, tagsCol)}
-            onBack={() => flow.goTo('upload')}
-          />
+          <div className={styles.stepContent}>
+            <AnkiColumnMapper
+              suggestions={ankiSuggestions}
+              rawText={rawParseInput?.text ?? ''}
+              onConfirm={(wordCol, tagsCol) => void handleAnkiConfirm(wordCol, tagsCol)}
+              onBack={() => flow.goTo('upload')}
+            />
+          </div>
         )}
 
         {/* ── Preview step ─────────────────────────────────────────────── */}
         {flow.step === 'preview' && (
-          <ImportPreview
-            parsedRows={flow.parsedRows}
-            settings={settings}
-            onSettingsChange={setSettings}
-            onExecute={handleExecute}
-            onBack={() => {
-              flow.goTo('upload')
-              previewMutation.reset()
-            }}
-          />
+          <div className={styles.stepContent}>
+            <ImportPreview
+              parsedRows={flow.parsedRows}
+              settings={settings}
+              onSettingsChange={setSettings}
+              onExecute={handleExecute}
+              onBack={() => {
+                flow.goTo('upload')
+                previewMutation.reset()
+              }}
+            />
+          </div>
         )}
 
         {/* ── Importing (in-flight) step ───────────────────────────────── */}
         {flow.step === 'importing' && (
-          <div className={styles.loadingStep}>
-            <Spinner />
-            <p className={styles.loadingText}>Importing words…</p>
+          <div className={styles.stepContent}>
+            <div className={styles.loadingStep}>
+              <Spinner />
+              <p className={styles.loadingText}>Importing words…</p>
+            </div>
           </div>
         )}
 
         {/* ── Complete step ────────────────────────────────────────────── */}
         {flow.step === 'complete' && flow.result && (
-          <ImportResult
-            result={flow.result}
-            onViewVocabulary={handleViewVocabulary}
-            onImportMore={handleImportMore}
-          />
+          <div className={styles.stepContent}>
+            <ImportResult
+              result={flow.result}
+              onViewVocabulary={handleViewVocabulary}
+              onImportMore={handleImportMore}
+            />
+          </div>
         )}
 
         {/* ── Error step ───────────────────────────────────────────────── */}
         {flow.step === 'error' && (
-          <div className={styles.errorStep}>
-            <p className={styles.errorMessage}>{flow.error?.message ?? 'Something went wrong.'}</p>
-            <div className={styles.errorActions}>
-              <button
-                type="button"
-                className={styles.errorRetryBtn}
-                onClick={() => {
-                  flow.goTo('upload')
-                  executeMutation.reset()
-                  flow.reset()
-                }}
-              >
-                Try again
-              </button>
-              <button type="button" className={styles.errorCloseBtn} onClick={handleClose}>
-                Close
-              </button>
+          <div className={styles.stepContent}>
+            <div className={styles.errorStep}>
+              <p className={styles.errorMessage}>{flow.error?.message ?? 'Something went wrong.'}</p>
+              <div className={styles.errorActions}>
+                <button
+                  type="button"
+                  className={styles.errorRetryBtn}
+                  onClick={() => {
+                    flow.goTo('upload')
+                    executeMutation.reset()
+                    flow.reset()
+                  }}
+                >
+                  Try again
+                </button>
+                <button type="button" className={styles.errorCloseBtn} onClick={handleClose}>
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         )}

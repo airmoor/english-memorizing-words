@@ -1,7 +1,45 @@
+/* ── Outer shell — fills the modal panel completely ──────────────────────── */
+
 .sheet {
   display: flex;
   flex-direction: column;
-  min-height: 200px;
+  flex: 1;
+  /* min-height: 0 overrides the implicit min-height: auto on flex children
+     so that inner scrollable sections can actually shrink. */
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── Step wrapper — entrance animation, fills available space ────────────── */
+
+/*
+ * Each step mounts fresh when the flow transitions, so the CSS animation
+ * fires automatically on every step change — no JS required.
+ * exit animation is intentionally omitted (old step unmounts immediately).
+ */
+.stepContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  animation: stepEnter 0.18s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) both;
+}
+
+@keyframes stepEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stepContent {
+    animation: none;
+  }
 }
 
 /* ── Loading step ────────────────────────────────────────────────────────── */
@@ -12,6 +50,7 @@
   align-items: center;
   justify-content: center;
   gap: 16px;
+  flex: 1;
   padding: 48px 24px;
 }
 
@@ -27,7 +66,12 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 24px;
+  padding: 32px 24px;
+  flex: 1;
+  justify-content: center;
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .errorMessage {
