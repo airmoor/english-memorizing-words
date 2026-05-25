@@ -1,4 +1,4 @@
-import { NavLink, Link } from 'react-router-dom'
+import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useLogout } from '../../../features/auth/model/useLogout'
 import { Logo } from '../Logo/Logo'
 import { usePwaInstall } from '../../pwa/usePwaInstall'
@@ -12,8 +12,27 @@ const NAV_ITEMS: { to: string; label: string }[] = [
 ]
 
 export function AppHeader() {
-  const logout = useLogout()
+  const logout  = useLogout()
   const { canInstall, install, dismiss } = usePwaInstall()
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  const onSettings = () => {
+    if (location.pathname === '/settings') {
+      // If there's a previous entry in the session stack, go back; otherwise go home.
+      // window.history.state.idx is populated by React Router's memory/browser history.
+      const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0
+      if (idx > 0) {
+        navigate(-1)
+      } else {
+        navigate('/home')
+      }
+    } else {
+      navigate('/settings')
+    }
+  }
+
+  const isOnSettings = location.pathname === '/settings'
 
   return (
     <header className={styles.header}>
@@ -47,16 +66,14 @@ export function AppHeader() {
             </button>
           </div>
         )}
-        <NavLink
-          to="/settings"
-          className={({ isActive }) =>
-            [styles.iconButton, isActive ? styles.iconButtonActive : ''].join(' ')
-          }
-          aria-label="Settings"
-          title="Settings"
+        <button
+          onClick={onSettings}
+          className={[styles.iconButton, isOnSettings ? styles.iconButtonActive : ''].join(' ')}
+          aria-label={isOnSettings ? 'Go back' : 'Settings'}
+          title={isOnSettings ? 'Go back' : 'Settings'}
         >
           <SettingsIcon />
-        </NavLink>
+        </button>
         <button onClick={logout} className={styles.logout}>
           Log out
         </button>

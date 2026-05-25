@@ -16,9 +16,13 @@
 /* ── Split grid — active while panel is open ────────────────────────────── */
 .pageWithPanel {
   display: grid;
-  /* List: fixed 420px. Panel: fills remaining space (1fr). */
-  grid-template-columns: 420px 1fr;
-  gap: var(--space-xxl); /* 48px — intentionally larger than before */
+  /*
+   * List: 380px fixed. Panel: fills remaining space with 1fr.
+   * At the xl container (1280px) with sidebar, the panel gets ~560px —
+   * comfortably wide for dictionary content without crushing the list.
+   */
+  grid-template-columns: 380px 1fr;
+  gap: var(--space-xxl); /* 48px — editorial gap */
   align-items: start;
 }
 

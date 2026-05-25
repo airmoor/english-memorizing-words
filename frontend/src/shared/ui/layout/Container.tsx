@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import styles from './Container.module.css'
 
-export type ContainerWidth = 'narrow' | 'default' | 'wide'
+export type ContainerWidth = 'narrow' | 'default' | 'wide' | 'xl'
 
 interface Props {
   children: ReactNode

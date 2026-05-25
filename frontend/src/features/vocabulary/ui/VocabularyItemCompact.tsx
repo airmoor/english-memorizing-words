@@ -29,13 +29,20 @@ function TrashIcon() {
  * Clicking the row opens the word detail panel.
  */
 export function VocabularyItemCompact({ item, onRemove, sourceList }: Props) {
-  const { open, activeWordId } = useWordDetail()
+  const { open, close, activeWordId } = useWordDetail()
   const isActive = activeWordId === item.wordId
   const [confirmOpen, setConfirmOpen] = useState(false)
 
   const state = getCardState(item)
 
-  const handleOpen = () => open(item.wordId, sourceList)
+  // Clicking an already-open card toggles it closed; otherwise opens it
+  const handleOpen = () => {
+    if (isActive) {
+      close()
+    } else {
+      open(item.wordId, sourceList)
+    }
+  }
 
   const handleRemoveClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -52,7 +59,7 @@ export function VocabularyItemCompact({ item, onRemove, sourceList }: Props) {
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpen() }
         }}
-        aria-label={`Open detail for ${item.wordText}`}
+        aria-label={isActive ? `Close detail for ${item.wordText}` : `Open detail for ${item.wordText}`}
         aria-pressed={isActive}
       >
         {/* State dot */}

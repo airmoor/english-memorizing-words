@@ -1,5 +1,5 @@
 import { useCallback, useState, useEffect, useRef } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { Text } from '../../shared/ui/Typography/Typography'
 import { Container } from '../../shared/ui/layout/Container'
 import { PageLayout } from '../../shared/ui/layout/PageLayout'
@@ -9,7 +9,6 @@ import { useWordDetailUrl } from '../../shared/ui/WordDetail/useWordDetailUrl'
 import { VocabularyList } from '../../features/vocabulary/ui/VocabularyList'
 import { VocabularyToolbar } from '../../features/vocabulary/ui/VocabularyToolbar'
 import { VocabularyFilterBar } from '../../features/vocabulary/ui/VocabularyFilterBar'
-import { BoardReviewBanner } from '../../features/vocabulary/ui/BoardReviewBanner'
 import { VocabularyBoardsSidebar } from '../../features/boards/ui/VocabularyBoardsSidebar'
 import { MobileBoardsSelector } from '../../features/boards/ui/MobileBoardsSelector'
 import { useVocabularyInfinite } from '../../features/vocabulary/model/useVocabularyInfinite'
@@ -148,6 +147,7 @@ function VocabularyPageContent({
 export function VocabularyPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [viewMode, setViewMode]         = useViewMode()
+  const navigate                        = useNavigate()
 
   // ── URL-backed filter state ───────────────────────────────────────────────
 
@@ -325,6 +325,18 @@ export function VocabularyPage() {
     if (inputValue) handleQueryChange('')
   }, [apiFilters, setApiFilter, activeFilters, handleFilterToggle, inputValue, handleQueryChange])
 
+  // ── Review navigation ─────────────────────────────────────────────────────
+
+  const handleReview = useCallback(() => {
+    if (urlBoard) {
+      const params = new URLSearchParams({ boardId: urlBoard })
+      if (activeBoard?.name) params.set('boardName', activeBoard.name)
+      navigate(`/review?${params.toString()}`)
+    } else {
+      navigate('/review')
+    }
+  }, [urlBoard, activeBoard, navigate])
+
   // ── Page title context ────────────────────────────────────────────────────
 
   const pageTitle = activeBoard?.name ?? 'My Vocabulary'
@@ -338,7 +350,7 @@ export function VocabularyPage() {
 
   return (
     <PageLayout>
-      <Container as="main" width="wide">
+      <Container as="main" width="xl">
         {/* ── Two-column layout: sidebar (desktop) + content ──────────── */}
         <div className={[styles.pageLayout, featureFlags.boardsTags ? '' : styles.pageLayoutNoSidebar].join(' ').trim()}>
 
@@ -355,29 +367,57 @@ export function VocabularyPage() {
 
             {/* ── Page header ───────────────────────────────────────────── */}
             <div className={styles.pageHeader}>
-              <div className={styles.headingRow}>
-                <Text variant="title" as="h1" className={styles.heading}>
-                  {pageTitle}
-                </Text>
-                {/* Breadcrumb back to all — only when inside a board */}
-                {activeBoard && (
-                  <button
-                    type="button"
-                    className={styles.allVocabLink}
-                    onClick={() => handleBoardSelect(undefined)}
-                    aria-label="Back to all vocabulary"
-                  >
-                    ← All
-                  </button>
+              <div className={styles.headerRow}>
+                {/* Left: title + word count */}
+                <div className={styles.headerMain}>
+                  <div className={styles.headingRow}>
+                    <Text variant="title" as="h1" className={styles.heading}>
+                      {pageTitle}
+                    </Text>
+                    {/* Breadcrumb back to all — only when inside a board */}
+                    {activeBoard && (
+                      <button
+                        type="button"
+                        className={styles.allVocabLink}
+                        onClick={() => handleBoardSelect(undefined)}
+                        aria-label="Back to all vocabulary"
+                      >
+                        ← All
+                      </button>
+                    )}
+                  </div>
+                  {isLoading ? (
+                    <div className={styles.skeletonWordCount} aria-hidden="true" />
+                  ) : wordCountText ? (
+                    <Text variant="body" color="secondary" as="p" className={styles.wordCount}>
+                      {wordCountText}
+                    </Text>
+                  ) : null}
+                </div>
+
+                {/* Right: review action — shown when there's something to review */}
+                {!isLoading && !isError && !isEmpty && (
+                  <div className={styles.headerAction}>
+                    <button
+                      type="button"
+                      className={styles.reviewBtn}
+                      onClick={handleReview}
+                      aria-label={urlBoard
+                        ? `Start review for ${activeBoard?.name ?? 'this board'}`
+                        : 'Start vocabulary review'
+                      }
+                    >
+                      <ReviewPlayIcon />
+                      <span>
+                        {urlBoard
+                          ? `Review ${activeBoard?.name ?? 'board'}`
+                          : 'Review all'
+                        }
+                      </span>
+                    </button>
+                  </div>
                 )}
               </div>
-              {isLoading ? (
-                <div className={styles.skeletonWordCount} aria-hidden="true" />
-              ) : wordCountText ? (
-                <Text variant="body" color="secondary" as="p" className={styles.wordCount}>
-                  {wordCountText}
-                </Text>
-              ) : null}
             </div>
 
             {isLoading ? (
@@ -422,11 +462,6 @@ export function VocabularyPage() {
                   </>
                 )}
 
-                {/* Board review entry point */}
-                {featureFlags.boardsTags && urlBoard && (
-                  <BoardReviewBanner boardId={urlBoard} />
-                )}
-
                 <div className={[styles.listWrapper, isRefetching ? styles.fetching : ''].join(' ').trim()}>
                   <WordDetailProvider onRemove={remove} context="vocabulary">
                     <VocabularyPageContent
@@ -448,5 +483,22 @@ export function VocabularyPage() {
         </div>
       </Container>
     </PageLayout>
+  )
+}
+
+// ── Icons ─────────────────────────────────────────────────────────────────────
+
+function ReviewPlayIcon() {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      stroke="none"
+      aria-hidden="true"
+    >
+      <polygon points="5 3 19 12 5 21 5 3" />
+    </svg>
   )
 }

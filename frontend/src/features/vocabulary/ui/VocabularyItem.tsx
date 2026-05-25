@@ -47,13 +47,18 @@ function TrashIcon() {
  * - Active state: accent dot shown while this word is open in the panel.
  */
 export function VocabularyItem({ item, onRemove, sourceList }: Props) {
-  const { open, activeWordId } = useWordDetail()
+  const { open, close, activeWordId } = useWordDetail()
   const isActive = activeWordId === item.wordId
   const [confirmOpen, setConfirmOpen] = useState(false)
   const state = getCardState(item)
 
+  // Clicking an already-open card toggles it closed; otherwise opens it
   const handleOpen = () => {
-    open(item.wordId, sourceList)
+    if (isActive) {
+      close()
+    } else {
+      open(item.wordId, sourceList)
+    }
   }
 
   const handleRemoveClick = (e: React.MouseEvent) => {
@@ -85,7 +90,7 @@ export function VocabularyItem({ item, onRemove, sourceList }: Props) {
         <div
           role="button"
           className={styles.rowButton}
-          aria-label={`Open detail for ${item.wordText}`}
+          aria-label={isActive ? `Close detail for ${item.wordText}` : `Open detail for ${item.wordText}`}
           aria-pressed={isActive}
           tabIndex={0}
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpen() } }}

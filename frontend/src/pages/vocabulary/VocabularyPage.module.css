@@ -35,6 +35,55 @@
   margin-bottom: var(--space-xl);
 }
 
+/* Title + review action on the same baseline row */
+.headerRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+/* Left side: title block */
+.headerMain {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Right side: review action */
+.headerAction {
+  flex-shrink: 0;
+  /* Nudge down slightly to align with the title baseline */
+  padding-top: 4px;
+}
+
+/* Review button — secondary CTA, compact, premium feel */
+.reviewBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: var(--font-sm);
+  font-weight: var(--fw-medium);
+  color: var(--color-accent);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.reviewBtn:hover {
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.reviewBtn:active {
+  background: color-mix(in srgb, var(--color-accent) 18%, transparent);
+}
+
 /* Heading + "← All" breadcrumb sit on the same row */
 .headingRow {
   display: flex;
@@ -60,7 +109,6 @@
   opacity: 0.8;
   transition: opacity 0.15s;
   white-space: nowrap;
-  /* align with the bottom of the h1 text */
   align-self: flex-end;
   margin-bottom: calc(var(--space-xs) + 2px);
 }

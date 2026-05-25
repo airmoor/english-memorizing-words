@@ -83,6 +83,7 @@
   --content-width:  880px;
   --content-narrow: 640px;
   --content-wide:   1080px;
+  --content-xl:     1280px;
 
   /* ── Semantic layout tokens ─────────────────────────────────────── */
   /* Fluid horizontal page padding — replaces the old stepped breakpoint

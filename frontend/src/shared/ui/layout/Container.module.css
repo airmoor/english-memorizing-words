@@ -7,6 +7,7 @@
 .narrow  { max-width: var(--content-narrow); }
 .default { max-width: var(--content-width); }
 .wide    { max-width: var(--content-wide); }
+.xl      { max-width: var(--content-xl); }
 
 .padY {
   padding-block: var(--space-lg);
