@@ -41,7 +41,7 @@ export function NoteSection({ cardId, note }: NoteSectionProps) {
     const current = note?.body?.trim() ?? ''
     // Only save if the value actually changed
     if (trimmed !== current) {
-      mutation.mutate({ cardId, notes: trimmed })
+      mutation.mutate({ cardId, body: trimmed })
     }
   }
 

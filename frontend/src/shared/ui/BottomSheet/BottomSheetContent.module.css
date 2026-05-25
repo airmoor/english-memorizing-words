@@ -1,9 +1,16 @@
 .content {
   flex: 1;
+  /*
+   * min-height: 0 is required for overflow-y: auto to activate inside a flex
+   * column. Without it, flex items use min-height: auto (content size), which
+   * prevents the container from shrinking — scroll never kicks in.
+   */
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  /* Ensure momentum scrolling on iOS */
+  /* iOS momentum scrolling */
   -webkit-overflow-scrolling: touch;
+  /* Prevent the page behind from scrolling when this container reaches its edge */
   overscroll-behavior: contain;
   padding: var(--space-md) var(--space-md) env(safe-area-inset-bottom, 0px);
 }

@@ -1,11 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { updateCardNote } from '../api/cardNoteApi'
+import { upsertCardNote } from '../api/cardNoteApi'
 
 export function useCardNoteMutation() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ cardId, notes }: { cardId: string; notes: string }) =>
-      updateCardNote(cardId, { notes }),
+    mutationFn: ({ cardId, body }: { cardId: string; body: string }) =>
+      upsertCardNote(cardId, { body }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['vocabulary'] })
     },

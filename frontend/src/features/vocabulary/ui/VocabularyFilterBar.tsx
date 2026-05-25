@@ -358,25 +358,32 @@ export function VocabularyFilterBar({
             </div>
           </div>
 
-          {hasMoreFilters && (
-            <div className={styles.sheetClear}>
-              <button
-                type="button"
-                className={styles.sheetClearBtn}
-                onClick={() => {
-                  if (filters.reviewState === 'upcoming' || filters.reviewState === 'mastered') {
-                    onSetFilter({ reviewState: undefined })
-                  }
-                  onSetFilter({ partOfSpeech: undefined, boardId: undefined, tagIds: undefined })
-                  ADVANCED_TIME_OPTIONS.forEach((o) => {
-                    if (legacyFilters.includes(o.value)) onLegacyFilterToggle(o.value)
-                  })
-                }}
-              >
-                Clear these filters
-              </button>
-            </div>
-          )}
+          {/*
+           * The footer is ALWAYS rendered so modal height never changes after
+           * the user selects a filter. Toggling conditional rendering causes
+           * a height jump that shifts the entire modal position.
+           * Instead: reserve the space always, toggle visibility only.
+           */}
+          <div className={styles.sheetClear}>
+            <button
+              type="button"
+              className={styles.sheetClearBtn}
+              aria-hidden={!hasMoreFilters}
+              tabIndex={hasMoreFilters ? undefined : -1}
+              style={{ visibility: hasMoreFilters ? 'visible' : 'hidden' }}
+              onClick={() => {
+                if (filters.reviewState === 'upcoming' || filters.reviewState === 'mastered') {
+                  onSetFilter({ reviewState: undefined })
+                }
+                onSetFilter({ partOfSpeech: undefined, boardId: undefined, tagIds: undefined })
+                ADVANCED_TIME_OPTIONS.forEach((o) => {
+                  if (legacyFilters.includes(o.value)) onLegacyFilterToggle(o.value)
+                })
+              }}
+            >
+              Clear these filters
+            </button>
+          </div>
         </BottomSheetContent>
       </AdaptiveSheet>
     </>

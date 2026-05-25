@@ -13,7 +13,12 @@ export interface UpdateBoardDto {
   isArchived?: boolean
 }
 
-export const fetchBoards = (includeArchived = false): Promise<{ boards: Board[] }> =>
+/*
+ * GET /boards returns Board[] directly — NOT { boards: Board[] }.
+ * The previous type annotation was wrong, causing .then((r) => r.boards)
+ * to evaluate to undefined at runtime → empty list → "No boards yet."
+ */
+export const fetchBoards = (includeArchived = false): Promise<Board[]> =>
   apiClient.get(`/boards${includeArchived ? '?includeArchived=true' : ''}`)
 
 export const createBoard = (dto: CreateBoardDto): Promise<Board> =>

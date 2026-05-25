@@ -8,7 +8,12 @@
   left: 0;
   right: 0;
   z-index: var(--z-sheet, 201);
-  background: var(--color-bg);
+  /*
+   * var(--color-bg) is not defined in the design token system — it falls back
+   * to `initial` (transparent), making the sheet appear glassy/see-through.
+   * var(--color-bg-card) is the correct elevated surface token (#1c1c32 dark).
+   */
+  background: var(--color-bg-card);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   /* Shadow to separate from page content */
   box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
