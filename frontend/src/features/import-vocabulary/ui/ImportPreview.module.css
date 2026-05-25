@@ -1,0 +1,327 @@
+.preview {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.backBtn:hover {
+  color: var(--color-text-primary);
+}
+
+.title {
+  font-size: 16px;
+  font-weight: var(--fw-semibold, 600);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* ── Summary bar ─────────────────────────────────────────────────────────── */
+
+.summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 24px;
+  background: var(--color-bg-primary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.summaryItem {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.summaryItem strong {
+  color: var(--color-text-primary);
+  font-weight: var(--fw-semibold, 600);
+}
+
+.summaryError strong {
+  color: var(--color-danger);
+}
+
+/* ── Filter tabs ─────────────────────────────────────────────────────────── */
+
+.filterTabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 24px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.filterTab {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: var(--radius-full, 9999px);
+  border: 1px solid transparent;
+  background: none;
+  font-size: 12px;
+  font-weight: var(--fw-medium, 500);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.1s ease, color 0.1s ease, border-color 0.1s ease;
+}
+
+.filterTab:hover {
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+.filterTabActive {
+  background: var(--color-accent-subtle);
+  border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
+  color: var(--color-accent);
+}
+
+.tabCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--radius-full, 9999px);
+  background: color-mix(in srgb, var(--color-text-secondary) 15%, transparent);
+  font-size: 10px;
+}
+
+.tabCountError {
+  background: color-mix(in srgb, var(--color-danger) 15%, transparent);
+  color: var(--color-danger);
+}
+
+/* ── Empty filter state ──────────────────────────────────────────────────── */
+
+.emptyFilter {
+  padding: 32px 24px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* ── Settings toggle ─────────────────────────────────────────────────────── */
+
+.settingsToggle {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  font-size: 13px;
+  font-weight: var(--fw-medium, 500);
+  cursor: pointer;
+  padding: 8px 24px;
+  text-align: left;
+}
+
+.settingsToggle:hover {
+  text-decoration: underline;
+}
+
+/* ── Row table ───────────────────────────────────────────────────────────── */
+
+.tableWrapper {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tableHead {
+  display: flex;
+  align-items: center;
+  padding: 8px 24px;
+  background: var(--color-bg-primary);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.tableBody {
+  /* content-visibility: auto improves scroll performance for large lists.
+     Each row has contain-intrinsic-size set to match the fixed 44px min-height. */
+  contain: content;
+}
+
+.tableRow {
+  display: flex;
+  align-items: center;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--color-border);
+  min-height: 44px;
+  gap: 12px;
+  /* content-visibility: auto skips layout/paint for off-screen rows */
+  content-visibility: auto;
+  contain-intrinsic-size: 0 44px;
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+}
+
+.colWord {
+  flex: 1;
+  font-size: 14px;
+  color: var(--color-text-primary);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.wordText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: var(--fw-medium, 500);
+}
+
+/* ── Metadata chips ──────────────────────────────────────────────────────── */
+
+.metaChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.boardChip {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm, 6px);
+  font-size: 10px;
+  font-weight: var(--fw-medium, 500);
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  color: var(--color-accent);
+  white-space: nowrap;
+}
+
+.tagChip {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm, 6px);
+  font-size: 10px;
+  background: var(--color-bg-primary);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.tableHead .colWord {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  font-weight: var(--fw-medium, 500);
+}
+
+.colStatus {
+  flex-shrink: 0;
+  width: 120px;
+  text-align: right;
+}
+
+.tableHead .colStatus {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  font-weight: var(--fw-medium, 500);
+}
+
+/* ── Status badges ───────────────────────────────────────────────────────── */
+
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 11px;
+  font-weight: var(--fw-medium, 500);
+  white-space: nowrap;
+}
+
+.badgeValid {
+  background: color-mix(in srgb, var(--color-success) 12%, transparent);
+  color: color-mix(in srgb, var(--color-success) 80%, black);
+}
+
+.badgeDuplicate {
+  background: color-mix(in srgb, var(--color-warning) 14%, transparent);
+  color: color-mix(in srgb, var(--color-warning) 80%, black);
+}
+
+.badgeError {
+  background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+  color: var(--color-danger);
+}
+
+/* ── Footer / Import button ──────────────────────────────────────────────── */
+
+.footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
+  position: sticky;
+  bottom: 0;
+  /* env(safe-area-inset-bottom) for notched iPhones */
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+}
+
+/* ── Mobile layout overrides ─────────────────────────────────────────────── */
+
+@media (max-width: 1023px) {
+  .preview {
+    /* Take full viewport height on mobile */
+    min-height: 100dvh;
+  }
+
+  .tableWrapper {
+    /* Allow table to grow and push footer to bottom */
+    flex: 1 1 auto;
+  }
+}
+
+.importBtn {
+  width: 100%;
+  padding: 12px 20px;
+  border-radius: var(--radius-md, 8px);
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 15px;
+  font-weight: var(--fw-semibold, 600);
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.importBtn:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+}
+
+.importBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

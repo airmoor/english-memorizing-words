@@ -1,0 +1,110 @@
+.uploader {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 24px 24px;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: var(--fw-semibold, 600);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* ── Textarea ────────────────────────────────────────────────────────────── */
+
+.textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md, 8px);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.6;
+  resize: vertical;
+  min-height: 140px;
+  transition: border-color 0.15s ease;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.textarea::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 0.6;
+}
+
+/* ── Drop zone ───────────────────────────────────────────────────────────── */
+
+.dropZone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  border: 1.5px dashed var(--color-border);
+  border-radius: var(--radius-md, 8px);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.dropZoneActive {
+  border-color: var(--color-accent);
+  background: var(--color-accent-subtle);
+}
+
+.dropZoneText {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.uploadBtn {
+  padding: 7px 14px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1.5px solid var(--color-border);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-weight: var(--fw-medium, 500);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.uploadBtn:hover {
+  border-color: var(--color-accent);
+  background: var(--color-accent-subtle);
+}
+
+.hiddenInput {
+  display: none;
+}
+
+/* ── Inline error ────────────────────────────────────────────────────────── */
+
+.inlineError {
+  font-size: 13px;
+  color: var(--color-danger);
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm, 6px);
+  background: color-mix(in srgb, var(--color-danger) 8%, transparent);
+}

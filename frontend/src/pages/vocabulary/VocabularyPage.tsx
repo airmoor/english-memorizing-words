@@ -1,5 +1,6 @@
 import { useCallback, useState, useEffect, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
+import { ImportSheet } from '../../features/import-vocabulary/ui/ImportSheet'
 import { Text } from '../../shared/ui/Typography/Typography'
 import { Container } from '../../shared/ui/layout/Container'
 import { PageLayout } from '../../shared/ui/layout/PageLayout'
@@ -336,6 +337,10 @@ export function VocabularyPage() {
     if (inputValue) handleQueryChange('')
   }, [apiFilters, setApiFilter, activeFilters, handleFilterToggle, inputValue, handleQueryChange])
 
+  // ── Import sheet state ─────────────────────────────────────────────────────
+
+  const [importSheetOpen, setImportSheetOpen] = useState(false)
+
   // ── Review navigation ─────────────────────────────────────────────────────
 
   const handleReview = useCallback(() => {
@@ -406,9 +411,22 @@ export function VocabularyPage() {
                   ) : null}
                 </div>
 
-                {/* Right: review action — shown when there's something to review */}
-                {!isLoading && !isError && !isEmpty && (
-                  <div className={styles.headerAction}>
+                {/* Right: import + review actions */}
+                <div className={styles.headerAction}>
+                  {/* Import button — gated behind feature flag */}
+                  {featureFlags.vocabularyImport && (
+                    <button
+                      type="button"
+                      className={styles.importBtn}
+                      onClick={() => setImportSheetOpen(true)}
+                      aria-label="Import vocabulary"
+                    >
+                      <ImportIcon />
+                      <span>Import</span>
+                    </button>
+                  )}
+                  {/* Review button — shown when there's something to review */}
+                  {!isLoading && !isError && !isEmpty && (
                     <button
                       type="button"
                       className={styles.reviewBtn}
@@ -426,8 +444,8 @@ export function VocabularyPage() {
                         }
                       </span>
                     </button>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
 
@@ -493,6 +511,14 @@ export function VocabularyPage() {
           </div>
         </div>
       </Container>
+
+      {/* ── Import sheet ─────────────────────────────────────────────────── */}
+      {featureFlags.vocabularyImport && (
+        <ImportSheet
+          open={importSheetOpen}
+          onClose={() => setImportSheetOpen(false)}
+        />
+      )}
     </PageLayout>
   )
 }
@@ -510,6 +536,26 @@ function ReviewPlayIcon() {
       aria-hidden="true"
     >
       <polygon points="5 3 19 12 5 21 5 3" />
+    </svg>
+  )
+}
+
+function ImportIcon() {
+  return (
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" y1="15" x2="12" y2="3" />
     </svg>
   )
 }

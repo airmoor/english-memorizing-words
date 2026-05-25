@@ -14,4 +14,10 @@ export const featureFlags = {
    * Set VITE_BOARDS_TAGS_ENABLED=false to hide entirely.
    */
   boardsTags: import.meta.env.VITE_BOARDS_TAGS_ENABLED !== 'false',
+
+  /**
+   * Controls the vocabulary import feature (bulk import from TXT/CSV/Anki).
+   * Enabled by default in development. Set VITE_IMPORT_ENABLED=false to hide.
+   */
+  vocabularyImport: import.meta.env.VITE_IMPORT_ENABLED !== 'false',
 } as const

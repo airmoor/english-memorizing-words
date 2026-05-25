@@ -52,8 +52,35 @@
 /* Right side: review action */
 .headerAction {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   /* Nudge down slightly to align with the title baseline */
   padding-top: 4px;
+}
+
+/* Import button — secondary ghost, compact */
+.importBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: var(--font-sm);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.importBtn:hover {
+  background: var(--color-bg-primary);
+  border-color: var(--color-text-secondary);
+  color: var(--color-text-primary);
 }
 
 /* Review button — secondary CTA, compact, premium feel */

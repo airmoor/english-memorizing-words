@@ -17,14 +17,17 @@ import { useLogout } from '../../features/auth/model/useLogout'
 import { changePasswordApi } from '../../features/auth/api/changePassword'
 import { ManageBoardsSheet } from '../../features/boards/ui/ManageBoardsSheet'
 import { ManageTagsSheet } from '../../features/tags/ui/ManageTagsSheet'
+import { ImportSheet } from '../../features/import-vocabulary/ui/ImportSheet'
+import { featureFlags } from '../../shared/lib/featureFlags'
 import styles from './SettingsPage.module.css'
 
 export function SettingsPage() {
   const { settings, resolved, setMode, setLightVariant, setDarkVariant } = useTheme()
   const logout = useLogout()
 
-  const [boardsOpen, setBoardsOpen] = useState(false)
-  const [tagsOpen,   setTagsOpen]   = useState(false)
+  const [boardsOpen, setBoardsOpen]   = useState(false)
+  const [tagsOpen,   setTagsOpen]     = useState(false)
+  const [importOpen, setImportOpen]   = useState(false)
 
   const showLightVariants = settings.mode === 'light' || settings.mode === 'system'
   const showDarkVariants  = settings.mode === 'dark'  || settings.mode === 'system'
@@ -114,6 +117,25 @@ export function SettingsPage() {
             Currently active: <strong>{resolved}</strong>
           </Text>
 
+          {/* ── Vocabulary Import ────────────────────────────────────────── */}
+          {featureFlags.vocabularyImport && (
+            <Card padding="lg" className={styles.section}>
+              <div className={styles.sectionHeader}>
+                <Text variant="label" as="h2" className={styles.sectionTitle}>Import vocabulary</Text>
+                <Text variant="caption" color="secondary" as="p">
+                  Bulk-import words from a .txt or .csv file, or paste a word list.
+                </Text>
+              </div>
+              <button
+                type="button"
+                onClick={() => setImportOpen(true)}
+                className={styles.logoutBtn}
+              >
+                Import vocabulary
+              </button>
+            </Card>
+          )}
+
           {/* ── Boards ───────────────────────────────────────────────────── */}
           <Card padding="lg" className={styles.section}>
             <div className={styles.sectionHeader}>
@@ -184,6 +206,9 @@ export function SettingsPage() {
 
       <ManageBoardsSheet open={boardsOpen} onClose={() => setBoardsOpen(false)} />
       <ManageTagsSheet   open={tagsOpen}   onClose={() => setTagsOpen(false)}   />
+      {featureFlags.vocabularyImport && (
+        <ImportSheet open={importOpen} onClose={() => setImportOpen(false)} />
+      )}
     </PageLayout>
   )
 }

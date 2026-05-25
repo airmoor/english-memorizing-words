@@ -1,0 +1,186 @@
+.mapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.backBtn:hover {
+  color: var(--color-text-primary);
+}
+
+.title {
+  font-size: 16px;
+  font-weight: var(--fw-semibold, 600);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* ── Limitation notice ───────────────────────────────────────────────────── */
+
+.notice {
+  margin: 16px 24px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm, 6px);
+  background: var(--color-bg-primary);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  border-left: 3px solid var(--color-warning);
+}
+
+/* ── Section label ───────────────────────────────────────────────────────── */
+
+.sectionLabel {
+  font-size: 13px;
+  font-weight: var(--fw-medium, 500);
+  color: var(--color-text-primary);
+  margin: 0 24px 8px;
+}
+
+/* ── Column card grid ────────────────────────────────────────────────────── */
+
+.columnGrid {
+  display: flex;
+  gap: 12px;
+  padding: 0 24px 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.columnCard {
+  flex-shrink: 0;
+  width: 140px;
+  padding: 12px;
+  border-radius: var(--radius-md, 8px);
+  border: 1.5px solid var(--color-border);
+  background: var(--color-bg-secondary);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.columnCard:hover {
+  border-color: var(--color-accent);
+  background: var(--color-accent-subtle);
+}
+
+.columnCardSelected {
+  border-color: var(--color-accent);
+  background: var(--color-accent-subtle);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 25%, transparent);
+}
+
+.columnLabel {
+  font-size: 12px;
+  font-weight: var(--fw-semibold, 600);
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.suggestedBadge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: var(--radius-full, 9999px);
+  background: color-mix(in srgb, var(--color-success) 15%, transparent);
+  color: color-mix(in srgb, var(--color-success) 80%, black);
+  font-size: 9px;
+  font-weight: var(--fw-medium, 500);
+}
+
+.sampleValues {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sampleValue {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Tags section ────────────────────────────────────────────────────────── */
+
+.tagsSection {
+  padding: 0 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tagsSelect {
+  padding: 7px 10px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm, 6px);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  max-width: 240px;
+  cursor: pointer;
+}
+
+.tagsSelect:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.tagsHint {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+
+.footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
+  margin-top: auto;
+}
+
+.confirmBtn {
+  width: 100%;
+  padding: 12px 20px;
+  border-radius: var(--radius-md, 8px);
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 15px;
+  font-weight: var(--fw-semibold, 600);
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.confirmBtn:hover {
+  background: var(--color-accent-hover);
+}

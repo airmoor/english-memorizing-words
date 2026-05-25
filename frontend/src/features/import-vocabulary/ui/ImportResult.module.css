@@ -1,0 +1,180 @@
+.result {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ── Status header ───────────────────────────────────────────────────────── */
+
+.statusHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 24px 24px;
+  text-align: center;
+  gap: 8px;
+}
+
+.statusSuccess { background: color-mix(in srgb, var(--color-success) 8%, transparent); }
+.statusWarning { background: color-mix(in srgb, var(--color-warning) 8%, transparent); }
+.statusDanger  { background: color-mix(in srgb, var(--color-danger)  8%, transparent); }
+
+.statusIcon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.statusSuccess .statusIcon { color: var(--color-success); }
+.statusWarning .statusIcon { color: var(--color-warning); }
+.statusDanger  .statusIcon { color: var(--color-danger); }
+
+.statusTitle {
+  font-size: 18px;
+  font-weight: var(--fw-semibold, 600);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.statusSubtitle {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0;
+  max-width: 280px;
+}
+
+/* ── Counts ──────────────────────────────────────────────────────────────── */
+
+.counts {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.countItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.countValue {
+  font-size: 24px;
+  font-weight: var(--fw-semibold, 600);
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.countLabel {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.countDanger .countValue {
+  color: var(--color-danger);
+}
+
+/* ── Error section ───────────────────────────────────────────────────────── */
+
+.errorSection {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.errorToggle {
+  display: block;
+  width: 100%;
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 13px;
+  font-weight: var(--fw-medium, 500);
+  color: var(--color-danger);
+  cursor: pointer;
+}
+
+.errorToggle:hover {
+  background: color-mix(in srgb, var(--color-danger) 5%, transparent);
+}
+
+.errorList {
+  list-style: none;
+  margin: 0;
+  padding: 0 24px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.errorRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.errorWord {
+  font-weight: var(--fw-medium, 500);
+  color: var(--color-text-primary);
+  min-width: 80px;
+}
+
+.errorReason {
+  flex: 1;
+  color: var(--color-text-secondary);
+}
+
+.searchLink {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: var(--color-accent);
+  cursor: pointer;
+  padding: 2px 0;
+  white-space: nowrap;
+}
+
+.searchLink:hover {
+  text-decoration: underline;
+}
+
+/* ── Actions ─────────────────────────────────────────────────────────────── */
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 24px 24px;
+}
+
+.primaryAction {
+  padding: 12px 20px;
+  border-radius: var(--radius-md, 8px);
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 15px;
+  font-weight: var(--fw-semibold, 600);
+  border: none;
+  cursor: pointer;
+}
+
+.primaryAction:hover {
+  background: var(--color-accent-hover);
+}
+
+.secondaryAction {
+  padding: 12px 20px;
+  border-radius: var(--radius-md, 8px);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 15px;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+}
+
+.secondaryAction:hover {
+  background: var(--color-bg-primary);
+}

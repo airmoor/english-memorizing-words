@@ -17,5 +17,6 @@ import { FreeDictionaryProvider } from './providers/free-dictionary/free-diction
     MerriamProvider,
     FreeDictionaryProvider,
   ],
+  exports: [WordsService],
 })
 export class WordsModule {}
