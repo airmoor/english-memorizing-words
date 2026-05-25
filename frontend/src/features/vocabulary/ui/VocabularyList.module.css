@@ -28,7 +28,7 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-md);
-  padding: var(--space-2xl) var(--space-lg);
+  padding: var(--space-xxl) var(--space-lg);
   text-align: center;
 }
 

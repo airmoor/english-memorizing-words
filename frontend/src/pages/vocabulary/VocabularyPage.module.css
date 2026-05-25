@@ -151,3 +151,19 @@
 .contentArea {
   animation: contentEnter 0.22s var(--ease-out) both;
 }
+
+/* ── Spacing between FilterBar and the word list ──────────────────────────
+   The FilterBar ends with a border-bottom. This wrapper creates visual
+   breathing room between the chip row and the first vocabulary card.
+   --space-lg (24px) on desktop, --space-md (16px) on mobile.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.listWrapper {
+  padding-top: var(--space-lg);
+}
+
+@media (max-width: 1023px) {
+  .listWrapper {
+    padding-top: var(--space-md);
+  }
+}

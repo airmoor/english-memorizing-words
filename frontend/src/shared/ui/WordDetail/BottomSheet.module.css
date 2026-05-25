@@ -94,9 +94,17 @@
 /* ── Scrollable content area ──────────────────────────────────────────────── */
 .body {
   flex: 1;
+  /*
+   * min-height: 0 — same critical flexbox fix as SidePanel.
+   * Allows the body to shrink within the sheet's fixed height so scroll works.
+   */
+  min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+  /* iOS momentum scrolling */
   -webkit-overflow-scrolling: touch;
+  /* Explicitly allow vertical pan inside this container */
+  touch-action: pan-y;
   padding: var(--space-md) var(--space-lg) var(--space-xxl);
 }
 

@@ -341,19 +341,21 @@ export function VocabularyPage() {
                 />
               </>
             )}
-            <WordDetailProvider onRemove={remove} context="vocabulary">
-              <VocabularyPageContent
-                items={items}
-                onRemove={remove}
-                viewMode={viewMode}
-                isEmpty={isEmpty}
-                hasActiveFilters={isFiltering}
-                hasNextPage={hasNextPage}
-                isFetchingNextPage={isFetchingNextPage}
-                onLoadMore={fetchNextPage}
-                onClearFilters={handleClearAll}
-              />
-            </WordDetailProvider>
+            <div className={styles.listWrapper}>
+              <WordDetailProvider onRemove={remove} context="vocabulary">
+                <VocabularyPageContent
+                  items={items}
+                  onRemove={remove}
+                  viewMode={viewMode}
+                  isEmpty={isEmpty}
+                  hasActiveFilters={isFiltering}
+                  hasNextPage={hasNextPage}
+                  isFetchingNextPage={isFetchingNextPage}
+                  onLoadMore={fetchNextPage}
+                  onClearFilters={handleClearAll}
+                />
+              </WordDetailProvider>
+            </div>
           </div>
         )}
       </Container>

@@ -7,15 +7,23 @@
 .panel {
   /*
    * position:sticky keeps the panel visible while the list scrolls.
-   * top accounts for the AppHeader height (~60px) plus a small gap.
-   * max-height prevents it from growing beyond the viewport.
+   *
+   * top: 112px clears both sticky layers above the panel:
+   *   - AppHeader:  60px (sticky, z-index 10)
+   *   - FilterBar:  ~44px (sticky at top: 60px, z-index 9)
+   *   - Gap:         8px
+   *
+   * Without clearing the FilterBar, the panel header slides behind it
+   * when the user scrolls past the toolbar and FilterBar becomes sticky.
+   *
+   * max-height fills the remaining viewport below those two headers.
    * align-self: start is required for sticky to work inside a grid.
    * position:sticky also acts as the containing block for the absolute
    * close button — no extra position:relative needed.
    */
   position: sticky;
-  top: 68px;
-  max-height: calc(100svh - 88px);
+  top: 112px;
+  max-height: calc(100svh - 128px);
   align-self: start;
 
   display: flex;
@@ -85,11 +93,27 @@
 /* ── Scrollable content area ──────────────────────────────────────────────── */
 .body {
   flex: 1;
+  /*
+   * min-height: 0 is a critical flexbox fix.
+   * Flex items default to min-height: auto, which prevents them from shrinking
+   * below their content height. Without this, overflow-y: auto never activates
+   * because the body grows past the panel's max-height instead of scrolling.
+   */
+  min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+  /* Thin, unobtrusive scrollbar — visible enough to hint scrollability */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
   /* Extra top padding clears the absolute close button (28px + 16px spacing) */
   padding: calc(var(--space-md) + 28px + var(--space-xs)) var(--space-lg) var(--space-xxl);
 }
+
+/* WebKit scrollbar — matches scrollbar-width: thin */
+.body::-webkit-scrollbar        { width: 4px; }
+.body::-webkit-scrollbar-track  { background: transparent; }
+.body::-webkit-scrollbar-thumb  { background: var(--color-border); border-radius: 4px; }
+.body::-webkit-scrollbar-thumb:hover { background: var(--color-text-secondary); }
 
 /* ── Reduced motion ───────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {

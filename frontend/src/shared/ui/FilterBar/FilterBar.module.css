@@ -1,10 +1,12 @@
 .root {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: var(--color-bg-primary);
-  /* Subtle separator from content scrolling beneath */
-  border-bottom: 1px solid var(--color-border);
+  top: 60px;
+  z-index: 9; 
+}
+
+@media (max-width: 1023px) {
+  .root {
+    top: 52px; /* compact header height on mobile */
+  }
 }
 
 .scroll {
@@ -21,28 +23,6 @@
 
 .scroll::-webkit-scrollbar {
   display: none;
-}
-
-/* Fade edges to hint scroll affordance */
-.root::before,
-.root::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 1px; /* sit above the border */
-  width: 20px;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.root::before {
-  left: 0;
-  background: linear-gradient(to right, var(--color-bg), transparent);
-}
-
-.root::after {
-  right: 0;
-  background: linear-gradient(to left, var(--color-bg), transparent);
 }
 
 /* Clear and Sort end-caps stay visible above the fade */
