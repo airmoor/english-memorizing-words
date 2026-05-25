@@ -15,7 +15,7 @@
   gap: var(--space-xs);
   overflow-x: auto;
   overflow-y: hidden;
-  padding: var(--space-xs) var(--space-md);
+  padding: var(--space-xs);
   /* Hide scrollbar on all browsers — navigation is via swipe/drag */
   scrollbar-width: none;
   -ms-overflow-style: none;

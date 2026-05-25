@@ -32,7 +32,7 @@
 /* ── Page header ─────────────────────────────────────────────────────────── */
 
 .pageHeader {
-  margin-bottom: var(--space-xl);
+  margin-bottom: var(--space-md);
 }
 
 /* Title + review action on the same baseline row */
