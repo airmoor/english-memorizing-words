@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
+  IsIn,
   IsInt,
   IsOptional,
   IsString,
@@ -30,13 +31,46 @@ export class ImportRowDto {
 
   /**
    * 1-based line number in the original source file/paste.
-   * Echoed back in error rows for frontend highlighting.
+   * Preserved verbatim in preview and execute responses so the frontend can
+   * highlight the exact source row — accurate for CSV, Anki, and multi-section files.
    */
-  @ApiPropertyOptional({ example: 3, description: '1-based source line number; echoed in error rows' })
+  @ApiPropertyOptional({ example: 3, description: '1-based source line number; echoed in preview and error rows' })
   @IsOptional()
   @IsInt()
   @Min(1)
   lineNumber?: number;
+
+  /**
+   * Parser-assigned row status.
+   *
+   * When the frontend sends this field, the backend uses it to:
+   *   - Preserve 'duplicate_within_batch' without re-computing it (parser is
+   *     the source of truth for within-batch deduplication).
+   *   - Only overlay 'duplicate_vocabulary' on rows the parser marked 'valid'.
+   *
+   * Omitting this field falls back to the backend computing all statuses
+   * independently (backward-compatible with older clients).
+   */
+  @ApiPropertyOptional({
+    enum: ['valid', 'duplicate_within_batch', 'error'],
+    description: 'Parser-determined row status; preserves within-batch duplicate decisions',
+  })
+  @IsOptional()
+  @IsIn(['valid', 'duplicate_within_batch', 'error'])
+  parserStatus?: 'valid' | 'duplicate_within_batch' | 'error';
+
+  /**
+   * Parser-generated reason string, used when parserStatus is 'duplicate_within_batch'.
+   * Echoed back in the preview response so the UI shows the correct source line reference.
+   */
+  @ApiPropertyOptional({
+    example: 'Already in this list (line 3)',
+    description: 'Parser-generated reason; echoed in preview for duplicate rows',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  parserReason?: string;
 
   @ApiPropertyOptional({
     example: ['botany', 'lesson-1'],

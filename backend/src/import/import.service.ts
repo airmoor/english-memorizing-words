@@ -70,29 +70,50 @@ export class ImportService {
   async preview(userId: string, dto: ImportRequestDto): Promise<ImportPreviewResultDto> {
     const rows: ImportPreviewRowDto[] = [];
 
-    // Track: normalised word → line index (1-based) of first occurrence
-    const seenWords = new Map<string, number>();
+    // Normalise words, preserving parser-assigned identity fields.
+    //
+    // lineNumber: use the parser's 1-based source line (accurate for CSV, Anki, and
+    //   multi-section files that have headers). Fall back to array position only when
+    //   the client doesn't send it (backward compatibility with older payloads).
+    //
+    // parserStatus: when the parser already determined 'duplicate_within_batch', the
+    //   backend trusts that decision and does NOT re-compute it. This keeps a single
+    //   authoritative source for within-batch deduplication (the parser) and avoids
+    //   divergence between client preview display and server response.
+    const normalised: Array<{
+      text: string;
+      lineNumber: number;
+      clientRowId?: string;
+      parserStatus?: 'valid' | 'duplicate_within_batch' | 'error';
+      parserReason?: string;
+    }> = [];
 
-    // Normalise and detect within-batch duplicates
-    const normalised: Array<{ original: string; text: string; lineNumber: number }> = [];
     for (let i = 0; i < dto.words.length; i++) {
-      const original = dto.words[i].word;
-      const text = normalizeWord(original);
-      normalised.push({ original, text, lineNumber: i + 1 });
+      const row = dto.words[i];
+      normalised.push({
+        text: normalizeWord(row.word),
+        lineNumber: row.lineNumber ?? i + 1,
+        clientRowId: row.clientRowId,
+        parserStatus: row.parserStatus,
+        parserReason: row.parserReason,
+      });
     }
 
-    // Collect unique words to check against vocabulary
+    // Collect unique words for vocabulary lookup.
+    // Rows already marked 'duplicate_within_batch' by the parser are excluded:
+    // they don't need a vocabulary check (they will never be imported anyway).
     const uniqueTexts: string[] = [];
-    const firstOccurrence = new Map<string, number>();
+    const firstOccurrence = new Map<string, number>(); // word → lineNumber of first non-duplicate occurrence
 
-    for (const { text, lineNumber } of normalised) {
+    for (const { text, lineNumber, parserStatus } of normalised) {
+      if (parserStatus === 'duplicate_within_batch') continue;
       if (!firstOccurrence.has(text)) {
         firstOccurrence.set(text, lineNumber);
         uniqueTexts.push(text);
       }
     }
 
-    // Check vocabulary duplicates server-side (no dictionary calls)
+    // Check vocabulary duplicates server-side (no dictionary calls, single batch query)
     const vocabSet = await this.getExistingVocabularySet(userId, uniqueTexts);
 
     // Note truncation warning set
@@ -106,29 +127,48 @@ export class ImportService {
 
     // Build response rows
     for (let i = 0; i < normalised.length; i++) {
-      const { text, lineNumber } = normalised[i];
-      const firstLine = firstOccurrence.get(text)!;
+      const { text, lineNumber, clientRowId, parserStatus, parserReason } = normalised[i];
 
       let row: ImportPreviewRowDto;
 
-      if (firstLine !== lineNumber) {
-        // Within-batch duplicate — subsequent occurrence
+      if (parserStatus === 'duplicate_within_batch') {
+        // Parser is authoritative — preserve its determination rather than re-deriving.
+        // Echo the parser's reason verbatim so the UI shows the correct source line reference.
         row = {
           word: text,
           status: 'duplicate_within_batch',
-          reason: `Already in this list (line ${firstLine})`,
-        };
-      } else if (vocabSet.has(text)) {
-        row = {
-          word: text,
-          status: 'duplicate_vocabulary',
-          reason: 'Already in your vocabulary',
+          reason: parserReason ?? 'Already in this list',
+          clientRowId,
+          lineNumber,
         };
       } else {
-        row = { word: text, status: 'valid' };
+        // Backend determines status for rows the parser didn't mark as duplicates.
+        // This covers: valid rows, error rows, and legacy payloads with no parserStatus.
+        const firstLine = firstOccurrence.get(text)!;
+
+        if (firstLine !== lineNumber) {
+          // Within-batch duplicate detected by the backend (occurs when parserStatus is absent)
+          row = {
+            word: text,
+            status: 'duplicate_within_batch',
+            reason: `Already in this list (line ${firstLine})`,
+            clientRowId,
+            lineNumber,
+          };
+        } else if (vocabSet.has(text)) {
+          row = {
+            word: text,
+            status: 'duplicate_vocabulary',
+            reason: 'Already in your vocabulary',
+            clientRowId,
+            lineNumber,
+          };
+        } else {
+          row = { word: text, status: 'valid', clientRowId, lineNumber };
+        }
       }
 
-      // Append note truncation warning if applicable
+      // Append note truncation warning if applicable (non-destructive: appended to existing reason)
       if (noteTruncated.has(i)) {
         const existing = row.reason ? `${row.reason}. ` : '';
         row.reason = `${existing}Note truncated to ${NOTE_MAX_LENGTH} characters`;
@@ -145,6 +185,7 @@ export class ImportService {
   async execute(userId: string, dto: ImportRequestDto): Promise<ImportExecuteResultDto> {
     let imported = 0;
     let skipped = 0;
+    let duplicatesIgnored = 0; // within-batch duplicates dropped before enrichment
     const errorRows: ImportErrorRowDto[] = [];
 
     // Normalise and deduplicate within batch (first occurrence wins)
@@ -161,7 +202,7 @@ export class ImportService {
     for (const row of dto.words) {
       const word = normalizeWord(row.word);
       if (!word) continue;
-      if (seenInBatch.has(word)) continue; // skip subsequent occurrences
+      if (seenInBatch.has(word)) { duplicatesIgnored++; continue; } // first occurrence wins
       seenInBatch.add(word);
 
       const notes = row.notes
@@ -290,15 +331,24 @@ export class ImportService {
     const errors = errorRows.length;
     const status = this.deriveImportStatus(imported, errors);
 
-    return { status, imported, skipped, errors, errorRows };
+    return { status, imported, skipped, duplicatesIgnored, errors, errorRows };
   }
 
-  // ── Task 1.15: Derive ImportStatus ────────────────────────────────────────
+  // ── Derive ImportStatus ───────────────────────────────────────────────────
 
+  /**
+   * Map (imported, errors) counts to a semantic ImportStatus.
+   *
+   * 'no_changes' is distinct from 'failed': it means the request succeeded and
+   * was processed correctly, but every submitted word was already in the
+   * vocabulary (or was a duplicate) — nothing was created. 'failed' is reserved
+   * for when errors prevented any word from being imported.
+   */
   private deriveImportStatus(imported: number, errors: number): ImportStatus {
-    if (errors === 0) return 'completed';
-    if (imported > 0 && errors > 0) return 'partial_failure';
-    return 'failed';
+    if (imported > 0 && errors === 0) return 'completed';
+    if (imported > 0 && errors > 0)  return 'partial_failure';
+    if (imported === 0 && errors === 0) return 'no_changes'; // all skipped / all duplicates
+    return 'failed'; // imported === 0 && errors > 0
   }
 
   // ── DB helpers ────────────────────────────────────────────────────────────
@@ -379,10 +429,18 @@ export class ImportService {
     const normalised = name.trim().toLowerCase();
     if (!normalised) return;
 
+    // Use "DO UPDATE SET name = EXCLUDED.name" instead of the no-op
+    // "DO UPDATE SET updated_at = tags.updated_at".
+    //
+    // The previous form triggered unnecessary WAL writes and row locks on every
+    // import even when the tag already existed. Setting name to EXCLUDED.name
+    // writes the same value back, but this is the idiomatic PostgreSQL pattern
+    // for "upsert and always RETURNING id" — it avoids the two-round-trip
+    // DO NOTHING + SELECT alternative, which introduces a race window.
     const [tag] = await this.dataSource.query<{ id: string }[]>(
       `INSERT INTO tags (id, user_id, name)
        VALUES (gen_random_uuid(), $1, $2)
-       ON CONFLICT (user_id, name) DO UPDATE SET updated_at = tags.updated_at
+       ON CONFLICT (user_id, name) DO UPDATE SET name = EXCLUDED.name
        RETURNING id`,
       [userId, normalised],
     );

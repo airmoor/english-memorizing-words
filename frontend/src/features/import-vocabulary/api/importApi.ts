@@ -9,10 +9,26 @@ interface ImportRowPayload {
   tags?: string[]
   board?: string
   notes?: string
-  /** Echoed back in execute error rows for frontend row highlighting. */
+  /** Stable client-generated UUID; echoed in preview and execute error rows. */
   clientRowId?: string
-  /** Echoed back in execute error rows for frontend row highlighting. */
+  /**
+   * 1-based source line number from the parser.
+   * Echoed in preview rows and execute error rows for frontend row highlighting.
+   * Accurate for CSV, Anki, and multi-header files (not reconstructed server-side).
+   */
   lineNumber?: number
+  /**
+   * Parser-determined status for this row.
+   * Sent so the backend can preserve 'duplicate_within_batch' without re-computing it,
+   * keeping the parser as the single source of truth for within-batch deduplication.
+   */
+  parserStatus?: 'valid' | 'duplicate_within_batch' | 'error'
+  /**
+   * Parser-generated reason string.
+   * Sent alongside parserStatus so the backend can echo the exact reason
+   * (e.g. "Already in this list (line 3)") without reconstructing it.
+   */
+  parserReason?: string
 }
 
 interface ImportRequestPayload {
@@ -33,9 +49,12 @@ function buildPayload(rows: ParsedRow[], settings: ImportSettings): ImportReques
       ...(row.tags && row.tags.length > 0 ? { tags: row.tags } : {}),
       ...(row.board ? { board: row.board } : {}),
       ...(row.notes ? { notes: row.notes } : {}),
-      // Tracking fields — echoed back in error rows for row highlighting
+      // Identity fields — echoed in preview rows and execute error rows
       clientRowId: row.clientRowId,
       lineNumber: row.lineNumber,
+      // Ownership fields — parser's determination, preserved by backend
+      parserStatus: row.status === 'duplicate_vocabulary' ? 'valid' : row.status,
+      ...(row.reason ? { parserReason: row.reason } : {}),
     })),
     settings: {
       ...(settings.boardId ? { boardId: settings.boardId } : {}),

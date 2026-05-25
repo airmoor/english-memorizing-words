@@ -41,6 +41,20 @@ export class ImportExecuteResultDto {
   @ApiProperty({ example: 5, description: 'Number of words skipped (existing vocabulary, skip mode)' })
   skipped: number;
 
+  /**
+   * Number of within-batch duplicate rows that were silently removed before processing.
+   * These are rows the parser (or backend) detected as duplicates of an earlier row
+   * in the same request — only the first occurrence is processed.
+   *
+   * Included so the result summary can account for all submitted rows:
+   *   submitted = imported + skipped + duplicatesIgnored + errors
+   */
+  @ApiProperty({
+    example: 2,
+    description: 'Within-batch duplicates removed before processing; first occurrence wins',
+  })
+  duplicatesIgnored: number;
+
   @ApiProperty({ example: 0, description: 'Number of words that failed enrichment' })
   errors: number;
 

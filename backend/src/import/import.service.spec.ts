@@ -157,6 +157,7 @@ describe('ImportService', () => {
       expect(result.status).toBe('completed');
       expect(result.imported).toBe(1);
       expect(result.errors).toBe(0);
+      expect(result.duplicatesIgnored).toBe(0);
     });
 
     it('returns "partial_failure" when some words fail enrichment', async () => {
@@ -181,6 +182,23 @@ describe('ImportService', () => {
       expect(result.status).toBe('failed');
       expect(result.imported).toBe(0);
       expect(result.errors).toBe(2);
+    });
+
+    it('returns "no_changes" when all words are skipped (all existing vocabulary, skip mode)', async () => {
+      // All words already in vocab → all skipped, no errors
+      dataSource.query.mockImplementation((sql: string) => {
+        if (sql.includes('SELECT w.text')) return Promise.resolve([{ text: 'apple' }, { text: 'banana' }]);
+        return Promise.resolve([]);
+      });
+
+      const dto = makeDto([makeRow('apple'), makeRow('banana')], { duplicateMode: 'skip' });
+      const result = await service.execute('user-1', dto);
+
+      expect(result.status).toBe('no_changes');
+      expect(result.imported).toBe(0);
+      expect(result.skipped).toBe(2);
+      expect(result.errors).toBe(0);
+      // no_changes means the request succeeded — no dictionary errors occurred
     });
   });
 
@@ -242,8 +260,10 @@ describe('ImportService', () => {
       const dto = makeDto([makeRow('apple'), makeRow('apple'), makeRow('apple')]);
       const result = await service.execute('user-1', dto);
 
+      // Only the first occurrence is enriched; the other two are counted in duplicatesIgnored
       expect(vocabularyService.saveWord).toHaveBeenCalledTimes(1);
       expect(result.imported).toBe(1);
+      expect(result.duplicatesIgnored).toBe(2);
     });
   });
 

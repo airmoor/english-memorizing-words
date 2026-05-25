@@ -3,16 +3,22 @@
 /**
  * Overall outcome of an import execution.
  *
- * Sync MVP only returns: completed | partial_failure | failed.
- * 'queued' and 'processing' are reserved for a future async job mode
- * where the backend queues enrichment work and the client polls for status.
+ * Sync MVP returns one of: completed | partial_failure | no_changes | failed.
+ * 'queued' and 'processing' are reserved for a future async job mode where the
+ * backend queues enrichment work and the client polls for status updates.
+ *
+ * Key distinction between no_changes and failed:
+ *   no_changes — request succeeded; every word was already in vocabulary or was a
+ *                within-batch duplicate. Nothing was imported, but nothing went wrong.
+ *   failed     — request processed; errors prevented any word from being imported.
  */
 export type ImportStatus =
-  | 'queued'           // reserved: job received, enrichment not yet started
-  | 'processing'       // reserved: enrichment in progress
+  | 'queued'           // reserved: future async mode
+  | 'processing'       // reserved: future async mode
   | 'completed'        // all submitted words successfully imported
   | 'partial_failure'  // some imported, some failed enrichment
-  | 'failed'           // nothing imported (all duplicates, all failed, or error)
+  | 'no_changes'       // succeeded — all rows were duplicates/skipped; nothing created
+  | 'failed'           // nothing imported due to enrichment errors
 
 // ── ParsedRow — client-side representation ────────────────────────────────────
 
@@ -63,6 +69,17 @@ export interface ImportPreviewRow {
   word: string
   status: 'valid' | 'duplicate_vocabulary' | 'duplicate_within_batch' | 'error'
   reason?: string
+  /**
+   * Echoed from the request payload — matches the ParsedRow.clientRowId that was sent.
+   * Use this to correlate server preview results back to local ParsedRow[] without
+   * relying on fragile array-index matching.
+   */
+  clientRowId?: string
+  /**
+   * Echoed 1-based source line number from the request payload.
+   * Preserved as-is from the parser (accurate for CSV, Anki, multi-header files).
+   */
+  lineNumber?: number
 }
 
 export interface ImportPreviewResult {
@@ -82,6 +99,12 @@ export interface ImportExecuteResult {
   status: ImportStatus
   imported: number
   skipped: number
+  /**
+   * Within-batch duplicates removed before processing — first occurrence wins.
+   * Included so the result summary can fully account for all submitted rows:
+   *   submitted = imported + skipped + duplicatesIgnored + errors
+   */
+  duplicatesIgnored: number
   errors: number
   errorRows: ImportErrorRow[]
 }
