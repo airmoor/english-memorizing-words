@@ -10,18 +10,18 @@ import { VocabularyList } from '../../features/vocabulary/ui/VocabularyList'
 import { VocabularyToolbar } from '../../features/vocabulary/ui/VocabularyToolbar'
 import { VocabularyFilterBar } from '../../features/vocabulary/ui/VocabularyFilterBar'
 import { BoardReviewBanner } from '../../features/vocabulary/ui/BoardReviewBanner'
+import { VocabularyBoardsSidebar } from '../../features/boards/ui/VocabularyBoardsSidebar'
+import { MobileBoardsSelector } from '../../features/boards/ui/MobileBoardsSelector'
 import { useVocabularyInfinite } from '../../features/vocabulary/model/useVocabularyInfinite'
 import { useVocabularyFilters } from '../../features/vocabulary/model/useVocabularyFilters'
+import { useBoardsQuery } from '../../features/boards/model/useBoardsQuery'
+import { featureFlags } from '../../shared/lib/featureFlags'
 import type { VocabularyFilter, SortOption } from '../../features/vocabulary/model/cardState'
 import type { ViewMode } from '../../features/vocabulary/ui/VocabularyToolbar'
 import type { VocabularyWord } from '../../entities/vocabulary/model/types'
-import { featureFlags } from '../../shared/lib/featureFlags'
 import styles from './VocabularyPage.module.css'
 
 // ── Skeleton loading placeholders ─────────────────────────────────────────────
-// Pre-allocate the spatial footprint of toolbar + list so the page layout
-// doesn't reflow when data arrives. Skeleton dimensions closely match the
-// real components so the swap is a smooth fade rather than a jump.
 
 function ToolbarSkeleton() {
   return (
@@ -32,7 +32,6 @@ function ToolbarSkeleton() {
         <div className={styles.skeletonControl} style={{ width: 74 }} />
       </div>
       <div className={styles.skeletonChipRow}>
-        {/* Primary chips: Due, New, Difficult + board/tag placeholders */}
         <div className={styles.skeletonChip} style={{ width: 48 }} />
         <div className={styles.skeletonChip} style={{ width: 44 }} />
         <div className={styles.skeletonChip} style={{ width: 76 }} />
@@ -45,8 +44,6 @@ function ToolbarSkeleton() {
   )
 }
 
-// Skeleton card data — (wordWidth, defWidths[])
-// Varying proportions give a natural look without randomness.
 const SKELETON_CARDS: [number, number[]][] = [
   [130, [1, 0.82]],
   [96,  [1]],
@@ -97,7 +94,7 @@ function useViewMode(): [ViewMode, (m: ViewMode) => void] {
   return [mode, set]
 }
 
-// ── Inner component — inside WordDetailProvider, has access to useWordDetail ──
+// ── Inner component — inside WordDetailProvider ───────────────────────────────
 
 interface ContentProps {
   items: VocabularyWord[]
@@ -152,20 +149,12 @@ export function VocabularyPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [viewMode, setViewMode]         = useViewMode()
 
-  // ── URL-backed filter state (filters + sort sync immediately) ─────────────
+  // ── URL-backed filter state ───────────────────────────────────────────────
 
   const activeFilters = (searchParams.get('f') ?? '').split(',').filter(Boolean) as VocabularyFilter[]
   const sort          = (searchParams.get('s') ?? 'newest') as SortOption
 
-  // ── Search input — decoupled from URL ─────────────────────────────────────
-  //
-  // Three distinct layers:
-  //   inputValue     — immediate, controls the <input> element
-  //   debouncedQuery — 300 ms delayed, drives the API call and URL ?q= param
-  //   URL ?q=        — output of debouncedQuery (never read back into inputValue)
-  //
-  // This ensures typing always feels native and instant while network requests
-  // remain debounced. Same pattern as SearchPage.
+  // ── Search input ──────────────────────────────────────────────────────────
 
   const [inputValue, setInputValue]         = useState(() => searchParams.get('q') ?? '')
   const [debouncedQuery, setDebouncedQuery] = useState(() => searchParams.get('q') ?? '')
@@ -177,11 +166,8 @@ export function VocabularyPage() {
 
   const handleQueryChange = useCallback((q: string) => {
     setInputValue(q)
-
     if (debounceRef.current) clearTimeout(debounceRef.current)
-
     if (q === '') {
-      // Instant clear — no debounce when emptying the field
       setDebouncedQuery('')
       setSearchParams((prev) => {
         const next = new URLSearchParams(prev)
@@ -190,7 +176,6 @@ export function VocabularyPage() {
       }, { replace: true })
       return
     }
-
     debounceRef.current = setTimeout(() => {
       const trimmed = q.trim()
       setDebouncedQuery(trimmed)
@@ -203,7 +188,7 @@ export function VocabularyPage() {
     }, 300)
   }, [setSearchParams])
 
-  // ── Filter / sort handlers (immediate, no debounce needed) ────────────────
+  // ── Filter / sort handlers ────────────────────────────────────────────────
 
   const handleFilterToggle = useCallback(
     (f: VocabularyFilter) => {
@@ -239,15 +224,61 @@ export function VocabularyPage() {
     [setSearchParams],
   )
 
-  // ── API-level filters (boards, tags, reviewState, POS, sortDir) ─────────
+  // ── API-level filters (tags, reviewState, POS, sortDir) ──────────────────
+  // boardId is managed separately as "navigation context" — not a temporary
+  // filter. It is NOT included in hasApiFilters or cleared by the filter bar.
   const {
-    filters:         apiFilters,
-    setFilter:       setApiFilter,
-    clearFilters:    clearApiFilters,
+    filters:          apiFilters,
+    setFilter:        setApiFilter,
+    clearFilters:     clearApiFilters,
     hasActiveFilters: hasApiFilters,
   } = useVocabularyFilters()
 
-  // ── Data — driven by debouncedQuery, not inputValue ───────────────────────
+  // ── Board context — URL-backed ────────────────────────────────────────────
+  //
+  // Boards feel like navigation (workspaces), not temporary filters.
+  // The active board ID lives in the URL ?board= param so it:
+  //   - persists across refreshes
+  //   - is linkable (home page boards section links here)
+  //   - is independent of the filter bar "Clear" action
+  //
+  // On mount, seed from the URL if present. Thereafter, URL is the source of truth.
+
+  const urlBoard = searchParams.get('board') ?? undefined
+  const { data: boards = [] } = useBoardsQuery()
+  const activeBoard = boards.find((b) => b.id === urlBoard)
+
+  // Keep the apiFilters.boardId in sync with the URL board param
+  // so the existing vocabulary query stays board-scoped.
+  useEffect(() => {
+    if (urlBoard !== apiFilters.boardId) {
+      setApiFilter({ boardId: urlBoard })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlBoard])
+
+  const handleBoardSelect = useCallback(
+    (boardId: string | undefined) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+          if (boardId) next.set('board', boardId)
+          else next.delete('board')
+          return next
+        },
+        { replace: true },
+      )
+    },
+    [setSearchParams],
+  )
+
+  // ── Non-board active filters (used by FilterBar "clear" logic) ───────────
+  const hasNonBoardApiFilters = Object.keys(apiFilters).some(
+    (k) => k !== 'boardId',
+  )
+  const hasFilterBarFilters = hasNonBoardApiFilters || activeFilters.length > 0 || debouncedQuery.length > 0
+
+  // ── Data ──────────────────────────────────────────────────────────────────
 
   const {
     items,
@@ -261,116 +292,160 @@ export function VocabularyPage() {
     remove,
   } = useVocabularyInfinite({ query: debouncedQuery, activeFilters, sort, apiFilters })
 
-  // True when a filter change (not initial load) is in flight — used for the
-  // thin progress bar and list opacity dim.
   const isRefetching = isFetching && !isLoading
 
   // ── Display state ─────────────────────────────────────────────────────────
 
-  // Track total unfiltered word count for the page header.
-  // A ref updated synchronously during render — no useState/useEffect — so
-  // the count is available in the exact same render pass that flips
-  // isLoading → false. Prevents the blank-frame gap that a setState in an
-  // effect would cause (skeleton → nothing → count).
   const knownTotalRef = useRef<number | null>(null)
-  if (!isLoading && !isError && !debouncedQuery && activeFilters.length === 0 && !hasApiFilters) {
+  if (!isLoading && !isError && !debouncedQuery && activeFilters.length === 0 && !hasNonBoardApiFilters) {
     knownTotalRef.current = total
   }
   const knownTotal = knownTotalRef.current
 
-  // Active filtering: either the committed query, legacy chips, or new API filters.
-  const isFiltering = debouncedQuery.length > 0 || activeFilters.length > 0 || hasApiFilters
+  // "Filtering" means something other than just a board is active
+  const isFiltering = debouncedQuery.length > 0 || activeFilters.length > 0 || hasNonBoardApiFilters
 
-  // Toolbar is always shown once loading resolves — as long as the user has
-  // words OR there are active filters (user must be able to clear them).
-  // This prevents the broken dead-end state after a refresh with ?q= in the URL.
   const showToolbar = !isLoading && !isError && (
-    isFiltering ||
+    isFiltering || !!urlBoard ||
     items.length > 0 ||
     (knownTotal !== null && knownTotal > 0)
   )
 
-  // Truly empty: user has zero saved words (unfiltered, confirmed by server).
-  const isEmpty = !isLoading && !isError && !isFiltering && total === 0
+  const isEmpty = !isLoading && !isError && !isFiltering && !urlBoard && total === 0
 
-  const handleClearAll = useCallback(() => {
-    clearApiFilters()
+  // Clear only non-board filters — board stays as the navigation context
+  const handleClearFilters = useCallback(() => {
+    const { boardId: _, ...withoutBoard } = apiFilters
+    const keysToUnset = Object.keys(withoutBoard).reduce(
+      (acc, k) => ({ ...acc, [k]: undefined }),
+      {} as Record<string, undefined>,
+    )
+    setApiFilter(keysToUnset)
     activeFilters.forEach(handleFilterToggle)
-  }, [clearApiFilters, activeFilters, handleFilterToggle])
+    if (inputValue) handleQueryChange('')
+  }, [apiFilters, setApiFilter, activeFilters, handleFilterToggle, inputValue, handleQueryChange])
+
+  // ── Page title context ────────────────────────────────────────────────────
+
+  const pageTitle = activeBoard?.name ?? 'My Vocabulary'
+  const wordCountText = (() => {
+    if (knownTotal === null || knownTotal === 0) return null
+    const noun = `word${knownTotal !== 1 ? 's' : ''}`
+    return activeBoard
+      ? `${knownTotal} ${noun} in ${activeBoard.name}`
+      : `${knownTotal} saved ${noun}`
+  })()
 
   return (
     <PageLayout>
       <Container as="main" width="wide">
-        <div className={styles.pageHeader}>
-          <Text variant="title" as="h1" className={styles.heading}>
-            My Vocabulary
-          </Text>
-          {isLoading ? (
-            <div className={styles.skeletonWordCount} aria-hidden="true" />
-          ) : knownTotal !== null && knownTotal > 0 ? (
-            <Text variant="body" color="secondary" as="p" className={styles.wordCount}>
-              {knownTotal} saved word{knownTotal !== 1 ? 's' : ''}
-            </Text>
-          ) : null}
-        </div>
+        {/* ── Two-column layout: sidebar (desktop) + content ──────────── */}
+        <div className={[styles.pageLayout, featureFlags.boardsTags ? '' : styles.pageLayoutNoSidebar].join(' ').trim()}>
 
-        {/* ── Loading: skeleton placeholders occupy the same space as the
-            real toolbar + list so no layout reflow occurs when data arrives.
-            ── Loaded: toolbar + list fade in as one unit via .contentArea. */}
-        {isLoading ? (
-          <>
-            <ToolbarSkeleton />
-            <ListSkeleton />
-          </>
-        ) : isError ? (
-          <Text variant="body" color="secondary" as="p">
-            Failed to load vocabulary. Please try again.
-          </Text>
-        ) : (
-          <div className={[styles.contentArea, isRefetching ? styles.contentAreaFetching : ''].join(' ').trim()}>
-            {isRefetching && <div className={styles.fetchingBar} aria-hidden="true" />}
-            {showToolbar && (
-              <>
-                <VocabularyToolbar
-                  query={inputValue}
-                  viewMode={viewMode}
-                  onQueryChange={handleQueryChange}
-                  onViewModeChange={setViewMode}
-                />
-                <VocabularyFilterBar
-                  filters={apiFilters}
-                  hasActiveFilters={isFiltering}
-                  onSetFilter={setApiFilter}
-                  onClear={handleClearAll}
-                  legacyFilters={activeFilters}
-                  onLegacyFilterToggle={handleFilterToggle}
-                  sort={sort}
-                  onSortChange={handleSortChange}
-                />
-              </>
-            )}
-            {/* Board review entry point — shown when a board filter is active */}
-            {featureFlags.boardsTags && apiFilters.boardId && (
-              <BoardReviewBanner boardId={apiFilters.boardId} />
-            )}
+          {/* Desktop sidebar — hidden on mobile/tablet via CSS */}
+          {featureFlags.boardsTags && (
+            <VocabularyBoardsSidebar
+              activeBoardId={urlBoard}
+              onSelect={handleBoardSelect}
+            />
+          )}
 
-            <div className={[styles.listWrapper, isRefetching ? styles.fetching : ''].join(' ').trim()}>
-              <WordDetailProvider onRemove={remove} context="vocabulary">
-                <VocabularyPageContent
-                  items={items}
-                  onRemove={remove}
-                  viewMode={viewMode}
-                  isEmpty={isEmpty}
-                  hasActiveFilters={isFiltering}
-                  hasNextPage={hasNextPage}
-                  isFetchingNextPage={isFetchingNextPage}
-                  onLoadMore={fetchNextPage}
-                  onClearFilters={handleClearAll}
-                />
-              </WordDetailProvider>
+          {/* Main content column */}
+          <div className={styles.mainColumn}>
+
+            {/* ── Page header ───────────────────────────────────────────── */}
+            <div className={styles.pageHeader}>
+              <div className={styles.headingRow}>
+                <Text variant="title" as="h1" className={styles.heading}>
+                  {pageTitle}
+                </Text>
+                {/* Breadcrumb back to all — only when inside a board */}
+                {activeBoard && (
+                  <button
+                    type="button"
+                    className={styles.allVocabLink}
+                    onClick={() => handleBoardSelect(undefined)}
+                    aria-label="Back to all vocabulary"
+                  >
+                    ← All
+                  </button>
+                )}
+              </div>
+              {isLoading ? (
+                <div className={styles.skeletonWordCount} aria-hidden="true" />
+              ) : wordCountText ? (
+                <Text variant="body" color="secondary" as="p" className={styles.wordCount}>
+                  {wordCountText}
+                </Text>
+              ) : null}
             </div>
+
+            {isLoading ? (
+              <>
+                <ToolbarSkeleton />
+                <ListSkeleton />
+              </>
+            ) : isError ? (
+              <Text variant="body" color="secondary" as="p">
+                Failed to load vocabulary. Please try again.
+              </Text>
+            ) : (
+              <div className={[styles.contentArea, isRefetching ? styles.contentAreaFetching : ''].join(' ').trim()}>
+                {isRefetching && <div className={styles.fetchingBar} aria-hidden="true" />}
+
+                {showToolbar && (
+                  <>
+                    {/* Mobile boards selector — shown only below 1024px */}
+                    {featureFlags.boardsTags && (
+                      <MobileBoardsSelector
+                        activeBoardId={urlBoard}
+                        onSelect={handleBoardSelect}
+                      />
+                    )}
+
+                    <VocabularyToolbar
+                      query={inputValue}
+                      viewMode={viewMode}
+                      onQueryChange={handleQueryChange}
+                      onViewModeChange={setViewMode}
+                    />
+                    <VocabularyFilterBar
+                      filters={apiFilters}
+                      hasActiveFilters={hasFilterBarFilters}
+                      onSetFilter={setApiFilter}
+                      onClear={handleClearFilters}
+                      legacyFilters={activeFilters}
+                      onLegacyFilterToggle={handleFilterToggle}
+                      sort={sort}
+                      onSortChange={handleSortChange}
+                    />
+                  </>
+                )}
+
+                {/* Board review entry point */}
+                {featureFlags.boardsTags && urlBoard && (
+                  <BoardReviewBanner boardId={urlBoard} />
+                )}
+
+                <div className={[styles.listWrapper, isRefetching ? styles.fetching : ''].join(' ').trim()}>
+                  <WordDetailProvider onRemove={remove} context="vocabulary">
+                    <VocabularyPageContent
+                      items={items}
+                      onRemove={remove}
+                      viewMode={viewMode}
+                      isEmpty={isEmpty}
+                      hasActiveFilters={isFiltering}
+                      hasNextPage={hasNextPage}
+                      isFetchingNextPage={isFetchingNextPage}
+                      onLoadMore={fetchNextPage}
+                      onClearFilters={handleClearFilters}
+                    />
+                  </WordDetailProvider>
+                </div>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </Container>
     </PageLayout>
   )

@@ -2,7 +2,6 @@ import { useRef, useState, useEffect } from 'react'
 import { FilterBar } from '../../../shared/ui/FilterBar/FilterBar'
 import { AdaptiveSheet } from '../../../shared/ui/AdaptiveSheet/AdaptiveSheet'
 import { BottomSheetContent } from '../../../shared/ui/BottomSheet/BottomSheetContent'
-import { useBoardsQuery } from '../../boards/model/useBoardsQuery'
 import { useTagsQuery } from '../../tags/model/useTagsQuery'
 import { featureFlags } from '../../../shared/lib/featureFlags'
 import type { VocabularyFilters } from '../../../entities/vocabulary/model/filters'
@@ -62,9 +61,7 @@ export function VocabularyFilterBar({
   const [sortOpen,  setSortOpen]  = useState(false)
   const sortRef = useRef<HTMLDivElement>(null)
 
-  const { data: boards = [] } = useBoardsQuery()
-  const { data: tags   = [] } = useTagsQuery()
-  const activeBoards = boards.filter((b) => !b.isArchived)
+  const { data: tags = [] } = useTagsQuery()
 
   // Close sort dropdown on outside click / Escape
   useEffect(() => {
@@ -87,14 +84,14 @@ export function VocabularyFilterBar({
   const isNew          = filters.reviewState === 'new'
   const isDifficult    = legacyFilters.includes('difficult')
   const isSaved        = legacyFilters.includes('savedRecently')
-  const isAllActive    = !filters.reviewState && !filters.boardId &&
+  // boardId is excluded here — it's navigation context, not a filter bar concern
+  const isAllActive    = !filters.reviewState &&
                          !filters.tagIds?.length && !filters.partOfSpeech &&
                          legacyFilters.length === 0
 
   const hasMoreFilters =
     (filters.reviewState === 'upcoming' || filters.reviewState === 'mastered') ||
     !!filters.partOfSpeech ||
-    !!filters.boardId ||
     !!filters.tagIds?.length ||
     ADVANCED_TIME_OPTIONS.some((o) => legacyFilters.includes(o.value))
 
@@ -237,30 +234,6 @@ export function VocabularyFilterBar({
             </button>
           </div>
 
-          {/* Boards */}
-          {featureFlags.boardsTags && activeBoards.length > 0 && (
-            <div className={styles.filterGroup}>
-              <p className={styles.groupLabel}>Board</p>
-              <div className={styles.groupChips}>
-                {activeBoards.map((b) => {
-                  const active = filters.boardId === b.id
-                  return (
-                    <button
-                      key={b.id}
-                      type="button"
-                      role="switch"
-                      aria-checked={active}
-                      className={[styles.groupChip, active ? styles.groupChipActive : ''].join(' ')}
-                      onClick={() => onSetFilter({ boardId: active ? undefined : b.id })}
-                    >
-                      {b.name}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
           {/* Tags */}
           {featureFlags.boardsTags && tags.length > 0 && (
             <div className={styles.filterGroup}>
@@ -376,7 +349,7 @@ export function VocabularyFilterBar({
                 if (filters.reviewState === 'upcoming' || filters.reviewState === 'mastered') {
                   onSetFilter({ reviewState: undefined })
                 }
-                onSetFilter({ partOfSpeech: undefined, boardId: undefined, tagIds: undefined })
+                onSetFilter({ partOfSpeech: undefined, tagIds: undefined })
                 ADVANCED_TIME_OPTIONS.forEach((o) => {
                   if (legacyFilters.includes(o.value)) onLegacyFilterToggle(o.value)
                 })

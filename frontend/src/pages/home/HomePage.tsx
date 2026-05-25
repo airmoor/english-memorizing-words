@@ -2,12 +2,14 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getProgress } from '../../features/review/api/getProgress'
 import { fetchVocabularyPage } from '../../features/vocabulary/api/vocabularyApi'
+import { BoardsHomeSection } from '../../features/boards/ui/BoardsHomeSection'
 import { Card } from '../../shared/ui/Card/Card'
 import { Button } from '../../shared/ui/Button/Button'
 import { Text } from '../../shared/ui/Typography/Typography'
 import { Container } from '../../shared/ui/layout/Container'
 import { PageLayout } from '../../shared/ui/layout/PageLayout'
 import { DashboardGrid, DashboardCell } from '../../shared/ui/layout/DashboardGrid'
+import { featureFlags } from '../../shared/lib/featureFlags'
 import styles from './HomePage.module.css'
 
 // Skeleton label widths approximate real StatTile label lengths
@@ -148,6 +150,15 @@ export function HomePage() {
                   </div>
                 </Card>
               </DashboardCell>
+
+              {/* Your boards — quick re-entry into active collections */}
+              {featureFlags.boardsTags && (
+                <DashboardCell span="full" className={styles.contentCell}>
+                  <Card variant="floating" padding="lg">
+                    <BoardsHomeSection />
+                  </Card>
+                </DashboardCell>
+              )}
 
               {/* Stats — Bento left column on desktop, full-width stack on mobile */}
               <DashboardCell span={recent.length === 0 ? 'full' : 'auto'} className={styles.contentCell}>

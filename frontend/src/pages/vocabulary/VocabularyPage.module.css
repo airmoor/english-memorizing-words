@@ -1,9 +1,73 @@
+/* ── Two-column page layout: sidebar + main ───────────────────────────────
+   On desktop (≥1024px): sidebar (196px) + main content column.
+   On mobile/tablet: single column — sidebar is hidden via CSS.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.pageLayout {
+  display: grid;
+  grid-template-columns: 196px 1fr;
+  gap: var(--space-xl);
+  align-items: start;
+}
+
+/* When boards feature flag is off: render as single column */
+.pageLayoutNoSidebar {
+  grid-template-columns: 1fr;
+}
+
+/* Below 1024px sidebar hides itself; collapse the grid to single column */
+@media (max-width: 1023px) {
+  .pageLayout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Main content column — min-width:0 prevents grid blowout */
+.mainColumn {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Page header ─────────────────────────────────────────────────────────── */
+
 .pageHeader {
   margin-bottom: var(--space-xl);
 }
 
+/* Heading + "← All" breadcrumb sit on the same row */
+.headingRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
 .heading {
   margin: 0 0 var(--space-xs);
+}
+
+/* "← All" back-to-all-vocabulary breadcrumb button */
+.allVocabLink {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-sm);
+  font-weight: var(--fw-medium);
+  color: var(--color-accent);
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+  /* align with the bottom of the h1 text */
+  align-self: flex-end;
+  margin-bottom: calc(var(--space-xs) + 2px);
+}
+
+.allVocabLink:hover {
+  opacity: 1;
+  text-decoration: underline;
 }
 
 .wordCount {

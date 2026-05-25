@@ -1,0 +1,165 @@
+/* ── Mobile boards selector ───────────────────────────────────────────────────
+   Visible only below 1024px. Desktop uses VocabularyBoardsSidebar.
+──────────────────────────────────────────────────────────────────────────── */
+
+/* Hide on desktop — the sidebar takes over */
+.selectorRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-sm);
+}
+
+@media (min-width: 1024px) {
+  .selectorRow {
+    display: none;
+  }
+}
+
+/* ── Selector button ─────────────────────────────────────────────────────── */
+.selector {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px 6px 10px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: var(--font-sm);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  max-width: 240px;
+}
+
+.selector:hover {
+  border-color: color-mix(in srgb, var(--color-accent) 50%, var(--color-border));
+  color: var(--color-text-primary);
+}
+
+/* Board-scoped state: more prominent, accent-tinted */
+.selectorScoped {
+  background: color-mix(in srgb, var(--color-accent) 8%, var(--color-bg-secondary));
+  border-color: color-mix(in srgb, var(--color-accent) 30%, var(--color-border));
+  color: var(--color-text-primary);
+}
+
+.selectorLabel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Clear button (×) ────────────────────────────────────────────────────── */
+.clearBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.clearBtn:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-text-secondary);
+}
+
+/* ── Sheet header ────────────────────────────────────────────────────────── */
+.sheetHeader {
+  padding: var(--space-sm) var(--space-md) var(--space-xs);
+}
+
+.sheetTitle {
+  font-size: var(--font-xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  opacity: 0.55;
+  font-family: var(--font-sans);
+}
+
+/* ── Board list ──────────────────────────────────────────────────────────── */
+.boardList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.boardRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 13px var(--space-md);
+  border: none;
+  background: none;
+  font-family: var(--font-sans);
+  font-size: var(--font-md);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+  min-height: 48px; /* touch-friendly */
+}
+
+.boardRow:hover {
+  background: color-mix(in srgb, var(--color-accent) 5%, transparent);
+  color: var(--color-text-primary);
+}
+
+.boardRowActive {
+  color: var(--color-text-primary);
+  font-weight: var(--fw-medium);
+}
+
+.boardRowLabel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.boardRowCount {
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+  opacity: 0.55;
+  font-variant-numeric: tabular-nums;
+  margin-right: 4px;
+}
+
+/* ── Create row ──────────────────────────────────────────────────────────── */
+.createRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 13px var(--space-md);
+  border: none;
+  border-top: 1px solid var(--color-border);
+  background: none;
+  font-family: var(--font-sans);
+  font-size: var(--font-md);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  text-align: left;
+  margin-top: var(--space-xs);
+  transition: color 0.1s;
+  min-height: 48px;
+}
+
+.createRow:hover {
+  color: var(--color-accent);
+}
