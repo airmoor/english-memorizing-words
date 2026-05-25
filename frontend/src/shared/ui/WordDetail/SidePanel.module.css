@@ -16,14 +16,16 @@
    * Without clearing the FilterBar, the panel header slides behind it
    * when the user scrolls past the toolbar and FilterBar becomes sticky.
    *
-   * max-height fills the remaining viewport below those two headers.
+   * max-height: min(calc(100svh - 144px), 760px)
+   *   - Subtracts 112px (top offset) + 32px breathing room → ~32px from viewport bottom.
+   *   - Caps at 760px so the panel never feels overwhelming on large displays;
+   *     the body scrolls internally for longer content.
+   *
    * align-self: start is required for sticky to work inside a grid.
-   * position:sticky also acts as the containing block for the absolute
-   * close button — no extra position:relative needed.
    */
   position: sticky;
   top: 112px;
-  max-height: calc(100svh - 128px);
+  max-height: min(calc(100svh - 144px), 760px);
   align-self: start;
 
   display: flex;

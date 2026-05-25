@@ -14,8 +14,10 @@
   border-left-width: 3px;
 }
 
-/* State-colored left border — one visual cue per card, no text label noise */
-.state_new       { border-left-color: var(--color-border); }
+/* State-colored left border — one visual cue per card, no text label noise.
+   "new" gets a softened accent so it scans as "fresh/unseen" without competing
+   with the stronger "review" or "difficult" states. */
+.state_new       { border-left-color: color-mix(in srgb, var(--color-accent) 48%, var(--color-border)); }
 .state_learning  { border-left-color: var(--color-warning); }
 .state_review    { border-left-color: var(--color-accent); }
 .state_mature    { border-left-color: var(--color-success); }

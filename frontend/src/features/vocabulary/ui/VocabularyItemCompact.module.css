@@ -44,7 +44,8 @@
   justify-self: center;
 }
 
-.dot_new       { background: var(--color-text-secondary); opacity: 0.4; }
+/* "new" dot matches the softened accent used for the detailed card's left border */
+.dot_new       { background: color-mix(in srgb, var(--color-accent) 60%, var(--color-text-secondary)); opacity: 0.65; }
 .dot_learning  { background: var(--color-warning); }
 .dot_review    { background: var(--color-accent); }
 .dot_mature    { background: var(--color-success); }
