@@ -190,6 +190,21 @@ export class UpsertNoteDto {
   body: string;
 }
 
+/**
+ * Optional body for POST /vocabulary/words/:wordId.
+ * When `meaningIds` is provided, only those meaning IDs are stored as the
+ * user's selection. NULL / omitted means "all meanings" (legacy behaviour).
+ */
+export class SaveWordDto {
+  @ApiPropertyOptional({
+    example: ['uuid-1', 'uuid-2'],
+    description: 'IDs of meanings the user selected. Omit to save all meanings.',
+    type: [String],
+  })
+  @IsOptional()
+  meaningIds?: string[];
+}
+
 export class PaginatedVocabularyDto {
   @ApiProperty({ type: [VocabularyWordDto] })
   items: VocabularyWordDto[];
@@ -273,7 +288,11 @@ export class VocabularyService {
   // Saves the canonical word to the user's vocabulary and creates a card.
   // Idempotent: repeated calls for the same (user, word) are a no-op.
 
-  async saveWord(userId: string, wordId: string): Promise<void> {
+  async saveWord(
+    userId: string,
+    wordId: string,
+    dto?: SaveWordDto,
+  ): Promise<void> {
     const [{ exists }] = await this.dataSource.query<[{ exists: boolean }]>(
       `SELECT EXISTS(SELECT 1 FROM words WHERE id = $1) AS exists`,
       [wordId],
@@ -285,12 +304,27 @@ export class VocabularyService {
     await qr.startTransaction();
 
     try {
-      await qr.query(
-        `INSERT INTO user_words (id, user_id, word_id)
-         VALUES (gen_random_uuid(), $1, $2)
-         ON CONFLICT (user_id, word_id) DO NOTHING`,
-        [userId, wordId],
-      );
+      const meaningIds =
+        dto?.meaningIds && dto.meaningIds.length > 0 ? dto.meaningIds : null;
+
+      if (meaningIds !== null) {
+        // Upsert: if the row already exists, update the selected meanings
+        await qr.query(
+          `INSERT INTO user_words (id, user_id, word_id, selected_meaning_ids)
+           VALUES (gen_random_uuid(), $1, $2, $3)
+           ON CONFLICT (user_id, word_id)
+           DO UPDATE SET selected_meaning_ids = EXCLUDED.selected_meaning_ids`,
+          [userId, wordId, meaningIds],
+        );
+      } else {
+        // No selection provided — save all meanings (legacy behaviour)
+        await qr.query(
+          `INSERT INTO user_words (id, user_id, word_id)
+           VALUES (gen_random_uuid(), $1, $2)
+           ON CONFLICT (user_id, word_id) DO NOTHING`,
+          [userId, wordId],
+        );
+      }
 
       await qr.query(
         `INSERT INTO cards (id, user_id, word_id, ease_factor, interval_days, next_review)
@@ -423,19 +457,21 @@ export class VocabularyService {
       lastReviewedAt: Date | null;
       intervalDays: number | null;
       easeFactor: number | null;
+      selectedMeaningIds: string[] | null;
     }[]>(
       `SELECT
-         uw.id               AS "userWordId",
-         uw.saved_at         AS "savedAt",
-         w.id                AS "wordId",
-         w.text              AS "wordText",
+         uw.id                     AS "userWordId",
+         uw.saved_at               AS "savedAt",
+         uw.selected_meaning_ids   AS "selectedMeaningIds",
+         w.id                      AS "wordId",
+         w.text                    AS "wordText",
          w.transcription,
          w.provider,
-         c.id                AS "cardId",
-         c.next_review       AS "nextReview",
-         c.last_reviewed_at  AS "lastReviewedAt",
-         c.interval_days     AS "intervalDays",
-         c.ease_factor       AS "easeFactor"
+         c.id                      AS "cardId",
+         c.next_review             AS "nextReview",
+         c.last_reviewed_at        AS "lastReviewedAt",
+         c.interval_days           AS "intervalDays",
+         c.ease_factor             AS "easeFactor"
        FROM user_words uw
        JOIN words w ON w.id = uw.word_id
        LEFT JOIN cards c ON c.user_id = uw.user_id AND c.word_id = uw.word_id
@@ -557,7 +593,12 @@ export class VocabularyService {
       boards:          boardsByCard.get(w.cardId) ?? [],
       tags:            tagsByCard.get(w.cardId) ?? [],
       note:            noteByCard.get(w.cardId) ?? null,
-      meanings:        meaningsByWord.get(w.wordId) ?? [],
+      meanings:        (() => {
+        const all = meaningsByWord.get(w.wordId) ?? []
+        if (!w.selectedMeaningIds || w.selectedMeaningIds.length === 0) return all
+        const selected = new Set(w.selectedMeaningIds)
+        return all.filter((m) => selected.has(m.id))
+      })(),
     }))
 
     return {

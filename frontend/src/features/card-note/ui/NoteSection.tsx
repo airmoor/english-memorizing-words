@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import type { CardNote } from '../../../entities/card-note/model/types'
 import { useCardNoteMutation } from '../model/useCardNoteMutation'
 import styles from './NoteSection.module.css'
@@ -9,49 +9,73 @@ interface NoteSectionProps {
 }
 
 /**
- * Expandable inline-edit note section for the card detail view.
+ * Inline-edit note section for the card detail view.
  *
- * - Shows placeholder text when empty
- * - Tap to activate textarea edit mode
- * - Saves on blur (debounced to avoid racing saves while typing)
- * - Clears the note when content is empty on blur
+ * UX behaviour (Phase 5):
+ * - Placeholder text when empty — tap to activate edit mode
+ * - Inline textarea (no modal, no separate screen)
+ * - Saves on blur — debounce-free, server call on every blur that changed value
+ * - Empty body on blur → calls PUT with empty string → backend deletes the note row
+ * - Error state: inline banner with Retry button; typed text is always preserved
+ * - Retry: re-fires the last mutation; user never loses their text
+ * - Editing clears any previous error state
  */
 export function NoteSection({ cardId, note }: NoteSectionProps) {
-  const [editing, setEditing] = useState(false)
-  const [value,   setValue]   = useState(note?.body ?? '')
-  const textareaRef           = useRef<HTMLTextAreaElement>(null)
-  const mutation              = useCardNoteMutation()
+  const [editing, setEditing]       = useState(false)
+  const [value,   setValue]         = useState(note?.body ?? '')
+  const textareaRef                 = useRef<HTMLTextAreaElement>(null)
+  const mutation                    = useCardNoteMutation()
 
-  // Keep local value in sync when note prop changes externally
-  // (e.g. after invalidation bringing fresh server data)
+  // Track the last attempted save value so Retry can re-fire it
+  const lastAttemptRef = useRef<string>('')
+
+  // Keep local value in sync when the note prop updates from the server
+  // (e.g. after query invalidation). Skip sync while actively editing to
+  // prevent losing in-progress text.
   useEffect(() => {
     if (!editing) {
       setValue(note?.body ?? '')
     }
   }, [note?.body, editing])
 
-  const startEditing = () => {
+  const startEditing = useCallback(() => {
+    // Clear stale error when user reopens the editor
+    mutation.reset()
     setEditing(true)
     requestAnimationFrame(() => textareaRef.current?.focus())
-  }
+  }, [mutation])
 
-  const handleBlur = () => {
-    setEditing(false)
-    const trimmed = value.trim()
+  const commitSave = useCallback((trimmed: string) => {
     const current = note?.body?.trim() ?? ''
-    // Only save if the value actually changed
-    if (trimmed !== current) {
-      mutation.mutate({ cardId, body: trimmed })
-    }
-  }
+    if (trimmed === current) return // nothing changed — skip network call
 
-  const isSaving = mutation.isPending
+    lastAttemptRef.current = trimmed
+    mutation.mutate({ cardId, body: trimmed })
+  }, [cardId, note?.body, mutation])
+
+  const handleBlur = useCallback(() => {
+    setEditing(false)
+    commitSave(value.trim())
+  }, [value, commitSave])
+
+  const handleRetry = useCallback(() => {
+    mutation.reset()
+    mutation.mutate({ cardId, body: lastAttemptRef.current })
+  }, [cardId, mutation])
+
+  const isDeleting = mutation.isPending && lastAttemptRef.current === ''
+  const isSaving   = mutation.isPending && !isDeleting
 
   return (
     <section className={styles.section} aria-label="Note">
       <div className={styles.header}>
         <span className={styles.title}>Note</span>
-        {isSaving && <span className={styles.saving} aria-live="polite">Saving…</span>}
+        {isSaving && (
+          <span className={styles.statusLabel} aria-live="polite">Saving…</span>
+        )}
+        {isDeleting && (
+          <span className={styles.statusLabel} aria-live="polite">Clearing…</span>
+        )}
       </div>
 
       {editing ? (
@@ -77,9 +101,20 @@ export function NoteSection({ cardId, note }: NoteSectionProps) {
       )}
 
       {mutation.isError && (
-        <p className={styles.error} role="alert">
-          Failed to save. Tap to retry.
-        </p>
+        <div className={styles.errorRow} role="alert">
+          <span className={styles.errorMsg}>
+            {lastAttemptRef.current === ''
+              ? 'Failed to clear note.'
+              : 'Failed to save.'}
+          </span>
+          <button
+            type="button"
+            className={styles.retryBtn}
+            onClick={handleRetry}
+          >
+            Retry
+          </button>
+        </div>
       )}
     </section>
   )

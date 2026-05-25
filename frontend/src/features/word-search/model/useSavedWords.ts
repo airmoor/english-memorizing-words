@@ -59,9 +59,20 @@ export function useSavedWords() {
     },
   })
 
+  /**
+   * Returns the meaning IDs saved for a word, or [] if unknown.
+   * Used by MeaningPickerSheet to pre-select on re-open.
+   * Empty array means "all meanings" (legacy save or word not in cache).
+   */
+  const getSavedMeaningIds = (wordId: string): string[] => {
+    const entry = vocabulary?.find((v) => v.wordId === wordId)
+    return entry?.meanings.map((m) => m.id) ?? []
+  }
+
   return {
     isSaved: (wordId: string) => savedIds.has(wordId),
     save: (wordId: string) => saveMutation.mutate(wordId),
     isSaving: saveMutation.isPending,
+    getSavedMeaningIds,
   }
 }

@@ -1,7 +1,7 @@
 # Implementation Tasks: boards-tags-review-v2
 
 **Status:** In Progress  
-**Last updated:** 2026-05-18
+**Last updated:** 2026-05-25
 
 ---
 
@@ -80,7 +80,7 @@ Phases 1–2 are backend-only and can be deployed without any visible frontend c
 - [x] Query returns `boards`, `tags`, `note`, `reviewState`, `cardId` per card (batch fetch + merge)
 - [x] `nextReviewHuman` string computed and included in response
 - [x] Cursor-based pagination — deferred (offset pagination kept; TODO comment added)
-- [ ] `POST /vocabulary` extended with optional `meaningIds` param — deferred to Phase 5 per adjustment #3
+- [x] `POST /vocabulary` extended with optional `meaningIds` param — migration `1749000001000`, `SaveWordDto`, `saveWord(userId, wordId, dto?)`, vocabulary query filters meanings by `selectedMeaningIds`
 - [x] `GET /cards/:cardId/note`, `PUT /cards/:cardId/note`, `DELETE /cards/:cardId/note`
 - [ ] Performance: `EXPLAIN ANALYZE` on filtered query with 1000+ cards
 - [x] Unit tests: filter by board, tag, reviewState, partOfSpeech, sortDir; reviewState computation; nextReviewHuman
@@ -213,15 +213,15 @@ Phases 1–2 are backend-only and can be deployed without any visible frontend c
 
 **Deliverables:**
 
-- [ ] Meaning picker bottom sheet on word save (checkboxes per meaning)
-- [ ] Meaning picker: at least one meaning must be selected (Save button disabled otherwise)
-- [ ] Meaning picker: pre-select meanings already saved on re-open
-- [ ] Meaning picker: "Save [N] meanings" button label updates as selection changes
-- [ ] `features/meaning-picker`: `MeaningPickerSheet`, `useSaveSelectedMeaningsMutation`
-- [ ] Note inline edit in card detail: tap placeholder to activate, blur to save
-- [ ] Note auto-save: debounced or on-blur, with loading indicator
-- [ ] Note save error: inline error with retry, content preserved in local state
-- [ ] Note delete: clearing the note content and blurring deletes the note (or keeps empty — resolve in open-questions)
+- [x] Meaning picker bottom sheet on word save (checkboxes per meaning)
+- [x] Meaning picker: at least one meaning must be selected (Save button disabled otherwise)
+- [x] Meaning picker: pre-select meanings already saved on re-open
+- [x] Meaning picker: "Save [N] meanings" button label updates as selection changes
+- [x] `features/meaning-picker`: `MeaningPickerSheet`, `useSaveSelectedMeaningsMutation`
+- [x] Note inline edit in card detail: tap placeholder to activate, blur to save
+- [x] Note auto-save: debounced or on-blur, with loading indicator
+- [x] Note save error: inline error with retry, content preserved in local state
+- [x] Note delete: clearing the note content and blurring deletes the note — PUT with empty body, backend deletes the row (Q12 resolved)
 
 ---
 

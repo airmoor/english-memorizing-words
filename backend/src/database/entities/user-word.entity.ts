@@ -32,6 +32,20 @@ export class UserWord {
   })
   savedAt: Date;
 
+  /**
+   * Subset of meaning IDs the user selected when saving.
+   * NULL = all meanings (backwards-compatible default).
+   * Non-null = only these meaning IDs are displayed on the vocabulary card.
+   */
+  @Column({
+    name: 'selected_meaning_ids',
+    type: 'uuid',
+    array: true,
+    nullable: true,
+    default: null,
+  })
+  selectedMeaningIds: string[] | null;
+
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;

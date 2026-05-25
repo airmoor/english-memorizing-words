@@ -32,7 +32,7 @@ export function SearchPage() {
   }
 
   const searchState = useWordSearch(query)
-  const { isSaved, save, isSaving } = useSavedWords()
+  const { isSaved, save, isSaving, getSavedMeaningIds } = useSavedWords()
 
   return (
     <PageLayout className={styles.flexPage}>
@@ -102,6 +102,7 @@ export function SearchPage() {
                 isSaved={isSaved(searchState.word.id)}
                 onSave={save}
                 isSaving={isSaving}
+                savedMeaningIds={getSavedMeaningIds(searchState.word.id)}
               />
             )}
           </div>

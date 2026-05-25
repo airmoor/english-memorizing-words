@@ -21,6 +21,7 @@ import {
 import {
   CardNoteDto,
   PaginatedVocabularyDto,
+  SaveWordDto,
   UpsertNoteDto,
   VocabularyQueryDto,
   VocabularyService,
@@ -44,8 +45,9 @@ export class VocabularyController {
   saveWord(
     @CurrentUser() user: AuthUser,
     @Param('wordId', new ParseUUIDPipe()) wordId: string,
+    @Body() dto?: SaveWordDto,
   ): Promise<void> {
-    return this.vocabularyService.saveWord(user.id, wordId);
+    return this.vocabularyService.saveWord(user.id, wordId, dto);
   }
 
   // Get paginated, filtered, sorted saved words

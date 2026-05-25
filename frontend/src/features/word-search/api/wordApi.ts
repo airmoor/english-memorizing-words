@@ -13,5 +13,15 @@ export const fetchWord = (text: string): Promise<WordResult> =>
 export const fetchVocabulary = (): Promise<VocabularyWord[]> =>
   apiClient.get<PaginatedVocabulary>('/vocabulary?limit=1000').then((r) => r.items)
 
-export const saveWord = (wordId: string): Promise<void> =>
-  apiClient.post(`/vocabulary/words/${wordId}`)
+/**
+ * Save a word to the user's vocabulary.
+ * Optional `meaningIds` restricts which meanings are stored.
+ * Omitting `meaningIds` (or passing an empty array) saves all meanings.
+ */
+export const saveWord = (
+  wordId: string,
+  meaningIds?: string[],
+): Promise<void> =>
+  meaningIds && meaningIds.length > 0
+    ? apiClient.post(`/vocabulary/words/${wordId}`, { meaningIds })
+    : apiClient.post(`/vocabulary/words/${wordId}`)
