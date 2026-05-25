@@ -6,7 +6,7 @@ export const TAGS_KEY = ['tags'] as const
 export function useTagsQuery() {
   return useQuery({
     queryKey: TAGS_KEY,
-    queryFn: () => fetchTags().then((r) => r.tags),
+    queryFn: () => fetchTags(),
     staleTime: 60_000,
   })
 }

@@ -8,6 +8,7 @@ import styles from './BoardsSection.module.css'
 
 interface BoardsSectionProps {
   cardId: string
+  wordId: string
   boards: BoardSummary[]
 }
 
@@ -16,7 +17,7 @@ interface BoardsSectionProps {
  * Shows board chips with remove button and an "+ Add to board" button
  * that opens the BoardPickerSheet (nested bottom sheet).
  */
-export function BoardsSection({ cardId, boards }: BoardsSectionProps) {
+export function BoardsSection({ cardId, wordId, boards }: BoardsSectionProps) {
   const [pickerOpen, setPickerOpen] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
   const removeMutation              = useRemoveCardFromBoard()
@@ -32,7 +33,7 @@ export function BoardsSection({ cardId, boards }: BoardsSectionProps) {
           <BoardChip
             key={board.id}
             label={board.name}
-            onRemove={() => removeMutation.mutate({ boardId: board.id, cardId })}
+            onRemove={() => removeMutation.mutate({ boardId: board.id, cardId, wordId })}
           />
         ))}
 
@@ -50,6 +51,7 @@ export function BoardsSection({ cardId, boards }: BoardsSectionProps) {
         open={pickerOpen}
         onClose={() => setPickerOpen(false)}
         cardId={cardId}
+        wordId={wordId}
         assignedBoards={boards}
         onCreateNew={() => {
           setPickerOpen(false)

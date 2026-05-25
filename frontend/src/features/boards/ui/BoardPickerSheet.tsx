@@ -9,6 +9,7 @@ interface BoardPickerSheetProps {
   open: boolean
   onClose: () => void
   cardId: string
+  wordId: string
   assignedBoards: BoardSummary[]
   onCreateNew?: () => void
 }
@@ -21,6 +22,7 @@ export function BoardPickerSheet({
   open,
   onClose,
   cardId,
+  wordId,
   assignedBoards,
   onCreateNew,
 }: BoardPickerSheetProps) {
@@ -32,9 +34,9 @@ export function BoardPickerSheet({
 
   const toggle = (boardId: string) => {
     if (assignedIds.has(boardId)) {
-      removeMutation.mutate({ boardId, cardId })
+      removeMutation.mutate({ boardId, cardId, wordId })
     } else {
-      assignMutation.mutate({ boardId, cardId })
+      assignMutation.mutate({ boardId, cardId, wordId })
     }
   }
 

@@ -71,6 +71,7 @@ export function WordDetailContent({
 
           <BoardsSection
             cardId={vocabCard.cardId}
+            wordId={vocabCard.wordId}
             boards={vocabCard.boards}
           />
 

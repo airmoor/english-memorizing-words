@@ -10,7 +10,8 @@ export interface AssignTagByNameResponse {
   assigned: boolean
 }
 
-export const fetchTags = (): Promise<{ tags: Tag[] }> =>
+// GET /tags returns Tag[] directly — NOT { tags: Tag[] }
+export const fetchTags = (): Promise<Tag[]> =>
   apiClient.get('/tags')
 
 export const createTag = (dto: CreateTagDto): Promise<Tag> =>
