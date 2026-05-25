@@ -12,21 +12,43 @@
  *                within-batch duplicate. Nothing was imported, but nothing went wrong.
  *   failed     — request processed; errors prevented any word from being imported.
  */
-export type ImportStatus =
-  | 'queued'           // reserved: future async mode
-  | 'processing'       // reserved: future async mode
-  | 'completed'        // all submitted words successfully imported
-  | 'partial_failure'  // some imported, some failed enrichment
-  | 'no_changes'       // succeeded — all rows were duplicates/skipped; nothing created
-  | 'failed'           // nothing imported due to enrichment errors
+export const IMPORT_STATUSES = [
+  'queued',          // reserved: future async mode
+  'processing',      // reserved: future async mode
+  'completed',       // all submitted words successfully imported
+  'partial_failure', // some imported, some failed enrichment
+  'no_changes',      // succeeded — all rows were duplicates/skipped; nothing created
+  'failed',          // nothing imported due to enrichment errors
+] as const
+
+export type ImportStatus = (typeof IMPORT_STATUSES)[number]
 
 // ── ParsedRow — client-side representation ────────────────────────────────────
 
-export type ImportRowStatus =
-  | 'valid'
-  | 'duplicate_vocabulary'
-  | 'duplicate_within_batch'
-  | 'error'
+/**
+ * All row statuses the frontend can assign or receive.
+ * 'duplicate_vocabulary' is server-only — the parser never produces it directly,
+ * but the frontend may receive it back from the preview endpoint.
+ */
+export const IMPORT_ROW_STATUSES = [
+  'valid',
+  'duplicate_vocabulary',    // server-only: word already in user's vocabulary
+  'duplicate_within_batch',  // parser-owned: word appears earlier in this batch
+  'error',
+] as const
+
+export type ImportRowStatus = (typeof IMPORT_ROW_STATUSES)[number]
+
+/**
+ * Subset of statuses the parser can assign — excludes server-only 'duplicate_vocabulary'.
+ */
+export const PARSER_ROW_STATUSES = [
+  'valid',
+  'duplicate_within_batch',
+  'error',
+] as const
+
+export type ParserRowStatus = (typeof PARSER_ROW_STATUSES)[number]
 
 /** A row produced by a parser — fully typed before server preview call. */
 export interface ParsedRow {
@@ -67,7 +89,7 @@ export interface ImportSettings {
 
 export interface ImportPreviewRow {
   word: string
-  status: 'valid' | 'duplicate_vocabulary' | 'duplicate_within_batch' | 'error'
+  status: ImportRowStatus
   reason?: string
   /**
    * Echoed from the request payload — matches the ParsedRow.clientRowId that was sent.

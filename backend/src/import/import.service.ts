@@ -6,28 +6,14 @@ import { ImportRequestDto } from './dto/import-request.dto';
 import { ImportPreviewResultDto, ImportPreviewRowDto } from './dto/import-preview-result.dto';
 import { ImportExecuteResultDto, ImportErrorRowDto } from './dto/import-execute-result.dto';
 import { ImportStatus } from './dto/import-status';
+import { normalizeWord } from './normalize-word';
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
-const MAX_BATCH_SIZE = 500;
 const NOTE_MAX_LENGTH = 1000;
 const ENRICH_CONCURRENCY = 5;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-/**
- * Normalise a raw word for storage and deduplication.
- * Steps:
- *   1. NFKC Unicode normalisation — collapses compatibility equivalents (e.g. ﬁ → fi)
- *   2. Trim surrounding whitespace
- *   3. Collapse internal runs of whitespace to a single space
- *   4. Locale-aware lowercase (en) — consistent across server locales
- *
- * Must match frontend `normalizeWord()` in shared/lib/import/normalizeWord.ts.
- */
-function normalizeWord(raw: string): string {
-  return raw.normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('en');
-}
 
 /**
  * Run an array of async tasks in batches of `concurrency` at a time.
@@ -70,16 +56,16 @@ export class ImportService {
   async preview(userId: string, dto: ImportRequestDto): Promise<ImportPreviewResultDto> {
     const rows: ImportPreviewRowDto[] = [];
 
-    // Normalise words, preserving parser-assigned identity fields.
+    // Normalise words and preserve parser-assigned identity fields.
     //
     // lineNumber: use the parser's 1-based source line (accurate for CSV, Anki, and
-    //   multi-section files that have headers). Fall back to array position only when
-    //   the client doesn't send it (backward compatibility with older payloads).
+    //   multi-section files with headers). Falls back to array position only when the
+    //   client doesn't send it (backward compatibility with older payloads).
     //
     // parserStatus: when the parser already determined 'duplicate_within_batch', the
-    //   backend trusts that decision and does NOT re-compute it. This keeps a single
-    //   authoritative source for within-batch deduplication (the parser) and avoids
-    //   divergence between client preview display and server response.
+    //   backend trusts that decision and does NOT re-compute it. Parser owns within-batch
+    //   deduplication; backend owns vocabulary duplicate detection. Keeping these
+    //   responsibilities separate avoids divergence between client display and server response.
     const normalised: Array<{
       text: string;
       lineNumber: number;
@@ -90,8 +76,10 @@ export class ImportService {
 
     for (let i = 0; i < dto.words.length; i++) {
       const row = dto.words[i];
+      const text = normalizeWord(row.word);
+      if (!text) continue; // skip rows that normalise to empty (defensive against malformed input)
       normalised.push({
-        text: normalizeWord(row.word),
+        text,
         lineNumber: row.lineNumber ?? i + 1,
         clientRowId: row.clientRowId,
         parserStatus: row.parserStatus,
@@ -100,10 +88,10 @@ export class ImportService {
     }
 
     // Collect unique words for vocabulary lookup.
-    // Rows already marked 'duplicate_within_batch' by the parser are excluded:
-    // they don't need a vocabulary check (they will never be imported anyway).
+    // Rows already marked 'duplicate_within_batch' by the parser are excluded —
+    // they will never be imported anyway, so a vocabulary check is wasteful.
     const uniqueTexts: string[] = [];
-    const firstOccurrence = new Map<string, number>(); // word → lineNumber of first non-duplicate occurrence
+    const firstOccurrence = new Map<string, number>(); // word → lineNumber of first non-duplicate
 
     for (const { text, lineNumber, parserStatus } of normalised) {
       if (parserStatus === 'duplicate_within_batch') continue;
@@ -113,27 +101,23 @@ export class ImportService {
       }
     }
 
-    // Check vocabulary duplicates server-side (no dictionary calls, single batch query)
+    // Single-batch vocabulary check — no dictionary calls, no N+1 queries.
     const vocabSet = await this.getExistingVocabularySet(userId, uniqueTexts);
 
-    // Note truncation warning set
     const noteTruncated = new Set<number>();
     for (let i = 0; i < dto.words.length; i++) {
       const notes = dto.words[i].notes;
-      if (notes && notes.length > NOTE_MAX_LENGTH) {
-        noteTruncated.add(i);
-      }
+      if (notes && notes.length > NOTE_MAX_LENGTH) noteTruncated.add(i);
     }
 
-    // Build response rows
     for (let i = 0; i < normalised.length; i++) {
       const { text, lineNumber, clientRowId, parserStatus, parserReason } = normalised[i];
 
       let row: ImportPreviewRowDto;
 
       if (parserStatus === 'duplicate_within_batch') {
-        // Parser is authoritative — preserve its determination rather than re-deriving.
-        // Echo the parser's reason verbatim so the UI shows the correct source line reference.
+        // Parser is authoritative — preserve its determination without re-deriving.
+        // Echo the parser's reason so the UI shows the correct first-occurrence line reference.
         row = {
           word: text,
           status: 'duplicate_within_batch',
@@ -143,11 +127,10 @@ export class ImportService {
         };
       } else {
         // Backend determines status for rows the parser didn't mark as duplicates.
-        // This covers: valid rows, error rows, and legacy payloads with no parserStatus.
+        // Covers: valid rows, error rows, and legacy payloads with no parserStatus.
         const firstLine = firstOccurrence.get(text)!;
 
         if (firstLine !== lineNumber) {
-          // Within-batch duplicate detected by the backend (occurs when parserStatus is absent)
           row = {
             word: text,
             status: 'duplicate_within_batch',
@@ -168,10 +151,10 @@ export class ImportService {
         }
       }
 
-      // Append note truncation warning if applicable (non-destructive: appended to existing reason)
+      // Append note truncation warning (non-destructive: appended to existing reason)
       if (noteTruncated.has(i)) {
-        const existing = row.reason ? `${row.reason}. ` : '';
-        row.reason = `${existing}Note truncated to ${NOTE_MAX_LENGTH} characters`;
+        const prefix = row.reason ? `${row.reason}. ` : '';
+        row.reason = `${prefix}Note truncated to ${NOTE_MAX_LENGTH} characters`;
       }
 
       rows.push(row);
@@ -185,10 +168,9 @@ export class ImportService {
   async execute(userId: string, dto: ImportRequestDto): Promise<ImportExecuteResultDto> {
     let imported = 0;
     let skipped = 0;
-    let duplicatesIgnored = 0; // within-batch duplicates dropped before enrichment
+    let duplicatesIgnored = 0;
     const errorRows: ImportErrorRowDto[] = [];
 
-    // Normalise and deduplicate within batch (first occurrence wins)
     const seenInBatch = new Set<string>();
     const candidates: Array<{
       word: string;
@@ -201,31 +183,40 @@ export class ImportService {
 
     for (const row of dto.words) {
       const word = normalizeWord(row.word);
-      if (!word) continue;
-      if (seenInBatch.has(word)) { duplicatesIgnored++; continue; } // first occurrence wins
-      seenInBatch.add(word);
+      if (!word) continue; // skip rows that normalise to empty
 
-      const notes = row.notes
-        ? row.notes.slice(0, NOTE_MAX_LENGTH)
-        : undefined;
+      // Trust the parser's within-batch duplicate determination when provided.
+      // This keeps the parser as the single authoritative source and avoids recomputing
+      // what the client already calculated from source line numbers.
+      if (row.parserStatus === 'duplicate_within_batch') {
+        duplicatesIgnored++;
+        continue;
+      }
+
+      // Fall back to backend deduplication for rows without parserStatus
+      // (legacy clients, or rows the parser didn't explicitly mark).
+      if (seenInBatch.has(word)) {
+        duplicatesIgnored++;
+        continue;
+      }
+      seenInBatch.add(word);
 
       candidates.push({
         word,
         tags: (row.tags ?? []).map((t: string) => normalizeWord(t)).filter(Boolean),
         board: row.board?.trim() || undefined,
-        notes,
+        notes: row.notes ? row.notes.slice(0, NOTE_MAX_LENGTH) : undefined,
         clientRowId: row.clientRowId,
         lineNumber: row.lineNumber,
       });
     }
 
-    // Check existing vocabulary for skip mode
+    // Check existing vocabulary for skip mode (single batch query)
     const existingVocab =
       dto.settings.duplicateMode === 'skip'
         ? await this.getExistingVocabularySet(userId, candidates.map((c) => c.word))
         : new Set<string>();
 
-    // Separate words to enrich from words to skip
     const toEnrich: typeof candidates = [];
     for (const candidate of candidates) {
       if (dto.settings.duplicateMode === 'skip' && existingVocab.has(candidate.word)) {
@@ -235,46 +226,43 @@ export class ImportService {
       }
     }
 
-    // Resolve board IDs upfront — deduplicate board names within batch
-    const boardIdCache = new Map<string, string>(); // boardName → boardId
-    if (dto.settings.boardId) {
-      // settings.boardId is already resolved — no need to look up by name
-    }
+    // Resolve board IDs upfront — deduplicate board names within the batch.
+    // settings.boardId is already a resolved ID; per-row board names need a find-or-create.
+    const boardIdCache = new Map<string, string>();
 
-    // Pre-collect all unique board names for batch resolution
-    const boardNamesNeeded = new Set<string>();
     if (!dto.settings.boardId) {
+      const boardNamesNeeded = new Set<string>();
       for (const c of toEnrich) {
         if (c.board) boardNamesNeeded.add(c.board);
       }
-    }
-    for (const boardName of boardNamesNeeded) {
-      try {
-        const boardId = await this.findOrCreateBoardByName(userId, boardName);
-        boardIdCache.set(boardName, boardId);
-      } catch (err) {
-        this.logger.warn(`Failed to resolve board "${boardName}": ${String(err)}`);
-      }
+      // Resolve all unique board names in parallel — upserts are safe under concurrent load.
+      await Promise.all(
+        [...boardNamesNeeded].map(async (boardName) => {
+          try {
+            boardIdCache.set(boardName, await this.findOrCreateBoardByName(userId, boardName));
+          } catch (err) {
+            this.logger.warn(`Failed to resolve board "${boardName}": ${String(err)}`);
+          }
+        }),
+      );
     }
 
-    // Enrich words in parallel batches of ENRICH_CONCURRENCY
+    // Enrich words in parallel batches — cards are created only after meanings resolve.
+    // No null-meaning cards are ever created; failed enrichment goes to errorRows instead.
     const enrichResults = await runInBatches(
       toEnrich,
       ENRICH_CONCURRENCY,
       async (candidate) => {
-        // Cache-first word resolution; throws if not found in any provider
         const wordDto = await this.wordsService.findWord(candidate.word);
 
-        // Create card only after meanings are resolved
+        // Create card only after meanings are resolved (invariant: no null-meaning cards)
         await this.vocabularyService.saveWord(userId, wordDto.id);
 
-        // Retrieve the card ID
         const cardId = await this.getCardId(userId, wordDto.id);
         if (!cardId) {
           throw new Error(`Card not found after saveWord for "${candidate.word}"`);
         }
 
-        // Apply board assignment
         const resolvedBoardId = dto.settings.boardId
           ? dto.settings.boardId
           : candidate.board
@@ -285,19 +273,16 @@ export class ImportService {
           await this.assignCardToBoard(userId, cardId, resolvedBoardId);
         }
 
-        // Apply global tags (by ID)
         if (dto.settings.tagIds && dto.settings.tagIds.length > 0) {
           for (const tagId of dto.settings.tagIds) {
             await this.assignCardToTag(cardId, tagId);
           }
         }
 
-        // Apply row-level tags (by name — find or create)
         for (const tagName of candidate.tags) {
           await this.findOrCreateAndAssignTag(userId, cardId, tagName);
         }
 
-        // Apply note
         if (candidate.notes) {
           await this.upsertCardNote(cardId, candidate.notes);
         }
@@ -306,7 +291,6 @@ export class ImportService {
       },
     );
 
-    // Tally results
     for (let i = 0; i < toEnrich.length; i++) {
       const result = enrichResults[i];
       if (result.ok) {
@@ -329,7 +313,7 @@ export class ImportService {
     }
 
     const errors = errorRows.length;
-    const status = this.deriveImportStatus(imported, errors);
+    const status = this.deriveImportStatus({ imported, errors, skipped, duplicatesIgnored });
 
     return { status, imported, skipped, duplicatesIgnored, errors, errorRows };
   }
@@ -337,17 +321,26 @@ export class ImportService {
   // ── Derive ImportStatus ───────────────────────────────────────────────────
 
   /**
-   * Map (imported, errors) counts to a semantic ImportStatus.
+   * Map execution counters to a semantic ImportStatus.
    *
-   * 'no_changes' is distinct from 'failed': it means the request succeeded and
-   * was processed correctly, but every submitted word was already in the
-   * vocabulary (or was a duplicate) — nothing was created. 'failed' is reserved
-   * for when errors prevented any word from being imported.
+   * All four counters are accepted explicitly to document that skipped and
+   * duplicatesIgnored are intentionally excluded from status derivation —
+   * they represent successful no-ops, not failures.
+   *
+   * 'no_changes' is distinct from 'failed': the request succeeded and was
+   * processed correctly, but every word was already in vocabulary or was a
+   * duplicate. Nothing was created. 'failed' is reserved for enrichment errors.
    */
-  private deriveImportStatus(imported: number, errors: number): ImportStatus {
+  private deriveImportStatus(counts: {
+    imported: number;
+    errors: number;
+    skipped: number;
+    duplicatesIgnored: number;
+  }): ImportStatus {
+    const { imported, errors } = counts;
     if (imported > 0 && errors === 0) return 'completed';
-    if (imported > 0 && errors > 0)  return 'partial_failure';
-    if (imported === 0 && errors === 0) return 'no_changes'; // all skipped / all duplicates
+    if (imported > 0 && errors > 0)   return 'partial_failure';
+    if (imported === 0 && errors === 0) return 'no_changes';
     return 'failed'; // imported === 0 && errors > 0
   }
 
@@ -355,8 +348,8 @@ export class ImportService {
 
   /**
    * Single-batch vocabulary lookup — no N+1 queries.
-   * The ANY($2) operator sends all words in one round-trip.
-   * Relies on index: `CREATE INDEX IF NOT EXISTS idx_words_text ON words (text);`
+   * Uses ANY($2) to send all words in one round-trip.
+   * Relies on index: CREATE INDEX IF NOT EXISTS idx_words_text ON words (text)
    */
   private async getExistingVocabularySet(userId: string, words: string[]): Promise<Set<string>> {
     if (words.length === 0) return new Set();
@@ -429,14 +422,9 @@ export class ImportService {
     const normalised = name.trim().toLowerCase();
     if (!normalised) return;
 
-    // Use "DO UPDATE SET name = EXCLUDED.name" instead of the no-op
-    // "DO UPDATE SET updated_at = tags.updated_at".
-    //
-    // The previous form triggered unnecessary WAL writes and row locks on every
-    // import even when the tag already existed. Setting name to EXCLUDED.name
-    // writes the same value back, but this is the idiomatic PostgreSQL pattern
-    // for "upsert and always RETURNING id" — it avoids the two-round-trip
-    // DO NOTHING + SELECT alternative, which introduces a race window.
+    // DO UPDATE SET name = EXCLUDED.name is the idiomatic pattern for "upsert and always
+    // RETURNING id". It avoids the two-round-trip DO NOTHING + SELECT alternative, which
+    // introduces a race window between the INSERT and the SELECT.
     const [tag] = await this.dataSource.query<{ id: string }[]>(
       `INSERT INTO tags (id, user_id, name)
        VALUES (gen_random_uuid(), $1, $2)

@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ImportStatus } from './import-status';
+import { SYNC_IMPORT_STATUSES } from './import-constants';
+import type { ImportStatus } from './import-constants';
 
 export class ImportErrorRowDto {
   @ApiProperty({ example: 'zymurgy' })
@@ -25,13 +26,14 @@ export class ImportErrorRowDto {
 
 export class ImportExecuteResultDto {
   @ApiProperty({
-    enum: ['completed', 'partial_failure', 'failed'],
+    enum: SYNC_IMPORT_STATUSES,
     example: 'completed',
     description:
       'Overall import outcome. ' +
       '"completed" = all words imported; ' +
       '"partial_failure" = some imported, some failed; ' +
-      '"failed" = nothing imported.',
+      '"no_changes" = nothing imported (all skipped / all duplicates); ' +
+      '"failed" = nothing imported due to enrichment errors.',
   })
   status: ImportStatus;
 
@@ -42,12 +44,10 @@ export class ImportExecuteResultDto {
   skipped: number;
 
   /**
-   * Number of within-batch duplicate rows that were silently removed before processing.
-   * These are rows the parser (or backend) detected as duplicates of an earlier row
-   * in the same request — only the first occurrence is processed.
+   * Number of within-batch duplicate rows removed before processing.
+   * First occurrence wins; subsequent identical words are counted here.
    *
-   * Included so the result summary can account for all submitted rows:
-   *   submitted = imported + skipped + duplicatesIgnored + errors
+   * Enables full accounting: submitted = imported + skipped + duplicatesIgnored + errors
    */
   @ApiProperty({
     example: 2,

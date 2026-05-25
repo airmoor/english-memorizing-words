@@ -1,16 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IMPORT_ROW_STATUSES } from './import-constants';
 
-export type ImportRowStatus = 'valid' | 'duplicate_vocabulary' | 'duplicate_within_batch' | 'error';
+export type { ImportRowStatus } from './import-constants';
 
 export class ImportPreviewRowDto {
   @ApiProperty({ example: 'ephemeral' })
   word: string;
 
-  @ApiProperty({
-    enum: ['valid', 'duplicate_vocabulary', 'duplicate_within_batch', 'error'],
-    example: 'valid',
-  })
-  status: ImportRowStatus;
+  @ApiProperty({ enum: IMPORT_ROW_STATUSES, example: 'valid' })
+  status: (typeof IMPORT_ROW_STATUSES)[number];
 
   @ApiPropertyOptional({
     example: 'Already in this list (line 3)',

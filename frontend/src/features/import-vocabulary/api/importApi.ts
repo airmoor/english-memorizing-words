@@ -42,6 +42,18 @@ interface ImportRequestPayload {
 
 // ── Payload builder ───────────────────────────────────────────────────────────
 
+/**
+ * Ownership invariants enforced by this builder:
+ *
+ *   parser    → owns within-batch duplicate detection
+ *               parserStatus / parserReason are sent as-is for all non-vocabulary statuses
+ *   backend   → owns duplicate_vocabulary detection (vocabulary lookup, server-side only)
+ *               rows with status 'duplicate_vocabulary' are sent as parserStatus 'valid'
+ *               so the backend re-evaluates them against the live vocabulary
+ *   clientRowId → identity only; never interpreted as a key or ordering hint
+ *   lineNumber  → display / debug only; never used for deduplication or ordering
+ *   array ordering must never be relied upon for row correlation — use clientRowId
+ */
 function buildPayload(rows: ParsedRow[], settings: ImportSettings): ImportRequestPayload {
   return {
     words: rows.map((row) => ({
