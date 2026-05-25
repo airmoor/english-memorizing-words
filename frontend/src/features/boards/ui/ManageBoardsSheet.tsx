@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { AdaptiveSheet } from '../../../shared/ui/AdaptiveSheet/AdaptiveSheet'
 import { BottomSheetContent } from '../../../shared/ui/BottomSheet/BottomSheetContent'
+import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog/ConfirmDialog'
 import { useBoardsQuery } from '../model/useBoardsQuery'
 import { useUpdateBoardMutation, useDeleteBoardMutation } from '../model/useUpdateBoardMutation'
 import { CreateBoardSheet } from './CreateBoardSheet'
@@ -49,6 +50,7 @@ export function ManageBoardsSheet({ open, onClose }: ManageBoardsSheetProps) {
 
   const activeBoards   = boards.filter((b) => !b.isArchived)
   const archivedBoards = boards.filter((b) => b.isArchived)
+  const boardToDelete  = boards.find((b) => b.id === deleteConfirmId)
 
   return (
     <>
@@ -125,25 +127,6 @@ export function ManageBoardsSheet({ open, onClose }: ManageBoardsSheetProps) {
                         </button>
                       </div>
 
-                      {deleteConfirmId === board.id && (
-                        <div className={styles.deleteConfirm} role="alert">
-                          <span>Delete &ldquo;{board.name}&rdquo;? Cards won&apos;t be removed.</span>
-                          <button
-                            type="button"
-                            className={styles.confirmDeleteBtn}
-                            onClick={() => confirmDelete(board.id)}
-                          >
-                            Delete
-                          </button>
-                          <button
-                            type="button"
-                            className={styles.cancelDeleteBtn}
-                            onClick={() => setDeleteConfirmId(null)}
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      )}
                     </li>
                   ))}
                 </ul>
@@ -178,13 +161,6 @@ export function ManageBoardsSheet({ open, onClose }: ManageBoardsSheetProps) {
                             <TrashIcon />
                           </button>
                         </div>
-                        {deleteConfirmId === board.id && (
-                          <div className={styles.deleteConfirm} role="alert">
-                            <span>Delete &ldquo;{board.name}&rdquo;?</span>
-                            <button type="button" className={styles.confirmDeleteBtn} onClick={() => confirmDelete(board.id)}>Delete</button>
-                            <button type="button" className={styles.cancelDeleteBtn} onClick={() => setDeleteConfirmId(null)}>Cancel</button>
-                          </div>
-                        )}
                       </li>
                     ))}
                   </ul>
@@ -198,6 +174,18 @@ export function ManageBoardsSheet({ open, onClose }: ManageBoardsSheetProps) {
       <CreateBoardSheet
         open={createOpen}
         onClose={() => setCreateOpen(false)}
+      />
+
+      <ConfirmDialog
+        isOpen={deleteConfirmId !== null}
+        title={`Delete "${boardToDelete?.name ?? ''}"?`}
+        body="Words in this board will remain in your vocabulary."
+        confirmLabel="Delete"
+        onConfirm={() => {
+          if (deleteConfirmId) confirmDelete(deleteConfirmId)
+        }}
+        onCancel={() => setDeleteConfirmId(null)}
+        danger
       />
     </>
   )

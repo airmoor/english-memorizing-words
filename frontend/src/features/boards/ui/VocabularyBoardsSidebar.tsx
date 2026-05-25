@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useBoardsQuery } from '../model/useBoardsQuery'
+import { useDeleteBoardMutation } from '../model/useUpdateBoardMutation'
 import { CreateBoardSheet } from './CreateBoardSheet'
+import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog/ConfirmDialog'
 import styles from './VocabularyBoardsSidebar.module.css'
 
 interface VocabularyBoardsSidebarProps {
@@ -29,15 +31,28 @@ export function VocabularyBoardsSidebar({
   activeBoardId,
   onSelect,
 }: VocabularyBoardsSidebarProps) {
-  const [createOpen, setCreateOpen] = useState(false)
-  const { data: boards = [] } = useBoardsQuery()
+  const [createOpen, setCreateOpen]           = useState(false)
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
+  const { data: boards = [] }                 = useBoardsQuery()
+  const deleteMutation                        = useDeleteBoardMutation()
 
-  const activeBoards   = boards.filter((b) => !b.isArchived)
-  const archivedCount  = boards.filter((b) => b.isArchived).length
+  const activeBoards  = boards.filter((b) => !b.isArchived)
+  const archivedCount = boards.filter((b) => b.isArchived).length
+  const boardToDelete = activeBoards.find((b) => b.id === deleteConfirmId)
 
   const handleCreated = (boardId: string) => {
     // Auto-select the newly created board
     onSelect(boardId)
+  }
+
+  const handleConfirmDelete = () => {
+    if (!deleteConfirmId) return
+    // If we're currently viewing this board, navigate back to all vocabulary
+    if (deleteConfirmId === activeBoardId) {
+      onSelect(undefined)
+    }
+    deleteMutation.mutate(deleteConfirmId)
+    setDeleteConfirmId(null)
   }
 
   return (
@@ -64,21 +79,35 @@ export function VocabularyBoardsSidebar({
             {activeBoards.map((board) => {
               const isActive = activeBoardId === board.id
               return (
-                <button
-                  key={board.id}
-                  type="button"
-                  className={[styles.item, isActive ? styles.itemActive : ''].join(' ')}
-                  onClick={() => onSelect(board.id)}
-                  aria-current={isActive ? 'page' : undefined}
-                  title={board.name}
-                >
-                  <span className={styles.itemLabel}>{board.name}</span>
-                  {board.cardCount > 0 && (
-                    <span className={styles.itemCount} aria-label={`${board.cardCount} words`}>
-                      {board.cardCount}
-                    </span>
-                  )}
-                </button>
+                <div key={board.id} className={styles.boardSlot}>
+                  {/* Nav button — label only; trailing slot handles count/delete */}
+                  <button
+                    type="button"
+                    className={[styles.item, isActive ? styles.itemActive : ''].join(' ')}
+                    onClick={() => onSelect(board.id)}
+                    aria-current={isActive ? 'page' : undefined}
+                    title={board.name}
+                  >
+                    <span className={styles.itemLabel}>{board.name}</span>
+                  </button>
+
+                  {/* Trailing slot — count and delete share the same position and cross-fade */}
+                  <div className={styles.itemTrailing} aria-hidden="true">
+                    {board.cardCount > 0 && (
+                      <span className={styles.trailingCount}>{board.cardCount}</span>
+                    )}
+                    <button
+                      type="button"
+                      className={styles.itemDeleteBtn}
+                      onClick={(e) => { e.stopPropagation(); setDeleteConfirmId(board.id) }}
+                      aria-label={`Delete ${board.name}`}
+                      title="Delete board"
+                      tabIndex={0}
+                    >
+                      <TrashIcon />
+                    </button>
+                  </div>
+                </div>
               )
             })}
           </>
@@ -118,6 +147,16 @@ export function VocabularyBoardsSidebar({
         onClose={() => setCreateOpen(false)}
         onCreated={handleCreated}
       />
+
+      <ConfirmDialog
+        isOpen={deleteConfirmId !== null}
+        title={`Delete "${boardToDelete?.name ?? ''}"?`}
+        body="Words in this board will remain in your vocabulary."
+        confirmLabel="Delete"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteConfirmId(null)}
+        danger
+      />
     </>
   )
 }
@@ -148,6 +187,17 @@ function ArchiveIcon() {
       <polyline points="21 8 21 21 3 21 3 8" />
       <rect x="1" y="3" width="22" height="5" />
       <line x1="10" y1="12" x2="14" y2="12" />
+    </svg>
+  )
+}
+
+function TrashIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+      <path d="M10 11v6M14 11v6" />
+      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
     </svg>
   )
 }

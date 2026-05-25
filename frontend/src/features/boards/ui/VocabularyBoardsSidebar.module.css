@@ -155,3 +155,98 @@
   margin-left: auto;
   font-variant-numeric: tabular-nums;
 }
+
+/* ── Board slot — flex row: [nav button flex:1] [trailing slot fixed-width] ── */
+.boardSlot {
+  display: flex;
+  align-items: center;
+}
+
+/* Nav button stretches to fill remaining space */
+.boardSlot .item {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+}
+
+/* ── Trailing slot ────────────────────────────────────────────────────────── */
+/*
+ * Fixed-width container shared by count and delete icon.
+ * Both children are absolute-filled so they occupy the exact same position
+ * and cross-fade — zero layout shift, no cramping.
+ */
+.itemTrailing {
+  position: relative;
+  flex-shrink: 0;
+  width: 28px;
+  height: 34px;   /* matches .item min-height */
+  margin-right: 4px;
+}
+
+/* Count and delete button both fill .itemTrailing and cross-fade */
+.trailingCount,
+.itemDeleteBtn {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s ease;
+}
+
+/* ── Count ─────────────────────────────────────────────────────────────────── */
+.trailingCount {
+  font-size: 11px;
+  font-weight: var(--fw-regular);
+  color: var(--color-text-secondary);
+  opacity: 0.55;
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Delete button ─────────────────────────────────────────────────────────── */
+.itemDeleteBtn {
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 0;
+  opacity: 0;
+}
+
+/* Hover state: count fades out, delete fades in */
+.boardSlot:hover .trailingCount {
+  opacity: 0;
+}
+
+.boardSlot:hover .itemDeleteBtn {
+  opacity: 0.45;
+}
+
+/* Direct hover/focus on delete button: danger colour */
+.itemDeleteBtn:hover,
+.itemDeleteBtn:focus-visible {
+  opacity: 1 !important;
+  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 8%, transparent);
+}
+
+.itemDeleteBtn:focus-visible {
+  outline: 2px solid var(--color-danger);
+  outline-offset: 1px;
+}
+
+/* ── Mobile: (hover: none) ────────────────────────────────────────────────── */
+/*
+ * Touch devices cannot hover — always show delete at low opacity.
+ * Count is hidden to avoid overlap in the shared slot.
+ */
+@media (hover: none) {
+  .trailingCount {
+    opacity: 0;
+  }
+  .itemDeleteBtn {
+    opacity: 0.3;
+  }
+}

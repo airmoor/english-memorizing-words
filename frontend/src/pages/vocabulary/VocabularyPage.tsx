@@ -245,7 +245,7 @@ export function VocabularyPage() {
   // On mount, seed from the URL if present. Thereafter, URL is the source of truth.
 
   const urlBoard = searchParams.get('board') ?? undefined
-  const { data: boards = [] } = useBoardsQuery()
+  const { data: boards = [], isLoading: boardsLoading } = useBoardsQuery()
   const activeBoard = boards.find((b) => b.id === urlBoard)
 
   // Keep the apiFilters.boardId in sync with the URL board param
@@ -271,6 +271,17 @@ export function VocabularyPage() {
     },
     [setSearchParams],
   )
+
+  // Active-board cleanup: if the board in the URL no longer exists (e.g. it was
+  // deleted), quietly return to "All Vocabulary" so the page doesn't show a
+  // stale board context with no words.
+  useEffect(() => {
+    if (!urlBoard || boardsLoading || boards.length === 0) return
+    const stillExists = boards.some((b) => b.id === urlBoard)
+    if (!stillExists) {
+      handleBoardSelect(undefined)
+    }
+  }, [boards, boardsLoading, urlBoard, handleBoardSelect])
 
   // ── Non-board active filters (used by FilterBar "clear" logic) ───────────
   const hasNonBoardApiFilters = Object.keys(apiFilters).some(
