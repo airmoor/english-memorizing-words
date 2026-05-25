@@ -1,0 +1,268 @@
+/* ── Filter chips ──────────────────────────────────────────────────────────────
+   Visual language mirrors VocabularyToolbar.module.css — same tokens, sizing,
+   hover / active patterns. Uses only the defined design system tokens.
+────────────────────────────────────────────────────────────────────────────── */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  background: var(--color-bg-card);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: var(--font-xs);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: border-color 0.14s, background 0.14s, color 0.14s;
+}
+
+.chip:hover {
+  border-color: color-mix(in srgb, var(--color-accent) 50%, var(--color-border));
+  color: var(--color-text-primary);
+}
+
+.chipActive {
+  background: var(--color-accent-subtle);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.moreChip {
+  gap: 6px;
+}
+
+.moreDot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  flex-shrink: 0;
+  margin-left: 1px;
+}
+
+/* ── Divider ──────────────────────────────────────────────────────────────────── */
+
+.chipDivider {
+  width: 1px;
+  height: 16px;
+  background: var(--color-border);
+  flex-shrink: 0;
+  align-self: center;
+}
+
+/* ── State dots ──────────────────────────────────────────────────────────────── */
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.dot_due       { background: var(--color-warning); }
+.dot_new       { background: var(--color-text-secondary); opacity: 0.5; }
+.dot_difficult { background: var(--color-danger); }
+.dot_saved     { background: var(--color-success); }
+
+/* ── Sort — inline dropdown at end of the chip row ────────────────────────────── */
+
+.sortWrap {
+  position: relative;
+  flex-shrink: 0;
+  margin-left: var(--space-xs);
+}
+
+.sortBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 11px;
+  background: var(--color-bg-card);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: var(--font-xs);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.14s, background 0.14s, color 0.14s;
+}
+
+.sortBtn:hover {
+  border-color: color-mix(in srgb, var(--color-accent) 50%, var(--color-border));
+  color: var(--color-text-primary);
+}
+
+.sortBtnActive {
+  background: var(--color-accent-subtle);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.sortDropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 50;
+  background: var(--color-bg-card);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  min-width: 168px;
+  animation: dropdownIn 0.14s var(--ease-out, ease) both;
+}
+
+@keyframes dropdownIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.sortOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px var(--space-md);
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  font-family: var(--font-sans);
+  font-size: var(--font-xs);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  transition: background 0.1s, color 0.1s;
+}
+
+.sortOption:last-child {
+  border-bottom: none;
+}
+
+.sortOption:hover {
+  background: color-mix(in srgb, var(--color-text-primary) 5%, transparent);
+  color: var(--color-text-primary);
+}
+
+.sortOptionActive {
+  color: var(--color-accent);
+  font-weight: var(--fw-medium);
+}
+
+/* ── "More filters" sheet content ────────────────────────────────────────────── */
+
+.sheetHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-lg) var(--space-lg) var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sheetTitle {
+  font-size: var(--font-md);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+  font-family: var(--font-sans);
+}
+
+.sheetCloseBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-full);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  flex-shrink: 0;
+}
+
+.sheetCloseBtn:hover {
+  background: color-mix(in srgb, var(--color-text-primary) 8%, transparent);
+  color: var(--color-text-primary);
+}
+
+/* ── Filter groups inside sheet ─────────────────────────────────────────────── */
+
+.filterGroup {
+  padding: var(--space-md) var(--space-lg);
+}
+
+.filterGroup + .filterGroup {
+  border-top: 1px solid var(--color-border);
+}
+
+.groupLabel {
+  font-size: var(--font-xs);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-sm);
+}
+
+.groupChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.groupChip {
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-border);
+  background: var(--color-bg-card);
+  color: var(--color-text-secondary);
+  font-size: var(--font-xs);
+  font-weight: var(--fw-medium);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: border-color 0.14s, background 0.14s, color 0.14s;
+  white-space: nowrap;
+}
+
+.groupChip:hover {
+  border-color: color-mix(in srgb, var(--color-accent) 50%, var(--color-border));
+  color: var(--color-text-primary);
+}
+
+.groupChipActive {
+  border-color: var(--color-accent);
+  background: var(--color-accent-subtle);
+  color: var(--color-accent);
+}
+
+/* ── Clear footer ─────────────────────────────────────────────────────────────── */
+
+.sheetClear {
+  padding: var(--space-md) var(--space-lg);
+  border-top: 1px solid var(--color-border);
+}
+
+.sheetClearBtn {
+  background: none;
+  border: none;
+  color: var(--color-danger);
+  font-size: var(--font-xs);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.8;
+  transition: opacity 0.15s;
+}
+
+.sheetClearBtn:hover {
+  opacity: 1;
+}

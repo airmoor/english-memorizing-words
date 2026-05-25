@@ -74,6 +74,10 @@ export interface LearningState {
 
 // ── WordDetailContent props contract ──────────────────────────────────────
 
+// Imported lazily to avoid circular deps — VocabularyWord lives in entities,
+// never in shared/ui.
+import type { VocabularyWord } from '../../../entities/vocabulary/model/types'
+
 /**
  * The complete prop interface for WordDetailContent.
  * Defined here so all containers (BottomSheet, SidePanel, WordDetailPage) share
@@ -87,6 +91,12 @@ export interface WordDetailContentProps {
    * WordDetailContent renders LearningSection only when this is non-null.
    */
   learningState: LearningState | null
+  /**
+   * Full vocabulary entry — present when context='vocabulary' and the word
+   * was found in the vocabulary cache. Used to render boards, tags, note, and
+   * review info sections (Phase 4 additions).
+   */
+  vocabCard?: VocabularyWord | null
   /** Called when the user saves the word. Only rendered when learningState is null. */
   onSave: () => void
   /** Called when the user removes the word. Only rendered when learningState is non-null. */

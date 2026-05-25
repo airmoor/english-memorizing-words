@@ -154,50 +154,50 @@ Phases 1–2 are backend-only and can be deployed without any visible frontend c
 **Deliverables:**
 
 **Filter bar:**
-- [ ] Board chips in filter bar (horizontal scroll, "All" chip)
-- [ ] "Browse boards" chip for users with many boards
-- [ ] Tag chips in filter bar (multi-select, AND logic)
-- [ ] Review state filter chips
-- [ ] Part-of-speech filter chips
-- [ ] Sort action sheet (bottom sheet with sort options)
-- [ ] Active filter visual state (filled chip)
-- [ ] "Clear" button when filters active
-- [ ] Filter bar sticky positioning
+- [x] Board chips in filter bar (horizontal scroll, single-select)
+- [x] "Browse boards" chip for users with many boards (>5 boards)
+- [x] Tag chips in filter bar (multi-select, AND logic)
+- [x] Review state filter chips
+- [x] Part-of-speech filter chips
+- [x] Sort action sheet (bottom sheet with sort options)
+- [x] Active filter visual state (filled chip)
+- [x] "Clear" button when filters active
+- [x] Filter bar sticky positioning
 
 **Card detail bottom sheet:**
-- [ ] Card detail opens as bottom sheet on card tap
-- [ ] Word header section (word, transcription)
-- [ ] Meanings section (read-only, scrollable)
-- [ ] Notes section (expandable, inline edit, auto-save)
-- [ ] Boards section (expandable, chips with remove, "+ Add to board")
-- [ ] Tags section (expandable, chips with remove, inline autocomplete input)
-- [ ] Review info section (interval, next review humanised, date added)
-- [ ] "Remove from vocabulary" destructive action
+- [x] Card detail opens as bottom sheet on card tap
+- [x] Word header section (word, transcription)
+- [x] Meanings section (read-only, scrollable)
+- [x] Notes section (expandable, inline edit, auto-save)
+- [x] Boards section (expandable, chips with remove, "+ Add to board")
+- [x] Tags section (expandable, chips with remove, inline autocomplete input)
+- [x] Review info section (interval, next review humanised, date added)
+- [x] "Remove from vocabulary" destructive action (inline confirm flow)
 
 **Board management:**
-- [ ] Create board flow (bottom sheet with name input)
-- [ ] Board rename (inline edit)
-- [ ] Board archive (swipe action or context menu)
-- [ ] Board delete (with confirmation)
-- [ ] Board management accessible from Settings
+- [x] Create board flow (bottom sheet with name input)
+- [x] Board rename (inline edit)
+- [x] Board archive (toggle from manage sheet)
+- [x] Board delete (with confirmation)
+- [x] Board management accessible from Settings
 
 **Tag management:**
-- [ ] Tag management list in Settings (name, card count)
-- [ ] Tag rename (inline edit)
-- [ ] Tag delete (with confirmation, affected card count)
+- [x] Tag management list in Settings (name, card count)
+- [x] Tag rename (inline edit)
+- [x] Tag delete (with confirmation, affected card count)
 
 **Features:**
-- [ ] `features/boards`: `useBoardsQuery`, `useCreateBoardMutation`, `useCardBoardMutation`, `BoardPickerSheet`, `CreateBoardSheet`
-- [ ] `features/tags`: `useTagsQuery`, `useCreateTagMutation`, `useCardTagMutation`, `TagInputSection`
-- [ ] `features/card-note`: `useCardNoteMutation`, `NoteSection`
-- [ ] `features/vocabulary` filter integration: pass filters to vocabulary query
+- [x] `features/boards`: `useBoardsQuery`, `useCreateBoardMutation`, `useCardBoardMutation`, `BoardPickerSheet`, `CreateBoardSheet`, `ManageBoardsSheet`
+- [x] `features/tags`: `useTagsQuery`, `useCreateTagMutation`, `useCardTagMutation`, `TagInputSection`, `ManageTagsSheet`
+- [x] `features/card-note`: `useCardNoteMutation`, `NoteSection`
+- [x] `features/vocabulary` filter integration: pass filters to vocabulary query
 
 **Vocabulary list:**
-- [ ] Standard card with board/tag chips (up to 2, "+N more")
-- [ ] Compact card mode (toggle)
-- [ ] Empty state: no filters
-- [ ] Empty state: active filters, no results
-- [ ] Review state badge on each card
+- [x] Standard card with board/tag chips (up to 2, "+N more")
+- [x] Compact card mode (toggle)
+- [x] Empty state: no filters
+- [x] Empty state: active filters, no results
+- [x] Review state badge on each card
 
 ---
 

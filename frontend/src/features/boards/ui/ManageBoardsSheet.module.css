@@ -1,0 +1,160 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-lg) var(--space-lg) var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.title {
+  font-size: var(--font-md);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+  font-family: var(--font-sans);
+}
+
+.addBtn {
+  background: none;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-full);
+  color: var(--color-accent);
+  font-size: var(--font-xs);
+  font-family: inherit;
+  font-weight: 600;
+  padding: var(--space-xs) 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.addBtn:hover {
+  background: var(--color-accent-subtle);
+}
+
+.loading,
+.empty {
+  padding: var(--space-md);
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: var(--font-xs);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-xs) 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.rowArchived {
+  opacity: 0.6;
+}
+
+.boardName {
+  flex: 1;
+  font-size: var(--font-sm);
+  color: var(--color-text-primary);
+}
+
+.cardCount {
+  font-size: var(--font-xs);
+  color: var(--color-text-secondary);
+}
+
+.editInput {
+  flex: 1;
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-size: var(--font-sm);
+  font-family: inherit;
+  outline: none;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+}
+
+.actionBtn:hover,
+.actionBtn:focus-visible {
+  background: color-mix(in srgb, var(--color-text-primary) 6%, transparent);
+  color: var(--color-text-primary);
+  outline: none;
+}
+
+.actionDanger:hover,
+.actionDanger:focus-visible {
+  color: var(--color-danger);
+}
+
+.deleteConfirm {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: var(--space-sm) 0;
+  font-size: var(--font-xs);
+  color: var(--color-text-secondary);
+  flex-wrap: wrap;
+}
+
+.confirmDeleteBtn {
+  padding: var(--space-xs) 12px;
+  background: var(--color-danger);
+  border: none;
+  border-radius: var(--radius-full);
+  color: #fff;
+  font-size: var(--font-xs);
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancelDeleteBtn {
+  padding: var(--space-xs) 12px;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text-secondary);
+  font-size: var(--font-xs);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.archivedSection {
+  border-top: 1px solid var(--color-border);
+  margin-top: var(--space-sm);
+}
+
+.archivedToggle {
+  padding: var(--space-sm) var(--space-lg);
+  font-size: var(--font-xs);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  user-select: none;
+}

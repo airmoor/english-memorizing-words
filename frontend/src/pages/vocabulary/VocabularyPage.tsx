@@ -8,7 +8,9 @@ import { useWordDetail } from '../../shared/ui/WordDetail/WordDetailContext'
 import { useWordDetailUrl } from '../../shared/ui/WordDetail/useWordDetailUrl'
 import { VocabularyList } from '../../features/vocabulary/ui/VocabularyList'
 import { VocabularyToolbar } from '../../features/vocabulary/ui/VocabularyToolbar'
+import { VocabularyFilterBar } from '../../features/vocabulary/ui/VocabularyFilterBar'
 import { useVocabularyInfinite } from '../../features/vocabulary/model/useVocabularyInfinite'
+import { useVocabularyFilters } from '../../features/vocabulary/model/useVocabularyFilters'
 import type { VocabularyFilter, SortOption } from '../../features/vocabulary/model/cardState'
 import type { ViewMode } from '../../features/vocabulary/ui/VocabularyToolbar'
 import type { VocabularyWord } from '../../entities/vocabulary/model/types'
@@ -28,18 +30,14 @@ function ToolbarSkeleton() {
         <div className={styles.skeletonControl} style={{ width: 74 }} />
       </div>
       <div className={styles.skeletonChipRow}>
-        {/* State chips — widths approximate real label lengths */}
-        <div className={styles.skeletonChip} style={{ width: 54 }} />
-        <div className={styles.skeletonChip} style={{ width: 88 }} />
+        {/* Primary chips: Due, New, Difficult + board/tag placeholders */}
+        <div className={styles.skeletonChip} style={{ width: 48 }} />
+        <div className={styles.skeletonChip} style={{ width: 44 }} />
         <div className={styles.skeletonChip} style={{ width: 76 }} />
-        <div className={styles.skeletonChip} style={{ width: 76 }} />
-        <div className={styles.skeletonChip} style={{ width: 96 }} />
         <div className={styles.skeletonDivider} />
-        {/* Special chips */}
-        <div className={styles.skeletonChip} style={{ width: 84 }} />
-        <div className={styles.skeletonChip} style={{ width: 122 }} />
-        <div className={styles.skeletonChip} style={{ width: 116 }} />
-        <div className={styles.skeletonChip} style={{ width: 136 }} />
+        <div className={styles.skeletonChip} style={{ width: 80 }} />
+        <div className={styles.skeletonChip} style={{ width: 66 }} />
+        <div className={styles.skeletonChip} style={{ width: 56 }} />
       </div>
     </div>
   )
@@ -104,9 +102,11 @@ interface ContentProps {
   onRemove: (wordId: string) => void
   viewMode: ViewMode
   isEmpty: boolean
+  hasActiveFilters?: boolean
   hasNextPage: boolean
   isFetchingNextPage: boolean
   onLoadMore: () => void
+  onClearFilters?: () => void
 }
 
 function VocabularyPageContent({
@@ -114,9 +114,11 @@ function VocabularyPageContent({
   onRemove,
   viewMode,
   isEmpty,
+  hasActiveFilters,
   hasNextPage,
   isFetchingNextPage,
   onLoadMore,
+  onClearFilters,
 }: ContentProps) {
   const detail = useWordDetail()
 
@@ -133,9 +135,11 @@ function VocabularyPageContent({
       onRemove={onRemove}
       viewMode={viewMode}
       isEmpty={isEmpty}
+      hasActiveFilters={hasActiveFilters}
       hasNextPage={hasNextPage}
       isFetchingNextPage={isFetchingNextPage}
       onLoadMore={onLoadMore}
+      onClearFilters={onClearFilters}
     />
   )
 }
@@ -233,6 +237,14 @@ export function VocabularyPage() {
     [setSearchParams],
   )
 
+  // ── API-level filters (boards, tags, reviewState, POS, sortDir) ─────────
+  const {
+    filters:         apiFilters,
+    setFilter:       setApiFilter,
+    clearFilters:    clearApiFilters,
+    hasActiveFilters: hasApiFilters,
+  } = useVocabularyFilters()
+
   // ── Data — driven by debouncedQuery, not inputValue ───────────────────────
 
   const {
@@ -244,7 +256,7 @@ export function VocabularyPage() {
     isFetchingNextPage,
     fetchNextPage,
     remove,
-  } = useVocabularyInfinite({ query: debouncedQuery, activeFilters, sort })
+  } = useVocabularyInfinite({ query: debouncedQuery, activeFilters, sort, apiFilters })
 
   // ── Display state ─────────────────────────────────────────────────────────
 
@@ -254,13 +266,13 @@ export function VocabularyPage() {
   // isLoading → false. Prevents the blank-frame gap that a setState in an
   // effect would cause (skeleton → nothing → count).
   const knownTotalRef = useRef<number | null>(null)
-  if (!isLoading && !isError && !debouncedQuery && activeFilters.length === 0) {
+  if (!isLoading && !isError && !debouncedQuery && activeFilters.length === 0 && !hasApiFilters) {
     knownTotalRef.current = total
   }
   const knownTotal = knownTotalRef.current
 
-  // Active filtering: either the committed query or any filter chip is on.
-  const isFiltering = debouncedQuery.length > 0 || activeFilters.length > 0
+  // Active filtering: either the committed query, legacy chips, or new API filters.
+  const isFiltering = debouncedQuery.length > 0 || activeFilters.length > 0 || hasApiFilters
 
   // Toolbar is always shown once loading resolves — as long as the user has
   // words OR there are active filters (user must be able to clear them).
@@ -273,6 +285,11 @@ export function VocabularyPage() {
 
   // Truly empty: user has zero saved words (unfiltered, confirmed by server).
   const isEmpty = !isLoading && !isError && !isFiltering && total === 0
+
+  const handleClearAll = useCallback(() => {
+    clearApiFilters()
+    activeFilters.forEach(handleFilterToggle)
+  }, [clearApiFilters, activeFilters, handleFilterToggle])
 
   return (
     <PageLayout>
@@ -305,17 +322,24 @@ export function VocabularyPage() {
         ) : (
           <div className={styles.contentArea}>
             {showToolbar && (
-              <VocabularyToolbar
-                query={inputValue}
-                activeFilters={activeFilters}
-                sort={sort}
-                viewMode={viewMode}
-                filteredCount={total}
-                onQueryChange={handleQueryChange}
-                onFilterToggle={handleFilterToggle}
-                onSortChange={handleSortChange}
-                onViewModeChange={setViewMode}
-              />
+              <>
+                <VocabularyToolbar
+                  query={inputValue}
+                  viewMode={viewMode}
+                  onQueryChange={handleQueryChange}
+                  onViewModeChange={setViewMode}
+                />
+                <VocabularyFilterBar
+                  filters={apiFilters}
+                  hasActiveFilters={isFiltering}
+                  onSetFilter={setApiFilter}
+                  onClear={handleClearAll}
+                  legacyFilters={activeFilters}
+                  onLegacyFilterToggle={handleFilterToggle}
+                  sort={sort}
+                  onSortChange={handleSortChange}
+                />
+              </>
             )}
             <WordDetailProvider onRemove={remove} context="vocabulary">
               <VocabularyPageContent
@@ -323,9 +347,11 @@ export function VocabularyPage() {
                 onRemove={remove}
                 viewMode={viewMode}
                 isEmpty={isEmpty}
+                hasActiveFilters={isFiltering}
                 hasNextPage={hasNextPage}
                 isFetchingNextPage={isFetchingNextPage}
                 onLoadMore={fetchNextPage}
+                onClearFilters={handleClearAll}
               />
             </WordDetailProvider>
           </div>

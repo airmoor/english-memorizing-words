@@ -5,6 +5,7 @@ import { Text } from '../../../shared/ui/Typography/Typography'
 import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog/ConfirmDialog'
 import { useWordDetail } from '../../../shared/ui/WordDetail/WordDetailContext'
 import { getCardState } from '../model/cardState'
+import { ReviewStateBadge } from './ReviewStateBadge'
 import styles from './VocabularyItem.module.css'
 
 interface Props {
@@ -93,6 +94,7 @@ export function VocabularyItem({ item, onRemove, sourceList }: Props) {
             {item.transcription && (
               <span className={styles.transcription}>/{item.transcription}/</span>
             )}
+            <ReviewStateBadge reviewState={item.reviewState} nextReviewHuman={item.nextReviewHuman} />
             {isActive && <span className={styles.activeDot} aria-hidden="true" />}
           </div>
 
@@ -116,6 +118,23 @@ export function VocabularyItem({ item, onRemove, sourceList }: Props) {
                 </li>
               )}
             </ul>
+          )}
+
+          {/* Board / tag chips */}
+          {(item.boards.length > 0 || item.tags.length > 0) && (
+            <div className={styles.metaChips}>
+              {item.boards.slice(0, 2).map((b) => (
+                <span key={b.id} className={styles.boardChip}>{b.name}</span>
+              ))}
+              {item.tags.slice(0, 2).map((t) => (
+                <span key={t.id} className={styles.tagChip}>{t.name}</span>
+              ))}
+              {(item.boards.length + item.tags.length) > 4 && (
+                <span className={styles.moreChip}>
+                  +{(item.boards.length + item.tags.length) - 4}
+                </span>
+              )}
+            </div>
           )}
         </div>
 

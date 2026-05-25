@@ -2,7 +2,7 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  background: var(--color-bg);
+  background: var(--color-bg-primary);
   /* Subtle separator from content scrolling beneath */
   border-bottom: 1px solid var(--color-border);
 }

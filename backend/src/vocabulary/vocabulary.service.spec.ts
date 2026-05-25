@@ -198,7 +198,7 @@ describe('VocabularyService', () => {
       expect(result.items[0].reviewState).toBe('due');
     });
 
-    it('computes reviewState="learning" for interval < 7', async () => {
+    it('computes reviewState="upcoming" for interval < 7 with future nextReview', async () => {
       const future = new Date(Date.now() + 3 * 86_400_000);
       mockFullFetch({
         words: [{
@@ -209,10 +209,10 @@ describe('VocabularyService', () => {
         }],
       });
       const result = await service.getUserVocabulary(userId, {});
-      expect(result.items[0].reviewState).toBe('learning');
+      expect(result.items[0].reviewState).toBe('upcoming');
     });
 
-    it('computes reviewState="review" for interval 7–20', async () => {
+    it('computes reviewState="upcoming" for interval 7–20 with future nextReview', async () => {
       const future = new Date(Date.now() + 14 * 86_400_000);
       mockFullFetch({
         words: [{
@@ -223,10 +223,10 @@ describe('VocabularyService', () => {
         }],
       });
       const result = await service.getUserVocabulary(userId, {});
-      expect(result.items[0].reviewState).toBe('review');
+      expect(result.items[0].reviewState).toBe('upcoming');
     });
 
-    it('computes reviewState="mature" for interval >= 21', async () => {
+    it('computes reviewState="mastered" for interval >= 21 with future nextReview', async () => {
       const future = new Date(Date.now() + 30 * 86_400_000);
       mockFullFetch({
         words: [{
@@ -237,7 +237,7 @@ describe('VocabularyService', () => {
         }],
       });
       const result = await service.getUserVocabulary(userId, {});
-      expect(result.items[0].reviewState).toBe('mature');
+      expect(result.items[0].reviewState).toBe('mastered');
     });
 
     it('sets nextReviewHuman to null when card has no nextReview', async () => {

@@ -207,6 +207,18 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
 // ── Review state computation ──────────────────────────────────────────────────
 
+/**
+ * Derives the card's review state.
+ *
+ * Priority order (first match wins):
+ *   1. new      — never reviewed
+ *   2. due      — next review is in the past (overdue)
+ *   3. mastered — interval ≥ 21 days (high stability, not yet due)
+ *   4. upcoming — any other active card whose next review is in the future
+ *
+ * Matches the ReviewState union on the frontend:
+ *   'new' | 'due' | 'upcoming' | 'mastered'
+ */
 function computeReviewState(
   lastReviewedAt: Date | null,
   intervalDays: number | null,
@@ -216,19 +228,26 @@ function computeReviewState(
   if (lastReviewedAt === null) return 'new';
   if (nextReview !== null && nextReview <= now) return 'due';
   const days = intervalDays ?? 0;
-  if (days < 7) return 'learning';
-  if (days < 21) return 'review';
-  return 'mature';
+  if (days >= 21) return 'mastered';
+  return 'upcoming';
 }
 
 // ── Filter → SQL condition mapping ────────────────────────────────────────────
 
 const FILTER_CONDITIONS: Record<string, string> = {
-  difficult:       '(c.ease_factor IS NOT NULL AND c.ease_factor < 2.0)',
+  // ── New API review states (used by ?reviewState= param) ────────────────
+  // These match the ReviewState union: 'new' | 'due' | 'upcoming' | 'mastered'
   new:             'c.last_reviewed_at IS NULL',
+  due:             '(c.last_reviewed_at IS NOT NULL AND c.next_review IS NOT NULL AND c.next_review <= NOW())',
+  upcoming:        '(c.last_reviewed_at IS NOT NULL AND (c.next_review IS NULL OR c.next_review > NOW()) AND (c.interval_days IS NULL OR c.interval_days < 21))',
+  mastered:        '(c.last_reviewed_at IS NOT NULL AND c.interval_days >= 21 AND (c.next_review IS NULL OR c.next_review > NOW()))',
+  // ── Legacy client-derived states (used by ?filters= param) ────────────
+  // Kept for backward compatibility with the VocabularyToolbar chip system.
+  difficult:       '(c.ease_factor IS NOT NULL AND c.ease_factor < 2.0)',
   learning:        '(c.last_reviewed_at IS NOT NULL AND c.interval_days < 7)',
   review:          '(c.interval_days >= 7 AND c.interval_days < 21)',
   mature:          'c.interval_days >= 21',
+  // ── Special filters ────────────────────────────────────────────────────
   dueToday:        'c.next_review <= NOW()',
   neverReviewed:   'c.last_reviewed_at IS NULL',
   savedRecently:   "uw.saved_at >= NOW() - INTERVAL '7 days'",

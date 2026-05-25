@@ -17,6 +17,11 @@ export interface WordDetailData {
   word: WordPayload | undefined
   /** The learning state. Null when the word is not saved to vocabulary. */
   learningState: LearningState | null
+  /**
+   * The full vocabulary entry if the word was found via the vocabulary cache
+   * (path 1). Null on paths 2 and 3. Used to render boards/tags/note sections.
+   */
+  vocabEntry: VocabularyWord | null
   /** True only during a network fetch (path 3). Paths 1 and 2 are instant. */
   isLoading: boolean
   error: Error | null
@@ -125,6 +130,7 @@ export function useWordDetailData(
     return {
       word: vocabWordToWordPayload(vocabEntry),
       learningState: vocabWordToLearningState(vocabEntry),
+      vocabEntry,
       isLoading: false,
       error: null,
     }
@@ -143,6 +149,7 @@ export function useWordDetailData(
     return {
       word: wordResultToWordPayload(searchCacheEntry),
       learningState: vocabEntryByText ? vocabWordToLearningState(vocabEntryByText) : null,
+      vocabEntry: vocabEntryByText,
       isLoading: false,
       error: null,
     }
@@ -156,6 +163,7 @@ export function useWordDetailData(
     return {
       word: wordResultToWordPayload(fetchedWord),
       learningState: vocabEntryByText ? vocabWordToLearningState(vocabEntryByText) : null,
+      vocabEntry: vocabEntryByText,
       isLoading: false,
       error: null,
     }
@@ -165,6 +173,7 @@ export function useWordDetailData(
   return {
     word: undefined,
     learningState: null,
+    vocabEntry: null,
     isLoading: isFetching && normalizedText !== null,
     error: isError ? (fetchError as Error) : null,
   }

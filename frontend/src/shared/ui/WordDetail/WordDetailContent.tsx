@@ -1,7 +1,12 @@
+import { useState } from 'react'
 import type { WordDetailContentProps } from './types'
 import { DictionaryHeader } from './DictionaryHeader'
 import { MeaningGroup } from './MeaningGroup'
 import { groupByPos } from './utils'
+import { NoteSection } from '../../../features/card-note/ui/NoteSection'
+import { TagInputSection } from '../../../features/tags/ui/TagInputSection'
+import { BoardsSection } from './BoardsSection'
+import { ReviewInfoSection } from './ReviewInfoSection'
 import styles from './WordDetailContent.module.css'
 
 /**
@@ -17,17 +22,22 @@ import styles from './WordDetailContent.module.css'
  *   DictionaryHeader    — word, transcription, source, save/remove
  *   MeaningGroup[]      — one section per part of speech
  *   (separator)         — visual rule between dictionary and learning layers
- *   LearningSection     — TODO: added in Phase 2 when LearningState is surfaced in UI
+ *   NoteSection         — inline-edit personal note (Phase 4)
+ *   BoardsSection       — board chips + add-to-board picker (Phase 4)
+ *   TagInputSection     — tag chips + autocomplete input (Phase 4)
+ *   ReviewInfoSection   — interval, next review, date added (Phase 4)
  */
 export function WordDetailContent({
   word,
   learningState,
+  vocabCard,
   onSave,
   onRemove,
   isMutating = false,
   context = 'search',
 }: WordDetailContentProps) {
   const groups = groupByPos(word.meanings)
+  const [removeConfirm, setRemoveConfirm] = useState(false)
 
   return (
     <div className={styles.content}>
@@ -51,13 +61,68 @@ export function WordDetailContent({
         ))}
       </div>
 
-      {/* ── Learning layer ────────────────────────────────────────────── */}
-      {/* TODO(P2): LearningSection added once learning state is surfaced in UI. */}
+      {/* ── Vocabulary card sections — only in vocabulary context ────── */}
+      {context === 'vocabulary' && vocabCard?.cardId && (
+        <div className={styles.vocabSections}>
+          <NoteSection
+            cardId={vocabCard.cardId}
+            note={vocabCard.note}
+          />
 
-      {/* ── Source attribution — subtle, at the very bottom ──────────── */}
-      {/* <p className={styles.attribution}>
-        {PROVIDER_LABELS[word.provider] ?? word.provider}
-      </p> */}
+          <BoardsSection
+            cardId={vocabCard.cardId}
+            boards={vocabCard.boards}
+          />
+
+          <TagInputSection
+            cardId={vocabCard.cardId}
+            tags={vocabCard.tags}
+          />
+
+          <ReviewInfoSection
+            reviewState={vocabCard.reviewState}
+            nextReviewHuman={vocabCard.nextReviewHuman}
+            lastReviewedAt={vocabCard.lastReviewedAt}
+            savedAt={vocabCard.savedAt}
+            intervalDays={vocabCard.intervalDays}
+          />
+
+          {/* ── Destructive: remove from vocabulary ───────────────────── */}
+          <div className={styles.destructiveRow}>
+            {!removeConfirm ? (
+              <button
+                type="button"
+                className={styles.removeBtn}
+                onClick={() => setRemoveConfirm(true)}
+                disabled={isMutating}
+              >
+                Remove from vocabulary
+              </button>
+            ) : (
+              <div className={styles.removeConfirm}>
+                <span className={styles.removeConfirmText}>
+                  Remove &ldquo;{word.text}&rdquo;? Review progress will be lost.
+                </span>
+                <button
+                  type="button"
+                  className={styles.removeConfirmYes}
+                  onClick={onRemove}
+                  disabled={isMutating}
+                >
+                  {isMutating ? 'Removing…' : 'Yes, remove'}
+                </button>
+                <button
+                  type="button"
+                  className={styles.removeConfirmNo}
+                  onClick={() => setRemoveConfirm(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

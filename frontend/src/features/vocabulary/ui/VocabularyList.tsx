@@ -15,9 +15,13 @@ interface Props {
   viewMode?: ViewMode
   /** True when the user has no words at all (not filtered out). */
   isEmpty?: boolean
+  /** True when at least one filter is active (board, tag, reviewState, etc.) */
+  hasActiveFilters?: boolean
   hasNextPage?: boolean
   isFetchingNextPage?: boolean
   onLoadMore?: () => void
+  /** Called when user clicks "Clear filters" from the empty filtered state */
+  onClearFilters?: () => void
 }
 
 export function VocabularyList({
@@ -25,9 +29,11 @@ export function VocabularyList({
   onRemove,
   viewMode = 'detailed',
   isEmpty = false,
+  hasActiveFilters = false,
   hasNextPage = false,
   isFetchingNextPage = false,
   onLoadMore,
+  onClearFilters,
 }: Props) {
   const navigate    = useNavigate()
   const sentinelRef = useRef<HTMLDivElement>(null)
@@ -78,8 +84,15 @@ export function VocabularyList({
           No matches
         </Text>
         <Text variant="body" color="secondary" as="p" className={styles.emptyText}>
-          Try a different search or filter combination.
+          {hasActiveFilters
+            ? 'No words match these filters. Try adjusting or clearing them.'
+            : 'Try a different search term.'}
         </Text>
+        {hasActiveFilters && onClearFilters && (
+          <Button onClick={onClearFilters} variant="secondary">
+            Clear filters
+          </Button>
+        )}
       </div>
     )
   }

@@ -3,6 +3,7 @@ import type { VocabularyWord } from '../../../entities/vocabulary/model/types'
 import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog/ConfirmDialog'
 import { useWordDetail } from '../../../shared/ui/WordDetail/WordDetailContext'
 import { getCardState } from '../model/cardState'
+import { ReviewStateBadge } from './ReviewStateBadge'
 import styles from './VocabularyItemCompact.module.css'
 
 interface Props {
@@ -71,6 +72,9 @@ export function VocabularyItemCompact({ item, onRemove, sourceList }: Props) {
           ) : (
             <span />
           )}
+
+          {/* Review state badge */}
+          <ReviewStateBadge reviewState={item.reviewState} nextReviewHuman={item.nextReviewHuman} />
         </div>
 
         {/* Delete */}

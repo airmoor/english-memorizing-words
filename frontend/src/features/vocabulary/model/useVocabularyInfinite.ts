@@ -3,6 +3,7 @@ import type { InfiniteData } from '@tanstack/react-query'
 import { fetchVocabularyPage, deleteWord } from '../api/vocabularyApi'
 import type { PaginatedVocabulary, VocabularyWord } from '../../../entities/vocabulary/model/types'
 import type { VocabularyFilter, SortOption } from './cardState'
+import type { VocabularyFilters } from '../../../entities/vocabulary/model/filters'
 
 const PAGE_SIZE = 50
 
@@ -10,24 +11,27 @@ export interface VocabularyQueryParams {
   query: string
   activeFilters: VocabularyFilter[]
   sort: SortOption
+  /** Structured API filters (boards-tags-review-v2) */
+  apiFilters?: VocabularyFilters
 }
 
 export function useVocabularyInfinite(params: VocabularyQueryParams) {
   const queryClient = useQueryClient()
-  const { query, activeFilters, sort } = params
+  const { query, activeFilters, sort, apiFilters } = params
 
   const filtersKey = activeFilters.join(',')
-  const queryKey   = ['vocabulary', { query, filters: filtersKey, sort }] as const
+  const queryKey   = ['vocabulary', { query, filters: filtersKey, sort, apiFilters }] as const
 
   const infiniteQuery = useInfiniteQuery({
     queryKey,
     queryFn: ({ pageParam }) =>
       fetchVocabularyPage({
-        q:       query || undefined,
-        filters: filtersKey || undefined,
-        sort:    sort !== 'newest' ? sort : undefined,
-        limit:   PAGE_SIZE,
-        offset:  pageParam as number,
+        q:          query || undefined,
+        filters:    filtersKey || undefined,
+        sort:       sort !== 'newest' ? sort : undefined,
+        limit:      PAGE_SIZE,
+        offset:     pageParam as number,
+        apiFilters: apiFilters,
       }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {

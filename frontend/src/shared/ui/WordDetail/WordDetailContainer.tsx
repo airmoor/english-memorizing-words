@@ -112,7 +112,7 @@ export function WordDetailContainer({ children, onSave, onRemove, context = 'voc
     return null
   }, [state.activeWordId, queryClient])
 
-  const { word, learningState, isLoading, error } = useWordDetailData(
+  const { word, learningState, vocabEntry, isLoading, error } = useWordDetailData(
     state.activeWordId,
     wordText,
   )
@@ -161,6 +161,7 @@ export function WordDetailContainer({ children, onSave, onRemove, context = 'voc
     <WordDetailContent
       word={word}
       learningState={learningState}
+      vocabCard={vocabEntry}
       onSave={handleSave}
       onRemove={handleRemove}
       context={context}

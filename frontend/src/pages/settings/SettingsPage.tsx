@@ -15,11 +15,16 @@ import {
 } from '../../shared/design/ThemeProvider'
 import { useLogout } from '../../features/auth/model/useLogout'
 import { changePasswordApi } from '../../features/auth/api/changePassword'
+import { ManageBoardsSheet } from '../../features/boards/ui/ManageBoardsSheet'
+import { ManageTagsSheet } from '../../features/tags/ui/ManageTagsSheet'
 import styles from './SettingsPage.module.css'
 
 export function SettingsPage() {
   const { settings, resolved, setMode, setLightVariant, setDarkVariant } = useTheme()
   const logout = useLogout()
+
+  const [boardsOpen, setBoardsOpen] = useState(false)
+  const [tagsOpen,   setTagsOpen]   = useState(false)
 
   const showLightVariants = settings.mode === 'light' || settings.mode === 'system'
   const showDarkVariants  = settings.mode === 'dark'  || settings.mode === 'system'
@@ -109,6 +114,40 @@ export function SettingsPage() {
             Currently active: <strong>{resolved}</strong>
           </Text>
 
+          {/* ── Boards ───────────────────────────────────────────────────── */}
+          <Card padding="lg" className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <Text variant="label" as="h2" className={styles.sectionTitle}>Boards</Text>
+              <Text variant="caption" color="secondary" as="p">
+                Organise your vocabulary cards into custom boards.
+              </Text>
+            </div>
+            <button
+              type="button"
+              onClick={() => setBoardsOpen(true)}
+              className={styles.logoutBtn}
+            >
+              Manage boards
+            </button>
+          </Card>
+
+          {/* ── Tags ─────────────────────────────────────────────────────── */}
+          <Card padding="lg" className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <Text variant="label" as="h2" className={styles.sectionTitle}>Tags</Text>
+              <Text variant="caption" color="secondary" as="p">
+                Tag your vocabulary cards for quick filtering.
+              </Text>
+            </div>
+            <button
+              type="button"
+              onClick={() => setTagsOpen(true)}
+              className={styles.logoutBtn}
+            >
+              Manage tags
+            </button>
+          </Card>
+
           {/* ── Change Password ──────────────────────────────────────────── */}
           <Card padding="lg" className={styles.section}>
             <div className={styles.sectionHeader}>
@@ -142,6 +181,9 @@ export function SettingsPage() {
           </Card>
         </div>
       </Container>
+
+      <ManageBoardsSheet open={boardsOpen} onClose={() => setBoardsOpen(false)} />
+      <ManageTagsSheet   open={tagsOpen}   onClose={() => setTagsOpen(false)}   />
     </PageLayout>
   )
 }
