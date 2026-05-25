@@ -12,10 +12,14 @@ interface Props {
   isMutating?: boolean
   /**
    * In 'vocabulary' context all words are already saved — the save/remove
-   * action area is hidden. The container chrome (SidePanel ×, BottomSheet
-   * close button) provides the close action instead.
+   * action area is hidden. Pass onClose to render the × inline on this header row.
    */
   context?: 'vocabulary' | 'search'
+  /**
+   * When provided (vocabulary + sidePanel only), renders an inline × close
+   * button on the right side of this header — same row as the word title.
+   */
+  onClose?: () => void
 }
 
 /**
@@ -36,6 +40,7 @@ export function DictionaryHeader({
   onRemove,
   isMutating = false,
   context = 'search',
+  onClose,
 }: Props) {
   const isSaved = learningState !== null
 
@@ -52,9 +57,21 @@ export function DictionaryHeader({
         )}
       </div>
 
-      {/* Action area: hidden in vocabulary context (panel chrome handles close);
-          shows save/remove in search context. */}
-      {context !== 'vocabulary' && (
+      {/* Action area — three cases:
+          1. vocabulary + onClose: inline × button aligned with the word title
+          2. search + saved: "Saved ✓" badge
+          3. search + unsaved: "Save word" button */}
+      {context === 'vocabulary' ? (
+        onClose ? (
+          <button
+            className={styles.panelCloseBtn}
+            onClick={onClose}
+            aria-label="Close word detail"
+          >
+            <CloseIcon />
+          </button>
+        ) : null
+      ) : (
         isSaved ? (
           <button
             className={styles.savedBadge}
@@ -78,5 +95,14 @@ export function DictionaryHeader({
         )
       )}
     </header>
+  )
+}
+
+function CloseIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
   )
 }

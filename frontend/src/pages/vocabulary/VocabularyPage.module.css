@@ -87,7 +87,7 @@
 /* Heading + "← All" breadcrumb sit on the same row */
 .headingRow {
   display: flex;
-  align-items: baseline;
+  align-items: center;   /* vertically center title and breadcrumb on the same axis */
   gap: var(--space-sm);
   flex-wrap: wrap;
 }
@@ -109,8 +109,9 @@
   opacity: 0.8;
   transition: opacity 0.15s;
   white-space: nowrap;
-  align-self: flex-end;
-  margin-bottom: calc(var(--space-xs) + 2px);
+  /* Nudge down slightly so it aligns with the visual centre of the h1 cap-height
+     rather than the mathematical center including descenders. */
+  margin-top: 3px;
 }
 
 .allVocabLink:hover {

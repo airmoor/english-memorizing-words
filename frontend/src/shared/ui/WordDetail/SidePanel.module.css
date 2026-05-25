@@ -53,44 +53,11 @@
   to   { opacity: 0; transform: translateX(16px); }
 }
 
-/* ── Floating close button ────────────────────────────────────────────────── */
-/* Pinned to the top-right corner; always visible regardless of body scroll. */
-.closeBtn {
-  position: absolute;
-  top: var(--space-md);
-  right: var(--space-md);
-  z-index: 1;
-
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background: var(--color-bg-primary);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
-  color: var(--color-text-secondary);
-  font-size: 0.875rem;
-  line-height: 1;
-  cursor: pointer;
-  font-family: inherit;
-
-  transition: color 0.1s ease, background 0.1s ease, border-color 0.1s ease;
-}
-
-.closeBtn:hover {
-  color: var(--color-text-primary);
-  background: var(--color-bg-card);
-  border-color: var(--color-text-secondary);
-}
-
-.closeBtn:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-
 /* ── Scrollable content area ──────────────────────────────────────────────── */
+/*
+ * The × close button now lives inside DictionaryHeader (aligned with the word
+ * title), so the old absolute close button and its extra top padding are gone.
+ */
 .body {
   flex: 1;
   /*
@@ -105,8 +72,7 @@
   /* Thin, unobtrusive scrollbar — visible enough to hint scrollability */
   scrollbar-width: thin;
   scrollbar-color: var(--color-border) transparent;
-  /* Extra top padding clears the absolute close button (28px + 16px spacing) */
-  padding: calc(var(--space-md) + 28px + var(--space-xs)) var(--space-lg) var(--space-xxl);
+  padding: var(--space-lg) var(--space-lg) var(--space-xxl);
 }
 
 /* WebKit scrollbar — matches scrollbar-width: thin */

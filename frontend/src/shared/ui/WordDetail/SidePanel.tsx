@@ -106,16 +106,10 @@ export function SidePanel({ isOpen, onClose, children, contentKey }: Props) {
         isExiting ? styles.panelExiting : '',
       ].filter(Boolean).join(' ')}
     >
-      {/* Floating close button — stays visible regardless of scroll position */}
-      <button
-        className={styles.closeBtn}
-        onClick={handleClose}
-        aria-label="Close word detail"
-      >
-        ×
-      </button>
-
-      {/* Scrollable content body */}
+      {/* Scrollable content body.
+          The × close button now lives inside DictionaryHeader (vocabulary context),
+          aligned on the same row as the word title. Escape key still works via the
+          keyboard handler above. */}
       <div ref={bodyRef} className={styles.body}>
         {children}
       </div>

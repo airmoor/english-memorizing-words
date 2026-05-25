@@ -5,7 +5,6 @@ import { Text } from '../../../shared/ui/Typography/Typography'
 import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog/ConfirmDialog'
 import { useWordDetail } from '../../../shared/ui/WordDetail/WordDetailContext'
 import { getCardState } from '../model/cardState'
-import { ReviewStateBadge } from './ReviewStateBadge'
 import { featureFlags } from '../../../shared/lib/featureFlags'
 import styles from './VocabularyItem.module.css'
 
@@ -102,7 +101,6 @@ export function VocabularyItem({ item, onRemove, sourceList }: Props) {
             {item.transcription && (
               <span className={styles.transcription}>/{item.transcription}/</span>
             )}
-            <ReviewStateBadge reviewState={item.reviewState} nextReviewHuman={item.nextReviewHuman} />
             {isActive && <span className={styles.activeDot} aria-hidden="true" />}
           </div>
 

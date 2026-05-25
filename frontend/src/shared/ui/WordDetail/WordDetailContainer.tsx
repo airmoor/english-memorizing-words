@@ -151,22 +151,29 @@ export function WordDetailContainer({ children, onSave, onRemove, context = 'voc
       : undefined
 
   // ── Content to render inside the container ────────────────────────────────
-  const detailContent = isLoading ? (
-    <Spinner />
-  ) : error ? (
-    <p style={{ color: 'var(--color-danger)', padding: 'var(--space-md)' }}>
-      Could not load definition. <button onClick={() => {}}>Retry</button>
-    </p>
-  ) : word ? (
-    <WordDetailContent
-      word={word}
-      learningState={learningState}
-      vocabCard={vocabEntry}
-      onSave={handleSave}
-      onRemove={handleRemove}
-      context={context}
-    />
-  ) : null
+  //
+  // SidePanel: pass onClose so DictionaryHeader renders the × inline with the
+  //   word title — removes the absolute floating close button from SidePanel.
+  // BottomSheet: omit onClose — the sheet chrome handles closing (nav bar + swipe).
+  //
+  const buildDetailContent = (withInlineClose: boolean) =>
+    isLoading ? (
+      <Spinner />
+    ) : error ? (
+      <p style={{ color: 'var(--color-danger)', padding: 'var(--space-md)' }}>
+        Could not load definition. <button onClick={() => {}}>Retry</button>
+      </p>
+    ) : word ? (
+      <WordDetailContent
+        word={word}
+        learningState={learningState}
+        vocabCard={vocabEntry}
+        onSave={handleSave}
+        onRemove={handleRemove}
+        context={context}
+        onClose={withInlineClose ? actions.close : undefined}
+      />
+    ) : null
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
@@ -195,7 +202,7 @@ export function WordDetailContainer({ children, onSave, onRemove, context = 'voc
                 {word.text}
               </h2>
             )}
-            {detailContent}
+            {buildDetailContent(/* withInlineClose */ context === 'vocabulary')}
           </SidePanel>
         </div>
       ) : (
@@ -223,7 +230,7 @@ export function WordDetailContainer({ children, onSave, onRemove, context = 'voc
                 {word.text}
               </h2>
             )}
-            {detailContent}
+            {buildDetailContent(/* withInlineClose */ false)}
           </BottomSheet>
         </>
       )}

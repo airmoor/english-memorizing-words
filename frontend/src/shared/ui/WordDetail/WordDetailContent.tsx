@@ -36,6 +36,7 @@ export function WordDetailContent({
   onRemove,
   isMutating = false,
   context = 'search',
+  onClose,
 }: WordDetailContentProps) {
   const groups = groupByPos(word.meanings)
   const [removeConfirm, setRemoveConfirm] = useState(false)
@@ -50,6 +51,7 @@ export function WordDetailContent({
         onRemove={onRemove}
         isMutating={isMutating}
         context={context}
+        onClose={onClose}
       />
 
       <div className={styles.meanings}>

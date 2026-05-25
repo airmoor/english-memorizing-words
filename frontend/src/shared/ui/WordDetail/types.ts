@@ -106,8 +106,14 @@ export interface WordDetailContentProps {
   /**
    * The context the word detail is opened in.
    * - 'vocabulary': word is already saved; hides save/remove action area entirely.
-   *   The SidePanel / BottomSheet chrome provides the close action.
+   *   Pass onClose to render the × inline in DictionaryHeader (SidePanel only).
    * - 'search': standard save/remove action shown.
    */
   context?: 'vocabulary' | 'search'
+  /**
+   * When provided in vocabulary context, renders a × close button inline inside
+   * DictionaryHeader on the same row as the word title.
+   * Intentionally omitted for BottomSheet (the sheet chrome handles close).
+   */
+  onClose?: () => void
 }
