@@ -1,5 +1,7 @@
 import { useCallback, useState, useEffect, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
+import { Play, Upload, ArrowLeft } from 'lucide-react'
+import { Icon } from '../../shared/ui/Icon/Icon'
 import { Text } from '../../shared/ui/Typography/Typography'
 import { Container } from '../../shared/ui/layout/Container'
 import { PageLayout } from '../../shared/ui/layout/PageLayout'
@@ -393,7 +395,8 @@ export function VocabularyPage() {
                         onClick={() => handleBoardSelect(undefined)}
                         aria-label="Back to all vocabulary"
                       >
-                        ← All
+                        <Icon icon={ArrowLeft} size={14} />
+                        All
                       </button>
                     )}
                   </div>
@@ -416,7 +419,7 @@ export function VocabularyPage() {
                       onClick={() => navigate('/import')}
                       aria-label="Import vocabulary"
                     >
-                      <ImportIcon />
+                      <Icon icon={Upload} size={13} />
                       <span>Import</span>
                     </button>
                   )}
@@ -431,7 +434,7 @@ export function VocabularyPage() {
                         : 'Start vocabulary review'
                       }
                     >
-                      <ReviewPlayIcon />
+                      <Icon icon={Play} size={12} />
                       <span>
                         {urlBoard
                           ? `Review ${activeBoard?.name ?? 'board'}`
@@ -511,39 +514,3 @@ export function VocabularyPage() {
   )
 }
 
-// ── Icons ─────────────────────────────────────────────────────────────────────
-
-function ReviewPlayIcon() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      stroke="none"
-      aria-hidden="true"
-    >
-      <polygon points="5 3 19 12 5 21 5 3" />
-    </svg>
-  )
-}
-
-function ImportIcon() {
-  return (
-    <svg
-      width="13"
-      height="13"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-      <polyline points="7 10 12 15 17 10" />
-      <line x1="12" y1="15" x2="12" y2="3" />
-    </svg>
-  )
-}

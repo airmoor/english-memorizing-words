@@ -1,7 +1,9 @@
+import { CheckCircle, AlertTriangle, Info, X } from 'lucide-react'
 import { useEffect, useReducer } from 'react'
 import { createPortal } from 'react-dom'
 import { subscribeToToasts } from './toastBus'
 import type { ToastMessage } from './toastBus'
+import { Icon } from '../Icon/Icon'
 import styles from './Toaster.module.css'
 
 const TOAST_DURATION = 4000 // ms before auto-dismiss
@@ -19,6 +21,12 @@ function reducer(state: ToastMessage[], action: Action): ToastMessage[] {
       return state.filter((t) => t.id !== action.id)
   }
 }
+
+const LEVEL_ICON = {
+  success: CheckCircle,
+  error:   AlertTriangle,
+  info:    Info,
+} as const
 
 /**
  * Mounts at the app root. Listens to the toast bus and renders notifications
@@ -44,17 +52,17 @@ export function Toaster() {
     <div className={styles.stack} role="region" aria-label="Notifications" aria-live="polite">
       {toasts.map((t) => (
         <div key={t.id} className={[styles.toast, styles[t.level]].join(' ')}>
-          <span className={styles.icon} aria-hidden="true">
-            {t.level === 'error' ? '⚠' : t.level === 'success' ? '✓' : 'ℹ'}
+          <span className={styles.icon}>
+            <Icon icon={LEVEL_ICON[t.level]} size={16} />
           </span>
           <span className={styles.text}>{t.text}</span>
           <button
             type="button"
-            className={styles.dismiss}
+            className={[styles.dismiss, 'icon-action'].join(' ')}
             aria-label="Dismiss notification"
             onClick={() => dispatch({ type: 'remove', id: t.id })}
           >
-            ✕
+            <Icon icon={X} size={14} muted />
           </button>
         </div>
       ))}

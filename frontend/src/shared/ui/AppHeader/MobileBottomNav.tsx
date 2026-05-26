@@ -1,4 +1,6 @@
+import { Home, Search, BookOpen, Upload, ClipboardCheck } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
+import { Icon } from '../Icon/Icon'
 import styles from './MobileBottomNav.module.css'
 
 /**
@@ -6,10 +8,6 @@ import styles from './MobileBottomNav.module.css'
  *
  * Rendered by PageLayout on every authenticated page.
  * Hidden via CSS on desktop — no JS matchMedia needed; CSS-only responsive.
- *
- * Four primary tabs: Home · Search · Vocab · Review.
- * Settings / logout live on the Settings page, reachable from the compact
- * mobile header's settings icon.
  *
  * Accessibility:
  * - role="navigation" + aria-label on the nav element
@@ -30,7 +28,9 @@ export function MobileBottomNav() {
         className={({ isActive }) => [styles.tab, isActive ? styles.tabActive : ''].join(' ')}
         aria-label="Home"
       >
-        <span className={styles.iconWrap} aria-hidden="true"><HomeIcon /></span>
+        <span className={styles.iconWrap} aria-hidden="true">
+          <Icon icon={Home} size={20} />
+        </span>
         <span className={styles.label}>Home</span>
       </NavLink>
 
@@ -39,7 +39,9 @@ export function MobileBottomNav() {
         className={({ isActive }) => [styles.tab, isActive ? styles.tabActive : ''].join(' ')}
         aria-label="Search"
       >
-        <span className={styles.iconWrap} aria-hidden="true"><SearchIcon /></span>
+        <span className={styles.iconWrap} aria-hidden="true">
+          <Icon icon={Search} size={20} />
+        </span>
         <span className={styles.label}>Search</span>
       </NavLink>
 
@@ -48,7 +50,9 @@ export function MobileBottomNav() {
         className={({ isActive }) => [styles.tab, isActive ? styles.tabActive : ''].join(' ')}
         aria-label="Vocabulary"
       >
-        <span className={styles.iconWrap} aria-hidden="true"><BookIcon /></span>
+        <span className={styles.iconWrap} aria-hidden="true">
+          <Icon icon={BookOpen} size={20} />
+        </span>
         <span className={styles.label}>Vocab</span>
       </NavLink>
 
@@ -57,7 +61,9 @@ export function MobileBottomNav() {
         className={({ isActive }) => [styles.tab, isActive ? styles.tabActive : ''].join(' ')}
         aria-label="Import"
       >
-        <span className={styles.iconWrap} aria-hidden="true"><ImportIcon /></span>
+        <span className={styles.iconWrap} aria-hidden="true">
+          <Icon icon={Upload} size={20} />
+        </span>
         <span className={styles.label}>Import</span>
       </NavLink>
 
@@ -66,103 +72,11 @@ export function MobileBottomNav() {
         className={({ isActive }) => [styles.tab, isActive ? styles.tabActive : ''].join(' ')}
         aria-label="Review"
       >
-        <span className={styles.iconWrap} aria-hidden="true"><ReviewIcon /></span>
+        <span className={styles.iconWrap} aria-hidden="true">
+          <Icon icon={ClipboardCheck} size={20} />
+        </span>
         <span className={styles.label}>Review</span>
       </NavLink>
     </nav>
-  )
-}
-
-// ── Tab icons ─────────────────────────────────────────────────────────────────
-// Stroke-based, 24×24 viewBox. currentColor inherits from parent NavLink state.
-
-function HomeIcon() {
-  return (
-    <svg
-      width="22"
-      height="22"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-      <polyline points="9 22 9 12 15 12 15 22" />
-    </svg>
-  )
-}
-
-function SearchIcon() {
-  return (
-    <svg
-      width="22"
-      height="22"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="11" cy="11" r="8" />
-      <line x1="21" y1="21" x2="16.65" y2="16.65" />
-    </svg>
-  )
-}
-
-function BookIcon() {
-  return (
-    <svg
-      width="22"
-      height="22"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-    </svg>
-  )
-}
-
-function ImportIcon() {
-  return (
-    <svg
-      width="22"
-      height="22"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-      <polyline points="7 10 12 15 17 10" />
-      <line x1="12" y1="15" x2="12" y2="3" />
-    </svg>
-  )
-}
-
-function ReviewIcon() {
-  return (
-    <svg
-      width="22"
-      height="22"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="2" y="5" width="20" height="15" rx="2" />
-      <path d="m9 12 2 2 4-4" />
-    </svg>
   )
 }

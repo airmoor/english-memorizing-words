@@ -318,6 +318,39 @@ body {
   min-height: 100vh;
 }
 
+/* ── Icon button micro-interactions ───────────────────────────────────────────
+   Apply `.icon-action` to any button whose only content is an icon (no visible
+   text label).  Gives consistent hover-brighten + press-shrink feedback without
+   coupling the animation to individual component CSS modules.
+
+   Fast cubic-bezier curve feels snappy rather than sluggish — modelled after
+   Linear / Luma.  The spring-like scale-back on release (1.0 → 0.88 → 1.0)
+   gives satisfying physical press feedback on both mouse and touch.
+   ──────────────────────────────────────────────────────────────────────────── */
+.icon-action {
+  transition: opacity 130ms ease, transform 130ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.icon-action:hover:not(:disabled) {
+  opacity: 0.72;
+}
+
+.icon-action:active:not(:disabled) {
+  transform: scale(0.88);
+  opacity: 0.55;
+  transition-duration: 60ms;
+}
+
+/* Reduced motion: keep colour feedback, drop transform */
+@media (prefers-reduced-motion: reduce) {
+  .icon-action {
+    transition: opacity 130ms ease;
+  }
+  .icon-action:active:not(:disabled) {
+    transform: none;
+  }
+}
+
 h1, h2, h3, h4 {
   margin: 0;
   color: var(--color-text-primary);

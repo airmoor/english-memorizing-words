@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
+import { Check, Sparkles } from 'lucide-react'
+import { Icon } from '../../shared/ui/Icon/Icon'
 import { useQuery } from '@tanstack/react-query'
 import { getNextCard } from '../../features/review/api/getNextCard'
 import { getProgress } from '../../features/review/api/getProgress'
@@ -118,7 +120,7 @@ export function ReviewPage() {
           {/* Empty from the start — board-scoped no-cards state */}
           {neverHadCards && boardName && (
             <div className={styles.empty}>
-              <p className={styles.emptyIcon}>✓</p>
+              <p className={styles.emptyIcon}><Icon icon={Check} size={32} muted /></p>
               <Text variant="title" as="h2">No cards due</Text>
               <Text variant="body" color="secondary" as="p" className={styles.emptyText}>
                 {`No cards due in "${boardName}".`}
@@ -137,7 +139,7 @@ export function ReviewPage() {
           {/* Empty from the start — global no-cards state */}
           {neverHadCards && !boardName && (
             <div className={styles.empty}>
-              <p className={styles.emptyIcon}>🎉</p>
+              <p className={styles.emptyIcon}><Icon icon={Sparkles} size={32} muted /></p>
               <Text variant="title" as="h2">No cards due today!</Text>
               <Text variant="body" color="secondary" as="p" className={styles.emptyText}>
                 {progress?.nextReviewDate

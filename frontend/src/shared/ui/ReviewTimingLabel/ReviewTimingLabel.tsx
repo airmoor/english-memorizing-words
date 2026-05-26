@@ -1,3 +1,6 @@
+import type { LucideIcon } from 'lucide-react'
+import { Sparkles, Circle, Clock, Check } from 'lucide-react'
+import { Icon } from '../Icon/Icon'
 import type { ReviewState } from '../../../entities/vocabulary/model/types'
 import styles from './ReviewTimingLabel.module.css'
 
@@ -10,12 +13,12 @@ interface ReviewTimingLabelProps {
   showIcon?: boolean
 }
 
-/** Maps review state to the CSS variant class and icon glyph */
-const STATE_CONFIG: Record<ReviewState, { cls: string; icon: string }> = {
-  new:      { cls: styles.new,      icon: '✦' },
-  due:      { cls: styles.due,      icon: '◉' },
-  upcoming: { cls: styles.soon,     icon: '◷' },
-  mastered: { cls: styles.mastered, icon: '✓' },
+/** Maps review state to the CSS variant class and Lucide icon */
+const STATE_CONFIG: Record<ReviewState, { cls: string; icon: LucideIcon }> = {
+  new:      { cls: styles.new,      icon: Sparkles },
+  due:      { cls: styles.due,      icon: Circle },
+  upcoming: { cls: styles.soon,     icon: Clock },
+  mastered: { cls: styles.mastered, icon: Check },
 }
 
 /**
@@ -38,13 +41,12 @@ export function ReviewTimingLabel({
 
   // Overdue gets special danger colour regardless of the computed reviewState
   const variantCls = isOverdue ? styles.overdue : (config?.cls ?? '')
-  const icon = config?.icon ?? '◷'
 
   return (
     <span className={[styles.label, variantCls].join(' ').trim()}>
-      {showIcon && (
+      {showIcon && config && (
         <span className={styles.icon} aria-hidden="true">
-          {icon}
+          <Icon icon={config.icon} size={11} strokeWidth={2} />
         </span>
       )}
       {label}

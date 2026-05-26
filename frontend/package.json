@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@tanstack/react-query": "5.100.9",
+    "lucide-react": "1.16.0",
     "papaparse": "5.5.3",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",

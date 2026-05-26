@@ -1,4 +1,7 @@
+import { SlidersHorizontal, ChevronDown, Check, X } from 'lucide-react'
 import { useRef, useState, useEffect } from 'react'
+import { Icon } from '../../../shared/ui/Icon/Icon'
+
 import { FilterBar } from '../../../shared/ui/FilterBar/FilterBar'
 import { AdaptiveSheet } from '../../../shared/ui/AdaptiveSheet/AdaptiveSheet'
 import { BottomSheetContent } from '../../../shared/ui/BottomSheet/BottomSheetContent'
@@ -178,7 +181,7 @@ export function VocabularyFilterBar({
           onClick={() => setMoreOpen(true)}
           aria-label="More filters"
         >
-          <FilterIcon />
+          <Icon icon={SlidersHorizontal} size={13} />
           More filters
           {hasMoreFilters && <span className={styles.moreDot} aria-hidden="true" />}
         </button>
@@ -193,7 +196,7 @@ export function VocabularyFilterBar({
             aria-expanded={sortOpen}
           >
             {currentSortLabel}
-            <ChevronIcon />
+            <Icon icon={ChevronDown} size={11} />
           </button>
           {sortOpen && (
             <div className={styles.sortDropdown} role="listbox" aria-label="Sort vocabulary">
@@ -207,7 +210,7 @@ export function VocabularyFilterBar({
                   onClick={() => { onSortChange(value); setSortOpen(false) }}
                 >
                   {label}
-                  {sort === value && <CheckIcon />}
+                  {sort === value && <Icon icon={Check} size={13} strokeWidth={2.5} style={{ marginLeft: 4 }} />}
                 </button>
               ))}
             </div>
@@ -226,11 +229,11 @@ export function VocabularyFilterBar({
             <h2 className={styles.sheetTitle}>More filters</h2>
             <button
               type="button"
-              className={styles.sheetCloseBtn}
+              className={[styles.sheetCloseBtn, 'icon-action'].join(' ')}
               onClick={() => setMoreOpen(false)}
               aria-label="Close"
             >
-              <XIcon />
+              <Icon icon={X} size={16} />
             </button>
           </div>
 
@@ -364,39 +367,3 @@ export function VocabularyFilterBar({
   )
 }
 
-// ── Icons ─────────────────────────────────────────────────────────────────────
-
-function FilterIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <line x1="4" y1="6"  x2="20" y2="6" />
-      <line x1="8" y1="12" x2="16" y2="12" />
-      <line x1="11" y1="18" x2="13" y2="18" />
-    </svg>
-  )
-}
-
-function ChevronIcon() {
-  return (
-    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <polyline points="6 9 12 15 18 9" />
-    </svg>
-  )
-}
-
-function CheckIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0, marginLeft: 4 }}>
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  )
-}
-
-function XIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <line x1="18" y1="6"  x2="6"  y2="18" />
-      <line x1="6"  y1="6"  x2="18" y2="18" />
-    </svg>
-  )
-}

@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { Copy, RotateCcw, ClipboardList } from 'lucide-react'
+import { Icon } from '../../../shared/ui/Icon/Icon'
 import { useImportSessionsQuery } from '../model/useImportSessionsQuery'
 import type { ImportSession, ImportSessionErrorRow } from '../../../entities/import-session/model/types'
 import styles from './ImportHistory.module.css'
@@ -141,7 +143,7 @@ function SessionRow({ session, onRetry }: SessionRowProps) {
                 onClick={() => void handleCopy()}
                 aria-label="Copy failed words to clipboard"
               >
-                <CopyIcon />
+                <Icon icon={Copy} size={12} />
                 {copyState === 'copied' ? 'Copied!' : 'Copy words'}
               </button>
             )}
@@ -154,7 +156,7 @@ function SessionRow({ session, onRetry }: SessionRowProps) {
                 onClick={() => onRetry(errorRows)}
                 aria-label={`Retry ${errorRows.length} failed rows from this import`}
               >
-                <RetryIcon />
+                <Icon icon={RotateCcw} size={12} />
                 Retry failed rows
               </button>
             )}
@@ -201,7 +203,9 @@ export function ImportHistory({ onRetry }: ImportHistoryProps) {
   if (!sessions || sessions.length === 0) {
     return (
       <div className={styles.centered}>
-        <span className={styles.emptyIcon} aria-hidden="true">📋</span>
+        <span className={styles.emptyIcon} aria-hidden="true">
+          <Icon icon={ClipboardList} size={32} muted />
+        </span>
         <p className={styles.emptyTitle}>No imports yet</p>
         <p className={styles.emptyBody}>
           Each import you run will appear here so you can review results and retry failed words.
@@ -220,45 +224,5 @@ export function ImportHistory({ onRetry }: ImportHistoryProps) {
         />
       ))}
     </div>
-  )
-}
-
-// ── Icons ─────────────────────────────────────────────────────────────────────
-
-function CopyIcon() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-    </svg>
-  )
-}
-
-function RetryIcon() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <polyline points="1 4 1 10 7 10" />
-      <path d="M3.51 15a9 9 0 1 0 .49-4.5" />
-    </svg>
   )
 }

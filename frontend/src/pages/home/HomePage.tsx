@@ -1,5 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { Flame, BookOpen, Check, Clock } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import { Icon } from '../../shared/ui/Icon/Icon'
 import { getProgress } from '../../features/review/api/getProgress'
 import { fetchVocabularyPage } from '../../features/vocabulary/api/vocabularyApi'
 import { BoardsHomeSection } from '../../features/boards/ui/BoardsHomeSection'
@@ -184,26 +187,26 @@ export function HomePage() {
               <DashboardCell span={recent.length === 0 ? 'full' : 'auto'} className={styles.contentCell}>
                 <div className={styles.stats}>
                   <StatTile
-                    icon="🔥"
+                    icon={Flame}
                     label="Streak"
                     value={streak}
                     unit={streak === 1 ? 'day' : 'days'}
                     accent={streak > 0}
                   />
                   <StatTile
-                    icon="📚"
+                    icon={BookOpen}
                     label="Saved"
                     value={total}
                     unit={total === 1 ? 'meaning' : 'meanings'}
                   />
                   <StatTile
-                    icon="✓"
+                    icon={Check}
                     label="Reviewed today"
                     value={reviewedToday}
                     unit={reviewedToday === 1 ? 'card' : 'cards'}
                   />
                   <StatTile
-                    icon="⏰"
+                    icon={Clock}
                     label="Due today"
                     value={dueToday}
                     unit={dueToday === 1 ? 'card' : 'cards'}
@@ -258,7 +261,7 @@ function StatTile({
   unit,
   accent,
 }: {
-  icon: string
+  icon: LucideIcon
   label: string
   value: number
   unit: string
@@ -266,7 +269,9 @@ function StatTile({
 }) {
   return (
     <Card variant="floating" padding="md" className={[styles.statTile, accent ? styles.statAccent : ''].join(' ')}>
-      <div className={styles.statIcon} aria-hidden>{icon}</div>
+      <div className={styles.statIcon} aria-hidden>
+        <Icon icon={icon} size={18} muted />
+      </div>
       <div className={styles.statValue}>{value}</div>
       <div className={styles.statLabel}>
         {label} <span className={styles.statUnit}>· {unit}</span>

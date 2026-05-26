@@ -1,7 +1,9 @@
+import { Download, Settings, X } from 'lucide-react'
 import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useLogout } from '../../../features/auth/model/useLogout'
 import { Logo } from '../Logo/Logo'
 import { usePwaInstall } from '../../pwa/usePwaInstall'
+import { Icon } from '../Icon/Icon'
 import styles from './AppHeader.module.css'
 
 const NAV_ITEMS: { to: string; label: string }[] = [
@@ -59,67 +61,30 @@ export function AppHeader() {
         {canInstall && (
           <div className={styles.installBadge} role="group" aria-label="Install Lexis app">
             <button onClick={install} className={styles.installBtn} title="Install Lexis">
-              <InstallIcon />
+              <Icon icon={Download} size={14} />
               <span className={styles.installLabel}>Install</span>
             </button>
-            <button onClick={dismiss} className={styles.installDismiss} aria-label="Dismiss install prompt">
-              ×
+            <button
+              onClick={dismiss}
+              className={[styles.installDismiss, 'icon-action'].join(' ')}
+              aria-label="Dismiss install prompt"
+            >
+              <Icon icon={X} size={14} />
             </button>
           </div>
         )}
         <button
           onClick={onSettings}
-          className={[styles.iconButton, isOnSettings ? styles.iconButtonActive : ''].join(' ')}
+          className={[styles.iconButton, isOnSettings ? styles.iconButtonActive : '', 'icon-action'].join(' ')}
           aria-label={isOnSettings ? 'Go back' : 'Settings'}
           title={isOnSettings ? 'Go back' : 'Settings'}
         >
-          <SettingsIcon />
+          <Icon icon={Settings} size={18} />
         </button>
         <button onClick={logout} className={styles.logout}>
           Log out
         </button>
       </div>
     </header>
-  )
-}
-
-/** Download-to-device icon for install CTA. */
-function InstallIcon() {
-  return (
-    <svg
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-      <polyline points="7 10 12 15 17 10" />
-      <line x1="12" y1="15" x2="12" y2="3" />
-    </svg>
-  )
-}
-
-/** Inline gear icon — currentColor so it inherits theme. */
-function SettingsIcon() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="12" cy="12" r="3" />
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-    </svg>
   )
 }

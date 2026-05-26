@@ -1,4 +1,6 @@
+import { Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { Icon } from '../../../shared/ui/Icon/Icon'
 import type { VocabularyWord } from '../../../entities/vocabulary/model/types'
 import { Card } from '../../../shared/ui/Card/Card'
 import { Text } from '../../../shared/ui/Typography/Typography'
@@ -13,29 +15,6 @@ interface Props {
   onRemove: (wordId: string) => void
   /** All word IDs in the current list, in display order. Used for panel navigation. */
   sourceList: string[]
-}
-
-/** Trash bin icon (16×16 outline). */
-function TrashIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <polyline points="3 6 5 6 21 6" />
-      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-      <path d="M10 11v6M14 11v6" />
-      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-    </svg>
-  )
 }
 
 /**
@@ -146,12 +125,12 @@ export function VocabularyItem({ item, onRemove, sourceList }: Props) {
 
         {/* Delete button — opens confirmation dialog, does not open the panel */}
         <button
-          className={styles.removeBtn}
+          className={[styles.removeBtn, 'icon-action'].join(' ')}
           onClick={handleRemoveClick}
           aria-label={`Delete ${item.wordText} from vocabulary`}
           title="Delete word"
         >
-          <TrashIcon />
+          <Icon icon={Trash2} size={15} muted />
         </button>
       </Card>
 

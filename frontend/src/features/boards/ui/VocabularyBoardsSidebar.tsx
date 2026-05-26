@@ -1,4 +1,6 @@
+import { Inbox, Plus, Archive, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { Icon } from '../../../shared/ui/Icon/Icon'
 import { useBoardsQuery } from '../model/useBoardsQuery'
 import { useDeleteBoardMutation } from '../model/useUpdateBoardMutation'
 import { CreateBoardSheet } from './CreateBoardSheet'
@@ -66,7 +68,7 @@ export function VocabularyBoardsSidebar({
           onClick={() => onSelect(undefined)}
           aria-current={!activeBoardId ? 'page' : undefined}
         >
-          <InboxIcon />
+          <Icon icon={Inbox} size={15} />
           <span className={styles.itemLabel}>All Vocabulary</span>
         </button>
 
@@ -104,7 +106,7 @@ export function VocabularyBoardsSidebar({
                       title="Delete board"
                       tabIndex={0}
                     >
-                      <TrashIcon />
+                      <Icon icon={Trash2} size={13} />
                     </button>
                   </div>
                 </div>
@@ -121,7 +123,7 @@ export function VocabularyBoardsSidebar({
           className={[styles.item, styles.itemAction].join(' ')}
           onClick={() => setCreateOpen(true)}
         >
-          <PlusIcon />
+          <Icon icon={Plus} size={14} />
           <span className={styles.itemLabel}>New board</span>
         </button>
 
@@ -132,7 +134,7 @@ export function VocabularyBoardsSidebar({
             disabled
             aria-label={`${archivedCount} archived board${archivedCount !== 1 ? 's' : ''}`}
           >
-            <ArchiveIcon />
+            <Icon icon={Archive} size={14} />
             <span className={styles.itemLabel}>
               Archived
               <span className={styles.itemCount}>{archivedCount}</span>
@@ -161,43 +163,3 @@ export function VocabularyBoardsSidebar({
   )
 }
 
-// ── Icons ─────────────────────────────────────────────────────────────────────
-
-function InboxIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={styles.icon}>
-      <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
-      <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
-    </svg>
-  )
-}
-
-function PlusIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={styles.icon}>
-      <line x1="12" y1="5" x2="12" y2="19" />
-      <line x1="5" y1="12" x2="19" y2="12" />
-    </svg>
-  )
-}
-
-function ArchiveIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={styles.icon}>
-      <polyline points="21 8 21 21 3 21 3 8" />
-      <rect x="1" y="3" width="22" height="5" />
-      <line x1="10" y1="12" x2="14" y2="12" />
-    </svg>
-  )
-}
-
-function TrashIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <polyline points="3 6 5 6 21 6" />
-      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-      <path d="M10 11v6M14 11v6" />
-      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-    </svg>
-  )
-}

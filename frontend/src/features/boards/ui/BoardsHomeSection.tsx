@@ -1,4 +1,6 @@
+import { ArrowRight, LayoutGrid } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { Icon } from '../../../shared/ui/Icon/Icon'
 import { useBoardsQuery } from '../model/useBoardsQuery'
 import styles from './BoardsHomeSection.module.css'
 
@@ -56,7 +58,7 @@ export function BoardsHomeSection() {
       ) : activeBoards.length === 0 ? (
         /* ── Empty state ──────────────────────────────────────────────── */
         <div className={styles.emptyState}>
-          <BoardsEmptyIcon />
+          <span className={styles.emptyIcon}><Icon icon={LayoutGrid} size={28} muted /></span>
           <p className={styles.emptyText}>
             Group your vocabulary into boards for focused review.
           </p>
@@ -85,7 +87,7 @@ export function BoardsHomeSection() {
                     ? `${board.cardCount} word${board.cardCount !== 1 ? 's' : ''}`
                     : 'Empty'}
                 </span>
-                <ArrowIcon />
+                <Icon icon={ArrowRight} size={13} className={styles.arrow} />
               </button>
             </li>
           ))}
@@ -95,34 +97,3 @@ export function BoardsHomeSection() {
   )
 }
 
-function ArrowIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={styles.arrow}>
-      <line x1="5" y1="12" x2="19" y2="12" />
-      <polyline points="12 5 19 12 12 19" />
-    </svg>
-  )
-}
-
-/** Subtle two-column grid icon — communicates "boards" without heavy decoration. */
-function BoardsEmptyIcon() {
-  return (
-    <svg
-      width="28"
-      height="28"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.4"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      className={styles.emptyIcon}
-    >
-      <rect x="3" y="3" width="7" height="9" rx="1.5" />
-      <rect x="14" y="3" width="7" height="5" rx="1.5" />
-      <rect x="14" y="12" width="7" height="9" rx="1.5" />
-      <rect x="3" y="16" width="7" height="5" rx="1.5" />
-    </svg>
-  )
-}

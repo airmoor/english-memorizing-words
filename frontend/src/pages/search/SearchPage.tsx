@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { BookOpen, Search, AlertTriangle } from 'lucide-react'
+import { Icon } from '../../shared/ui/Icon/Icon'
 import { Spinner } from '../../shared/ui/Spinner'
 import { Text } from '../../shared/ui/Typography/Typography'
 import { SearchBar } from '../../features/word-search/ui/SearchBar'
@@ -52,7 +54,9 @@ export function SearchPage() {
           <div className={styles.results}>
             {searchState.status === 'idle' && (
               <div className={styles.emptyState}>
-                <span className={styles.emptyIcon}>📖</span>
+                <span className={styles.emptyIcon}>
+                  <Icon icon={BookOpen} size={32} muted />
+                </span>
                 <Text variant="body" color="secondary" as="p">
                   Search for any English word to see its meanings, transcription, and examples.
                 </Text>
@@ -65,7 +69,9 @@ export function SearchPage() {
 
             {searchState.status === 'notFound' && (
               <div className={styles.emptyState}>
-                <span className={styles.emptyIcon}>🔍</span>
+                <span className={styles.emptyIcon}>
+                  <Icon icon={Search} size={32} muted />
+                </span>
                 <Text variant="title" as="h3" className={styles.stateTitle}>
                   Word not found
                 </Text>
@@ -77,7 +83,9 @@ export function SearchPage() {
 
             {searchState.status === 'unavailable' && (
               <div className={styles.emptyState}>
-                <span className={styles.emptyIcon}>⚠️</span>
+                <span className={styles.emptyIcon}>
+                  <Icon icon={AlertTriangle} size={32} muted />
+                </span>
                 <Text variant="title" as="h3" className={styles.stateTitle}>
                   Dictionary unavailable
                 </Text>
@@ -89,7 +97,9 @@ export function SearchPage() {
 
             {searchState.status === 'error' && (
               <div className={styles.emptyState}>
-                <span className={styles.emptyIcon}>⚠️</span>
+                <span className={styles.emptyIcon}>
+                  <Icon icon={AlertTriangle} size={32} muted />
+                </span>
                 <Text variant="body" color="danger" as="p">
                   {searchState.message}
                 </Text>

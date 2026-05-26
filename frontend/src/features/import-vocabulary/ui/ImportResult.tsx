@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { CheckCircle, AlertTriangle, XCircle, ChevronDown, ChevronRight, Check } from 'lucide-react'
+import { Icon } from '../../../shared/ui/Icon/Icon'
 import type { ImportExecuteResult } from '../../../entities/import-session/model/types'
 import styles from './ImportResult.module.css'
 
@@ -46,6 +48,8 @@ export function ImportResult({ result, onViewVocabulary, onImportMore }: ImportR
     onViewVocabulary()
   }
 
+  const statusIcon = isCompleted ? CheckCircle : isPartial ? AlertTriangle : XCircle
+
   return (
     <div className={styles.result}>
       {/* ── Status icon + heading ────────────────────────────────────── */}
@@ -58,7 +62,7 @@ export function ImportResult({ result, onViewVocabulary, onImportMore }: ImportR
         ].join(' ')}
       >
         <span className={styles.statusIcon} aria-hidden="true">
-          {isCompleted ? '✓' : isPartial ? '⚠' : '✕'}
+          <Icon icon={statusIcon} size={28} />
         </span>
         <h2 className={styles.statusTitle}>
           {isCompleted
@@ -109,7 +113,7 @@ export function ImportResult({ result, onViewVocabulary, onImportMore }: ImportR
               onClick={() => setErrorRowsExpanded((v) => !v)}
               aria-expanded={errorRowsExpanded}
             >
-              <span aria-hidden="true">{errorRowsExpanded ? '▾' : '▸'}</span>
+              <Icon icon={errorRowsExpanded ? ChevronDown : ChevronRight} size={14} />
               {' '}View {result.errors} failed word{result.errors !== 1 ? 's' : ''}
             </button>
             <button
@@ -118,7 +122,9 @@ export function ImportResult({ result, onViewVocabulary, onImportMore }: ImportR
               onClick={() => void handleCopyFailed()}
               aria-label="Copy failed words to clipboard"
             >
-              {copyState === 'copied' ? '✓ Copied' : 'Copy'}
+              {copyState === 'copied'
+                ? <><Icon icon={Check} size={12} strokeWidth={2.5} /> Copied</>
+                : 'Copy'}
             </button>
           </div>
           {errorRowsExpanded && (

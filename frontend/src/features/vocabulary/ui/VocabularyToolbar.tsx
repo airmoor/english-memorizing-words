@@ -1,4 +1,6 @@
 import { useRef } from 'react'
+import { Search, X, List, AlignJustify } from 'lucide-react'
+import { Icon } from '../../../shared/ui/Icon/Icon'
 import styles from './VocabularyToolbar.module.css'
 
 export type ViewMode = 'detailed' | 'compact'
@@ -24,10 +26,7 @@ export function VocabularyToolbar({
       <div className={styles.topRow}>
         <div className={styles.searchWrap}>
           <span className={styles.searchIcon} aria-hidden="true">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
+            <Icon icon={Search} size={16} />
           </span>
           <input
             ref={inputRef}
@@ -40,11 +39,11 @@ export function VocabularyToolbar({
           />
           {query && (
             <button
-              className={styles.clearBtn}
+              className={[styles.clearBtn, 'icon-action'].join(' ')}
               onClick={() => { onQueryChange(''); inputRef.current?.focus() }}
               aria-label="Clear search"
             >
-              ×
+              <Icon icon={X} size={14} />
             </button>
           )}
         </div>
@@ -58,7 +57,7 @@ export function VocabularyToolbar({
               aria-pressed={viewMode === 'detailed'}
               title="Detailed view"
             >
-              <DetailedIcon />
+              <Icon icon={List} size={16} />
             </button>
             <button
               className={[styles.viewBtn, viewMode === 'compact' ? styles.viewBtnActive : ''].join(' ')}
@@ -66,31 +65,12 @@ export function VocabularyToolbar({
               aria-pressed={viewMode === 'compact'}
               title="Compact view"
             >
-              <CompactIcon />
+              <Icon icon={AlignJustify} size={16} />
             </button>
           </div>
         </div>
       </div>
 
     </div>
-  )
-}
-
-function DetailedIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="3" y="3" width="18" height="7" rx="2" />
-      <rect x="3" y="14" width="18" height="7" rx="2" />
-    </svg>
-  )
-}
-
-function CompactIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <line x1="3" y1="6"  x2="21" y2="6" />
-      <line x1="3" y1="12" x2="21" y2="12" />
-      <line x1="3" y1="18" x2="21" y2="18" />
-    </svg>
   )
 }

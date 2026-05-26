@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useMemo, useEffect, useRef } from 'react'
+import { Library, Search } from 'lucide-react'
+import { Icon } from '../../../shared/ui/Icon/Icon'
 import type { VocabularyWord } from '../../../entities/vocabulary/model/types'
 import { Text } from '../../../shared/ui/Typography/Typography'
 import { Button } from '../../../shared/ui/Button/Button'
@@ -61,7 +63,7 @@ export function VocabularyList({
   if (isEmpty) {
     return (
       <div className={styles.empty}>
-        <span className={styles.emptyIcon}>📚</span>
+        <span className={styles.emptyIcon}><Icon icon={Library} size={32} muted /></span>
         <Text variant="title" as="h3" className={styles.emptyTitle}>
           No words saved yet
         </Text>
@@ -79,7 +81,7 @@ export function VocabularyList({
   if (items.length === 0) {
     return (
       <div className={styles.empty}>
-        <span className={styles.emptyIcon}>🔍</span>
+        <span className={styles.emptyIcon}><Icon icon={Search} size={32} muted /></span>
         <Text variant="title" as="h3" className={styles.emptyTitle}>
           No matches
         </Text>

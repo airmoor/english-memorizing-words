@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { Inbox, ChevronDown, X, Check, Plus } from 'lucide-react'
+import { Icon } from '../../../shared/ui/Icon/Icon'
 import { BottomSheet } from '../../../shared/ui/BottomSheet/BottomSheet'
 import { BottomSheetContent } from '../../../shared/ui/BottomSheet/BottomSheetContent'
 import { useBoardsQuery } from '../model/useBoardsQuery'
@@ -54,22 +56,22 @@ export function MobileBoardsSelector({
           aria-haspopup="dialog"
           aria-label={activeBoard ? `Viewing ${activeBoard.name}. Tap to change` : 'All Vocabulary. Tap to filter by board'}
         >
-          {activeBoardId ? <BoardDotIcon /> : <InboxIcon />}
+          {activeBoardId ? <BoardDotIcon /> : <Icon icon={Inbox} size={14} />}
           <span className={styles.selectorLabel}>
             {activeBoard?.name ?? 'All Words'}
           </span>
-          <ChevronIcon />
+          <Icon icon={ChevronDown} size={12} />
         </button>
 
         {/* Inline clear button — only visible when a board is selected */}
         {activeBoardId && (
           <button
             type="button"
-            className={styles.clearBtn}
+            className={[styles.clearBtn, 'icon-action'].join(' ')}
             onClick={() => onSelect(undefined)}
             aria-label="Back to all vocabulary"
           >
-            <XIcon />
+            <Icon icon={X} size={12} />
           </button>
         )}
       </div>
@@ -99,9 +101,11 @@ export function MobileBoardsSelector({
                 ].join(' ')}
                 onClick={() => handleSelect(undefined)}
               >
-                <InboxIcon />
+                <Icon icon={Inbox} size={14} />
                 <span className={styles.boardRowLabel}>All Vocabulary</span>
-                {!activeBoardId && <CheckIcon />}
+                {!activeBoardId && (
+                  <Icon icon={Check} size={14} strokeWidth={2.5} style={{ flexShrink: 0, color: 'var(--color-accent)' }} />
+                )}
               </button>
             </li>
 
@@ -125,7 +129,9 @@ export function MobileBoardsSelector({
                     {board.cardCount > 0 && (
                       <span className={styles.boardRowCount}>{board.cardCount}</span>
                     )}
-                    {isActive && <CheckIcon />}
+                    {isActive && (
+                      <Icon icon={Check} size={14} strokeWidth={2.5} style={{ flexShrink: 0, color: 'var(--color-accent)' }} />
+                    )}
                   </button>
                 </li>
               )
@@ -139,7 +145,7 @@ export function MobileBoardsSelector({
             className={styles.createRow}
             onClick={() => { setSheetOpen(false); setCreateOpen(true) }}
           >
-            <PlusIcon />
+            <Icon icon={Plus} size={14} />
             <span>New board</span>
           </button>
         </BottomSheetContent>
@@ -154,55 +160,16 @@ export function MobileBoardsSelector({
   )
 }
 
-// ── Icons ─────────────────────────────────────────────────────────────────────
-
-function InboxIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
-      <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
-    </svg>
-  )
-}
+// ── Board dot (semantic active/inactive indicator, not a standard icon) ────────
 
 function BoardDotIcon({ active }: { active?: boolean }) {
   return (
     <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true">
-      <circle cx="4" cy="4" r="3.5" fill={active ? 'var(--color-accent)' : 'var(--color-text-secondary)'} opacity={active ? 1 : 0.4} />
-    </svg>
-  )
-}
-
-function ChevronIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <polyline points="6 9 12 15 18 9" />
-    </svg>
-  )
-}
-
-function XIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <line x1="18" y1="6" x2="6" y2="18" />
-      <line x1="6" y1="6" x2="18" y2="18" />
-    </svg>
-  )
-}
-
-function CheckIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0, color: 'var(--color-accent)' }}>
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  )
-}
-
-function PlusIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <line x1="12" y1="5" x2="12" y2="19" />
-      <line x1="5" y1="12" x2="19" y2="12" />
+      <circle
+        cx="4" cy="4" r="3.5"
+        fill={active ? 'var(--color-accent)' : 'var(--color-text-secondary)'}
+        opacity={active ? 1 : 0.4}
+      />
     </svg>
   )
 }

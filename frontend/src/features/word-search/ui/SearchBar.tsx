@@ -1,4 +1,6 @@
 import type { KeyboardEvent } from 'react'
+import { Search } from 'lucide-react'
+import { Icon } from '../../../shared/ui/Icon/Icon'
 import styles from './SearchBar.module.css'
 
 interface Props {
@@ -6,26 +8,6 @@ interface Props {
   onChange: (value: string) => void
   onSearch: () => void
   disabled?: boolean
-}
-
-/** Search-icon SVG, currentColor. */
-function SearchIcon() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="11" cy="11" r="7" />
-      <path d="m20 20-3.5-3.5" />
-    </svg>
-  )
 }
 
 export function SearchBar({ value, onChange, onSearch, disabled }: Props) {
@@ -36,7 +18,7 @@ export function SearchBar({ value, onChange, onSearch, disabled }: Props) {
   return (
     <div className={styles.bar}>
       <span className={styles.iconLeft} aria-hidden>
-        <SearchIcon />
+        <Icon icon={Search} size={18} />
       </span>
       <input
         type="text"

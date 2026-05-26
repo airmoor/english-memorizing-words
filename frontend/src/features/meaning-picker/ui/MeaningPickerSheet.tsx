@@ -1,4 +1,6 @@
 import { useState, useMemo } from 'react'
+import { Check, X } from 'lucide-react'
+import { Icon } from '../../../shared/ui/Icon/Icon'
 import { AdaptiveSheet } from '../../../shared/ui/AdaptiveSheet/AdaptiveSheet'
 import { BottomSheetContent } from '../../../shared/ui/BottomSheet/BottomSheetContent'
 import { useSaveSelectedMeaningsMutation } from '../api/useSaveSelectedMeaningsMutation'
@@ -130,11 +132,11 @@ export function MeaningPickerSheet({
           </div>
           <button
             type="button"
-            className={styles.closeBtn}
+            className={[styles.closeBtn, 'icon-action'].join(' ')}
             onClick={onClose}
             aria-label="Cancel"
           >
-            <XIcon />
+            <Icon icon={X} size={16} />
           </button>
         </div>
 
@@ -146,7 +148,7 @@ export function MeaningPickerSheet({
             onClick={toggleAll}
           >
             <span className={[styles.checkbox, allSelected ? styles.checkboxChecked : ''].join(' ')} aria-hidden="true">
-              {allSelected && <CheckIcon />}
+              {allSelected && <Icon icon={Check} size={11} strokeWidth={3} />}
             </span>
             <span className={styles.selectAllLabel}>
               {allSelected ? 'Deselect all' : 'Select all'}
@@ -174,7 +176,7 @@ export function MeaningPickerSheet({
                     className={[styles.checkbox, checked ? styles.checkboxChecked : ''].join(' ')}
                     aria-hidden="true"
                   >
-                    {checked && <CheckIcon />}
+                    {checked && <Icon icon={Check} size={11} strokeWidth={3} />}
                   </span>
                   <span className={styles.rowBody}>
                     {m.partOfSpeech && (
@@ -212,19 +214,3 @@ export function MeaningPickerSheet({
   )
 }
 
-function CheckIcon() {
-  return (
-    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  )
-}
-
-function XIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <line x1="18" y1="6"  x2="6"  y2="18" />
-      <line x1="6"  y1="6"  x2="18" y2="18" />
-    </svg>
-  )
-}
