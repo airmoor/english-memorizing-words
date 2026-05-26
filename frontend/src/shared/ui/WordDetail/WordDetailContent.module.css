@@ -107,6 +107,88 @@
   align-self: flex-start;
 }
 
+/* ── Inline selection mode ────────────────────────────────────────────────── */
+
+.selectionBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--surface-accent);
+  border-radius: var(--radius-md);
+}
+
+.selectionBarText {
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+}
+
+.selectionBarCancel {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: var(--font-sm);
+  color: var(--color-accent);
+  cursor: pointer;
+  padding: 0;
+}
+
+.selectionFooter {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--card-padding-x);
+  margin-inline: calc(-1 * var(--card-padding-x));
+  background: var(--color-bg-card);
+  border-top: var(--border-default);
+}
+
+.selectionCount {
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+}
+
+.selectionSaveBtn {
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-full);
+  font-family: inherit;
+  font-size: var(--font-sm);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity var(--transition-fast);
+}
+
+.selectionSaveBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── Edit-mode destructive remove link ───────────────────────────────────── */
+
+.editRemoveLink {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-size: var(--text-caption);
+  color: var(--color-danger);
+  background: none;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+  padding: var(--space-sm) var(--card-padding-x);
+}
+
+.editRemoveLink:hover {
+  text-decoration: underline;
+}
+
 /* ── Source attribution ───────────────────────────────────────────────────── */
 /* Rendered at the very bottom of the card — low prominence, secondary info. */
 .attribution {

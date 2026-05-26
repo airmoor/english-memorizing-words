@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { X } from 'lucide-react'
 import { Icon } from '../Icon/Icon'
 import type { WordPayload, LearningState } from './types'
@@ -22,6 +23,15 @@ interface Props {
    * button on the right side of this header — same row as the word title.
    */
   onClose?: () => void
+  /**
+   * When provided in search context, clicking "Saved ✓" opens edit mode
+   * instead of removing the word.
+   */
+  onEdit?: () => void
+  /**
+   * When provided, renders a "View in vocabulary →" link below the "Saved ✓" badge.
+   */
+  onViewInVocabulary?: () => void
 }
 
 /**
@@ -30,10 +40,8 @@ interface Props {
  * Renders: word text · transcription · source attribution · save/remove action.
  *
  * - When learningState is null: shows "Save word" button
- * - When learningState is non-null: shows "Saved ✓" badge (click to remove)
- *
- * Dictionary layer only — receives no learning data beyond the boolean
- * save state implied by learningState !== null.
+ * - When learningState is non-null + onEdit: shows "Saved ✓" badge that opens edit mode
+ * - When learningState is non-null, no onEdit: shows "Saved ✓" badge that removes
  */
 export function DictionaryHeader({
   word,
@@ -43,8 +51,11 @@ export function DictionaryHeader({
   isMutating = false,
   context = 'search',
   onClose,
+  onEdit,
+  onViewInVocabulary,
 }: Props) {
   const isSaved = learningState !== null
+  const [hoveringBadge, setHoveringBadge] = useState(false)
 
   return (
     <header className={styles.header}>
@@ -61,7 +72,7 @@ export function DictionaryHeader({
 
       {/* Action area — three cases:
           1. vocabulary + onClose: inline × button aligned with the word title
-          2. search + saved: "Saved ✓" badge
+          2. search + saved: "Saved ✓" badge (+ optional "View in vocabulary" link)
           3. search + unsaved: "Save word" button */}
       {context === 'vocabulary' ? (
         onClose ? (
@@ -75,15 +86,27 @@ export function DictionaryHeader({
         ) : null
       ) : (
         isSaved ? (
-          <button
-            className={styles.savedBadge}
-            onClick={onRemove}
-            disabled={isMutating}
-            aria-label={`Remove ${word.text} from vocabulary`}
-            title="Click to remove from vocabulary"
-          >
-            Saved ✓
-          </button>
+          <div className={styles.savedActions}>
+            <button
+              className={styles.savedBadge}
+              onClick={onEdit ?? onRemove}
+              onMouseEnter={() => setHoveringBadge(true)}
+              onMouseLeave={() => setHoveringBadge(false)}
+              disabled={isMutating}
+              aria-label={onEdit ? `Edit saved meanings for ${word.text}` : `Remove ${word.text} from vocabulary`}
+            >
+              {hoveringBadge && onEdit ? 'Edit ✓' : 'Saved ✓'}
+            </button>
+            {onViewInVocabulary && (
+              <button
+                type="button"
+                className={styles.viewInVocab}
+                onClick={onViewInVocabulary}
+              >
+                View in vocabulary →
+              </button>
+            )}
+          </div>
         ) : (
           <Button
             variant="secondary"
@@ -99,4 +122,3 @@ export function DictionaryHeader({
     </header>
   )
 }
-

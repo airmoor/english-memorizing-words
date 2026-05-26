@@ -31,6 +31,29 @@
 
 /* ── Save / Remove action ────────────────────────────────────────────────── */
 
+/* Groups "Saved ✓" badge + "View in vocabulary →" link vertically */
+.savedActions {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-xs);
+}
+
+.viewInVocab {
+  font-size: var(--text-caption);
+  color: var(--color-accent);
+  background: none;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
+.viewInVocab:hover {
+  text-decoration: underline;
+}
+
 .savedBadge {
   flex-shrink: 0;
   display: inline-flex;

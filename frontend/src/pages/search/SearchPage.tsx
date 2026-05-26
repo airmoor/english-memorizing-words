@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BookOpen, Search, AlertTriangle } from 'lucide-react'
+import { Search, AlertTriangle } from 'lucide-react'
 import { Icon } from '../../shared/ui/Icon/Icon'
 import { Spinner } from '../../shared/ui/Spinner'
 import { Text } from '../../shared/ui/Typography/Typography'
@@ -53,13 +53,24 @@ export function SearchPage() {
           {/* State-driven result area */}
           <div className={styles.results}>
             {searchState.status === 'idle' && (
-              <div className={styles.emptyState}>
-                <span className={styles.emptyIcon}>
-                  <Icon icon={BookOpen} size={32} muted />
-                </span>
-                <Text variant="body" color="secondary" as="p">
-                  Search for any English word to see its meanings, transcription, and examples.
-                </Text>
+              <div className={styles.idleState}>
+                <p className={styles.idleHeading}>Search any English word</p>
+                <p className={styles.idleSubtext}>Meanings, transcription, and usage examples</p>
+                <p className={styles.chipsLabel}>Try these words</p>
+                <div className={styles.chipsRow}>
+                  {['ephemeral', 'serendipity', 'ambiguous', 'resilient', 'eloquent'].map((word) => (
+                    <button
+                      key={word}
+                      className={styles.chip}
+                      onClick={() => {
+                        setInput(word)
+                        setQuery(normalizeText(word))
+                      }}
+                    >
+                      {word}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
@@ -113,6 +124,10 @@ export function SearchPage() {
                 onSave={save}
                 isSaving={isSaving}
                 savedMeaningIds={getSavedMeaningIds(searchState.word.id)}
+                onSeeAlso={(term) => {
+                  setInput(term)
+                  setQuery(normalizeText(term))
+                }}
               />
             )}
           </div>

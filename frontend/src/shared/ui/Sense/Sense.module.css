@@ -10,7 +10,7 @@
 }
 
 .subSense {
-  padding-left: var(--space-xl);
+  padding-left: var(--space-lg);
 }
 
 .row {
@@ -20,14 +20,31 @@
   align-items: start;
 }
 
+/* Sub-senses have no counter column — body spans full width */
+.rowNoCounter {
+  grid-template-columns: 1fr;
+}
+
 .senseNumber {
-  display: inline-block;
-  min-width: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-width: 20px;
   font-size: var(--font-sm);
-  font-weight: var(--fw-semibold);
+  font-weight: var(--fw-medium);
   color: var(--color-accent);
   padding-top: 2px;
   user-select: none;
+}
+
+/* Filled dot before the counter — shown when this meaning is saved */
+.savedDot {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
 }
 
 .body {
@@ -43,6 +60,55 @@
   color: var(--color-text-primary);
 }
 
+/* ── "See also" cross-references ─────────────────────────────────────────── */
+
+.seeAlsoRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.seeAlsoLabel {
+  font-size: var(--text-micro);
+  color: var(--color-text-secondary);
+  letter-spacing: 0.04em;
+}
+
+.seeAlsoChip {
+  font-size: var(--text-micro);
+  color: var(--color-accent);
+  background: var(--surface-accent);
+  border-radius: var(--radius-full);
+  padding: 1px var(--space-sm); /* no token — sub-xs vertical for chip micro text */
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: background var(--transition-fast);
+}
+
+.seeAlsoChip:hover {
+  background: color-mix(in srgb, var(--color-accent) 15%, transparent);
+}
+
+/* ── Editorial notes [=...] ─────────────────────────────────────────────── */
+
+.editorialNote {
+  font-style: italic;
+  color: var(--color-text-secondary);
+  font-size: var(--text-caption);
+}
+
+/* ── Saved meaning highlight ─────────────────────────────────────────────── */
+
+.senseSaved {
+  position: relative;
+  border-left: 2px solid var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 5%, transparent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding-left: var(--space-sm);
+}
+
 .examples {
   list-style: none;
   margin: 0;
@@ -56,6 +122,11 @@
   position: relative;
   padding-left: var(--space-md);
   font-style: italic;
+}
+
+.exampleText {
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
 }
 
 .example::before {
@@ -84,6 +155,52 @@
   border-radius: var(--radius-full);
   font-size: var(--font-xs);
   color: var(--color-text-secondary);
+}
+
+/* ── Inline selection mode ────────────────────────────────────────────────── */
+
+.senseSelectable {
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+
+.senseSelectable:hover {
+  background: var(--color-bg-card);
+}
+
+.senseSelected {
+  background: var(--surface-accent);
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-border);
+  background: var(--color-bg-primary);
+  margin-top: 2px;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.checkboxChecked {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+}
+
+.checkboxChecked::after {
+  content: '';
+  display: block;
+  width: 5px;
+  height: 9px;
+  border: 1.5px solid #fff;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg) translate(-1px, -1px);
 }
 
 .savedBadge {

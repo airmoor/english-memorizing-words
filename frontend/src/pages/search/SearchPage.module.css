@@ -4,6 +4,7 @@
 }
 
 .content {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: var(--space-xl);
@@ -18,19 +19,86 @@
 }
 
 .results {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
 }
 
-/* Empty / error states */
-.emptyState {
+/* ── Idle state — suggested chips ───────────────────────────────────────── */
+
+.idleState {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--space-xs);
+  min-height: calc(100vh - var(--nav-height) - 120px);
+  padding-bottom: var(--space-xxl);
+}
+
+.idleHeading {
+  margin: 0;
+  font-size: var(--text-section-title);
+  font-weight: var(--fw-regular);
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+.idleSubtext {
+  margin: 0;
+  font-size: var(--text-caption);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.chipsLabel {
+  margin: var(--space-md) 0 var(--space-xs);
+  font-size: var(--text-micro);
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.chipsRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-xs);
+}
+
+.chip {
+  padding: var(--badge-padding-y) var(--badge-padding-x);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--font-sm);
+  font-family: inherit;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.chip:hover {
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
+  border-color: var(--color-text-secondary);
+}
+
+/* ── Empty / error states ─────────────────────────────────────────────────── */
+.emptyState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   gap: var(--space-sm);
-  padding: var(--space-xxl) var(--space-md);
+  min-height: calc(100vh - var(--nav-height) - 120px);
+  padding-bottom: var(--space-xxl);
 }
 
 .emptyIcon {

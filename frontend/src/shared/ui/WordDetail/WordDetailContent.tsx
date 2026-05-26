@@ -10,6 +10,30 @@ import { ReviewInfoSection } from './ReviewInfoSection'
 import { featureFlags } from '../../../shared/lib/featureFlags'
 import styles from './WordDetailContent.module.css'
 
+/** Optional inline selection props — only used in search context. */
+interface SelectionProps {
+  selectionMode?: boolean
+  selectedIds?: string[]
+  onToggle?: (id: string) => void
+  onSaveSelection?: () => void
+  onCancelSelection?: () => void
+  isSavingSelection?: boolean
+  /** True when editing an already-saved word (changes button/bar labels). */
+  isEditMode?: boolean
+  /** Called when the destructive "Remove word" link is clicked in edit mode. */
+  onRemoveFromVocabulary?: () => void
+  /** IDs of meanings already saved — drives the persistent highlight on senses. */
+  savedMeaningIds?: string[]
+  /** Navigates to the vocabulary page filtered to this word. */
+  onViewInVocabulary?: () => void
+  /** Called when user clicks a "see also" cross-reference chip in a definition. */
+  onSeeAlso?: (term: string) => void
+  /** Called when user clicks "Saved ✓" and edit mode should open. */
+  onEdit?: () => void
+}
+
+type Props = WordDetailContentProps & SelectionProps
+
 /**
  * The canonical word detail view — section-composed, layout-agnostic.
  *
@@ -37,7 +61,19 @@ export function WordDetailContent({
   isMutating = false,
   context = 'search',
   onClose,
-}: WordDetailContentProps) {
+  selectionMode = false,
+  selectedIds = [],
+  onToggle,
+  onSaveSelection,
+  onCancelSelection,
+  isSavingSelection = false,
+  isEditMode = false,
+  onRemoveFromVocabulary,
+  savedMeaningIds,
+  onViewInVocabulary,
+  onSeeAlso,
+  onEdit,
+}: Props) {
   const groups = groupByPos(word.meanings)
   const [removeConfirm, setRemoveConfirm] = useState(false)
 
@@ -52,7 +88,21 @@ export function WordDetailContent({
         isMutating={isMutating}
         context={context}
         onClose={onClose}
+        onEdit={onEdit}
+        onViewInVocabulary={onViewInVocabulary}
       />
+
+      {/* ── Inline selection bar — search context only ────────────────── */}
+      {selectionMode && context !== 'vocabulary' && (
+        <div className={styles.selectionBar}>
+          <span className={styles.selectionBarText}>
+            {isEditMode ? 'Edit saved meanings' : 'Select meanings to save'}
+          </span>
+          <button type="button" className={styles.selectionBarCancel} onClick={onCancelSelection}>
+            Cancel
+          </button>
+        </div>
+      )}
 
       <div className={styles.meanings}>
         {groups.map((group, i) => (
@@ -60,9 +110,42 @@ export function WordDetailContent({
             key={`${group.pos ?? 'null'}-${i}`}
             pos={group.pos}
             meanings={group.meanings}
+            selectionMode={selectionMode && context !== 'vocabulary'}
+            selectedIds={selectedIds}
+            onToggle={onToggle}
+            savedMeaningIds={!selectionMode ? savedMeaningIds : undefined}
+            onSeeAlso={onSeeAlso}
           />
         ))}
       </div>
+
+      {/* ── Sticky save footer — inline selection mode ───────────────── */}
+      {selectionMode && context !== 'vocabulary' && (
+        <div className={styles.selectionFooter}>
+          <span className={styles.selectionCount}>
+            {selectedIds.length} of {word.meanings.length} selected
+          </span>
+          <button
+            type="button"
+            className={styles.selectionSaveBtn}
+            onClick={onSaveSelection}
+            disabled={selectedIds.length === 0 || isSavingSelection}
+          >
+            {isSavingSelection ? 'Saving…' : isEditMode ? 'Update' : 'Save meanings'}
+          </button>
+        </div>
+      )}
+
+      {/* ── Destructive remove link — edit mode only ─────────────────── */}
+      {selectionMode && isEditMode && context !== 'vocabulary' && onRemoveFromVocabulary && (
+        <button
+          type="button"
+          className={styles.editRemoveLink}
+          onClick={onRemoveFromVocabulary}
+        >
+          Remove word from vocabulary
+        </button>
+      )}
 
       {/* ── Vocabulary card sections — only in vocabulary context ────── */}
       {context === 'vocabulary' && vocabCard?.cardId && (

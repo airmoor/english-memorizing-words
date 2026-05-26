@@ -42,12 +42,20 @@
   color: var(--color-accent);
 }
 
+/* ── Input wrapper — flex child that hosts the text field + clear button ─── */
+
+.inputWrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
 /* ── Text input ─────────────────────────────────────────────────────────── */
 
 .input {
-  flex: 1;
-  min-width: 0;
-  padding: 14px var(--space-md);
+  width: 100%;
+  /* Extra right padding reserves space for the × button when present */
+  padding: 14px calc(20px + var(--space-sm)) 14px var(--space-md); /* 20px = clearBtn width */
   background: transparent;
   border: none;
   outline: none;
@@ -68,6 +76,31 @@
   opacity: 0.65;
   font-style: italic;
   letter-spacing: 0;
+}
+
+/* ── Clear (×) button ───────────────────────────────────────────────────── */
+
+.clearBtn {
+  position: absolute;
+  right: var(--space-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;   /* no token — specific icon-button size */
+  height: 20px;  /* no token */
+  border-radius: var(--radius-full);
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.clearBtn:hover {
+  color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--color-text-primary) 8%, transparent);
 }
 
 /* ── Search button ─────────────────────────────────────────────────────── */
