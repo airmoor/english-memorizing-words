@@ -5,7 +5,7 @@
 
 @media (max-width: 1023px) {
   .root {
-    top: 52px; /* compact header height on mobile */
+    top: var(--nav-height); /* compact header height on mobile */
   }
 }
 

@@ -1,5 +1,5 @@
 .input {
-  padding: 0.625rem var(--space-md);
+  padding: var(--input-padding-y) var(--input-padding-x);
   border: 1.5px solid var(--color-border);
   border-radius: var(--input-radius);
   font-size: var(--text-body);

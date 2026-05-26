@@ -49,8 +49,8 @@
   justify-content: center;
   gap: 3px;
 
-  /* 52px minimum touch height — exceeds Apple's 44px minimum */
-  min-height: 52px;
+  /* nav-height minimum touch height — exceeds Apple's 44px minimum */
+  min-height: var(--nav-height);
   padding: 6px 4px;
 
   text-decoration: none;
