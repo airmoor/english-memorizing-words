@@ -38,7 +38,7 @@
   font-weight: var(--fw-semibold);
   font-family: var(--font-sans);
   cursor: pointer;
-  transition: opacity 0.15s;
+  transition: opacity var(--transition-fast);
 }
 
 .cta:hover {

@@ -7,7 +7,7 @@
   background: var(--color-bg-secondary);
   color: var(--color-text-primary);
   outline: none;
-  transition: border-color 0.15s, background 0.2s;
+  transition: border-color var(--transition-fast), background var(--transition-base);
   min-width: 0;
 }
 

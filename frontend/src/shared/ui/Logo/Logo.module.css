@@ -7,7 +7,7 @@
   user-select: none;
   font-family: var(--font-serif);
   letter-spacing: -0.01em;
-  transition: color 0.18s ease;
+  transition: color var(--transition-base);
 }
 
 .logo:hover {

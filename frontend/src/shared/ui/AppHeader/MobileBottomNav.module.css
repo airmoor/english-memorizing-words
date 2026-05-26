@@ -57,7 +57,7 @@
   color: var(--color-text-secondary);
   -webkit-tap-highlight-color: transparent;
 
-  transition: color 0.15s var(--ease-out);
+  transition: color var(--transition-fast);
 }
 
 /* ── Icon wrapper — carries the active background pill ───────────────────── */
@@ -70,7 +70,7 @@
   height: 28px;
   border-radius: var(--radius-md);
 
-  transition: background 0.18s var(--ease-out);
+  transition: background var(--transition-base);
 }
 
 /* ── Label ───────────────────────────────────────────────────────────────── */
@@ -80,7 +80,7 @@
   font-weight: var(--fw-medium);
   letter-spacing: 0.01em;
   line-height: 1;
-  transition: font-weight 0.15s var(--ease-out);
+  transition: font-weight var(--transition-fast);
 }
 
 /* ── Active state ────────────────────────────────────────────────────────── */

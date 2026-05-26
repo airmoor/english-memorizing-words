@@ -60,7 +60,7 @@
 .panelExit {
   transform: translate(-50%, -50%) scale(0.97);
   opacity: 0;
-  transition: transform 0.15s ease, opacity 0.15s ease;
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
 }
 
 /* ── Animations ───────────────────────────────────────────────────────────────── */

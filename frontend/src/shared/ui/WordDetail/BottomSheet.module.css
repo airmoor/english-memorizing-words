@@ -52,7 +52,7 @@
 
   /* Will be overridden inline during drag */
   transform: translateY(0);
-  transition: transform 0.35s var(--ease-out);
+  transition: transform var(--transition-slow);
   will-change: transform;
 }
 

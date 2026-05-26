@@ -29,7 +29,7 @@
   font-family: inherit;
   max-width: 240px;
   cursor: pointer;
-  transition: border-color 0.15s ease;
+  transition: border-color var(--transition-fast);
 }
 
 .select:focus {
@@ -54,7 +54,7 @@
   border-radius: var(--radius-sm, 6px);
   padding: 6px 10px;
   /* Smooth color/background transition when the board selection changes */
-  transition: color 120ms ease, background 120ms ease;
+  transition: color var(--transition-fast), background var(--transition-fast);
 }
 
 .hint {

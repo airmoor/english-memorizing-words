@@ -48,7 +48,7 @@
   gap: 6px;
   padding: 14px 16px;
   border-bottom: 1px solid var(--border-subtle);
-  transition: background 120ms ease;
+  transition: background var(--transition-fast);
 }
 
 .sessionItem:last-child {
@@ -126,7 +126,7 @@
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 2px;
-  transition: opacity 120ms ease;
+  transition: opacity var(--transition-fast);
 }
 
 .retryToggle:hover { opacity: 0.75; }
@@ -182,7 +182,7 @@
   background: var(--surface-2);
   border: 1px solid var(--border-subtle);
   cursor: pointer;
-  transition: background 120ms ease, color 120ms ease;
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
 
 .copyBtn:hover {
@@ -202,7 +202,7 @@
   background: var(--color-accent-subtle, rgba(99,102,241,0.1));
   border: 1px solid var(--color-accent-border, rgba(99,102,241,0.25));
   cursor: pointer;
-  transition: background 120ms ease, opacity 120ms ease;
+  transition: background var(--transition-fast), opacity var(--transition-fast);
 }
 
 .retryBtn:hover {

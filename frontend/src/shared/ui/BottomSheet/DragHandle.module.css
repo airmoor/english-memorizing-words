@@ -17,7 +17,7 @@
   height: 4px;
   border-radius: var(--radius-full);
   background: var(--color-border);
-  transition: background 0.15s;
+  transition: background var(--transition-fast);
 }
 
 .track:hover .pill {

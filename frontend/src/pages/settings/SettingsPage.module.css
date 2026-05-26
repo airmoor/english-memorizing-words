@@ -56,7 +56,7 @@
   font-size: var(--font-sm);
   color: var(--color-text-primary);
   cursor: pointer;
-  transition: border-color 0.15s var(--ease-out), background 0.15s var(--ease-out);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 
 .modeTile:hover {
@@ -107,7 +107,7 @@
   font-family: inherit;
   cursor: pointer;
   text-align: left;
-  transition: border-color 0.15s var(--ease-out), background 0.15s var(--ease-out);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 
 .variantTile:hover {
@@ -273,7 +273,7 @@
   font-weight: var(--fw-medium);
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
 }
 
 .logoutBtn:hover {
@@ -310,7 +310,7 @@
   background: var(--color-bg-secondary);
   color: var(--color-text-primary);
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color var(--transition-fast);
 }
 
 .pwInput:focus {

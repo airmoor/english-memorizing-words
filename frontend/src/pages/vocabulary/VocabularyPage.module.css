@@ -74,7 +74,7 @@
   color: var(--color-text-secondary);
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
 }
 
 .importBtn:hover {
@@ -98,7 +98,7 @@
   color: var(--color-accent);
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
 }
 
 .reviewBtn:hover {
@@ -134,7 +134,7 @@
   color: var(--color-accent);
   cursor: pointer;
   opacity: 0.8;
-  transition: opacity 0.15s;
+  transition: opacity var(--transition-fast);
   white-space: nowrap;
   /* Nudge down slightly so it aligns with the visual centre of the h1 cap-height
      rather than the mathematical center including descenders. */
@@ -324,7 +324,7 @@
 /* Apply light opacity to list only (not toolbar/filter bar) during refetch */
 .listWrapper.fetching {
   opacity: 0.6;
-  transition: opacity 0.15s;
+  transition: opacity var(--transition-fast);
 }
 
 /* ── Spacing between FilterBar and the word list ──────────────────────────

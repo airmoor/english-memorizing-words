@@ -37,7 +37,7 @@
   color: var(--color-text-secondary);
   text-decoration: none;
   letter-spacing: 0.01em;
-  transition: color 0.18s var(--ease-out);
+  transition: color var(--transition-base);
 }
 
 .link:hover {
@@ -90,7 +90,7 @@
   border-radius: var(--radius-full);
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: border-color 0.15s var(--ease-out), color 0.15s var(--ease-out), transform 0.4s var(--ease-spring);
+  transition: border-color var(--transition-fast), color var(--transition-fast), transform 0.4s var(--ease-spring); /* spring spin — intentional */
 }
 
 .iconButton:hover {
@@ -114,7 +114,7 @@
   color: var(--color-text-secondary);
   cursor: pointer;
   white-space: nowrap;
-  transition: border-color 0.15s, color 0.15s;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
 }
 
 .logout:hover {
@@ -150,7 +150,7 @@
   font-weight: var(--fw-medium);
   color: var(--color-accent);
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background var(--transition-fast);
 }
 
 .installBtn:hover {
@@ -169,7 +169,7 @@
   font-size: 1rem;
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: color 0.15s, background 0.15s;
+  transition: color var(--transition-fast), background var(--transition-fast);
   line-height: 1;
 }
 

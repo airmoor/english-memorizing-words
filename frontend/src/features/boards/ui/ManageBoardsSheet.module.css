@@ -24,7 +24,7 @@
   font-weight: 600;
   padding: var(--space-xs) 12px;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background var(--transition-fast);
 }
 
 .addBtn:hover {
@@ -97,7 +97,7 @@
   border-radius: var(--radius-sm);
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: background 0.1s, color 0.1s;
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
 
 .actionBtn:hover,

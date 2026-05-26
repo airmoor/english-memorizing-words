@@ -75,7 +75,7 @@
   background: var(--color-bg-secondary);
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 
 .columnCard:hover {
@@ -178,7 +178,7 @@
   font-weight: var(--fw-semibold, 600);
   border: none;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background var(--transition-fast);
 }
 
 .confirmBtn:hover {

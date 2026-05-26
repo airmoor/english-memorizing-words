@@ -17,7 +17,7 @@
   cursor: pointer;
   background: transparent;
   white-space: nowrap;
-  transition: background 0.15s, color 0.15s, opacity 0.15s;
+  transition: background var(--transition-fast), color var(--transition-fast), opacity var(--transition-fast);
   /* Default: single-line layout */
   display: inline-flex;
   flex-direction: column;

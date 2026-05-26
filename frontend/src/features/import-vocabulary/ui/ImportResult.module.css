@@ -114,7 +114,7 @@
   border: 1px solid var(--color-border);
   cursor: pointer;
   white-space: nowrap;
-  transition: background 120ms ease, color 120ms ease;
+  transition: background var(--transition-fast), color var(--transition-fast);
   flex-shrink: 0;
 }
 

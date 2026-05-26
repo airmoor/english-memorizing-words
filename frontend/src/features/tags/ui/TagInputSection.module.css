@@ -42,7 +42,7 @@
   box-sizing: border-box;
   font-family: inherit;
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color var(--transition-fast);
 }
 
 .input:focus {
@@ -71,7 +71,7 @@
   font-size: var(--font-xs);
   color: var(--color-text-primary);
   cursor: pointer;
-  transition: background 0.1s;
+  transition: background var(--transition-fast);
 }
 
 .suggestion:hover,

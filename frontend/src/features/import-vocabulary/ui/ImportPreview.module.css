@@ -123,7 +123,7 @@
   color: var(--color-text-secondary);
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.1s ease, color 0.1s ease, border-color 0.1s ease;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .filterTab:hover {
@@ -198,7 +198,7 @@
 
 .settingsChevron {
   flex-shrink: 0;
-  transition: transform 0.2s ease;
+  transition: transform var(--transition-base);
 }
 
 .settingsChevronOpen {
@@ -413,7 +413,7 @@
   font-size: 13px;
   padding: 6px 14px;
   cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
 }
 
 .emptyImportBack:hover {
@@ -433,7 +433,7 @@
   font-weight: var(--fw-semibold, 600);
   border: none;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background var(--transition-fast);
 }
 
 .importBtn:hover:not(:disabled) {

@@ -42,7 +42,7 @@
   font-family: inherit;
   font-size: var(--font-sm);
   color: var(--color-text-primary);
-  transition: border-color 0.18s var(--ease-out), box-shadow 0.18s var(--ease-out);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
   /* Hide native clear button */
   -webkit-appearance: none;
 }
@@ -79,7 +79,7 @@
   cursor: pointer;
   line-height: 1;
   font-family: inherit;
-  transition: color 0.12s, background 0.12s;
+  transition: color var(--transition-fast), background var(--transition-fast);
 }
 
 .clearBtn:hover {
@@ -116,7 +116,7 @@
   color: var(--color-text-secondary);
   cursor: pointer;
   flex-shrink: 0;
-  transition: border-color 0.14s, color 0.14s, background 0.14s;
+  transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
 }
 
 .sortBtn:hover {
@@ -165,7 +165,7 @@
   cursor: pointer;
   text-align: left;
   white-space: nowrap;
-  transition: background 0.1s, color 0.1s;
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
 
 .sortOption:last-child {
@@ -208,7 +208,7 @@
   border: none;
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: background 0.14s, color 0.14s;
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
 
 .viewBtn + .viewBtn {
@@ -275,7 +275,7 @@
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
-  transition: border-color 0.14s, background 0.14s, color 0.14s;
+  transition: border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
 }
 
 .chip:hover {
@@ -324,7 +324,7 @@
   font-size: var(--font-xs);
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: border-color 0.12s, color 0.12s;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
 }
 
 .clearFiltersBtn:hover {

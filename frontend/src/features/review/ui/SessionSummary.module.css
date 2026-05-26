@@ -141,7 +141,7 @@
   font-weight: var(--fw-medium);
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
 }
 
 .fallbackBtn:hover {

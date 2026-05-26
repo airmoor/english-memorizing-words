@@ -62,7 +62,7 @@
   font-family: var(--font-sans);
   cursor: pointer;
   text-align: left;
-  transition: opacity 0.1s;
+  transition: opacity var(--transition-fast);
 }
 
 .list li:first-child .boardRow {
@@ -108,7 +108,7 @@
   flex-shrink: 0;
   color: var(--color-text-secondary);
   opacity: 0.4;
-  transition: transform 0.15s ease, opacity 0.15s;
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
 }
 
 .boardRow:hover .arrow {
@@ -187,7 +187,7 @@
   font-weight: var(--fw-medium);
   color: var(--color-accent);
   cursor: pointer;
-  transition: opacity 0.15s;
+  transition: opacity var(--transition-fast);
 }
 
 .emptyBtn:hover {

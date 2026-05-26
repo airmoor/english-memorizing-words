@@ -46,7 +46,7 @@
   color: var(--text-secondary);
   cursor: pointer;
   margin-bottom: -1px;
-  transition: color 120ms ease, border-color 120ms ease;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
   white-space: nowrap;
 }
 
@@ -104,14 +104,14 @@
   font-size: 12px;
   font-weight: 700;
   flex-shrink: 0;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: background var(--transition-base), color var(--transition-base);
 }
 
 .stepLabel {
   font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
-  transition: color 0.2s ease;
+  transition: color var(--transition-base);
 }
 
 /* Active step */
@@ -294,7 +294,7 @@
   color: #fff;
   border: none;
   cursor: pointer;
-  transition: opacity 120ms ease;
+  transition: opacity var(--transition-fast);
 }
 
 .errorRetryBtn:hover { opacity: 0.85; }
@@ -308,7 +308,7 @@
   color: var(--text-secondary);
   border: 1px solid var(--border-subtle);
   cursor: pointer;
-  transition: background 120ms ease;
+  transition: background var(--transition-fast);
 }
 
 .errorCloseBtn:hover { background: var(--surface-hover); }
