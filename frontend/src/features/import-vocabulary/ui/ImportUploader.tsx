@@ -35,6 +35,15 @@ export function ImportUploader({ onParsed, onError, initialWords }: ImportUpload
   const [inlineError, setInlineError] = useState<string | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
   const [fileNotice, setFileNotice] = useState<{ name: string; wordCount: number } | null>(null)
+  /**
+   * When the user has typed content and then selects/drops a file, we stash
+   * the file here instead of silently overwriting the textarea.  An inline
+   * confirmation block is shown asking "Replace your text with <filename>?".
+   * If the user confirms, `loadFile` is called with the stashed file.
+   * Re-uploading when file content is already active (fileNotice !== null)
+   * skips the guard — the user knowingly picked a new file.
+   */
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Live word count — lines with at least one non-whitespace character
@@ -91,10 +100,11 @@ export function ImportUploader({ onParsed, onError, initialWords }: ImportUpload
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setPasteValue(e.target.value)
       setInlineError(null)
-      // User is now editing manually — dismiss any file-load notice
+      // User is now editing manually — dismiss any file-load notice or pending confirmation
       if (fileNotice) setFileNotice(null)
+      if (pendingFile) setPendingFile(null)
     },
-    [fileNotice],
+    [fileNotice, pendingFile],
   )
 
   // Cmd/Ctrl+Enter triggers preview from anywhere in the textarea
@@ -116,9 +126,11 @@ export function ImportUploader({ onParsed, onError, initialWords }: ImportUpload
     }
   }, [pasteValue, parseAndEmit])
 
-  // ── File reading — auto-proceeds on select/drop ───────────────────────────
+  // ── File reading — actual read + parse logic ──────────────────────────────
+  // Separated from the "should we load?" guard so it can be called both from
+  // processFile (no conflict) and from handleConfirmReplace (after confirmation).
 
-  const processFile = useCallback(
+  const loadFile = useCallback(
     (file: File) => {
       // Validate extension
       const ext = '.' + (file.name.split('.').pop()?.toLowerCase() ?? '')
@@ -156,6 +168,41 @@ export function ImportUploader({ onParsed, onError, initialWords }: ImportUpload
     },
     [parseAndEmit, handleInlineError],
   )
+
+  // ── File selection guard ──────────────────────────────────────────────────
+  // If the user has typed content in the textarea (not loaded from a file),
+  // uploading a file would silently overwrite it.  Instead we stash the file
+  // and show an inline confirmation so the user consciously chooses to replace.
+  //
+  // Re-uploading when file content is already active (fileNotice !== null)
+  // skips the guard — the user knowingly chose a different file.
+
+  const processFile = useCallback(
+    (file: File) => {
+      if (pasteValue.trim().length > 0 && fileNotice === null) {
+        // Typed content exists — ask before overwriting
+        setPendingFile(file)
+        return
+      }
+      loadFile(file)
+    },
+    [pasteValue, fileNotice, loadFile],
+  )
+
+  // Called when the user clicks "Replace" in the overwrite-confirmation block
+  const handleConfirmReplace = useCallback(() => {
+    if (!pendingFile) return
+    const file = pendingFile
+    setPendingFile(null)
+    loadFile(file)
+  }, [pendingFile, loadFile])
+
+  // Called when the user clicks "Keep my text" in the overwrite-confirmation block
+  const handleCancelReplace = useCallback(() => {
+    setPendingFile(null)
+    // Reset the hidden file input so the same file can be re-selected later
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }, [])
 
   const handleFileChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -248,6 +295,37 @@ export function ImportUploader({ onParsed, onError, initialWords }: ImportUpload
           >
             ×
           </button>
+        </div>
+      )}
+
+      {/* ── Overwrite confirmation ────────────────────────────────────── */}
+      {/* Shown when the user tries to upload a file while typed text exists.
+          The file is stashed in `pendingFile`; we ask before replacing the
+          textarea content to prevent accidental data loss. */}
+      {pendingFile && (
+        <div className={styles.replaceConfirm} role="alert" aria-live="assertive">
+          <p className={styles.replaceConfirmMsg}>
+            Replace your text with <strong>{pendingFile.name}</strong>?{' '}
+            <span className={styles.replaceConfirmHint}>Your typed content will be lost.</span>
+          </p>
+          <div className={styles.replaceConfirmActions}>
+            <button
+              type="button"
+              className={styles.replaceConfirmYes}
+              onClick={handleConfirmReplace}
+              // eslint-disable-next-line jsx-a11y/no-autofocus
+              autoFocus
+            >
+              Replace
+            </button>
+            <button
+              type="button"
+              className={styles.replaceConfirmNo}
+              onClick={handleCancelReplace}
+            >
+              Keep my text
+            </button>
+          </div>
         </div>
       )}
 

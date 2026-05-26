@@ -33,6 +33,14 @@ export function ImportPage() {
    */
   const [retryWords, setRetryWords] = useState<string | null>(null)
   const [uploaderKey, setUploaderKey] = useState(0)
+  /**
+   * Incremented every time `handleParsed` produces a new batch of rows to
+   * preview.  Passed as `key` to <ImportPreview> so the component fully
+   * remounts — resetting its internal `mergedRows` state and re-firing the
+   * server-preview effect — even when the flow step is already 'preview'
+   * (i.e. the user edited the textarea and clicked "Preview Import" again).
+   */
+  const [previewKey, setPreviewKey] = useState(0)
 
   const flow = useImportFlow()
   const previewMutation = useImportPreviewMutation()
@@ -67,6 +75,11 @@ export function ImportPage() {
       } else {
         flow.setParsedRows(rows)
         flow.goTo('preview')
+        // Increment key so <ImportPreview> fully remounts with fresh state.
+        // Without this, clicking "Preview Import" a second time while already
+        // on the preview step would leave the component frozen on the first
+        // batch of rows (useState and mount-only useEffect don't re-run).
+        setPreviewKey((k) => k + 1)
       }
     },
     [flow],
@@ -228,6 +241,7 @@ export function ImportPage() {
                 {/* Preview step */}
                 {flow.step === 'preview' && (
                   <ImportPreview
+                    key={previewKey}
                     parsedRows={flow.parsedRows}
                     settings={settings}
                     onSettingsChange={setSettings}
