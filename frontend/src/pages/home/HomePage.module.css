@@ -204,6 +204,22 @@
   opacity: 0.7;
 }
 
+/* ── Zero-streak empty state ─────────────────────────────────────────────── */
+
+.streakEmptyPrimary {
+  font-size: var(--text-section-title);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+.streakEmptySecondary {
+  font-size: var(--text-caption);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-xs);
+  line-height: 1.4;
+}
+
 /* Recently saved */
 
 .recent {

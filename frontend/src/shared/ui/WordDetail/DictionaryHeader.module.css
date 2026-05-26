@@ -16,10 +16,11 @@
 
 .word {
   margin: 0;
-  font-family: var(--font-serif);
-  font-size: var(--text-page-title);
-  font-weight: var(--fw-semibold);
+  font-size: var(--font-xxl);
+  font-weight: var(--fw-regular);
   letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--color-text-primary);
   word-break: break-word;
 }
 

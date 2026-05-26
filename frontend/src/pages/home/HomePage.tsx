@@ -186,13 +186,20 @@ export function HomePage() {
               {/* Stats — Bento left column on desktop, full-width stack on mobile */}
               <DashboardCell span={recent.length === 0 ? 'full' : 'auto'} className={styles.contentCell}>
                 <div className={styles.stats}>
-                  <StatTile
-                    icon={Flame}
-                    label="Streak"
-                    value={streak}
-                    unit={streak === 1 ? 'day' : 'days'}
-                    accent={streak > 0}
-                  />
+                  {streak === 0 ? (
+                    <Card variant="floating" padding="md" className={styles.statTile}>
+                      <div className={styles.streakEmptyPrimary}>Start today</div>
+                      <div className={styles.streakEmptySecondary}>Review cards to begin your streak</div>
+                    </Card>
+                  ) : (
+                    <StatTile
+                      icon={Flame}
+                      label="Streak"
+                      value={streak}
+                      unit={streak === 1 ? 'day' : 'days'}
+                      accent={streak > 0}
+                    />
+                  )}
                   <StatTile
                     icon={BookOpen}
                     label="Saved"
