@@ -1,6 +1,6 @@
 .summary {
   text-align: center;
-  margin-top: var(--space-xxl);
+  margin-top: var(--section-gap);
   position: relative;
   display: flex;
   flex-direction: column;

@@ -1,12 +1,12 @@
 .header {
   display: flex;
   align-items: center;
-  padding: var(--space-lg) var(--space-lg) var(--space-md);
-  border-bottom: 1px solid var(--color-border);
+  padding: var(--card-padding-x) var(--card-padding-x) var(--card-padding-y);
+  border-bottom: var(--border-default);
 }
 
 .title {
-  font-size: var(--font-md);
+  font-size: var(--text-body);
   font-weight: 600;
   color: var(--color-text-primary);
   margin: 0;
@@ -30,8 +30,8 @@
 .row {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-sm) var(--space-lg);
+  gap: var(--inline-gap);
+  padding: var(--space-sm) var(--card-padding-x);
   flex-wrap: wrap;
 }
 
@@ -107,7 +107,7 @@
   padding: var(--space-xs) 12px;
   background: var(--color-danger);
   border: none;
-  border-radius: var(--radius-full);
+  border-radius: var(--btn-radius-pill);
   color: #fff;
   font-size: var(--font-xs);
   font-family: inherit;
@@ -119,7 +119,7 @@
   padding: var(--space-xs) 12px;
   background: none;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
+  border-radius: var(--btn-radius-pill);
   color: var(--color-text-secondary);
   font-size: var(--font-xs);
   font-family: inherit;

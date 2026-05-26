@@ -7,7 +7,7 @@
 .item {
   display: flex;
   align-items: center;
-  gap: var(--space-md);
+  gap: var(--card-gap);
   cursor: pointer;
   animation: fadeIn 0.22s var(--ease-out) both;
   /* Left border color indicates card state — subtle accent, not intrusive */
@@ -76,7 +76,7 @@
 
 .word {
   font-family: var(--font-serif);
-  font-size: var(--font-lg);
+  font-size: var(--text-card-title);
   font-weight: var(--fw-semibold);
   letter-spacing: -0.01em;
   color: var(--color-text-primary);
@@ -139,7 +139,7 @@
   justify-content: center;
   background: none;
   border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--btn-radius);
   color: var(--color-text-secondary);
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s, background 0.15s;

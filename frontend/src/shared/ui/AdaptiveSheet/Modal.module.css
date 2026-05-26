@@ -27,8 +27,8 @@
    * This is the correct elevated surface — matching vocabulary cards, nav, etc.
    */
   background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border: var(--border-default);
+  border-radius: var(--card-radius);
   box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.2),
     0 16px 48px rgba(0, 0, 0, 0.45),

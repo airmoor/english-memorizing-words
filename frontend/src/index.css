@@ -96,6 +96,69 @@
 
   /* Fixed-height constants referenced by layout components */
   --mobile-nav-height: 56px;   /* MobileBottomNav visual bar height */
+
+  /* ── Semantic tokens ─────────────────────────────────────────────────
+     All values are aliases of primitives above — never raw values here.
+     Use these in component CSS instead of primitives so a single token
+     change propagates everywhere (e.g. swap --card-radius for a rounder
+     design in one place, every card updates automatically).
+     ──────────────────────────────────────────────────────────────────── */
+
+  /* — Surfaces — */
+  --surface-page:        var(--color-bg-primary);
+  --surface-card:        var(--color-bg-card);
+  --surface-overlay:     var(--color-bg-secondary);
+  --surface-accent:      var(--color-accent-subtle);
+
+  /* — Component spacing — */
+  --card-padding-x:      var(--space-lg);
+  --card-padding-y:      var(--space-md);
+  --card-gap:            var(--space-md);
+  --card-radius:         var(--radius-lg);
+
+  --section-gap:         var(--space-xxl);
+  --inline-gap:          var(--space-sm);
+
+  --input-padding-x:     var(--space-md);
+  --input-padding-y:     var(--space-sm);
+  --input-radius:        var(--radius-md);
+
+  --badge-padding-x:     var(--space-sm);
+  --badge-padding-y:     var(--space-xs);
+  --badge-radius:        var(--radius-sm);
+
+  --btn-padding-x:       var(--space-lg);
+  --btn-padding-y:       var(--space-sm);
+  --btn-radius:          var(--radius-md);
+  --btn-radius-pill:     var(--radius-full);
+
+  /* — Navbar — */
+  --nav-height:          52px;
+  --nav-padding-x:       var(--page-padding-x);
+
+  /* — Review flashcard — */
+  --card-word-padding-x: var(--space-xl);
+  --card-word-padding-y: var(--space-xl);
+  --card-word-radius:    var(--radius-lg);
+
+  /* — Typography roles — */
+  --text-page-title:     var(--font-xxl);
+  --text-section-title:  var(--font-xl);
+  --text-card-title:     var(--font-lg);
+  --text-body:           var(--font-md);
+  --text-caption:        var(--font-sm);
+  --text-micro:          var(--font-xs);
+
+  /* — Borders — */
+  --border-default:      1px solid var(--color-border);
+  --border-card:         0.5px solid rgba(0, 0, 0, 0.08);
+  --border-input:        1px solid var(--color-border);
+  --border-focus:        2px solid var(--color-accent);
+
+  /* — Motion — */
+  --transition-fast:     120ms var(--ease-out);
+  --transition-base:     200ms var(--ease-out);
+  --transition-slow:     350ms var(--ease-out);
 }
 
 /* Heavier shadows in all dark themes for atmospheric depth */
@@ -110,6 +173,8 @@
   --shadow-lg: 0 14px 48px rgba(0, 0, 0, 0.55);
   /* Brighter selection on dark backgrounds — accent tint at higher opacity */
   --selection-bg: rgba(140, 150, 255, 0.38);
+  /* --border-card uses black at near-zero opacity — invisible on dark surfaces */
+  --border-card: 0.5px solid rgba(255, 255, 255, 0.10);
 }
 
 /* ── Glass surface tokens per theme ─────────────────────────────────────── */

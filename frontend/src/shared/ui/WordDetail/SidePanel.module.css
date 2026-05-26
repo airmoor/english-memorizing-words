@@ -33,8 +33,8 @@
   overflow: hidden;
 
   background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border: var(--border-default);
+  border-radius: var(--card-radius);
 
   /* Slide in from the right edge */
   animation: panelIn 220ms var(--ease-out) both;
@@ -74,7 +74,7 @@
   /* Thin, unobtrusive scrollbar — visible enough to hint scrollability */
   scrollbar-width: thin;
   scrollbar-color: var(--color-border) transparent;
-  padding: var(--space-lg) var(--space-lg) var(--space-xxl);
+  padding: var(--card-padding-x) var(--card-padding-x) var(--section-gap);
 }
 
 /* WebKit scrollbar — matches scrollbar-width: thin */

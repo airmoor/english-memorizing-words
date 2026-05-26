@@ -25,8 +25,8 @@
   width: 100%;
   max-width: 360px;
   background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border: var(--border-default);
+  border-radius: var(--card-radius);
   box-shadow:
     0 24px 64px rgba(0, 0, 0, 0.22),
     0 4px 16px rgba(0, 0, 0, 0.12),
@@ -44,7 +44,7 @@
 
 .title {
   margin: 0 0 var(--space-xs);
-  font-size: var(--font-md);
+  font-size: var(--text-body);
   font-weight: var(--fw-semibold);
   color: var(--color-text-primary);
   line-height: 1.4;
@@ -69,7 +69,7 @@
   padding: 8px 16px;
   background: none;
   border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--btn-radius);
   font-family: inherit;
   font-size: var(--font-sm);
   font-weight: var(--fw-medium);
@@ -91,7 +91,7 @@
 .confirmBtn {
   padding: 8px 16px;
   border: 1.5px solid transparent;
-  border-radius: var(--radius-md);
+  border-radius: var(--btn-radius);
   font-family: inherit;
   font-size: var(--font-sm);
   font-weight: var(--fw-semibold);
