@@ -30,9 +30,6 @@ export interface WordDetailData {
 // ── Cache lookup helper ───────────────────────────────────────────────────
 //
 // The vocabulary page uses useInfiniteQuery with key ['vocabulary', {...}].
-// useSavedWords uses useQuery with key ['saved-words'] (a DIFFERENT key so
-// the two shapes never collide in the cache).
-//
 // Reading from the cache therefore means iterating the InfiniteData pages —
 // getQueryData(['vocabulary']) no longer returns anything meaningful.
 

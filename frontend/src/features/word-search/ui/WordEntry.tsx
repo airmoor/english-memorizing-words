@@ -5,17 +5,13 @@ import { Card } from '../../../shared/ui/Card/Card'
 import { WordDetailContent } from '../../../shared/ui/WordDetail/WordDetailContent'
 import { useSaveSelectedMeaningsMutation } from '../../meaning-picker/api/useSaveSelectedMeaningsMutation'
 import { deleteWord } from '../../vocabulary/api/vocabularyApi'
+import { useWordSavedStatus } from '../model/useWordSavedStatus'
 import type { WordPayload } from '../../../shared/ui/WordDetail/types'
 import type { WordResult } from '../../../entities/word/model/types'
 import styles from './WordEntry.module.css'
 
 interface Props {
   word: WordResult
-  isSaved: boolean
-  onSave: (wordId: string) => void
-  isSaving: boolean
-  /** IDs of meanings already saved — drives persistent highlights and edit-mode pre-selection */
-  savedMeaningIds?: string[]
   /** Called when user clicks a "see also" cross-reference chip */
   onSeeAlso?: (term: string) => void
 }
@@ -23,17 +19,20 @@ interface Props {
 /**
  * Search-page wrapper for WordDetailContent.
  *
- * Two selection flows:
- *  - New save: "Save word" button → selection mode (≤3 pre-checked, >3 empty)
- *  - Edit:     "Saved ✓" badge   → edit mode (saved meanings pre-checked)
+ * Owns the full save/edit/remove lifecycle for the currently viewed word:
+ *   - Fetches per-word saved status via useWordSavedStatus (no global preload)
+ *   - New save: "Save word" button → meaning selection mode
+ *   - Edit:     "Saved ✓" badge   → edit mode with saved meanings pre-checked
+ *   - Remove:   "Remove word" link in edit mode
  *
- * Escape key cancels either mode.
- * MeaningPickerSheet is intentionally not rendered here — kept for other contexts.
+ * Escape key cancels selection mode.
  */
-export function WordEntry({ word, isSaved, onSave, isSaving, savedMeaningIds = [], onSeeAlso }: Props) {
+export function WordEntry({ word, onSeeAlso }: Props) {
   const [selectionMode, setSelectionMode] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
+
+  const { isSaved, savedMeaningIds, setOptimistic } = useWordSavedStatus(word.id)
   const saveMutation = useSaveSelectedMeaningsMutation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -42,13 +41,19 @@ export function WordEntry({ word, isSaved, onSave, isSaving, savedMeaningIds = [
 
   const removeMutation = useMutation({
     mutationFn: () => deleteWord(word.id),
+    onMutate: () => {
+      // Optimistically clear the saved badge so it disappears immediately
+      setOptimistic(false)
+    },
+    onError: () => {
+      setOptimistic(null) // revert — let real cache data decide
+    },
     onSuccess: () => {
       setSelectionMode(false)
       setIsEditMode(false)
-      queryClient.invalidateQueries({ queryKey: ['saved-words'] })
+      setOptimistic(null)
+      queryClient.invalidateQueries({ queryKey: ['saved-status', word.id] })
       queryClient.invalidateQueries({ queryKey: ['vocabulary'] })
-      // Notify parent so the "Saved ✓" badge resets
-      // Parent drives isSaved from cache so invalidation is enough
     },
   })
 
@@ -74,7 +79,6 @@ export function WordEntry({ word, isSaved, onSave, isSaving, savedMeaningIds = [
   }
 
   function handleOpenEditMode() {
-    // Pre-check whatever is already saved
     setSelectedIds([...savedMeaningIds])
     setIsEditMode(true)
     setSelectionMode(true)
@@ -95,10 +99,19 @@ export function WordEntry({ word, isSaved, onSave, isSaving, savedMeaningIds = [
     saveMutation.mutate(
       { wordId: word.id, meaningIds: selectedIds },
       {
+        onMutate: () => {
+          // Flip badge immediately — user confirmed save, don't wait for server
+          setOptimistic(true)
+        },
+        onError: () => {
+          setOptimistic(null) // revert on failure
+        },
         onSuccess: () => {
           setSelectionMode(false)
           setIsEditMode(false)
-          onSave(word.id)
+          // Clear optimistic override — cache refetch (triggered by onSettled
+          // in useSaveSelectedMeaningsMutation) will supply the real value
+          setOptimistic(null)
         },
       }
     )
@@ -119,7 +132,7 @@ export function WordEntry({ word, isSaved, onSave, isSaving, savedMeaningIds = [
         learningState={isSaved ? { nextReview: '', lastReviewedAt: null, intervalDays: 0, easeFactor: 2.5 } : null}
         onSave={handleOpenNewSave}
         onRemove={() => {}}
-        isMutating={isSaving}
+        isMutating={saveMutation.isPending || removeMutation.isPending}
         selectionMode={selectionMode}
         selectedIds={selectedIds}
         onToggle={handleToggle}

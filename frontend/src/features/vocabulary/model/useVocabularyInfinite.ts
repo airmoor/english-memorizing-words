@@ -83,10 +83,11 @@ export function useVocabularyInfinite(params: VocabularyQueryParams) {
       })
     },
 
-    onSettled: () => {
+    onSettled: (_data, _err, wordId) => {
       queryClient.invalidateQueries({ queryKey: ['vocabulary'] })
-      // Also refresh the saved-words cache used by the search page "Save" button
-      queryClient.invalidateQueries({ queryKey: ['saved-words'] })
+      // Invalidate the per-word saved status so the Search page badge resets
+      // if the user looks up this word again after removing it.
+      queryClient.invalidateQueries({ queryKey: ['saved-status', wordId] })
     },
   })
 

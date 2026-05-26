@@ -10,9 +10,9 @@ interface SaveSelectedMeaningsArgs {
 /**
  * Saves a word with only the user-selected meanings.
  *
- * On success invalidates both caches that track saved words:
- *   - ['saved-words']   → powers the "Save" button state on search results
- *   - ['vocabulary']    → powers the vocabulary list
+ * On settlement invalidates:
+ *   - ['saved-status', wordId]  → the per-word saved status on the Search page
+ *   - ['vocabulary']            → the vocabulary list / infinite pages
  */
 export function useSaveSelectedMeaningsMutation() {
   const queryClient = useQueryClient()
@@ -21,8 +21,8 @@ export function useSaveSelectedMeaningsMutation() {
     mutationFn: ({ wordId, meaningIds }: SaveSelectedMeaningsArgs) =>
       saveWord(wordId, meaningIds),
 
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['saved-words'] })
+    onSettled: (_data, _error, { wordId }) => {
+      queryClient.invalidateQueries({ queryKey: ['saved-status', wordId] })
       queryClient.invalidateQueries({ queryKey: ['vocabulary'] })
     },
   })

@@ -1,17 +1,21 @@
 import { apiClient } from '../../../shared/api/base'
-import type { PaginatedVocabulary, VocabularyWord } from '../../../entities/vocabulary/model/types'
 import type { WordResult } from '../../../entities/word/model/types'
 
 export const fetchWord = (text: string): Promise<WordResult> =>
   apiClient.get(`/words/${encodeURIComponent(text)}`)
 
+/** Shape returned by GET /vocabulary/words/:wordId/status */
+export interface WordSavedStatus {
+  isSaved: boolean
+  meaningIds: string[]
+}
+
 /**
- * Fetches all saved word IDs for the current user.
- * Used by useSavedWords to power the "Save" button state on search results.
- * Uses a high limit (1000) because we need the full ID set, not a single page.
+ * Fetches the saved status for a single word.
+ * Returns { isSaved: false, meaningIds: [] } when the word is not in vocabulary.
  */
-export const fetchVocabulary = (): Promise<VocabularyWord[]> =>
-  apiClient.get<PaginatedVocabulary>('/vocabulary?limit=1000').then((r) => r.items)
+export const fetchWordSavedStatus = (wordId: string): Promise<WordSavedStatus> =>
+  apiClient.get<WordSavedStatus>(`/vocabulary/words/${wordId}/status`)
 
 /**
  * Save a word to the user's vocabulary.

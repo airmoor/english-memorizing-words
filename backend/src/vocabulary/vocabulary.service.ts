@@ -278,6 +278,20 @@ const SORT_MAP: Record<string, string> = {
   nextReview:   'c.next_review ASC NULLS LAST',
 }
 
+// ── Per-word saved status DTO (GET /vocabulary/words/:wordId/status) ──────────
+
+export class WordSavedStatusDto {
+  @ApiProperty({ example: true, description: 'Whether the word is in the user vocabulary' })
+  isSaved: boolean;
+
+  @ApiProperty({
+    example: ['uuid-1', 'uuid-2'],
+    type: [String],
+    description: 'IDs of saved meanings (selected subset, or all word meanings when no explicit selection was made). Empty when isSaved is false.',
+  })
+  meaningIds: string[];
+}
+
 // ── Service ──────────────────────────────────────────────────────────────────
 
 @Injectable()
@@ -340,6 +354,28 @@ export class VocabularyService {
     } finally {
       await qr.release();
     }
+  }
+
+  // ── GET /vocabulary/words/:wordId/status ────────────────────────────────
+  // Answers "is this specific word saved, and which meanings?" in one query.
+  // Constant-time: no vocabulary-wide scan. Returns isSaved:false gracefully
+  // when the word is not in the user's vocabulary.
+
+  async getWordSavedStatus(userId: string, wordId: string): Promise<WordSavedStatusDto> {
+    const rows = await this.dataSource.query<{ meaningIds: string[] | null }[]>(
+      `SELECT
+         COALESCE(
+           uw.selected_meaning_ids,
+           ARRAY_AGG(m.id ORDER BY m.sense_number NULLS LAST)
+         ) AS "meaningIds"
+       FROM user_words uw
+       LEFT JOIN meanings m ON m.word_id = uw.word_id
+       WHERE uw.user_id = $1 AND uw.word_id = $2
+       GROUP BY uw.word_id, uw.selected_meaning_ids`,
+      [userId, wordId],
+    );
+    if (rows.length === 0) return { isSaved: false, meaningIds: [] };
+    return { isSaved: true, meaningIds: rows[0].meaningIds ?? [] };
   }
 
   // ── GET /vocabulary ───────────────────────────────────────────────────────

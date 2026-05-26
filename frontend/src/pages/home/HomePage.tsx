@@ -118,13 +118,6 @@ export function HomePage() {
     <PageLayout>
       <Container as="main">
         <DashboardGrid>
-          {/* Greeting */}
-          <DashboardCell span="full">
-            <Text variant="heading" as="h1" className={styles.greeting}>
-              Welcome back
-            </Text>
-          </DashboardCell>
-
           {isLoading ? (
             <HomePageSkeleton />
           ) : (

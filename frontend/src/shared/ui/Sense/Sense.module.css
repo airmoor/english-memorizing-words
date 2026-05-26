@@ -1,13 +1,9 @@
 .sense {
   list-style: none;
-  padding: var(--space-md) 0;
+  padding: var(--space-md);
   border-top: 1px solid var(--color-border);
 }
 
-.sense:first-child {
-  border-top: none;
-  padding-top: 0;
-}
 
 .subSense {
   padding-left: var(--space-lg);
@@ -165,12 +161,19 @@
   transition: background var(--transition-fast);
 }
 
-.senseSelectable:hover {
-  background: var(--color-bg-card);
+/* Unselected hover — off-white, not pure white, to avoid a harsh flash
+   against the card's white surface. */
+.senseSelectable:hover:not(.senseSelected) {
+  background: var(--color-bg-primary);
 }
 
 .senseSelected {
   background: var(--surface-accent);
+}
+
+/* Selected hover — stay in the accent family, slightly richer than the resting tint. */
+.senseSelectable.senseSelected:hover {
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
 }
 
 .checkbox {

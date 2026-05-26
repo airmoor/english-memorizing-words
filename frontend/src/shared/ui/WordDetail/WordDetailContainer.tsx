@@ -99,10 +99,9 @@ export function WordDetailContainer({ children, onSave, onRemove, context = 'voc
     )
     for (const [, data] of allVocabData) {
       // Type guard: skip any cache entry that isn't InfiniteData.
-      // The ['vocabulary'] prefix match can theoretically return regular-query
-      // entries if a non-infinite query is ever written under the same prefix
-      // (e.g. the now-fixed useSavedWords collision). Checking Array.isArray
-      // on pages makes this loop safe regardless of cache contents.
+      // The ['vocabulary'] prefix match can return regular-query entries if a
+      // non-infinite query is ever written under the same key prefix.
+      // Checking Array.isArray on pages makes this loop safe regardless.
       if (!data || !Array.isArray(data.pages)) continue
       for (const page of data.pages) {
         const found = page.items.find((v) => v.wordId === state.activeWordId)

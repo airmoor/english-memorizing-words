@@ -26,6 +26,7 @@ import {
   VocabularyQueryDto,
   VocabularyService,
   VocabularyWordDto,
+  WordSavedStatusDto,
 } from './vocabulary.service';
 import { AuthUser, CurrentUser } from '../common/decorators/current-user.decorator';
 
@@ -34,6 +35,20 @@ import { AuthUser, CurrentUser } from '../common/decorators/current-user.decorat
 @Controller('vocabulary')
 export class VocabularyController {
   constructor(private readonly vocabularyService: VocabularyService) {}
+
+  // Saved status for a single word — used by the Search page "Save" button.
+  // Returns { isSaved: false, meaningIds: [] } when the word is not in vocabulary.
+  // Constant-time: single-row lookup, no vocabulary-wide scan.
+  @Get('words/:wordId/status')
+  @ApiOperation({ summary: 'Get saved status and meaning IDs for a single word' })
+  @ApiResponse({ status: 200, description: 'Saved status', type: WordSavedStatusDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  getWordSavedStatus(
+    @CurrentUser() user: AuthUser,
+    @Param('wordId', new ParseUUIDPipe()) wordId: string,
+  ): Promise<WordSavedStatusDto> {
+    return this.vocabularyService.getWordSavedStatus(user.id, wordId);
+  }
 
   // Save a word (and create its card) — idempotent
   @Post('words/:wordId')

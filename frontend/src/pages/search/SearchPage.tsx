@@ -8,7 +8,6 @@ import { WordEntry } from '../../features/word-search/ui/WordEntry'
 import { Container } from '../../shared/ui/layout/Container'
 import { PageLayout } from '../../shared/ui/layout/PageLayout'
 import { useWordSearch } from '../../features/word-search/model/useWordSearch'
-import { useSavedWords } from '../../features/word-search/model/useSavedWords'
 import styles from './SearchPage.module.css'
 
 function normalizeText(raw: string): string {
@@ -34,7 +33,6 @@ export function SearchPage() {
   }
 
   const searchState = useWordSearch(query)
-  const { isSaved, save, isSaving, getSavedMeaningIds } = useSavedWords()
 
   return (
     <PageLayout className={styles.flexPage}>
@@ -54,7 +52,7 @@ export function SearchPage() {
           <div className={styles.results}>
             {searchState.status === 'idle' && (
               <div className={styles.idleState}>
-                <p className={styles.idleHeading}>Search any English word</p>
+                <p className={styles.idleHeading}>Look up any word</p>
                 <p className={styles.idleSubtext}>Meanings, transcription, and usage examples</p>
                 <p className={styles.chipsLabel}>Try these words</p>
                 <div className={styles.chipsRow}>
@@ -120,10 +118,6 @@ export function SearchPage() {
             {searchState.status === 'success' && (
               <WordEntry
                 word={searchState.word}
-                isSaved={isSaved(searchState.word.id)}
-                onSave={save}
-                isSaving={isSaving}
-                savedMeaningIds={getSavedMeaningIds(searchState.word.id)}
                 onSeeAlso={(term) => {
                   setInput(term)
                   setQuery(normalizeText(term))
