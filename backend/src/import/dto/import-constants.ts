@@ -54,3 +54,6 @@ export const SYNC_IMPORT_STATUSES = [
   'no_changes',
   'failed',
 ] as const;
+
+/** Statuses that can actually be returned by the synchronous execute endpoint. */
+export type SyncImportStatus = (typeof SYNC_IMPORT_STATUSES)[number];

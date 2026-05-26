@@ -1,6 +1,5 @@
 import { useCallback, useState, useEffect, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { ImportSheet } from '../../features/import-vocabulary/ui/ImportSheet'
 import { Text } from '../../shared/ui/Typography/Typography'
 import { Container } from '../../shared/ui/layout/Container'
 import { PageLayout } from '../../shared/ui/layout/PageLayout'
@@ -337,10 +336,6 @@ export function VocabularyPage() {
     if (inputValue) handleQueryChange('')
   }, [apiFilters, setApiFilter, activeFilters, handleFilterToggle, inputValue, handleQueryChange])
 
-  // ── Import sheet state ─────────────────────────────────────────────────────
-
-  const [importSheetOpen, setImportSheetOpen] = useState(false)
-
   // ── Review navigation ─────────────────────────────────────────────────────
 
   const handleReview = useCallback(() => {
@@ -413,12 +408,12 @@ export function VocabularyPage() {
 
                 {/* Right: import + review actions */}
                 <div className={styles.headerAction}>
-                  {/* Import button — gated behind feature flag */}
+                  {/* Import button — navigates to the dedicated /import page */}
                   {featureFlags.vocabularyImport && (
                     <button
                       type="button"
                       className={styles.importBtn}
-                      onClick={() => setImportSheetOpen(true)}
+                      onClick={() => navigate('/import')}
                       aria-label="Import vocabulary"
                     >
                       <ImportIcon />
@@ -512,13 +507,6 @@ export function VocabularyPage() {
         </div>
       </Container>
 
-      {/* ── Import sheet ─────────────────────────────────────────────────── */}
-      {featureFlags.vocabularyImport && (
-        <ImportSheet
-          open={importSheetOpen}
-          onClose={() => setImportSheetOpen(false)}
-        />
-      )}
     </PageLayout>
   )
 }

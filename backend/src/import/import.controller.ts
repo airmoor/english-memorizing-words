@@ -1,13 +1,19 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
+  ParseIntPipe,
   Post,
+  Query,
+  DefaultValuePipe,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -15,6 +21,7 @@ import { ImportService } from './import.service';
 import { ImportRequestDto } from './dto/import-request.dto';
 import { ImportPreviewResultDto } from './dto/import-preview-result.dto';
 import { ImportExecuteResultDto } from './dto/import-execute-result.dto';
+import { ImportSessionDto, ImportSessionListDto } from './dto/import-session.dto';
 import { AuthUser, CurrentUser } from '../common/decorators/current-user.decorator';
 
 @ApiTags('import')
@@ -45,6 +52,7 @@ export class ImportController {
    * Execute an import batch.
    * Enriches each word synchronously (cache-first, dictionary fallback),
    * creates cards only after meanings are resolved.
+   * Persists an ImportSession record for history and retry.
    * Returns ImportStatus + counts; always 200 even on partial failure.
    */
   @Post('execute')
@@ -58,5 +66,37 @@ export class ImportController {
     @Body() dto: ImportRequestDto,
   ): Promise<ImportExecuteResultDto> {
     return this.importService.execute(user.id, dto);
+  }
+
+  /**
+   * List the current user's import sessions, newest first.
+   * Used by the Import History tab to display past imports.
+   */
+  @Get('sessions')
+  @ApiOperation({ summary: 'List import history for the current user' })
+  @ApiQuery({ name: 'limit', required: false, description: 'Max sessions to return (1–100, default 50)' })
+  @ApiResponse({ status: 200, type: ImportSessionListDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  listSessions(
+    @CurrentUser() user: AuthUser,
+    @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
+  ): Promise<ImportSessionListDto> {
+    return this.importService.listSessions(user.id, limit);
+  }
+
+  /**
+   * Get a single import session by ID.
+   * Returns full detail including all failed rows.
+   */
+  @Get('sessions/:id')
+  @ApiOperation({ summary: 'Get a single import session by ID' })
+  @ApiResponse({ status: 200, type: ImportSessionDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Session not found' })
+  getSession(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+  ): Promise<ImportSessionDto> {
+    return this.importService.getSession(user.id, id);
   }
 }

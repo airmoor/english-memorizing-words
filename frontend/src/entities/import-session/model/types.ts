@@ -131,6 +131,37 @@ export interface ImportExecuteResult {
   errorRows: ImportErrorRow[]
 }
 
+// ── ImportSession — persistent session record from the API ────────────────────
+
+/** A failed-row snapshot stored inside an ImportSession. */
+export interface ImportSessionErrorRow {
+  word: string
+  reason: string
+  clientRowId?: string
+  lineNumber?: number
+}
+
+/**
+ * A persisted import session returned by GET /import/sessions or GET /import/sessions/:id.
+ * Mirrors `ImportSessionDto` from the backend.
+ */
+export interface ImportSession {
+  id: string
+  sourceType: 'paste' | 'csv' | 'anki'
+  status: 'completed' | 'partial_failure' | 'no_changes' | 'failed'
+  submitted: number
+  imported: number
+  skipped: number
+  duplicatesIgnored: number
+  errors: number
+  errorRows: ImportSessionErrorRow[]
+  createdAt: string
+}
+
+export interface ImportSessionList {
+  sessions: ImportSession[]
+}
+
 // ── ImportFlowError — typed error model ───────────────────────────────────────
 
 /**

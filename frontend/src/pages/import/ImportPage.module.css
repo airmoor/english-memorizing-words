@@ -1,0 +1,249 @@
+/* ── Page wrapper ────────────────────────────────────────────────────────────
+   Full-height flex column so the two-column content area can fill remaining
+   vertical space without overflow.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+/* ── Page header ──────────────────────────────────────────────────────────── */
+
+.pageHeader {
+  padding: var(--space-lg) var(--space-lg) 0;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.pageTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 16px;
+  line-height: 1.2;
+}
+
+/* ── Tab bar ──────────────────────────────────────────────────────────────── */
+
+.tabBar {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  margin-bottom: -1px;
+  transition: color 120ms ease, border-color 120ms ease;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: var(--text-primary);
+}
+
+.tabActive {
+  color: var(--color-accent, #6366f1);
+  border-bottom-color: var(--color-accent, #6366f1);
+  font-weight: 600;
+}
+
+/* ── Content area ─────────────────────────────────────────────────────────── */
+
+.content {
+  flex: 1;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-lg);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* ── Two-column import layout (desktop ≥ 1024px) ─────────────────────────── */
+
+.importLayout {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: var(--space-xl);
+  flex: 1;
+  min-height: 0;
+  align-items: start;
+}
+
+@media (max-width: 1023px) {
+  .importLayout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Left panel — uploader, stable */
+.leftPanel {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg, 12px);
+  overflow: hidden;
+  position: sticky;
+  top: var(--space-lg);
+}
+
+/* Right panel — contextual content */
+.rightPanel {
+  display: flex;
+  flex-direction: column;
+  min-height: 480px;
+}
+
+/* On mobile: sequential layout — only show the active step */
+@media (max-width: 1023px) {
+  .leftPanel {
+    position: static;
+    /* On mobile, hide the left panel when not on the upload step */
+  }
+
+  .leftPanel[data-hidden='true'] {
+    display: none;
+  }
+
+  .rightPanel[data-hidden='true'] {
+    display: none;
+  }
+}
+
+/* ── Right panel: empty state ────────────────────────────────────────────── */
+
+.rightEmpty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 64px 24px;
+  text-align: center;
+  color: var(--text-secondary);
+  border: 2px dashed var(--border-subtle);
+  border-radius: var(--radius-lg, 12px);
+}
+
+.rightEmptyIcon {
+  font-size: 40px;
+  line-height: 1;
+  opacity: 0.5;
+}
+
+.rightEmptyTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.rightEmptyBody {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+  max-width: 240px;
+}
+
+/* ── Loading / error step ─────────────────────────────────────────────────── */
+
+.rightCentered {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 64px 24px;
+  text-align: center;
+}
+
+.loadingText {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.errorMessage {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-error, #ef4444);
+  margin: 0;
+  max-width: 340px;
+}
+
+.errorHint {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+  max-width: 320px;
+  padding: 8px 12px;
+  border-left: 3px solid var(--color-warning, #f59e0b);
+  background: var(--color-warning-subtle, rgba(245,158,11,0.08));
+  border-radius: 0 6px 6px 0;
+  text-align: left;
+}
+
+.errorActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.errorRetryBtn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--color-accent, #6366f1);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: opacity 120ms ease;
+}
+
+.errorRetryBtn:hover { opacity: 0.85; }
+
+.errorCloseBtn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.errorCloseBtn:hover { background: var(--surface-hover); }
+
+/* ── History tab ──────────────────────────────────────────────────────────── */
+
+.historyPane {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg, 12px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}

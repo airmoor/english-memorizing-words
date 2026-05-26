@@ -81,9 +81,15 @@
   border-bottom: 1px solid var(--color-border);
 }
 
+.errorHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 16px;
+}
+
 .errorToggle {
-  display: block;
-  width: 100%;
+  flex: 1;
   padding: 12px 24px;
   background: none;
   border: none;
@@ -96,6 +102,25 @@
 
 .errorToggle:hover {
   background: color-mix(in srgb, var(--color-danger) 5%, transparent);
+}
+
+.copyBtn {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: var(--fw-medium, 500);
+  color: var(--color-text-secondary);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 120ms ease, color 120ms ease;
+  flex-shrink: 0;
+}
+
+.copyBtn:hover {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
 }
 
 .errorList {

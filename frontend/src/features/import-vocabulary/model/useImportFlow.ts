@@ -20,6 +20,11 @@ interface ImportFlowState {
   serverPreviewRows: ImportPreviewRow[]
   result: ImportExecuteResult | null
   error: ImportFlowError | null
+  /**
+   * Source format determined at parse time — used to tag the ImportSession record.
+   * Set when the parser finishes; defaults to 'paste' if not explicitly set.
+   */
+  sourceType: 'paste' | 'csv' | 'anki'
 }
 
 const INITIAL_STATE: ImportFlowState = {
@@ -28,6 +33,7 @@ const INITIAL_STATE: ImportFlowState = {
   serverPreviewRows: [],
   result: null,
   error: null,
+  sourceType: 'paste',
 }
 
 // ── Hook ──────────────────────────────────────────────────────────────────────
@@ -55,6 +61,10 @@ export function useImportFlow() {
     setState((prev) => ({ ...prev, error }))
   }, [])
 
+  const setSourceType = useCallback((sourceType: 'paste' | 'csv' | 'anki') => {
+    setState((prev) => ({ ...prev, sourceType }))
+  }, [])
+
   const reset = useCallback(() => {
     setState(INITIAL_STATE)
   }, [])
@@ -65,11 +75,13 @@ export function useImportFlow() {
     serverPreviewRows: state.serverPreviewRows,
     result: state.result,
     error: state.error,
+    sourceType: state.sourceType,
     goTo,
     setParsedRows,
     setServerPreviewRows,
     setResult,
     setError,
+    setSourceType,
     reset,
   }
 }

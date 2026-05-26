@@ -44,7 +44,8 @@ export function ImportSheet({ open, onClose }: ImportSheetProps) {
 
   // Called by ImportUploader when parsing is done
   const handleParsed = useCallback(
-    (rows: ParsedRow[], meta?: { requiresColumnMapping?: boolean; columnSuggestions?: ColumnSuggestion[]; text?: string; filename?: string }) => {
+    (rows: ParsedRow[], meta?: { requiresColumnMapping?: boolean; columnSuggestions?: ColumnSuggestion[]; text?: string; filename?: string; sourceType?: 'paste' | 'csv' | 'anki' }) => {
+      if (meta?.sourceType) flow.setSourceType(meta.sourceType)
       if (meta?.requiresColumnMapping) {
         // Route to Anki column mapper
         setRawParseInput({ text: meta.text ?? '', filename: meta.filename })
@@ -84,7 +85,7 @@ export function ImportSheet({ open, onClose }: ImportSheetProps) {
     async (rows: ParsedRow[]) => {
       flow.goTo('importing')
       try {
-        const result = await executeMutation.mutateAsync({ rows, settings })
+        const result = await executeMutation.mutateAsync({ rows, settings, sourceType: flow.sourceType })
         flow.setResult(result)
         flow.goTo('complete')
       } catch (err) {

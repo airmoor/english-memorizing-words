@@ -16,15 +16,22 @@ interface ParseMeta {
   columnSuggestions?: ColumnSuggestion[]
   text?: string
   filename?: string
+  sourceType?: 'paste' | 'csv' | 'anki'
 }
 
 interface ImportUploaderProps {
   onParsed: (rows: ParsedRow[], meta?: ParseMeta) => void
   onError?: (message: string) => void
+  /**
+   * Pre-fill the textarea with this content on mount.
+   * Used by the retry flow — ImportPage passes failed words as a newline-joined string.
+   * Ignored after initial mount; use the component `key` prop to re-mount with new words.
+   */
+  initialWords?: string
 }
 
-export function ImportUploader({ onParsed, onError }: ImportUploaderProps) {
-  const [pasteValue, setPasteValue] = useState('')
+export function ImportUploader({ onParsed, onError, initialWords }: ImportUploaderProps) {
+  const [pasteValue, setPasteValue] = useState(initialWords ?? '')
   const [inlineError, setInlineError] = useState<string | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -43,6 +50,11 @@ export function ImportUploader({ onParsed, onError }: ImportUploaderProps) {
       const input = { text, filename }
       const parser = selectParser(input)
 
+      // Infer source type: .csv files → 'csv', everything else pasted/txt → 'paste'
+      // Anki is detected via requiresColumnMapping below
+      const ext = filename ? '.' + (filename.split('.').pop()?.toLowerCase() ?? '') : ''
+      const inferredSourceType: 'paste' | 'csv' = ext === '.csv' ? 'csv' : 'paste'
+
       let result
       try {
         result = await parser.parse(input)
@@ -53,7 +65,7 @@ export function ImportUploader({ onParsed, onError }: ImportUploaderProps) {
 
       // If the parser requires column mapping (Anki), delegate to the parent
       if (result.requiresColumnMapping) {
-        onParsed([], { requiresColumnMapping: true, columnSuggestions: result.columnSuggestions, text, filename })
+        onParsed([], { requiresColumnMapping: true, columnSuggestions: result.columnSuggestions, text, filename, sourceType: 'anki' })
         return
       }
 
@@ -62,7 +74,7 @@ export function ImportUploader({ onParsed, onError }: ImportUploaderProps) {
         handleInlineError('No words found. Paste one word per line, or upload a .txt or .csv file.')
         return
       }
-      onParsed(nonEmpty)
+      onParsed(nonEmpty, { sourceType: inferredSourceType })
     },
     [onParsed, handleInlineError],
   )

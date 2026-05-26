@@ -8,6 +8,7 @@ const NAV_ITEMS: { to: string; label: string }[] = [
   { to: '/home',       label: 'Home' },
   { to: '/search',     label: 'Search' },
   { to: '/vocabulary', label: 'Vocabulary' },
+  { to: '/import',     label: 'Import' },
   { to: '/review',     label: 'Review' },
 ]
 

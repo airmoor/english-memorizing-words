@@ -3,6 +3,15 @@ import { useNavigate } from 'react-router-dom'
 import type { ImportExecuteResult } from '../../../entities/import-session/model/types'
 import styles from './ImportResult.module.css'
 
+async function copyToClipboard(text: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text)
+    return true
+  } catch {
+    return false
+  }
+}
+
 interface ImportResultProps {
   result: ImportExecuteResult
   onViewVocabulary: () => void
@@ -11,7 +20,17 @@ interface ImportResultProps {
 
 export function ImportResult({ result, onViewVocabulary, onImportMore }: ImportResultProps) {
   const [errorRowsExpanded, setErrorRowsExpanded] = useState(false)
+  const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle')
   const navigate = useNavigate()
+
+  const handleCopyFailed = async () => {
+    const words = result.errorRows.map((r) => r.word).join('\n')
+    const ok = await copyToClipboard(words)
+    if (ok) {
+      setCopyState('copied')
+      setTimeout(() => setCopyState('idle'), 2000)
+    }
+  }
 
   const isCompleted = result.status === 'completed'
   const isPartial = result.status === 'partial_failure'
@@ -83,14 +102,25 @@ export function ImportResult({ result, onViewVocabulary, onImportMore }: ImportR
       {/* ── Failed words (expandable) ────────────────────────────────── */}
       {result.errorRows.length > 0 && (
         <div className={styles.errorSection}>
-          <button
-            type="button"
-            className={styles.errorToggle}
-            onClick={() => setErrorRowsExpanded((v) => !v)}
-            aria-expanded={errorRowsExpanded}
-          >
-            {errorRowsExpanded ? '▾' : '▸'} View {result.errors} failed word{result.errors !== 1 ? 's' : ''}
-          </button>
+          <div className={styles.errorHeader}>
+            <button
+              type="button"
+              className={styles.errorToggle}
+              onClick={() => setErrorRowsExpanded((v) => !v)}
+              aria-expanded={errorRowsExpanded}
+            >
+              <span aria-hidden="true">{errorRowsExpanded ? '▾' : '▸'}</span>
+              {' '}View {result.errors} failed word{result.errors !== 1 ? 's' : ''}
+            </button>
+            <button
+              type="button"
+              className={styles.copyBtn}
+              onClick={() => void handleCopyFailed()}
+              aria-label="Copy failed words to clipboard"
+            >
+              {copyState === 'copied' ? '✓ Copied' : 'Copy'}
+            </button>
+          </div>
           {errorRowsExpanded && (
             <ul className={styles.errorList} aria-label="Failed words">
               {result.errorRows.map((row) => (

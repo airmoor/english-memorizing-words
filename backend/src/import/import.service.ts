@@ -1,17 +1,42 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { WordsService } from '../words/words.service';
 import { VocabularyService } from '../vocabulary/vocabulary.service';
+import { ImportSession } from '../database/entities/import-session.entity';
 import { ImportRequestDto } from './dto/import-request.dto';
 import { ImportPreviewResultDto, ImportPreviewRowDto } from './dto/import-preview-result.dto';
 import { ImportExecuteResultDto, ImportErrorRowDto } from './dto/import-execute-result.dto';
-import { ImportStatus } from './dto/import-status';
+import { ImportSessionDto, ImportSessionListDto } from './dto/import-session.dto';
+import { ImportStatus, SyncImportStatus, SYNC_IMPORT_STATUSES } from './dto/import-constants';
 import { normalizeWord } from './normalize-word';
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
 const NOTE_MAX_LENGTH = 1000;
 const ENRICH_CONCURRENCY = 5;
+
+/**
+ * Maximum number of failed-row snapshots stored per session.
+ *
+ * The total error count (`errors`) is always accurate; only the stored detail
+ * rows are capped. The UI uses `session.errors > session.errorRows.length` to
+ * detect truncation and display "…and N more failed rows".
+ *
+ * Worst-case JSONB per session: 50 rows × ~120 bytes ≈ 6 KB.
+ * Worst-case per user (100 sessions): ~600 KB — comfortably within limits.
+ */
+const MAX_STORED_ERROR_ROWS = 50;
+
+/**
+ * Maximum import sessions retained per user.
+ *
+ * After each successful session save, older sessions beyond this threshold are
+ * deleted in the same fire-and-forget chain. This keeps the import_sessions
+ * table bounded without a separate cron job. Loss of very old history is
+ * acceptable — history is a convenience feature, not a system of record.
+ */
+const MAX_SESSIONS_PER_USER = 100;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -49,6 +74,8 @@ export class ImportService {
     private readonly wordsService: WordsService,
     private readonly vocabularyService: VocabularyService,
     private readonly dataSource: DataSource,
+    @InjectRepository(ImportSession)
+    private readonly sessionRepo: Repository<ImportSession>,
   ) {}
 
   // ── POST /import/preview ───────────────────────────────────────────────────
@@ -315,7 +342,103 @@ export class ImportService {
     const errors = errorRows.length;
     const status = this.deriveImportStatus({ imported, errors, skipped, duplicatesIgnored });
 
+    // ── Persist ImportSession (fire-and-forget) ────────────────────────────
+    //
+    // Why fire-and-forget?
+    //   The execute response (card counts, error rows) reflects actual database
+    //   state regardless of whether the session record is saved. Awaiting the
+    //   session write would add a synchronous DB round-trip to a path that has
+    //   already done substantial work (dictionary lookups, card creation).
+    //   History is a convenience feature — if the record is occasionally lost
+    //   (transient DB error), the vocabulary is still correct.
+    //
+    // Error rows are capped at MAX_STORED_ERROR_ROWS to bound JSONB size.
+    // The `errors` counter is always the true total; the UI derives
+    // hasMoreErrors = session.errors > session.errorRows.length.
+    //
+    // After a successful save, old sessions beyond MAX_SESSIONS_PER_USER are
+    // trimmed in the same chain — no cron job needed.
+    const submitted = imported + skipped + duplicatesIgnored + errors;
+    const storedErrorRows = errorRows.slice(0, MAX_STORED_ERROR_ROWS);
+
+    this.sessionRepo
+      .save({
+        userId,
+        sourceType: dto.sourceType ?? 'paste',
+        status,
+        submitted,
+        imported,
+        skipped,
+        duplicatesIgnored,
+        errors,
+        errorRows: storedErrorRows,
+      })
+      .then(async () => {
+        // Trim sessions beyond MAX_SESSIONS_PER_USER (fire-and-forget cleanup).
+        // The subquery approach avoids a self-join and works across PostgreSQL versions.
+        await this.dataSource.query(
+          `DELETE FROM import_sessions
+           WHERE user_id = $1
+             AND id NOT IN (
+               SELECT id FROM import_sessions
+               WHERE user_id = $1
+               ORDER BY created_at DESC
+               LIMIT $2
+             )`,
+          [userId, MAX_SESSIONS_PER_USER],
+        );
+      })
+      .catch((err: unknown) => {
+        // Log but do NOT bubble — the user gets their result regardless
+        this.logger.error('Failed to persist ImportSession', String(err));
+      });
+
     return { status, imported, skipped, duplicatesIgnored, errors, errorRows };
+  }
+
+  // ── GET /import/sessions ──────────────────────────────────────────────────
+
+  /**
+   * Return the most recent import sessions for a user, newest first.
+   * Capped at `limit` (default 50, max 100) — pagination is not required
+   * at current scale; the list is user-scoped and naturally bounded.
+   */
+  async listSessions(userId: string, limit = 50): Promise<ImportSessionListDto> {
+    const cap = Math.min(Math.max(1, limit), 100);
+    const rows = await this.sessionRepo.find({
+      where: { userId },
+      order: { createdAt: 'DESC' },
+      take: cap,
+    });
+
+    return {
+      sessions: rows.map((s) => this.toSessionDto(s)),
+    };
+  }
+
+  // ── GET /import/sessions/:id ──────────────────────────────────────────────
+
+  async getSession(userId: string, id: string): Promise<ImportSessionDto> {
+    const session = await this.sessionRepo.findOne({ where: { id, userId } });
+    if (!session) throw new NotFoundException(`Import session ${id} not found`);
+    return this.toSessionDto(session);
+  }
+
+  // ── Session DTO mapper ────────────────────────────────────────────────────
+
+  private toSessionDto(s: ImportSession): ImportSessionDto {
+    return {
+      id: s.id,
+      sourceType: s.sourceType,
+      status: s.status,
+      submitted: s.submitted,
+      imported: s.imported,
+      skipped: s.skipped,
+      duplicatesIgnored: s.duplicatesIgnored,
+      errors: s.errors,
+      errorRows: s.errorRows,
+      createdAt: s.createdAt.toISOString(),
+    };
   }
 
   // ── Derive ImportStatus ───────────────────────────────────────────────────
@@ -336,7 +459,7 @@ export class ImportService {
     errors: number;
     skipped: number;
     duplicatesIgnored: number;
-  }): ImportStatus {
+  }): SyncImportStatus {
     const { imported, errors } = counts;
     if (imported > 0 && errors === 0) return 'completed';
     if (imported > 0 && errors > 0)   return 'partial_failure';

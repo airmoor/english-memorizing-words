@@ -173,7 +173,9 @@ export function ImportPreview({
     [onSettingsChange, runServerPreview, parsedRows],
   )
 
-  const counts = countByStatus(mergedRows)
+  // Memoized so badge counts don't re-derive on every render triggered by
+  // parent state changes unrelated to the row list.
+  const counts = useMemo(() => countByStatus(mergedRows), [mergedRows])
 
   const filteredRows = useMemo(() => {
     switch (activeFilter) {
@@ -271,12 +273,16 @@ export function ImportPreview({
         className={styles.settingsToggle}
         onClick={() => setSettingsOpen((v) => !v)}
         aria-expanded={settingsOpen}
+        aria-controls="import-settings-panel"
       >
-        {settingsOpen ? '▾ Settings' : '▸ Settings'}
+        {/* aria-hidden so screen readers hear "Settings" expanded/collapsed via
+            aria-expanded, not "black right-pointing small triangle Settings". */}
+        <span aria-hidden="true">{settingsOpen ? '▾' : '▸'}</span>
+        {' '}Settings
       </button>
 
       {settingsOpen && (
-        <div className={styles.settingsPanel}>
+        <div id="import-settings-panel" className={styles.settingsPanel}>
           <ImportSettings settings={settings} onChange={handleSettingsChange} />
         </div>
       )}
@@ -297,9 +303,9 @@ export function ImportPreview({
                   : 'No rows match this filter.'}
             </p>
           )}
-          {filteredRows.map((row, i) => (
+          {filteredRows.map((row) => (
             <div
-              key={`${row.word}-${i}`}
+              key={row.clientRowId}
               className={styles.tableRow}
               role="row"
               aria-label={`${row.word}: ${row.status}${row.reason ? `, ${row.reason}` : ''}`}

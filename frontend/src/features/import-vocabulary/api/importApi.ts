@@ -1,5 +1,11 @@
 import { apiClient } from '../../../shared/api/base'
-import type { ImportPreviewResult, ImportExecuteResult, ImportSettings } from '../../../entities/import-session/model/types'
+import type {
+  ImportPreviewResult,
+  ImportExecuteResult,
+  ImportSettings,
+  ImportSession,
+  ImportSessionList,
+} from '../../../entities/import-session/model/types'
 import type { ParsedRow } from '../../../entities/import-session/model/types'
 
 // ── Request payload shapes ────────────────────────────────────────────────────
@@ -38,6 +44,8 @@ interface ImportRequestPayload {
     tagIds?: string[]
     duplicateMode: 'skip' | 'import-anyway'
   }
+  /** Source format — used to tag the ImportSession for history. */
+  sourceType?: 'paste' | 'csv' | 'anki'
 }
 
 // ── Payload builder ───────────────────────────────────────────────────────────
@@ -54,8 +62,13 @@ interface ImportRequestPayload {
  *   lineNumber  → display / debug only; never used for deduplication or ordering
  *   array ordering must never be relied upon for row correlation — use clientRowId
  */
-function buildPayload(rows: ParsedRow[], settings: ImportSettings): ImportRequestPayload {
+function buildPayload(
+  rows: ParsedRow[],
+  settings: ImportSettings,
+  sourceType?: 'paste' | 'csv' | 'anki',
+): ImportRequestPayload {
   return {
+    ...(sourceType ? { sourceType } : {}),
     words: rows.map((row) => ({
       word: row.word,
       ...(row.tags && row.tags.length > 0 ? { tags: row.tags } : {}),
@@ -102,7 +115,26 @@ export function postImportPreview(
 export function postImportExecute(
   rows: ParsedRow[],
   settings: ImportSettings,
+  sourceType?: 'paste' | 'csv' | 'anki',
   signal?: AbortSignal,
 ): Promise<ImportExecuteResult> {
-  return apiClient.post<ImportExecuteResult>('/import/execute', buildPayload(rows, settings), signal)
+  return apiClient.post<ImportExecuteResult>('/import/execute', buildPayload(rows, settings, sourceType), signal)
+}
+
+// ── Session history ───────────────────────────────────────────────────────────
+
+/**
+ * GET /import/sessions?limit=N
+ * Returns the current user's import history, newest first.
+ */
+export function getImportSessions(limit = 50): Promise<ImportSessionList> {
+  return apiClient.get<ImportSessionList>(`/import/sessions?limit=${limit}`)
+}
+
+/**
+ * GET /import/sessions/:id
+ * Returns a single import session with full error row detail.
+ */
+export function getImportSession(id: string): Promise<ImportSession> {
+  return apiClient.get<ImportSession>(`/import/sessions/${id}`)
 }

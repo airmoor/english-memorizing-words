@@ -6,6 +6,7 @@ import type { ParsedRow, ImportSettings, ImportExecuteResult } from '../../../en
 interface ExecutePayload {
   rows: ParsedRow[]
   settings: ImportSettings
+  sourceType?: 'paste' | 'csv' | 'anki'
 }
 
 export function useImportExecuteMutation() {
@@ -13,18 +14,19 @@ export function useImportExecuteMutation() {
   const controllerRef = useRef<AbortController | null>(null)
 
   const mutation = useMutation<ImportExecuteResult, Error, ExecutePayload>({
-    mutationFn: ({ rows, settings }) => {
+    mutationFn: ({ rows, settings, sourceType }) => {
       // Each execute call gets a fresh AbortController
       controllerRef.current?.abort()
       const controller = new AbortController()
       controllerRef.current = controller
-      return postImportExecute(rows, settings, controller.signal)
+      return postImportExecute(rows, settings, sourceType, controller.signal)
     },
     onSuccess: () => {
       controllerRef.current = null
-      // Invalidate vocabulary and boards so the lists reflect the new cards
+      // Invalidate vocabulary, boards, and import sessions so the lists reflect new data
       void queryClient.invalidateQueries({ queryKey: ['vocabulary'] })
       void queryClient.invalidateQueries({ queryKey: ['boards'] })
+      void queryClient.invalidateQueries({ queryKey: ['import-sessions'] })
     },
   })
 
