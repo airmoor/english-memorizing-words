@@ -35,7 +35,7 @@
   justify-content: center;
   text-align: center;
   gap: var(--space-xs);
-  min-height: calc(100vh - var(--nav-height) - 120px);
+  min-height: calc(100vh - var(--nav-height) - 200px);
   padding-bottom: var(--space-xxl);
 }
 
