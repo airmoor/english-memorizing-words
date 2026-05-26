@@ -61,8 +61,30 @@
 }
 
 .summaryItem strong {
-  color: var(--color-text-primary);
   font-weight: var(--fw-semibold, 600);
+}
+
+/* Muted: "N ready" — low visual weight when count is secondary info */
+.summaryMuted {
+  color: var(--color-text-secondary);
+}
+
+.summaryMuted strong {
+  color: var(--color-text-secondary);
+}
+
+/* Warning: duplicates — amber */
+.summaryWarning {
+  color: color-mix(in srgb, var(--color-warning) 80%, black);
+}
+
+.summaryWarning strong {
+  color: color-mix(in srgb, var(--color-warning) 80%, black);
+}
+
+/* Error: errors — red */
+.summaryError {
+  color: var(--color-danger);
 }
 
 .summaryError strong {
@@ -132,6 +154,11 @@
   color: var(--color-danger);
 }
 
+.tabCountWarning {
+  background: color-mix(in srgb, var(--color-warning) 18%, transparent);
+  color: color-mix(in srgb, var(--color-warning) 80%, black);
+}
+
 /* ── Settings panel (open/closed) ───────────────────────────────────────── */
 
 .settingsPanel {
@@ -151,6 +178,9 @@
 /* ── Settings toggle ─────────────────────────────────────────────────────── */
 
 .settingsToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background: none;
   border: none;
   color: var(--color-accent);
@@ -164,6 +194,15 @@
 
 .settingsToggle:hover {
   text-decoration: underline;
+}
+
+.settingsChevron {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.settingsChevronOpen {
+  transform: rotate(180deg);
 }
 
 /* ── Row table ───────────────────────────────────────────────────────────── */
@@ -319,6 +358,70 @@
     flex: 1 1 auto;
   }
 }
+
+/* ── "View →" link on duplicate rows ────────────────────────────────────── */
+
+.viewLink {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--color-accent);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.viewLink:hover {
+  text-decoration: underline;
+}
+
+/* ── Empty import state ──────────────────────────────────────────────────── */
+
+.emptyImport {
+  text-align: center;
+  padding: 4px 0;
+}
+
+.emptyImportMsg {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.emptyImportActions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.emptyImportLink {
+  font-size: 14px;
+  font-weight: var(--fw-medium, 500);
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.emptyImportLink:hover {
+  text-decoration: underline;
+}
+
+.emptyImportBack {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm, 6px);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.emptyImportBack:hover {
+  border-color: var(--color-text-secondary);
+  color: var(--color-text-primary);
+}
+
+/* ── Import button ───────────────────────────────────────────────────────── */
 
 .importBtn {
   width: 100%;

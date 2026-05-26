@@ -182,6 +182,19 @@ export function ImportPage() {
 
           {/* ── Import tab ───────────────────────────────────────────── */}
           {activeTab === 'import' && (
+            <>
+            {/* ── Step indicator ──────────────────────────────────── */}
+            <div className={styles.stepIndicator} aria-label="Import progress">
+              <div className={[styles.step, isUploadStep ? styles.stepActive : styles.stepDone].join(' ')}>
+                <span className={styles.stepBadge} aria-hidden="true">1</span>
+                <span className={styles.stepLabel}>Add words</span>
+              </div>
+              <span className={styles.stepArrow} aria-hidden="true">→</span>
+              <div className={[styles.step, !isUploadStep ? styles.stepActive : styles.stepPending].join(' ')}>
+                <span className={styles.stepBadge} aria-hidden="true">2</span>
+                <span className={styles.stepLabel}>Preview &amp; import</span>
+              </div>
+            </div>
             <div className={styles.importLayout}>
               {/* Left panel: uploader — always visible on desktop,
                   hidden on mobile when right panel has content */}
@@ -284,6 +297,7 @@ export function ImportPage() {
                 )}
               </div>
             </div>
+            </>
           )}
 
           {/* ── History tab ──────────────────────────────────────────── */}

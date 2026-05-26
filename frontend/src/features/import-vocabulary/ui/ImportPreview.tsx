@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useImportPreviewMutation } from '../model/useImportPreviewMutation'
 import { ImportSettings } from './ImportSettings'
 import { Spinner } from '../../../shared/ui/Spinner'
@@ -217,17 +218,15 @@ export function ImportPreview({
 
       {/* ── Summary bar ─────────────────────────────────────────────── */}
       <div className={styles.summary}>
-        <span className={styles.summaryItem}>
-          {previewMutation.isPending ? (
-            <Spinner />
-          ) : (
-            <>
-              <strong>{counts.valid}</strong> ready
-            </>
-          )}
-        </span>
+        {previewMutation.isPending ? (
+          <span className={styles.summaryItem}><Spinner /></span>
+        ) : (
+          <span className={[styles.summaryItem, styles.summaryMuted].join(' ')}>
+            <strong>{counts.valid}</strong> ready
+          </span>
+        )}
         {counts.duplicates > 0 && (
-          <span className={styles.summaryItem}>
+          <span className={[styles.summaryItem, styles.summaryWarning].join(' ')}>
             <strong>{counts.duplicates}</strong> duplicate{counts.duplicates !== 1 ? 's' : ''}
           </span>
         )}
@@ -242,12 +241,12 @@ export function ImportPreview({
       <div className={styles.filterTabs} role="tablist" aria-label="Filter rows">
         {(
           [
-            { key: 'all', label: 'All' },
-            { key: 'valid', label: 'Valid' },
-            { key: 'duplicates', label: 'Duplicates' },
-            { key: 'errors', label: 'Errors' },
+            { key: 'all', label: 'All', count: mergedRows.length },
+            { key: 'valid', label: 'Valid', count: counts.valid },
+            { key: 'duplicates', label: 'Duplicates', count: counts.duplicates },
+            { key: 'errors', label: 'Errors', count: counts.errors },
           ] as const
-        ).map(({ key, label }) => (
+        ).map(({ key, label, count }) => (
           <button
             key={key}
             type="button"
@@ -257,12 +256,15 @@ export function ImportPreview({
             onClick={() => setActiveFilter(key)}
           >
             {label}
-            {key === 'duplicates' && counts.duplicates > 0 && (
-              <span className={styles.tabCount}>{counts.duplicates}</span>
-            )}
-            {key === 'errors' && counts.errors > 0 && (
-              <span className={[styles.tabCount, styles.tabCountError].join(' ')}>{counts.errors}</span>
-            )}
+            <span
+              className={[
+                styles.tabCount,
+                key === 'errors' ? styles.tabCountError : '',
+                key === 'duplicates' && count > 0 ? styles.tabCountWarning : '',
+              ].join(' ')}
+            >
+              {count}
+            </span>
           </button>
         ))}
       </div>
@@ -275,10 +277,17 @@ export function ImportPreview({
         aria-expanded={settingsOpen}
         aria-controls="import-settings-panel"
       >
-        {/* aria-hidden so screen readers hear "Settings" expanded/collapsed via
-            aria-expanded, not "black right-pointing small triangle Settings". */}
-        <span aria-hidden="true">{settingsOpen ? '▾' : '▸'}</span>
-        {' '}Settings
+        <svg
+          className={[styles.settingsChevron, settingsOpen ? styles.settingsChevronOpen : ''].join(' ')}
+          aria-hidden="true"
+          width="12"
+          height="12"
+          viewBox="0 0 12 12"
+          fill="none"
+        >
+          <path d="M2 4.5L6 8.5L10 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        Import settings
       </button>
 
       {settingsOpen && (
@@ -316,23 +325,50 @@ export function ImportPreview({
               </span>
               <span className={styles.colStatus} role="cell">
                 <StatusBadge status={row.status} reason={row.reason} />
+                {row.status === 'duplicate_vocabulary' && (
+                  <Link
+                    to={`/vocabulary?q=${encodeURIComponent(row.word)}`}
+                    className={styles.viewLink}
+                    aria-label={`View "${row.word}" in vocabulary`}
+                  >
+                    View →
+                  </Link>
+                )}
               </span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* ── Import button ────────────────────────────────────────────── */}
+      {/* ── Import button / empty state ──────────────────────────────── */}
       <div className={styles.footer}>
-        <button
-          type="button"
-          className={styles.importBtn}
-          onClick={handleImport}
-          disabled={importCount === 0}
-          aria-label={`Import ${importCount} word${importCount !== 1 ? 's' : ''}`}
-        >
-          {importCount === 0 ? 'Nothing to import' : `Import ${importCount} word${importCount !== 1 ? 's' : ''}`}
-        </button>
+        {importCount === 0 && !previewMutation.isPending ? (
+          <div className={styles.emptyImport}>
+            <p className={styles.emptyImportMsg}>
+              {counts.duplicates > 0 && counts.valid === 0
+                ? `All ${counts.duplicates} word${counts.duplicates !== 1 ? 's are' : ' is'} already in your vocabulary.`
+                : 'Nothing to import.'}
+            </p>
+            <div className={styles.emptyImportActions}>
+              <Link to="/vocabulary" className={styles.emptyImportLink}>
+                Go to vocabulary →
+              </Link>
+              <button type="button" className={styles.emptyImportBack} onClick={onBack}>
+                Clear list
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className={styles.importBtn}
+            onClick={handleImport}
+            disabled={importCount === 0}
+            aria-label={`Import ${importCount} word${importCount !== 1 ? 's' : ''}`}
+          >
+            {`Import ${importCount} word${importCount !== 1 ? 's' : ''}`}
+          </button>
+        )}
       </div>
     </div>
   )

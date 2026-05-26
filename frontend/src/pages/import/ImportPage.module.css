@@ -74,6 +74,83 @@
   min-height: 0;
 }
 
+/* ── Step indicator ───────────────────────────────────────────────────────── */
+
+.stepIndicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: var(--space-lg);
+  padding: 10px 16px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md, 8px);
+  width: fit-content;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stepBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.stepLabel {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+/* Active step */
+.stepActive .stepBadge {
+  background: var(--color-accent, #6366f1);
+  color: #fff;
+}
+
+.stepActive .stepLabel {
+  color: var(--color-accent, #6366f1);
+  font-weight: 600;
+}
+
+/* Completed step (step 1 after moving to preview) */
+.stepDone .stepBadge {
+  background: color-mix(in srgb, var(--color-success, #22c55e) 18%, transparent);
+  color: color-mix(in srgb, var(--color-success, #22c55e) 80%, black);
+}
+
+.stepDone .stepLabel {
+  color: color-mix(in srgb, var(--color-success, #22c55e) 80%, black);
+}
+
+/* Pending step (step 2 before moving to preview) */
+.stepPending .stepBadge {
+  background: var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.stepPending .stepLabel {
+  color: var(--text-secondary);
+}
+
+.stepArrow {
+  font-size: 14px;
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
 /* ── Two-column import layout (desktop ≥ 1024px) ─────────────────────────── */
 
 .importLayout {

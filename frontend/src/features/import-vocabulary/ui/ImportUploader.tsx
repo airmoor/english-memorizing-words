@@ -34,7 +34,11 @@ export function ImportUploader({ onParsed, onError, initialWords }: ImportUpload
   const [pasteValue, setPasteValue] = useState(initialWords ?? '')
   const [inlineError, setInlineError] = useState<string | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
+  const [fileNotice, setFileNotice] = useState<{ name: string; wordCount: number } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Live word count — lines with at least one non-whitespace character
+  const wordCount = pasteValue === '' ? 0 : pasteValue.split('\n').filter((l) => l.trim().length > 0).length
 
   const handleInlineError = useCallback(
     (message: string) => {
@@ -87,8 +91,10 @@ export function ImportUploader({ onParsed, onError, initialWords }: ImportUpload
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setPasteValue(e.target.value)
       setInlineError(null)
+      // User is now editing manually — dismiss any file-load notice
+      if (fileNotice) setFileNotice(null)
     },
-    [],
+    [fileNotice],
   )
 
   // Cmd/Ctrl+Enter triggers preview from anywhere in the textarea
@@ -135,6 +141,12 @@ export function ImportUploader({ onParsed, onError, initialWords }: ImportUpload
           return
         }
         const text = stripBom(raw)
+        // Populate the textarea with the file content so the user can see
+        // what was loaded and edit it if needed. This also ensures "back"
+        // from preview shows the file content, not stale pasted text.
+        const lines = text.split('\n').filter((l) => l.trim().length > 0)
+        setPasteValue(text)
+        setFileNotice({ name: file.name, wordCount: lines.length })
         void parseAndEmit(text, file.name)
       }
       reader.onerror = () => {
@@ -193,15 +205,51 @@ export function ImportUploader({ onParsed, onError, initialWords }: ImportUpload
       {/* ── Paste textarea ────────────────────────────────────────────── */}
       <textarea
         className={styles.textarea}
-        placeholder={'apple\nbanana\nephemeral\n…'}
+        placeholder="Type words here, one per line"
         value={pasteValue}
         onChange={handlePasteChange}
         onKeyDown={handleKeyDown}
         rows={8}
-        aria-label="Paste words to import"
+        aria-label="Paste words to import, one per line"
         spellCheck={false}
         autoComplete="off"
       />
+
+      {/* ── Textarea meta row: word count + example ───────────────────── */}
+      <div className={styles.textareaMeta}>
+        <span
+          className={styles.wordCount}
+          aria-live="polite"
+          aria-atomic="true"
+          aria-label={wordCount === 0 ? 'No words entered' : `${wordCount} words entered`}
+        >
+          {wordCount > 0 ? `${wordCount} ${wordCount === 1 ? 'word' : 'words'}` : ''}
+        </span>
+        {wordCount === 0 && (
+          <span className={styles.example}>
+            <span className={styles.exampleLabel}>Example:</span>
+            {' '}apple · ephemeral · metamorphosis
+          </span>
+        )}
+      </div>
+
+      {/* ── File loaded notice ────────────────────────────────────────── */}
+      {fileNotice && (
+        <div className={styles.fileNotice} role="status">
+          <span className={styles.fileNoticeIcon} aria-hidden="true">📎</span>
+          <span className={styles.fileNoticeText}>
+            <strong>{fileNotice.name}</strong> loaded · {fileNotice.wordCount} {fileNotice.wordCount === 1 ? 'word' : 'words'} detected
+          </span>
+          <button
+            type="button"
+            className={styles.fileNoticeDismiss}
+            onClick={() => { setFileNotice(null); setPasteValue('') }}
+            aria-label="Dismiss file and clear textarea"
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       {/* ── Or upload a file ──────────────────────────────────────────── */}
       <div

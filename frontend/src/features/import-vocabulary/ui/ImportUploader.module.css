@@ -71,6 +71,82 @@
   opacity: 0.6;
 }
 
+/* ── Textarea meta row (word count + example) ────────────────────────────── */
+
+.textareaMeta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 6px 24px 0;
+  min-height: 18px; /* reserve space so layout doesn't shift between states */
+}
+
+.wordCount {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.example {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  opacity: 0.75;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exampleLabel {
+  font-weight: var(--fw-medium, 500);
+}
+
+/* ── File loaded notice ───────────────────────────────────────────────────── */
+
+.fileNotice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 24px 0;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm, 6px);
+  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 20%, transparent);
+  font-size: 13px;
+}
+
+.fileNoticeIcon {
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.fileNoticeText {
+  flex: 1;
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fileNoticeDismiss {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+  opacity: 0.6;
+  transition: opacity 120ms ease;
+}
+
+.fileNoticeDismiss:hover {
+  opacity: 1;
+}
+
 /* ── Drop zone ───────────────────────────────────────────────────────────── */
 
 .dropZone {
