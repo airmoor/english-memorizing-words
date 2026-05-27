@@ -49,6 +49,10 @@ export function useVocabularyInfinite(params: VocabularyQueryParams) {
 
   const total: number = infiniteQuery.data?.pages[0]?.total ?? 0
 
+  // Board-scoped (or global) unfiltered total — always provided by the backend
+  // so "X of Y words" works correctly even on direct URL loads with filters.
+  const contextTotal: number = infiniteQuery.data?.pages[0]?.totalCount ?? 0
+
   const removeMutation = useMutation({
     mutationFn: deleteWord,
 
@@ -63,12 +67,22 @@ export function useVocabularyInfinite(params: VocabularyQueryParams) {
         { queryKey: ['vocabulary'] },
         (old) => {
           if (!old) return old
+          // Only update cache entries that actually contain this word.
+          // Queries for other boards/filters may not have it — decrementing
+          // their totals would corrupt their counts.
+          const wordExists = old.pages.some((p) =>
+            p.items.some((item) => item.wordId === wordId),
+          )
+          if (!wordExists) return old
           return {
             ...old,
-            pages: old.pages.map((page) => ({
+            pages: old.pages.map((page, i) => ({
               ...page,
               items: page.items.filter((item) => item.wordId !== wordId),
-              total: Math.max(page.total - 1, 0),
+              // Only decrement counts on the first page — it's the canonical
+              // source for both totals. Other pages carry the same values.
+              total:      i === 0 ? Math.max(page.total - 1, 0)      : page.total,
+              totalCount: i === 0 ? Math.max(page.totalCount - 1, 0) : page.totalCount,
             })),
           }
         },
@@ -94,9 +108,11 @@ export function useVocabularyInfinite(params: VocabularyQueryParams) {
   return {
     items,
     total,
+    contextTotal,
     isLoading:          infiniteQuery.isPending,
     isError:            infiniteQuery.isError,
     isFetching:         infiniteQuery.isFetching,
+    isPlaceholderData:  infiniteQuery.isPlaceholderData,
     hasNextPage:        infiniteQuery.hasNextPage,
     isFetchingNextPage: infiniteQuery.isFetchingNextPage,
     fetchNextPage:      infiniteQuery.fetchNextPage,

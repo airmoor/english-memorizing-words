@@ -66,6 +66,14 @@ export interface VocabularyWord {
 
 export interface PaginatedVocabulary {
   items: VocabularyWord[]
+  /** Items matching the current search / filters. */
   total: number
+  /**
+   * Total items in the current board (or all vocabulary when no board is
+   * selected), without any search or filter applied.
+   * Always present: the backend computes it in the same request so the
+   * client can show "X of Y words" even on the very first load.
+   */
+  totalCount: number
   hasMore: boolean
 }

@@ -318,9 +318,11 @@ export function VocabularyPage() {
   const {
     items,
     total,
+    contextTotal,
     isLoading,
     isError,
     isFetching,
+    isPlaceholderData,
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
@@ -331,11 +333,20 @@ export function VocabularyPage() {
 
   // ── Display state ─────────────────────────────────────────────────────────
 
-  const knownTotalRef = useRef<number | null>(null)
-  if (!isLoading && !isError && !committedQuery && activeFilters.length === 0 && !hasNonBoardApiFilters) {
-    knownTotalRef.current = total
+  // `contextTotal` comes directly from the API (backend always computes the
+  // board-scoped unfiltered count in the same request), so it is correct on
+  // the very first load even when URL filters are already present.
+  //
+  // During a board switch, `isPlaceholderData` is true and `contextTotal` still
+  // reflects the *previous* board's data.  We track the last "settled" board so
+  // we can hide the count (show skeleton) while the new board's data is loading.
+  const settledBoardRef = useRef<string | undefined>(undefined)
+  if (!isPlaceholderData) {
+    settledBoardRef.current = urlBoard
   }
-  const knownTotal = knownTotalRef.current
+  // Show the count only when the settled board matches the current URL board.
+  // This prevents showing the previous board's total as a flash during switch.
+  const stableContextTotal = settledBoardRef.current === urlBoard ? contextTotal : null
 
   // "Filtering" means something other than just a board is active
   const isFiltering = committedQuery.length > 0 || activeFilters.length > 0 || hasNonBoardApiFilters
@@ -343,7 +354,7 @@ export function VocabularyPage() {
   const showToolbar = !isLoading && !isError && (
     isFiltering || !!urlBoard ||
     items.length > 0 ||
-    (knownTotal !== null && knownTotal > 0)
+    (stableContextTotal !== null && stableContextTotal > 0)
   )
 
   const isEmpty = !isLoading && !isError && !isFiltering && !urlBoard && total === 0
@@ -376,11 +387,18 @@ export function VocabularyPage() {
 
   const pageTitle = activeBoard?.name ?? 'My Vocabulary'
   const wordCountText = (() => {
-    if (knownTotal === null || knownTotal === 0) return null
-    const noun = `word${knownTotal !== 1 ? 's' : ''}`
+    if (stableContextTotal === null || stableContextTotal === 0) return null
+    const noun = `word${stableContextTotal !== 1 ? 's' : ''}`
+    // When a search or filter is active, show "X of Y" so the user can see
+    // both how many matched and how many words they have in total.
+    if (isFiltering) {
+      return activeBoard
+        ? `${total} of ${stableContextTotal} ${noun} in ${activeBoard.name}`
+        : `${total} of ${stableContextTotal} saved ${noun}`
+    }
     return activeBoard
-      ? `${knownTotal} ${noun} in ${activeBoard.name}`
-      : `${knownTotal} saved ${noun}`
+      ? `${stableContextTotal} ${noun} in ${activeBoard.name}`
+      : `${stableContextTotal} saved ${noun}`
   })()
 
   return (

@@ -15,6 +15,7 @@ import { buildValidationFlowError } from '../../features/import-vocabulary/lib/f
 import type { ParsedRow, ImportSettings, ImportFlowError } from '../../entities/import-session/model/types'
 import type { ColumnSuggestion } from '../../shared/lib/import/parsers/types'
 import styles from './ImportPage.module.css'
+import {Container} from "../../shared/ui/layout/Container.tsx";
 
 type ImportTab = 'import' | 'history'
 
@@ -166,6 +167,7 @@ export function ImportPage() {
 
   return (
     <PageLayout>
+      <Container as="main" width="wide">
       <div className={styles.page}>
         {/* ── Page header + tab bar ─────────────────────────────────────── */}
         <div className={styles.pageHeader}>
@@ -324,6 +326,7 @@ export function ImportPage() {
           )}
         </div>
       </div>
+      </Container>
     </PageLayout>
   )
 }

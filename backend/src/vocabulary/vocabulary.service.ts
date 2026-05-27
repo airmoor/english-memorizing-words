@@ -209,8 +209,11 @@ export class PaginatedVocabularyDto {
   @ApiProperty({ type: [VocabularyWordDto] })
   items: VocabularyWordDto[];
 
-  @ApiProperty({ example: 123, description: 'Total items matching current filters' })
+  @ApiProperty({ example: 32, description: 'Items matching the current search / filters' })
   total: number;
+
+  @ApiProperty({ example: 1248, description: 'Total items in the current board (or all vocabulary when no board is selected), without any search or filter applied' })
+  totalCount: number;
 
   @ApiProperty({ example: true })
   hasMore: boolean;
@@ -468,8 +471,9 @@ export class VocabularyService {
 
     const whereClause = where.join(' AND ')
 
-    // ── COUNT ──────────────────────────────────────────────────────────────
-    const [{ total }] = await this.dataSource.query<[{ total: string }]>(
+    // ── COUNT (filtered) ──────────────────────────────────────────────────
+    // Counts only items matching the full WHERE clause (search + filters + board).
+    const [{ total: filteredTotalStr }] = await this.dataSource.query<[{ total: string }]>(
       `SELECT COUNT(*) AS total
        FROM user_words uw
        JOIN words w ON w.id = uw.word_id
@@ -477,8 +481,49 @@ export class VocabularyService {
        WHERE ${whereClause}`,
       params,
     )
-    const totalCount = parseInt(total, 10)
-    if (totalCount === 0) return { items: [], total: 0, hasMore: false }
+    const filteredCount = parseInt(filteredTotalStr, 10)
+
+    // ── COUNT (context — board-scoped or global unfiltered total) ─────────
+    // Always returned alongside `total` so the client can show "X of Y words"
+    // even on the very first load when filters are already present in the URL.
+    // Only fires a second DB query when narrowing filters are active (search,
+    // review-state, tags, POS, legacy filter chips) — the board alone is a
+    // navigation context, not a narrowing filter.
+    const hasNarrowingFilters = !!(
+      q ||
+      activeFilters.length > 0 ||
+      dto.reviewState ||
+      dto.partOfSpeech ||
+      dto.tagIds
+    )
+
+    let contextTotalCount: number
+    if (hasNarrowingFilters) {
+      // Context WHERE: userId + optional boardId only (no search, no review filters)
+      const ctxParams: unknown[] = [userId]
+      const ctxWhere: string[]   = ['uw.user_id = $1']
+      if (dto.boardId) {
+        ctxParams.push(dto.boardId)
+        ctxWhere.push(`EXISTS (
+          SELECT 1 FROM card_boards cb
+          WHERE cb.card_id = c.id AND cb.board_id = $${ctxParams.length}
+        )`)
+      }
+      const [{ total: ctxStr }] = await this.dataSource.query<[{ total: string }]>(
+        `SELECT COUNT(*) AS total
+         FROM user_words uw
+         JOIN words w ON w.id = uw.word_id
+         LEFT JOIN cards c ON c.user_id = uw.user_id AND c.word_id = uw.word_id
+         WHERE ${ctxWhere.join(' AND ')}`,
+        ctxParams,
+      )
+      contextTotalCount = parseInt(ctxStr, 10)
+    } else {
+      // No narrowing filters — filtered count IS the context total
+      contextTotalCount = filteredCount
+    }
+
+    if (filteredCount === 0) return { items: [], total: 0, totalCount: contextTotalCount, hasMore: false }
 
     // ── Items ──────────────────────────────────────────────────────────────
     //
@@ -540,7 +585,7 @@ export class VocabularyService {
       itemParams,
     )
 
-    if (words.length === 0) return { items: [], total: totalCount, hasMore: false }
+    if (words.length === 0) return { items: [], total: filteredCount, totalCount: contextTotalCount, hasMore: false }
 
     const wordIds = words.map((w) => w.wordId)
     const cardIds = words.map((w) => w.cardId).filter(Boolean)
@@ -662,8 +707,9 @@ export class VocabularyService {
 
     return {
       items,
-      total:   totalCount,
-      hasMore: offset + items.length < totalCount,
+      total:      filteredCount,
+      totalCount: contextTotalCount,
+      hasMore:    offset + items.length < filteredCount,
     }
   }
 
