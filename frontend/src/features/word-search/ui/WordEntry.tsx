@@ -122,7 +122,9 @@ export function WordEntry({ word, onSeeAlso }: Props) {
   }
 
   function handleViewInVocabulary() {
-    navigate(`/vocabulary?word=${encodeURIComponent(word.text)}`)
+    // ?q= pre-fills the search so the list filters to this word immediately.
+    // ?open=true tells VocabularyPageContent to open the first matching card.
+    navigate(`/vocabulary?q=${encodeURIComponent(word.text)}&open=true`)
   }
 
   return (

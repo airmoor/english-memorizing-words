@@ -106,10 +106,8 @@
 }
 
 .sortDropdown {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  z-index: 50;
+  /* position/top/right/z-index are set inline — rendered via createPortal
+     into document.body so `position: fixed` avoids overflow-clip issues */
   background: var(--color-bg-card);
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md);

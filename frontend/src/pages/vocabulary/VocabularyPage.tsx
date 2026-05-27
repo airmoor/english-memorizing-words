@@ -107,6 +107,11 @@ interface ContentProps {
   isFetchingNextPage: boolean
   onLoadMore: () => void
   onClearFilters?: () => void
+  /**
+   * When true, automatically open the first card in `items` once it loads.
+   * Driven by the ?open=true URL param — consumed and removed after use.
+   */
+  autoOpen: boolean
 }
 
 function VocabularyPageContent({
@@ -119,8 +124,10 @@ function VocabularyPageContent({
   isFetchingNextPage,
   onLoadMore,
   onClearFilters,
+  autoOpen,
 }: ContentProps) {
   const detail = useWordDetail()
+  const [, setSearchParams] = useSearchParams()
 
   useWordDetailUrl({
     detail,
@@ -128,6 +135,39 @@ function VocabularyPageContent({
     open:  detail.open,
     close: detail.close,
   })
+
+  // ── Auto-open first card when ?open=true is present ───────────────────────
+  //
+  // Fires once items have loaded. Opens the first card in the (possibly filtered)
+  // list, scrolls it into view, then removes ?open=true from the URL so
+  // the action is not repeated on re-renders or history revisits.
+  //
+  // The ?word= write from useWordDetailUrl fires in a subsequent effect, so
+  // ?open=true is already gone by the time that push-history call runs.
+  useEffect(() => {
+    if (!autoOpen || items.length === 0) return
+
+    const first      = items[0]
+    const sourceList = items.map((v) => v.wordId)
+    detail.open(first.wordId, sourceList)
+
+    // Scroll the card into view after the next paint
+    requestAnimationFrame(() => {
+      document
+        .querySelector<HTMLElement>(`[data-word-id="${first.wordId}"]`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
+
+    // Consume the param so this effect doesn't fire again
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.delete('open')
+      return next
+    }, { replace: true })
+  // Intentionally limited deps: re-run only when items arrive or the flag changes.
+  // detail.open and setSearchParams are stable references.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoOpen, items.length])
 
   return (
     <VocabularyList
@@ -157,9 +197,33 @@ export function VocabularyPage() {
   const sort          = (searchParams.get('s') ?? 'newest') as SortOption
 
   // ── Search input ──────────────────────────────────────────────────────────
+  //
+  // Architecture: the URL ?q= param is the single source of truth for the
+  // committed (debounced) query that drives the API call. There is no
+  // separate debouncedQuery state — it is derived directly from the URL.
+  //
+  // inputValue is local state for what the text field displays. It stays ahead
+  // of the URL while the user is typing (before the 300 ms debounce fires).
+  //
+  // When the URL's ?q= changes from an external source — back/forward nav, or
+  // "View in vocabulary" pushing ?q=dog while already on this page — inputValue
+  // must update to match. This is done with React's "setState during render"
+  // pattern (tracking prevCommittedQuery), which avoids calling setState inside
+  // a useEffect and the cascading-renders lint warning it triggers.
 
-  const [inputValue, setInputValue]         = useState(() => searchParams.get('q') ?? '')
-  const [debouncedQuery, setDebouncedQuery] = useState(() => searchParams.get('q') ?? '')
+  const committedQuery = searchParams.get('q')?.trim() ?? ''
+  const shouldAutoOpen = searchParams.get('open') === 'true'
+
+  const [inputValue, setInputValue] = useState(committedQuery)
+
+  // "setState during render" sync: when committedQuery changes from an external
+  // source, update inputValue to match without going through an effect.
+  // React re-renders immediately with the new state; no paint occurs between.
+  const [prevCommittedQuery, setPrevCommittedQuery] = useState(committedQuery)
+  if (committedQuery !== prevCommittedQuery) {
+    setPrevCommittedQuery(committedQuery)
+    setInputValue(committedQuery)
+  }
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => {
@@ -170,7 +234,7 @@ export function VocabularyPage() {
     setInputValue(q)
     if (debounceRef.current) clearTimeout(debounceRef.current)
     if (q === '') {
-      setDebouncedQuery('')
+      // Clear immediately — no debounce needed for an empty query
       setSearchParams((prev) => {
         const next = new URLSearchParams(prev)
         next.delete('q')
@@ -180,7 +244,6 @@ export function VocabularyPage() {
     }
     debounceRef.current = setTimeout(() => {
       const trimmed = q.trim()
-      setDebouncedQuery(trimmed)
       setSearchParams((prev) => {
         const next = new URLSearchParams(prev)
         if (trimmed) next.set('q', trimmed)
@@ -289,7 +352,7 @@ export function VocabularyPage() {
   const hasNonBoardApiFilters = Object.keys(apiFilters).some(
     (k) => k !== 'boardId',
   )
-  const hasFilterBarFilters = hasNonBoardApiFilters || activeFilters.length > 0 || debouncedQuery.length > 0
+  const hasFilterBarFilters = hasNonBoardApiFilters || activeFilters.length > 0 || committedQuery.length > 0
 
   // ── Data ──────────────────────────────────────────────────────────────────
 
@@ -303,20 +366,20 @@ export function VocabularyPage() {
     isFetchingNextPage,
     fetchNextPage,
     remove,
-  } = useVocabularyInfinite({ query: debouncedQuery, activeFilters, sort, apiFilters })
+  } = useVocabularyInfinite({ query: committedQuery, activeFilters, sort, apiFilters })
 
   const isRefetching = isFetching && !isLoading
 
   // ── Display state ─────────────────────────────────────────────────────────
 
   const knownTotalRef = useRef<number | null>(null)
-  if (!isLoading && !isError && !debouncedQuery && activeFilters.length === 0 && !hasNonBoardApiFilters) {
+  if (!isLoading && !isError && !committedQuery && activeFilters.length === 0 && !hasNonBoardApiFilters) {
     knownTotalRef.current = total
   }
   const knownTotal = knownTotalRef.current
 
   // "Filtering" means something other than just a board is active
-  const isFiltering = debouncedQuery.length > 0 || activeFilters.length > 0 || hasNonBoardApiFilters
+  const isFiltering = committedQuery.length > 0 || activeFilters.length > 0 || hasNonBoardApiFilters
 
   const showToolbar = !isLoading && !isError && (
     isFiltering || !!urlBoard ||
@@ -501,6 +564,7 @@ export function VocabularyPage() {
                       isFetchingNextPage={isFetchingNextPage}
                       onLoadMore={fetchNextPage}
                       onClearFilters={handleClearFilters}
+                      autoOpen={shouldAutoOpen}
                     />
                   </WordDetailProvider>
                 </div>

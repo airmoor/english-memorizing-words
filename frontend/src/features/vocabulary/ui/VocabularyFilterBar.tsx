@@ -1,5 +1,6 @@
 import { SlidersHorizontal, ChevronDown, Check, X } from 'lucide-react'
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, type CSSProperties } from 'react'
+import { createPortal } from 'react-dom'
 import { Icon } from '../../../shared/ui/Icon/Icon'
 
 import { FilterBar } from '../../../shared/ui/FilterBar/FilterBar'
@@ -62,15 +63,40 @@ export function VocabularyFilterBar({
 }: VocabularyFilterBarProps) {
   const [moreOpen,  setMoreOpen]  = useState(false)
   const [sortOpen,  setSortOpen]  = useState(false)
-  const sortRef = useRef<HTMLDivElement>(null)
+  // Portal-based dropdown: separate refs for trigger button and menu
+  const sortTriggerRef  = useRef<HTMLButtonElement>(null)
+  const sortMenuRef     = useRef<HTMLDivElement>(null)
+  const [menuStyle, setMenuStyle] = useState<CSSProperties>({})
 
   const { data: tags = [] } = useTagsQuery()
 
-  // Close sort dropdown on outside click / Escape
+  // Measure trigger position when the dropdown opens so the portal menu
+  // can be positioned with `position: fixed` — bypasses FilterBar's
+  // `overflow-y: hidden` scroll container that clips `position: absolute`.
+  useEffect(() => {
+    if (!sortOpen || !sortTriggerRef.current) return
+    const rect = sortTriggerRef.current.getBoundingClientRect()
+    setMenuStyle({
+      position: 'fixed',
+      top:   rect.bottom + 6,
+      right: window.innerWidth - rect.right,
+      zIndex: 200,
+    })
+  }, [sortOpen])
+
+  // Close sort dropdown on outside click / Escape.
+  // Check both the trigger button and the portal menu — the menu is in
+  // document.body so a simple sortRef.contains() check would miss it.
   useEffect(() => {
     if (!sortOpen) return
     const onPointer = (e: PointerEvent) => {
-      if (sortRef.current && !sortRef.current.contains(e.target as Node)) setSortOpen(false)
+      const target = e.target as Node
+      if (
+        !sortTriggerRef.current?.contains(target) &&
+        !sortMenuRef.current?.contains(target)
+      ) {
+        setSortOpen(false)
+      }
     }
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setSortOpen(false) }
     document.addEventListener('pointerdown', onPointer)
@@ -186,9 +212,10 @@ export function VocabularyFilterBar({
           {hasMoreFilters && <span className={styles.moreDot} aria-hidden="true" />}
         </button>
 
-        {/* ── Sort — inline dropdown like old toolbar ────────────────────── */}
-        <div className={styles.sortWrap} ref={sortRef}>
+        {/* ── Sort — portal dropdown (bypasses overflow-y:hidden on scroll row) */}
+        <div className={styles.sortWrap}>
           <button
+            ref={sortTriggerRef}
             type="button"
             className={[styles.sortBtn, sort !== 'newest' ? styles.sortBtnActive : ''].join(' ')}
             onClick={() => setSortOpen((o) => !o)}
@@ -198,8 +225,14 @@ export function VocabularyFilterBar({
             {currentSortLabel}
             <Icon icon={ChevronDown} size={11} />
           </button>
-          {sortOpen && (
-            <div className={styles.sortDropdown} role="listbox" aria-label="Sort vocabulary">
+          {sortOpen && createPortal(
+            <div
+              ref={sortMenuRef}
+              className={styles.sortDropdown}
+              style={menuStyle}
+              role="listbox"
+              aria-label="Sort vocabulary"
+            >
               {(Object.entries(SORT_LABELS) as [SortOption, string][]).map(([value, label]) => (
                 <button
                   key={value}
@@ -213,7 +246,8 @@ export function VocabularyFilterBar({
                   {sort === value && <Icon icon={Check} size={13} strokeWidth={2.5} style={{ marginLeft: 4 }} />}
                 </button>
               ))}
-            </div>
+            </div>,
+            document.body,
           )}
         </div>
       </FilterBar>
