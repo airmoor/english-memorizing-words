@@ -103,7 +103,7 @@
   font-size: var(--font-xs);
   font-weight: var(--fw-medium);
   font-family: var(--font-sans);
-  color: var(--color-accent);
+  color: var(--color-text-primary);
   background: none;
   border: none;
   cursor: pointer;

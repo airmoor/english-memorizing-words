@@ -254,6 +254,9 @@
 
 .expansionTd {
   padding: 0;
+  /* Ensure the next data row has a clear separator regardless of how the inner
+     panel div's border resolves in the collapsed-border table model. */
+  border-bottom: var(--border-default);
 }
 
 .expansionWrap {
@@ -606,14 +609,14 @@
   .mobileList {
     display: flex;
     flex-direction: column;
-    gap: var(--space-sm);
+    gap: var(--space-md);
     padding: var(--space-md) 0 var(--space-xl, 48px);
   }
 
   /* ── Card shell ──────────────────────────────────────────────────────────── */
 
   .mobileCard {
-    border: var(--border-card);
+    border: var(--border-default);
     border-radius: 8px;
     overflow: hidden;
   }
@@ -642,7 +645,7 @@
     justify-content: space-between;
     padding: var(--space-xs) var(--space-md) var(--space-sm);
     border-top: var(--border-card);
-    gap: var(--space-sm);
+    gap: var(--space-md);
     min-height: 40px;
   }
 
