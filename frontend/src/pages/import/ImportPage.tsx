@@ -140,6 +140,8 @@ export function ImportPage() {
 
   const handleImportMore = useCallback(() => {
     resetFlow()
+    setRetryWords(null)
+    setUploaderKey((k) => k + 1)
   }, [resetFlow])
 
   const handleViewVocabulary = useCallback(() => {
