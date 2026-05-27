@@ -4,7 +4,6 @@ import { ChevronDown, Pencil, Check, X } from 'lucide-react'
 import { Icon } from '../../../shared/ui/Icon/Icon'
 import { useImportPreviewMutation } from '../model/useImportPreviewMutation'
 import { ImportSettings } from './ImportSettings'
-import { Spinner } from '../../../shared/ui/Spinner'
 import { ApiError } from '../../../shared/api/base'
 import { buildRowErrorMap } from '../lib/formatValidationErrors'
 import type {
@@ -118,6 +117,18 @@ function StatusBadge({ status, reason }: { status: ParsedRow['status']; reason?:
 
 interface ImportPreviewProps {
   parsedRows: ParsedRow[]
+  /**
+   * Server-validated rows from a previous visit to this step.
+   * When provided, the summary bar renders instantly with accurate counts
+   * instead of client-side placeholders, eliminating the spinner flash.
+   * Omitted on the first visit; populated by `onMergedRowsChange` thereafter.
+   */
+  initialMergedRows?: ParsedRow[]
+  /**
+   * Called whenever the server-validated row state updates so the parent
+   * flow can persist it for re-entry without a flicker.
+   */
+  onMergedRowsChange?: (rows: ParsedRow[]) => void
   settings: ImportSettingsType
   onSettingsChange: (settings: ImportSettingsType) => void
   onExecute: (rows: ParsedRow[]) => void
@@ -128,13 +139,20 @@ interface ImportPreviewProps {
 
 export function ImportPreview({
   parsedRows,
+  initialMergedRows,
+  onMergedRowsChange,
   settings,
   onSettingsChange,
   onExecute,
   onBack,
 }: ImportPreviewProps) {
   const previewMutation = useImportPreviewMutation()
-  const [mergedRows, setMergedRows] = useState<ParsedRow[]>(parsedRows)
+  // Prefer initialMergedRows (server-validated from a previous visit) so the
+  // summary renders with accurate counts immediately. Falls back to parsedRows
+  // (client-side statuses) on the very first visit to this step.
+  const [mergedRows, setMergedRows] = useState<ParsedRow[]>(
+    () => initialMergedRows ?? parsedRows,
+  )
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [activeFilter, setActiveFilter] = useState<'all' | 'valid' | 'duplicates' | 'errors'>('all')
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -187,6 +205,18 @@ export function ImportPreview({
     runServerPreview(parsedRows, settings)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Persist the latest server-validated rows back to the parent flow.
+  // This lets the summary bar render with accurate counts immediately on
+  // re-entry (e.g. user views Import History mid-flow and navigates back)
+  // instead of resetting to client-side placeholders and showing a spinner.
+  useEffect(() => {
+    if (mergedRows.length > 0) onMergedRowsChange?.(mergedRows)
+    // onMergedRowsChange is a stable useCallback from the parent — omitting it
+    // from the dependency array is intentional to avoid a spurious initial call
+    // before the first server validation has a chance to run.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mergedRows])
 
   // Re-run when settings change (debounced 300ms)
   const handleSettingsChange = useCallback(
@@ -300,14 +330,23 @@ export function ImportPreview({
       </div>
 
       {/* ── Summary bar ─────────────────────────────────────────────── */}
+      {/*
+       * Counts always render — never swapped for a spinner.
+       *
+       * The Spinner (28×28, margin: 2rem auto) is designed for full-page
+       * loading and inflates the bar height when used inline, causing the
+       * layout shift the user experiences.
+       *
+       * Instead: show the best available counts immediately.
+       *   • On re-entry: initialMergedRows → accurate server-validated counts
+       *   • First visit: parsedRows (client-side) → counts may update slightly
+       *     when server responds, but a quiet number change is imperceptibly
+       *     smoother than a full spinner/text swap.
+       */}
       <div className={styles.summary}>
-        {previewMutation.isPending ? (
-          <span className={styles.summaryItem}><Spinner /></span>
-        ) : (
-          <span className={[styles.summaryItem, styles.summaryMuted].join(' ')}>
-            <strong>{counts.valid}</strong> ready
-          </span>
-        )}
+        <span className={[styles.summaryItem, styles.summaryMuted].join(' ')}>
+          <strong>{counts.valid}</strong> ready
+        </span>
         {counts.duplicates > 0 && (
           <span className={[styles.summaryItem, styles.summaryWarning].join(' ')}>
             <strong>{counts.duplicates}</strong> duplicate{counts.duplicates !== 1 ? 's' : ''}

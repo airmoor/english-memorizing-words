@@ -50,6 +50,9 @@
   background: var(--color-bg-primary);
   border-bottom: 1px solid var(--color-border);
   flex-shrink: 0;
+  /* Prevent height change between pending and settled states.
+     12px top + 20px line-height + 12px bottom ≈ 44px. */
+  min-height: 44px;
 }
 
 .summaryItem {

@@ -165,6 +165,8 @@ export function ImportSheet({ open, onClose }: ImportSheetProps) {
           <div className={styles.stepContent}>
             <ImportPreview
               parsedRows={flow.parsedRows}
+              initialMergedRows={flow.mergedRows.length > 0 ? flow.mergedRows : undefined}
+              onMergedRowsChange={flow.setMergedRows}
               settings={settings}
               onSettingsChange={setSettings}
               onExecute={handleExecute}

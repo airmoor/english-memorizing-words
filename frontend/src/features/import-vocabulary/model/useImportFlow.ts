@@ -17,6 +17,16 @@ export type ImportStep =
 interface ImportFlowState {
   step: ImportStep
   parsedRows: ParsedRow[]
+  /**
+   * Server-merged rows from the most recent successful preview validation.
+   * Preserved in the flow so that if the Preview step unmounts and remounts
+   * (e.g. user switches to Import History and back) the summary bar can render
+   * with already-accurate counts instead of client-side placeholders.
+   *
+   * Reset to [] whenever `parsedRows` changes so stale results are never used
+   * with a different word list.
+   */
+  mergedRows: ParsedRow[]
   serverPreviewRows: ImportPreviewRow[]
   result: ImportExecuteResult | null
   error: ImportFlowError | null
@@ -30,6 +40,7 @@ interface ImportFlowState {
 const INITIAL_STATE: ImportFlowState = {
   step: 'upload',
   parsedRows: [],
+  mergedRows: [],
   serverPreviewRows: [],
   result: null,
   error: null,
@@ -46,7 +57,13 @@ export function useImportFlow() {
   }, [])
 
   const setParsedRows = useCallback((rows: ParsedRow[]) => {
-    setState((prev) => ({ ...prev, parsedRows: rows }))
+    // Also clear mergedRows so the previous server-validated state is never
+    // used as initial data for a different word list.
+    setState((prev) => ({ ...prev, parsedRows: rows, mergedRows: [] }))
+  }, [])
+
+  const setMergedRows = useCallback((rows: ParsedRow[]) => {
+    setState((prev) => ({ ...prev, mergedRows: rows }))
   }, [])
 
   const setServerPreviewRows = useCallback((rows: ImportPreviewRow[]) => {
@@ -72,12 +89,14 @@ export function useImportFlow() {
   return {
     step: state.step,
     parsedRows: state.parsedRows,
+    mergedRows: state.mergedRows,
     serverPreviewRows: state.serverPreviewRows,
     result: state.result,
     error: state.error,
     sourceType: state.sourceType,
     goTo,
     setParsedRows,
+    setMergedRows,
     setServerPreviewRows,
     setResult,
     setError,
