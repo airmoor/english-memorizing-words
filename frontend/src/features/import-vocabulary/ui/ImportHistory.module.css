@@ -1,83 +1,78 @@
-.history {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+/* ── Wrapper & table shell ─────────────────────────────────────────────────── */
+
+.tableWrap {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
 }
 
-/* ── Empty / loading / error states ────────────────────────────────────────── */
-
-.centered {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 48px 24px;
-  text-align: center;
-}
-
-.emptyIcon {
-  font-size: 32px;
-  line-height: 1;
-  margin-bottom: 4px;
-}
-
-.emptyTitle {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.emptyBody {
-  font-size: 13px;
-  color: var(--text-secondary);
-  margin: 0;
-  max-width: 260px;
-}
-
-/* ── Session row ────────────────────────────────────────────────────────────── */
-
-.sessionItem {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--border-subtle);
-  transition: background var(--transition-fast);
-}
-
-.sessionItem:last-child {
-  border-bottom: none;
-}
-
-.sessionItem:hover {
-  background: var(--surface-hover);
-}
-
-.sessionHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.table {
+  table-layout: fixed;
   width: 100%;
-  gap: 8px;
+  border-collapse: collapse;
 }
 
-/* ── Status badge ────────────────────────────────────────────────────────────── */
+/* ── Column visibility helpers (desktop default) ──────────────────────────── */
+
+/* Status and Imported columns collapse on mobile — declared in responsive section */
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+
+.th {
+  font-size: var(--text-micro);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  text-align: left;
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: var(--border-default);
+  font-weight: var(--fw-medium);
+  background: transparent;
+  white-space: nowrap;
+}
+
+.thRight {
+  text-align: right;
+}
+
+/* ── Data row ─────────────────────────────────────────────────────────────── */
+
+.dataRow {
+  cursor: default;
+  border-bottom: var(--border-card);
+}
+
+.dataRow td {
+  height: 48px;
+  padding: var(--space-sm) var(--space-md);
+  vertical-align: middle;
+}
+
+/* ── Column cells ─────────────────────────────────────────────────────────── */
+
+.tdDate {
+  font-size: var(--text-body);
+  color: var(--color-text-primary);
+}
+
+.tdNumber {
+  text-align: right;
+}
+
+.tdActions {
+  text-align: right;
+}
+
+/* ── Status badge ─────────────────────────────────────────────────────────── */
 
 .statusBadge {
   display: inline-flex;
   align-items: center;
   font-size: var(--text-micro);
-  font-weight: var(--fw-medium, 500);
+  font-weight: var(--fw-medium);
   padding: var(--badge-padding-y) var(--badge-padding-x);
   border-radius: var(--badge-radius);
   white-space: nowrap;
-  flex-shrink: 0;
 }
 
 .statusBadgeComplete {
@@ -95,134 +90,352 @@
   color: var(--color-danger);
 }
 
-.sessionDate {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
+/* Mobile-only duplicate badge inside Date cell (hidden on desktop) */
+.mobileBadge {
+  display: none;
 }
 
-.sessionSource {
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--text-tertiary, var(--text-secondary));
-  background: var(--surface-2);
-  border: 1px solid var(--border-subtle);
-  border-radius: 4px;
-  padding: 1px 6px;
+/* ── Count values ─────────────────────────────────────────────────────────── */
+
+.dashValue {
+  font-size: var(--text-body);
+  color: var(--color-text-secondary);
 }
 
-/* Counts row */
-.sessionCounts {
-  display: flex;
+.importedValue {
+  font-size: var(--text-body);
+  font-weight: var(--fw-medium);
+  color: color-mix(in srgb, var(--color-success) 70%, var(--color-text-secondary));
+}
+
+.failedValue {
+  font-size: var(--text-body);
+  font-weight: var(--fw-medium);
+  color: color-mix(in srgb, var(--color-danger) 70%, var(--color-text-secondary));
+}
+
+/* ── Failed toggle button (desktop) ──────────────────────────────────────── */
+
+.failedToggle {
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-  font-size: 12px;
-  color: var(--text-secondary);
-  padding-left: 16px;
-  flex-wrap: wrap;
-}
-
-.countImported { color: color-mix(in srgb, var(--color-success) 70%, var(--color-text-secondary)); font-weight: 600; }
-.countErrors   { color: color-mix(in srgb, var(--color-danger)  70%, var(--color-text-secondary)); font-weight: 600; }
-
-/* ── Retry section (failed rows) ────────────────────────────────────────────── */
-
-.retrySection {
-  padding-left: 16px;
-}
-
-.retryToggle {
+  gap: 4px;
+  font-size: var(--text-body);
+  font-weight: var(--fw-medium);
+  color: color-mix(in srgb, var(--color-danger) 70%, var(--color-text-secondary));
   background: none;
   border: none;
-  padding: 0;
-  font-size: 12px;
-  color: var(--color-accent, #6366f1);
   cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  transition: opacity var(--transition-fast);
-}
-
-.retryToggle:hover { opacity: 0.75; }
-
-.errorRows {
-  margin-top: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.errorRow {
-  display: grid;
-  grid-template-columns: minmax(160px, auto) 1fr;
-  gap: var(--space-md);
-  align-items: baseline;
-}
-
-.errorRowWord {
-  font-weight: var(--fw-medium, 500);
-  color: var(--color-text-primary);
-}
-
-.errorRowReason {
-  color: var(--color-text-secondary);
-  font-size: var(--text-caption);
-}
-
-.moreErrors {
-  font-size: 11px;
-  color: var(--text-tertiary, var(--text-secondary));
-  font-style: italic;
-  margin: 4px 0 0;
   padding: 0;
+  transition: color var(--transition-fast);
 }
 
-.retryActions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 10px;
+.failedToggle:hover,
+.failedToggleOpen {
+  color: var(--color-danger);
 }
+
+.failedToggle:focus-visible,
+.mobileFailedToggle:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* ── Chevron icon ─────────────────────────────────────────────────────────── */
+
+.chevron {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  transition: transform var(--transition-fast);
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+/* ── Desktop / mobile cell visibility ────────────────────────────────────── */
+
+.failedDesktopCell {
+  display: inline-flex;
+}
+
+.failedMobileCell {
+  display: none;
+}
+
+/* ── Actions cell ─────────────────────────────────────────────────────────── */
+
+.actionsCell {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* ── Copy button ──────────────────────────────────────────────────────────── */
 
 .copyBtn {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-width: 110px;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  background: var(--surface-2);
-  border: 1px solid var(--border-subtle);
+  gap: 4px;
+  color: var(--color-text-secondary);
+  background: none;
+  border: none;
   cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--btn-radius);
+  font-size: var(--text-caption);
+  min-width: 68px;
+  justify-content: center;
+  transition: color var(--transition-fast), background var(--transition-fast);
 }
 
 .copyBtn:hover {
-  background: var(--surface-hover);
-  color: var(--text-primary);
+  color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--color-text-primary) 6%, transparent);
 }
+
+.copyBtn:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* ── Retry button ─────────────────────────────────────────────────────────── */
 
 .retryBtn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
+  gap: 4px;
   color: var(--color-accent);
-  background: transparent;
-  border: 1px solid var(--color-accent);
+  background: none;
+  border: none;
   cursor: pointer;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--btn-radius);
+  font-size: var(--text-caption);
   transition: background var(--transition-fast);
 }
 
 .retryBtn:hover {
-  background: var(--surface-accent); /* = var(--color-accent-subtle) */
+  background: var(--surface-accent);
+}
+
+.retryBtn:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* ── Expansion row ────────────────────────────────────────────────────────── */
+
+.expansionTd {
+  padding: 0;
+}
+
+.expansionWrap {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 200ms var(--ease-out), opacity 150ms var(--ease-out);
+}
+
+.expansionWrapOpen {
+  max-height: 400px;
+  opacity: 1;
+}
+
+.failedExpansion {
+  background: color-mix(in srgb, var(--color-danger) 4%, transparent);
+  border-bottom: var(--border-default);
+  padding: var(--space-sm) var(--space-md) var(--space-md);
+}
+
+/* ── Failed word grid ─────────────────────────────────────────────────────── */
+
+.failedGrid {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: var(--space-xs) var(--space-lg);
+}
+
+.failedGridRow {
+  display: contents; /* children participate directly in the 2-col grid */
+}
+
+.failedWordCell {
+  font-size: var(--text-caption);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-primary);
+}
+
+.failedWordCell::before {
+  content: '↳ ';
+  color: var(--color-text-secondary);
+  font-weight: normal;
+}
+
+.wordSuffix {
+  color: var(--color-text-secondary);
+  font-style: italic;
+  font-size: var(--text-micro);
+}
+
+.failedReasonCell {
+  font-size: var(--text-caption);
+  color: var(--color-text-secondary);
+}
+
+.hiddenCount {
+  font-size: var(--text-micro);
+  color: var(--color-text-secondary);
+  font-style: italic;
+  margin: var(--space-xs) 0 0;
+  padding: 0;
+}
+
+/* ── Empty state ──────────────────────────────────────────────────────────── */
+
+.emptyRow {
+  height: 120px;
+  font-size: var(--text-caption);
+  color: var(--color-text-secondary);
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* ── Loading / error states ───────────────────────────────────────────────── */
+
+.centered {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.emptyTitle {
+  font-size: var(--text-body);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.emptyBody {
+  font-size: var(--text-caption);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* ── Responsive — mobile (< 640px) ───────────────────────────────────────── */
+
+@media (max-width: 639px) {
+
+  /* Switch to auto layout so collapsed columns reclaim their space */
+  .table {
+    table-layout: auto;
+  }
+
+  /* Collapse Status and Imported columns */
+  .colStatus,
+  .colImported {
+    visibility: collapse;
+  }
+
+  .tdColStatus,
+  .thColStatus,
+  .tdColImported,
+  .thColImported {
+    display: none;
+  }
+
+  /* Hide the Failed header text (column is repurposed as merged counts) */
+  .thColFailed {
+    visibility: hidden;
+  }
+
+  /* Date cell: stack badge below date */
+  .tdDate {
+    display: flex; /* safe on td in auto-layout mode */
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+  }
+
+  .mobileBadge {
+    display: inline-flex;
+  }
+
+  /* Switch desktop / mobile count cells */
+  .failedDesktopCell {
+    display: none;
+  }
+
+  .failedMobileCell {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2px;
+    font-size: var(--text-caption);
+  }
+
+  /* Mobile failed toggle — same colour/style as desktop */
+  .mobileFailedToggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: var(--text-caption);
+    font-weight: var(--fw-medium);
+    color: color-mix(in srgb, var(--color-danger) 70%, var(--color-text-secondary));
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: color var(--transition-fast);
+  }
+
+  .mobileFailedToggle:hover,
+  .mobileFailedToggle.failedToggleOpen {
+    color: var(--color-danger);
+  }
+
+  .mobileSeparator {
+    color: var(--color-text-secondary);
+  }
+
+  .mobileImportedText {
+    font-size: var(--text-caption);
+  }
+
+  /* Icon-only action buttons on mobile — hide text labels */
+  .btnText {
+    display: none;
+  }
+
+  /* Reset min-width since there's no text label */
+  .copyBtn {
+    min-width: unset;
+  }
+
+  /* Tighten row padding on mobile */
+  .dataRow td {
+    padding: var(--space-xs) var(--space-sm);
+  }
+
+  .th {
+    padding: var(--space-xs) var(--space-sm);
+  }
+
+  /* Mobile expansion: slightly less padding */
+  .failedExpansion {
+    padding: var(--space-xs) var(--space-sm) var(--space-sm);
+  }
+
+  /* Narrow the failed grid on mobile */
+  .failedGrid {
+    grid-template-columns: 120px 1fr;
+  }
 }

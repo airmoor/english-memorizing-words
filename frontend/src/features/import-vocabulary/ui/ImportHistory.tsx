@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { Copy, RotateCcw, ClipboardList } from 'lucide-react'
+import { Copy, RotateCcw, ChevronDown } from 'lucide-react'
 import { Icon } from '../../../shared/ui/Icon/Icon'
 import { useImportSessionsQuery } from '../model/useImportSessionsQuery'
 import type { ImportSession, ImportSessionErrorRow } from '../../../entities/import-session/model/types'
 import styles from './ImportHistory.module.css'
 
-// ── Clipboard helper ──────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 async function copyToClipboard(text: string): Promise<boolean> {
   try {
@@ -16,49 +16,51 @@ async function copyToClipboard(text: string): Promise<boolean> {
   }
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
 function formatDate(iso: string): string {
   const d = new Date(iso)
   return d.toLocaleDateString('en-GB', {
     day: 'numeric',
     month: 'short',
-    year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
   })
 }
 
-function getStatusBadge(
-  imported: number,
-  errors: number,
-): { text: string; cls: string } {
-  if (errors === 0)                  return { text: 'Complete', cls: styles.statusBadgeComplete }
-  if (errors > 0 && imported > 0)   return { text: 'Partial',  cls: styles.statusBadgePartial  }
-  return                                    { text: 'Failed',   cls: styles.statusBadgeFailed   }
+function getStatusBadge(imported: number, errors: number): { text: string; cls: string } {
+  if (errors === 0)                return { text: 'Complete', cls: styles.statusBadgeComplete }
+  if (errors > 0 && imported > 0) return { text: 'Partial',  cls: styles.statusBadgePartial  }
+  return                                  { text: 'Failed',   cls: styles.statusBadgeFailed   }
 }
 
-// ── Session row ───────────────────────────────────────────────────────────────
+// Renders a word with optional MW-suffix dimming (first token normal, rest dimmed/italic)
+function WordCell({ word }: { word: string }) {
+  const spaceIdx = word.indexOf(' ')
+  if (spaceIdx === -1) {
+    return <>{word}</>
+  }
+  return (
+    <>
+      {word.slice(0, spaceIdx)}
+      <span className={styles.wordSuffix}>{word.slice(spaceIdx)}</span>
+    </>
+  )
+}
 
-interface SessionRowProps {
+// ── Session rows ──────────────────────────────────────────────────────────────
+
+interface SessionRowsProps {
   session: ImportSession
-  /** Called when the user clicks "Retry failed rows" */
+  isExpanded: boolean
+  onToggle: () => void
   onRetry?: (errorRows: ImportSessionErrorRow[]) => void
 }
 
-function SessionRow({ session, onRetry }: SessionRowProps) {
-  const [showErrors, setShowErrors] = useState(false)
+function SessionRows({ session, isExpanded, onToggle, onRetry }: SessionRowsProps) {
   const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle')
 
-  const {
-    createdAt,
-    imported, skipped, duplicatesIgnored, errors,
-    errorRows,
-  } = session
-
-  // True when the backend capped stored error rows (total errors > stored rows).
-  // The `errors` field is always the accurate total; `errorRows` is the stored subset.
+  const { createdAt, imported, errors, errorRows } = session
   const hiddenErrorCount = errors - errorRows.length
+  const badge = getStatusBadge(imported, errors)
 
   const handleCopy = async () => {
     const words = errorRows.map((r) => r.word).join('\n')
@@ -69,112 +71,171 @@ function SessionRow({ session, onRetry }: SessionRowProps) {
     }
   }
 
-  const badge = getStatusBadge(imported, errors)
-
   return (
-    <div className={styles.sessionItem}>
-      <div className={styles.sessionHeader}>
-        <span className={styles.sessionDate}>{formatDate(createdAt)}</span>
-        <span className={[styles.statusBadge, badge.cls].join(' ')}>{badge.text}</span>
-      </div>
+    <>
+      {/* ── Data row ─────────────────────────────────────────────────────────── */}
+      <tr className={styles.dataRow}>
 
-      <div className={styles.sessionCounts}>
-        {imported > 0 && (
-          <span className={styles.countImported}>
-            {imported} imported
+        {/* Date — desktop: date only; mobile: date + stacked status badge */}
+        <td className={styles.tdDate}>
+          {formatDate(createdAt)}
+          <span className={`${styles.statusBadge} ${badge.cls} ${styles.mobileBadge}`}>
+            {badge.text}
           </span>
-        )}
-        {skipped > 0 && <span>{skipped} skipped</span>}
-        {duplicatesIgnored > 0 && <span>{duplicatesIgnored} duplicates</span>}
-        {errors > 0 && (
-          <span className={styles.countErrors}>
-            {errors} failed
+        </td>
+
+        {/* Status — hidden on mobile (badge moved to Date cell) */}
+        <td className={styles.tdColStatus}>
+          <span className={`${styles.statusBadge} ${badge.cls}`}>{badge.text}</span>
+        </td>
+
+        {/* Imported — hidden on mobile (merged into Failed cell) */}
+        <td className={`${styles.tdNumber} ${styles.tdColImported}`}>
+          {imported === 0
+            ? <span className={styles.dashValue}>—</span>
+            : <span className={styles.importedValue}>{imported}</span>
+          }
+        </td>
+
+        {/* Failed — desktop: failed toggle; mobile: merged "N imported · N failed ▾" */}
+        <td className={styles.tdNumber}>
+          {/* Desktop */}
+          <span className={styles.failedDesktopCell}>
+            {errors === 0
+              ? <span className={styles.dashValue}>—</span>
+              : (
+                <button
+                  type="button"
+                  className={`${styles.failedToggle}${isExpanded ? ` ${styles.failedToggleOpen}` : ''}`}
+                  onClick={onToggle}
+                  aria-expanded={isExpanded}
+                  aria-label={`${errors} failed, ${isExpanded ? 'collapse' : 'expand'} details`}
+                >
+                  {errors}
+                  <span
+                    className={`${styles.chevron}${isExpanded ? ` ${styles.chevronOpen}` : ''}`}
+                    aria-hidden="true"
+                  >
+                    <Icon icon={ChevronDown} size={12} />
+                  </span>
+                </button>
+              )
+            }
           </span>
-        )}
-      </div>
 
-      {/* Retry section — only shown when there are failed rows */}
-      {errors > 0 && (
-        <div className={styles.retrySection}>
-          {/* Expand/collapse stored error rows */}
-          {errorRows.length > 0 && (
-            <button
-              type="button"
-              className={styles.retryToggle}
-              onClick={() => setShowErrors((v) => !v)}
-              aria-expanded={showErrors}
-            >
-              {showErrors
-                ? 'Hide failed rows'
-                : `Show ${errorRows.length} failed row${errorRows.length !== 1 ? 's' : ''}`}
-            </button>
-          )}
-
-          {showErrors && (
-            <div className={styles.errorRows} role="list">
-              {errorRows.map((row, i) => (
-                <div key={row.clientRowId ?? i} className={styles.errorRow} role="listitem">
-                  <span className={styles.errorRowWord}>{row.word}</span>
-                  <span className={styles.errorRowReason}>{row.reason}</span>
-                </div>
-              ))}
-              {/* Indicate when stored rows are fewer than the actual error count */}
-              {hiddenErrorCount > 0 && (
-                <p className={styles.moreErrors}>
-                  …and {hiddenErrorCount} more failed row{hiddenErrorCount !== 1 ? 's' : ''} (not stored)
-                </p>
-              )}
-            </div>
-          )}
-
-          <div className={styles.retryActions}>
-            {/* Copy failed words to clipboard for manual re-paste */}
-            {errorRows.length > 0 && (
+          {/* Mobile — combined "N imported · N failed ▾" */}
+          <span className={styles.failedMobileCell}>
+            {imported > 0 && (
+              <span className={styles.mobileImportedText}>
+                <span className={styles.importedValue}>{imported}</span>
+                {' imported'}
+              </span>
+            )}
+            {imported > 0 && errors > 0 && (
+              <span className={styles.mobileSeparator}> · </span>
+            )}
+            {errors > 0 ? (
               <button
                 type="button"
-                className={styles.copyBtn}
-                onClick={() => void handleCopy()}
-                aria-label="Copy failed words to clipboard"
+                className={`${styles.mobileFailedToggle}${isExpanded ? ` ${styles.failedToggleOpen}` : ''}`}
+                onClick={onToggle}
+                aria-expanded={isExpanded}
+                aria-label={`${errors} failed, ${isExpanded ? 'collapse' : 'expand'} details`}
               >
-                <Icon icon={Copy} size={12} />
-                {copyState === 'copied' ? 'Copied!' : 'Copy words'}
+                <span className={styles.failedValue}>{errors}</span>
+                {' failed'}
+                <span
+                  className={`${styles.chevron}${isExpanded ? ` ${styles.chevronOpen}` : ''}`}
+                  aria-hidden="true"
+                >
+                  <Icon icon={ChevronDown} size={12} />
+                </span>
               </button>
-            )}
+            ) : imported === 0 ? (
+              <span className={styles.dashValue}>—</span>
+            ) : null}
+          </span>
+        </td>
 
-            {/* Retry: switch to Import tab with failed words pre-filled */}
-            {onRetry && errorRows.length > 0 && (
+        {/* Actions */}
+        <td className={styles.tdActions}>
+          <div className={styles.actionsCell}>
+            {errors > 0 && onRetry && (
               <button
                 type="button"
                 className={styles.retryBtn}
                 onClick={() => onRetry(errorRows)}
-                aria-label={`Retry ${errorRows.length} failed rows from this import`}
+                aria-label={`Retry ${errors} failed imports`}
               >
-                <Icon icon={RotateCcw} size={12} />
-                Retry failed rows
+                <Icon icon={RotateCcw} size={14} />
+                <span className={styles.btnText}>Retry</span>
               </button>
             )}
+            <button
+              type="button"
+              className={styles.copyBtn}
+              onClick={() => void handleCopy()}
+              aria-label={copyState === 'copied' ? 'Copied to clipboard' : 'Copy words to clipboard'}
+            >
+              <Icon icon={Copy} size={14} />
+              <span className={styles.btnText}>
+                {copyState === 'copied' ? 'Copied' : 'Copy'}
+              </span>
+            </button>
           </div>
-        </div>
+        </td>
+      </tr>
+
+      {/* ── Failed expansion row — always in DOM for error sessions, animated via CSS */}
+      {errors > 0 && (
+        <tr>
+          <td colSpan={5} className={styles.expansionTd}>
+            <div
+              className={`${styles.expansionWrap}${isExpanded ? ` ${styles.expansionWrapOpen}` : ''}`}
+              aria-hidden={!isExpanded}
+            >
+              <div className={styles.failedExpansion}>
+                <div className={styles.failedGrid}>
+                  {errorRows.map((row, i) => (
+                    <div key={row.clientRowId ?? i} className={styles.failedGridRow}>
+                      <span className={styles.failedWordCell}>
+                        <WordCell word={row.word} />
+                      </span>
+                      <span className={styles.failedReasonCell}>{row.reason}</span>
+                    </div>
+                  ))}
+                </div>
+                {hiddenErrorCount > 0 && (
+                  <p className={styles.hiddenCount}>
+                    …and {hiddenErrorCount} more
+                  </p>
+                )}
+              </div>
+            </div>
+          </td>
+        </tr>
       )}
-    </div>
+    </>
   )
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
 
 interface ImportHistoryProps {
-  /** Called when the user wants to retry failed rows — receives the error rows as a word list. */
   onRetry?: (words: string[]) => void
 }
 
 export function ImportHistory({ onRetry }: ImportHistoryProps) {
   const { data: sessions, isLoading, isError } = useImportSessionsQuery()
+  const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const handleRetry = onRetry
-    ? (errorRows: ImportSessionErrorRow[]) => {
-        onRetry(errorRows.map((r) => r.word))
-      }
+    ? (errorRows: ImportSessionErrorRow[]) => onRetry(errorRows.map((r) => r.word))
     : undefined
+
+  const toggleExpanded = (id: string) => {
+    setExpandedId((prev) => (prev === id ? null : id))
+  }
 
   if (isLoading) {
     return (
@@ -193,29 +254,43 @@ export function ImportHistory({ onRetry }: ImportHistoryProps) {
     )
   }
 
-  if (!sessions || sessions.length === 0) {
-    return (
-      <div className={styles.centered}>
-        <span className={styles.emptyIcon} aria-hidden="true">
-          <Icon icon={ClipboardList} size={32} muted />
-        </span>
-        <p className={styles.emptyTitle}>No imports yet</p>
-        <p className={styles.emptyBody}>
-          Each import you run will appear here so you can review results and retry failed words.
-        </p>
-      </div>
-    )
-  }
-
   return (
-    <div className={styles.history} role="list" aria-label="Import history">
-      {sessions.map((session) => (
-        <SessionRow
-          key={session.id}
-          session={session}
-          onRetry={handleRetry}
-        />
-      ))}
+    <div className={styles.tableWrap}>
+      <table className={styles.table}>
+        <colgroup>
+          <col style={{ width: '180px' }} />
+          <col className={styles.colStatus} style={{ width: '100px' }} />
+          <col className={styles.colImported} style={{ width: '90px' }} />
+          <col style={{ width: '90px' }} />
+          <col />
+        </colgroup>
+        <thead>
+          <tr>
+            <th className={styles.th} scope="col">Date</th>
+            <th className={`${styles.th} ${styles.thColStatus}`} scope="col">Status</th>
+            <th className={`${styles.th} ${styles.thRight} ${styles.thColImported}`} scope="col">Imported</th>
+            <th className={`${styles.th} ${styles.thRight} ${styles.thColFailed}`} scope="col">Failed</th>
+            <th className={`${styles.th} ${styles.thRight}`} scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {!sessions || sessions.length === 0 ? (
+            <tr>
+              <td colSpan={5} className={styles.emptyRow}>No imports yet</td>
+            </tr>
+          ) : (
+            sessions.map((session) => (
+              <SessionRows
+                key={session.id}
+                session={session}
+                isExpanded={expandedId === session.id}
+                onToggle={() => toggleExpanded(session.id)}
+                onRetry={handleRetry}
+              />
+            ))
+          )}
+        </tbody>
+      </table>
     </div>
   )
 }
