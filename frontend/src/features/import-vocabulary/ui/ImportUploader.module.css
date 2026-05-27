@@ -5,9 +5,6 @@
   min-height: 0;
   /* Footer (CTA) is sticky at the bottom; content above scrolls if needed */
   overflow: hidden;
-  /* Single container-level horizontal padding — all children align automatically
-     instead of each managing its own margin: ... 24px 0. */
-  padding: 0 24px;
 }
 
 /* ── Scrollable content area ─────────────────────────────────────────────── */

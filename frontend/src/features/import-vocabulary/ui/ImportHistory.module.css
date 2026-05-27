@@ -72,18 +72,21 @@
 }
 
 .statusBadgeComplete {
-  background: color-mix(in srgb, var(--color-success) 12%, transparent);
-  color: var(--color-success);
+  background: color-mix(in srgb, var(--color-success) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-success) 35%, transparent);
+  color: color-mix(in srgb, var(--color-success) 80%, var(--color-text-primary));
 }
 
 .statusBadgePartial {
-  background: color-mix(in srgb, var(--color-warning) 12%, transparent);
-  color: var(--color-warning);
+  background: color-mix(in srgb, var(--color-warning) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-warning) 35%, transparent);
+  color: color-mix(in srgb, var(--color-warning) 75%, var(--color-text-primary));
 }
 
 .statusBadgeFailed {
-  background: color-mix(in srgb, var(--color-danger) 12%, transparent);
-  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 35%, transparent);
+  color: color-mix(in srgb, var(--color-danger) 80%, var(--color-text-primary));
 }
 
 /* Mobile-only duplicate badge inside Date cell */
@@ -101,19 +104,19 @@
 .importedValue {
   font-size: var(--text-body);
   font-weight: var(--fw-medium);
-  color: color-mix(in srgb, var(--color-success) 70%, var(--color-text-secondary));
+  color: color-mix(in srgb, var(--color-success) 55%, var(--color-text-secondary));
 }
 
 .failedValue {
   font-size: var(--text-body);
   font-weight: var(--fw-medium);
-  color: color-mix(in srgb, var(--color-danger) 70%, var(--color-text-secondary));
+  color: color-mix(in srgb, var(--color-danger) 55%, var(--color-text-secondary));
 }
 
 /* ── Shared toggle state (open = full color) ──────────────────────────────── */
 
-.toggleOpen.importedToggle { color: var(--color-success); }
-.toggleOpen.failedToggle   { color: var(--color-danger); }
+.toggleOpen.importedToggle { color: color-mix(in srgb, var(--color-success) 80%, var(--color-text-primary)); }
+.toggleOpen.failedToggle   { color: color-mix(in srgb, var(--color-danger)  80%, var(--color-text-primary)); }
 
 /* ── Imported count toggle ────────────────────────────────────────────────── */
 
@@ -123,7 +126,7 @@
   gap: 4px;
   font-size: var(--text-body);
   font-weight: var(--fw-medium);
-  color: color-mix(in srgb, var(--color-success) 70%, var(--color-text-secondary));
+  color: color-mix(in srgb, var(--color-success) 55%, var(--color-text-secondary));
   background: none;
   border: none;
   cursor: pointer;
@@ -131,7 +134,7 @@
   transition: color var(--transition-fast);
 }
 
-.importedToggle:hover { color: var(--color-success); }
+.importedToggle:hover { color: color-mix(in srgb, var(--color-success) 80%, var(--color-text-primary)); }
 
 .importedToggle:focus-visible {
   outline: var(--border-focus);
@@ -147,7 +150,7 @@
   gap: 4px;
   font-size: var(--text-body);
   font-weight: var(--fw-medium);
-  color: color-mix(in srgb, var(--color-danger) 70%, var(--color-text-secondary));
+  color: color-mix(in srgb, var(--color-danger) 55%, var(--color-text-secondary));
   background: none;
   border: none;
   cursor: pointer;
@@ -155,7 +158,7 @@
   transition: color var(--transition-fast);
 }
 
-.failedToggle:hover { color: var(--color-danger); }
+.failedToggle:hover { color: color-mix(in srgb, var(--color-danger) 80%, var(--color-text-primary)); }
 
 .failedToggle:focus-visible,
 .mobileFailedToggle:focus-visible,
@@ -240,7 +243,6 @@
 
 .copyBtn:hover {
   color: var(--color-text-primary);
-  background: color-mix(in srgb, var(--color-text-primary) 6%, transparent);
 }
 
 .copyBtn:focus-visible {
@@ -269,7 +271,8 @@
 /* ── Expansion panel ──────────────────────────────────────────────────────── */
 
 .expansionPanel {
-  background: color-mix(in srgb, var(--color-text-primary) 3%, transparent);
+  background: var(--surface-page);
+  border-top: var(--border-card);
   border-bottom: var(--border-default);
 }
 
@@ -293,13 +296,13 @@
 .panelImportedCount {
   font-size: var(--text-caption);
   font-weight: var(--fw-medium);
-  color: color-mix(in srgb, var(--color-success) 70%, var(--color-text-secondary));
+  color: var(--color-text-secondary);
 }
 
 .panelFailedCount {
   font-size: var(--text-caption);
   font-weight: var(--fw-medium);
-  color: color-mix(in srgb, var(--color-danger) 70%, var(--color-text-secondary));
+  color: var(--color-text-secondary);
 }
 
 .panelDot {
@@ -326,7 +329,7 @@
   font-size: var(--text-micro);
   font-weight: var(--fw-medium);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   color: var(--color-text-secondary);
 }
 
@@ -347,8 +350,9 @@
 .importedChip {
   font-size: var(--text-caption);
   font-weight: var(--fw-medium);
-  color: color-mix(in srgb, var(--color-success) 80%, var(--color-text-primary));
-  background: color-mix(in srgb, var(--color-success) 8%, transparent);
+  color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--color-success) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-success) 20%, transparent);
   border-radius: var(--badge-radius);
   padding: var(--badge-padding-y) var(--badge-padding-x);
 }
@@ -356,6 +360,8 @@
 .importedChip::before {
   content: '✓ ';
   font-weight: normal;
+  color: var(--color-success);
+  font-size: 11px; /* no token */
 }
 
 /* ── Failed word grid ─────────────────────────────────────────────────────── */
@@ -512,7 +518,7 @@
     gap: 3px;
     font-size: var(--text-caption);
     font-weight: var(--fw-medium);
-    color: color-mix(in srgb, var(--color-success) 70%, var(--color-text-secondary));
+    color: color-mix(in srgb, var(--color-success) 55%, var(--color-text-secondary));
     background: none;
     border: none;
     cursor: pointer;
@@ -522,7 +528,13 @@
 
   .mobileImportedToggle:hover,
   .mobileImportedToggle.toggleOpen {
-    color: var(--color-success);
+    color: color-mix(in srgb, var(--color-success) 80%, var(--color-text-primary));
+  }
+
+  /* .importedValue is a child span with its own color — override on hover/open */
+  .mobileImportedToggle:hover .importedValue,
+  .mobileImportedToggle.toggleOpen .importedValue {
+    color: color-mix(in srgb, var(--color-success) 80%, var(--color-text-primary));
   }
 
   /* Mobile failed toggle */
@@ -532,7 +544,7 @@
     gap: 3px;
     font-size: var(--text-caption);
     font-weight: var(--fw-medium);
-    color: color-mix(in srgb, var(--color-danger) 70%, var(--color-text-secondary));
+    color: color-mix(in srgb, var(--color-danger) 55%, var(--color-text-secondary));
     background: none;
     border: none;
     cursor: pointer;
@@ -542,7 +554,13 @@
 
   .mobileFailedToggle:hover,
   .mobileFailedToggle.toggleOpen {
-    color: var(--color-danger);
+    color: color-mix(in srgb, var(--color-danger) 80%, var(--color-text-primary));
+  }
+
+  /* .failedValue is a child span with its own color — override on hover/open */
+  .mobileFailedToggle:hover .failedValue,
+  .mobileFailedToggle.toggleOpen .failedValue {
+    color: color-mix(in srgb, var(--color-danger) 80%, var(--color-text-primary));
   }
 
   .mobileSeparator {
@@ -664,12 +682,23 @@
 
   .mobileStatImported {
     font-weight: var(--fw-medium);
-    color: color-mix(in srgb, var(--color-success) 70%, var(--color-text-secondary));
+    color: color-mix(in srgb, var(--color-success) 55%, var(--color-text-secondary));
   }
 
   .mobileStatFailed {
     font-weight: var(--fw-medium);
-    color: color-mix(in srgb, var(--color-danger) 70%, var(--color-text-secondary));
+    color: color-mix(in srgb, var(--color-danger) 55%, var(--color-text-secondary));
+  }
+
+  /* Stat spans have explicit color — escalate to 80% on button hover / open state */
+  .mobileExpandBtn:hover .mobileStatImported,
+  .mobileExpandBtnOpen .mobileStatImported {
+    color: color-mix(in srgb, var(--color-success) 80%, var(--color-text-primary));
+  }
+
+  .mobileExpandBtn:hover .mobileStatFailed,
+  .mobileExpandBtnOpen .mobileStatFailed {
+    color: color-mix(in srgb, var(--color-danger) 80%, var(--color-text-primary));
   }
 
   .mobileStatSep {
