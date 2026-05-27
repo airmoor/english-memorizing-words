@@ -236,7 +236,7 @@
   padding: 10px 24px;
   border-bottom: 1px solid var(--color-border);
   min-height: 44px;
-  gap: 12px;
+  gap: var(--space-sm);
   /* content-visibility: auto skips layout/paint for off-screen rows */
   content-visibility: auto;
   contain-intrinsic-size: 0 44px;
@@ -301,7 +301,7 @@
 
 .colStatus {
   flex-shrink: 0;
-  width: 120px;
+  min-width: 100px;
   text-align: right;
 }
 
@@ -357,6 +357,110 @@
   .tableWrapper {
     flex: 1 1 auto;
   }
+}
+
+/* ── Inline editing ──────────────────────────────────────────────────────── */
+
+/* Row enters top-align mode when editing so the taller edit cell doesn't
+   force the status badge to centre-align against the middle of the input. */
+.tableRowEditing {
+  align-items: flex-start;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  /* Override content-visibility so the focused input is never skipped */
+  content-visibility: visible;
+}
+
+/* Edit trigger button — hidden by default, visible on row hover */
+.editBtn {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 0;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.tableRow:hover .editBtn {
+  opacity: 1;
+}
+
+/* Edited word indicator — italic text so the marker is structural, not decorative */
+.wordTextEdited {
+  font-style: italic;
+}
+
+/* MW-style suffix dimmer — "able adj. a2" → "able" + dimmed " adj. a2" */
+.wordSuffix {
+  color: var(--color-text-secondary);
+  font-style: italic;
+  font-size: var(--text-caption);
+  margin-left: 4px; /* no token */
+}
+
+/* Wrapper for the inline edit UI (input + confirm + cancel + delete) */
+.editCell {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.editInputRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.editInput {
+  min-width: 120px;
+  max-width: 240px;
+  width: fit-content;
+  font-size: var(--text-body);
+  font-family: inherit;
+  padding: 2px var(--space-sm);
+  border: var(--border-focus);
+  border-radius: var(--input-radius);
+  background: var(--surface-card);
+  color: var(--color-text-primary);
+  outline: none;
+}
+
+.confirmBtn {
+  background: none;
+  border: none;
+  color: var(--color-success);
+  cursor: pointer;
+  padding: 2px;
+  line-height: 0;
+  flex-shrink: 0;
+}
+
+.cancelBtn {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 2px;
+  line-height: 0;
+  flex-shrink: 0;
+}
+
+.deleteRowBtn {
+  background: none;
+  border: none;
+  color: var(--color-danger);
+  font-size: var(--text-micro);
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+
+.deleteRowBtn:hover {
+  text-decoration: underline;
 }
 
 /* ── "View →" link on duplicate rows ────────────────────────────────────── */

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Pencil, Check, X } from 'lucide-react'
 import { Icon } from '../../../shared/ui/Icon/Icon'
 import { useImportPreviewMutation } from '../model/useImportPreviewMutation'
 import { ImportSettings } from './ImportSettings'
@@ -39,6 +39,24 @@ function countByStatus(rows: ParsedRow[]) {
     else errors++
   }
   return { valid, duplicates, errors }
+}
+
+// ── Word text — dims MW-style suffixes ("able adj. a2" → "able" + " adj. a2") ─
+
+function WordText({ word, isEdited }: { word: string; isEdited: boolean }) {
+  const spaceIdx = word.indexOf(' ')
+  const cls = [styles.wordText, isEdited ? styles.wordTextEdited : ''].join(' ')
+  if (spaceIdx === -1) {
+    return <span className={cls}>{word}</span>
+  }
+  const first = word.slice(0, spaceIdx)
+  const rest  = word.slice(spaceIdx) // leading space kept for natural separation
+  return (
+    <span className={cls}>
+      {first}
+      <span className={styles.wordSuffix}>{rest}</span>
+    </span>
+  )
 }
 
 // ── Metadata chips ────────────────────────────────────────────────────────────
@@ -120,6 +138,12 @@ export function ImportPreview({
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [activeFilter, setActiveFilter] = useState<'all' | 'valid' | 'duplicates' | 'errors'>('all')
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // ── Inline editing state ──────────────────────────────────────────────────
+  const [editingRowId, setEditingRowId] = useState<string | null>(null)
+  const [editValue,    setEditValue]    = useState('')
+  // Track rows that have been manually edited so we can show an italic marker.
+  const [editedRowIds, setEditedRowIds] = useState<Set<string>>(new Set())
 
   // Run server preview whenever rows or settings change (debounced 300ms for settings)
   const runServerPreview = useCallback(
@@ -207,6 +231,63 @@ export function ImportPreview({
   const handleImport = useCallback(() => {
     onExecute(rowsToImport)
   }, [onExecute, rowsToImport])
+
+  // ── Inline edit handlers ──────────────────────────────────────────────────
+
+  function handleStartEdit(clientRowId: string, word: string) {
+    setEditingRowId(clientRowId)
+    setEditValue(word)
+  }
+
+  function handleCancelEdit() {
+    setEditingRowId(null)
+    setEditValue('')
+  }
+
+  function handleConfirmEdit() {
+    if (!editingRowId) return
+    const trimmed = editValue.trim()
+    const row = mergedRows.find((r) => r.clientRowId === editingRowId)
+    if (!trimmed || !row || trimmed === row.word) {
+      handleCancelEdit()
+      return
+    }
+    setMergedRows((prev) =>
+      prev.map((r) =>
+        r.clientRowId === editingRowId
+          ? {
+              ...r,
+              word: trimmed,
+              // Reset to 'valid' (Ready) after manual edit.
+              // The server preview re-validates on the next settings change.
+              /* TODO: re-validate against vocabulary */
+              status: 'valid' as const,
+              reason: undefined,
+            }
+          : r,
+      ),
+    )
+    setEditedRowIds((prev) => new Set(prev).add(editingRowId))
+    setEditingRowId(null)
+    setEditValue('')
+  }
+
+  function handleDeleteRow(clientRowId: string) {
+    setMergedRows((prev) => prev.filter((r) => r.clientRowId !== clientRowId))
+    if (editingRowId === clientRowId) {
+      setEditingRowId(null)
+      setEditValue('')
+    }
+  }
+
+  function handleEditKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleConfirmEdit()
+    } else if (e.key === 'Escape') {
+      handleCancelEdit()
+    }
+  }
 
   return (
     <div className={styles.preview}>
@@ -309,31 +390,98 @@ export function ImportPreview({
                   : 'No rows match this filter.'}
             </p>
           )}
-          {filteredRows.map((row) => (
-            <div
-              key={row.clientRowId}
-              className={styles.tableRow}
-              role="row"
-              aria-label={`${row.word}: ${row.status}${row.reason ? `, ${row.reason}` : ''}`}
-            >
-              <span className={styles.colWord} role="cell">
-                <span className={styles.wordText}>{row.word}</span>
-                <MetaChips row={row} />
-              </span>
-              <span className={styles.colStatus} role="cell">
-                <StatusBadge status={row.status} reason={row.reason} />
-                {row.status === 'duplicate_vocabulary' && (
-                  <Link
-                    to={`/vocabulary?q=${encodeURIComponent(row.word)}`}
-                    className={styles.viewLink}
-                    aria-label={`View "${row.word}" in vocabulary`}
+          {filteredRows.map((row) => {
+            const isEditing = editingRowId === row.clientRowId
+            const isEdited  = editedRowIds.has(row.clientRowId)
+            return (
+              <div
+                key={row.clientRowId}
+                className={[styles.tableRow, isEditing ? styles.tableRowEditing : ''].join(' ')}
+                role="row"
+                aria-label={
+                  isEditing
+                    ? `Editing word "${row.word}"`
+                    : `${row.word}: ${row.status}${row.reason ? `, ${row.reason}` : ''}`
+                }
+              >
+                <span className={styles.colWord} role="cell">
+                  {isEditing ? (
+                    /* ── Edit mode ─────────────────────────────────── */
+                    <div className={styles.editCell}>
+                      <div className={styles.editInputRow}>
+                        <input
+                          autoFocus
+                          className={styles.editInput}
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onKeyDown={handleEditKeyDown}
+                          aria-label={`Edit word "${row.word}"`}
+                        />
+                        <button
+                          type="button"
+                          className={styles.confirmBtn}
+                          onClick={handleConfirmEdit}
+                          aria-label="Confirm edit"
+                        >
+                          <Icon icon={Check} size={16} />
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.cancelBtn}
+                          onClick={handleCancelEdit}
+                          aria-label="Cancel edit"
+                        >
+                          <Icon icon={X} size={16} />
+                        </button>
+                      </div>
+                      <button
+                        type="button"
+                        className={styles.deleteRowBtn}
+                        onClick={() => handleDeleteRow(row.clientRowId)}
+                      >
+                        Remove from list
+                      </button>
+                    </div>
+                  ) : (
+                    /* ── Normal mode ───────────────────────────────── */
+                    <>
+                      <WordText word={row.word} isEdited={isEdited} />
+                      <MetaChips row={row} />
+                    </>
+                  )}
+                </span>
+
+                {/* Edit trigger — sits between word column and status column */}
+                {!isEditing && (
+                  <button
+                    type="button"
+                    className={styles.editBtn}
+                    onClick={() => handleStartEdit(row.clientRowId, row.word)}
+                    aria-label={`Edit word "${row.word}"`}
                   >
-                    View →
-                  </Link>
+                    <Icon icon={Pencil} size={14} />
+                  </button>
                 )}
-              </span>
-            </div>
-          ))}
+
+                <span className={styles.colStatus} role="cell">
+                  {!isEditing && (
+                    <>
+                      <StatusBadge status={row.status} reason={row.reason} />
+                      {row.status === 'duplicate_vocabulary' && (
+                        <Link
+                          to={`/vocabulary?q=${encodeURIComponent(row.word)}`}
+                          className={styles.viewLink}
+                          aria-label={`View "${row.word}" in vocabulary`}
+                        >
+                          View →
+                        </Link>
+                      )}
+                    </>
+                  )}
+                </span>
+              </div>
+            )
+          })}
         </div>
       </div>
 

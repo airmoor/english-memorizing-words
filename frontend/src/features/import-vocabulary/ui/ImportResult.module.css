@@ -1,121 +1,123 @@
 .result {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  padding: var(--space-md);
 }
 
-/* ── Status header ───────────────────────────────────────────────────────── */
+/* ── Card wrapper ────────────────────────────────────────────────────────── */
 
-.statusHeader {
+.card {
+  background: var(--surface-card);
+  border: var(--border-card);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding-y) var(--card-padding-x);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 32px 24px 24px;
-  text-align: center;
-  gap: 8px;
 }
 
-.statusSuccess { background: color-mix(in srgb, var(--color-success) 8%, transparent); }
-.statusWarning { background: color-mix(in srgb, var(--color-warning) 8%, transparent); }
-.statusDanger  { background: color-mix(in srgb, var(--color-danger)  8%, transparent); }
+/* ── Status row ──────────────────────────────────────────────────────────── */
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
 
 .statusIcon {
-  font-size: 32px;
+  line-height: 0;
+  flex-shrink: 0;
+}
+
+.iconSuccess { color: var(--color-success); }
+.iconDanger  { color: var(--color-danger); }
+
+.statusTitle {
+  font-size: var(--text-section-title);
+  font-family: var(--font-serif);
+  font-weight: var(--fw-regular);
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.2;
+}
+
+/* ── Stats row ───────────────────────────────────────────────────────────── */
+
+.stats {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-xl);
+  margin-top: var(--space-md);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.statValue {
+  font-size: var(--text-section-title);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
   line-height: 1;
 }
 
-.statusSuccess .statusIcon { color: var(--color-success); }
-.statusWarning .statusIcon { color: var(--color-warning); }
-.statusDanger  .statusIcon { color: var(--color-danger); }
-
-.statusTitle {
-  font-size: 18px;
-  font-weight: var(--fw-semibold, 600);
-  color: var(--color-text-primary);
-  margin: 0;
-}
-
-.statusSubtitle {
-  font-size: 13px;
+.statLabel {
+  font-size: var(--text-caption);
   color: var(--color-text-secondary);
-  margin: 0;
-  max-width: 280px;
+  white-space: nowrap;
 }
 
-/* ── Counts ──────────────────────────────────────────────────────────────── */
-
-.counts {
-  display: flex;
-  justify-content: center;
-  gap: 32px;
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.countItem {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.countValue {
-  font-size: 24px;
-  font-weight: var(--fw-semibold, 600);
-  color: var(--color-text-primary);
-  font-variant-numeric: tabular-nums;
-}
-
-.countLabel {
-  font-size: 12px;
-  color: var(--color-text-secondary);
-}
-
-.countDanger .countValue {
-  color: var(--color-danger);
-}
+.statSuccess { color: var(--color-success); }
+.statDanger  { color: var(--color-danger); }
 
 /* ── Error section ───────────────────────────────────────────────────────── */
 
 .errorSection {
-  border-bottom: 1px solid var(--color-border);
+  margin-top: var(--space-sm);
 }
 
 .errorHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-right: 16px;
 }
 
 .errorToggle {
-  flex: 1;
-  padding: 12px 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   background: none;
   border: none;
-  text-align: left;
-  font-size: 13px;
+  font-size: var(--text-caption);
+  font-family: inherit;
   font-weight: var(--fw-medium, 500);
   color: var(--color-danger);
   cursor: pointer;
+  padding: 0;
 }
 
 .errorToggle:hover {
-  background: color-mix(in srgb, var(--color-danger) 5%, transparent);
+  opacity: 0.8;
 }
 
 .copyBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 4px 10px;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: var(--text-caption);
   font-weight: var(--fw-medium, 500);
+  font-family: inherit;
   color: var(--color-text-secondary);
   background: var(--color-bg-primary);
   border: 1px solid var(--color-border);
   cursor: pointer;
   white-space: nowrap;
-  transition: background var(--transition-fast), color var(--transition-fast);
   flex-shrink: 0;
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
 
 .copyBtn:hover {
@@ -125,12 +127,12 @@
 
 .errorList {
   list-style: none;
-  margin: 0;
-  padding: 0 24px 12px;
+  margin: var(--space-sm) 0 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  max-height: 240px;
+  gap: 6px;
+  max-height: 200px;
   overflow-y: auto;
 }
 
@@ -138,7 +140,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 13px;
+  font-size: var(--text-caption);
 }
 
 .errorWord {
@@ -155,7 +157,8 @@
 .searchLink {
   background: none;
   border: none;
-  font-size: 12px;
+  font-size: var(--text-micro);
+  font-family: inherit;
   color: var(--color-accent);
   cursor: pointer;
   padding: 2px 0;
@@ -166,24 +169,37 @@
   text-decoration: underline;
 }
 
+/* ── Divider ─────────────────────────────────────────────────────────────── */
+
+.divider {
+  border: none;
+  border-top: var(--border-card);
+  margin: var(--space-md) 0;
+}
+
 /* ── Actions ─────────────────────────────────────────────────────────────── */
 
 .actions {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 20px 24px 24px;
+  gap: var(--space-sm);
+  align-items: stretch;
 }
 
 .primaryAction {
-  padding: 12px 20px;
-  border-radius: var(--radius-md, 8px);
+  width: 100%;
+  min-height: 48px;
+  padding: var(--btn-padding-y) var(--btn-padding-x);
+  border-radius: var(--btn-radius);
   background: var(--color-accent);
   color: #fff;
-  font-size: 15px;
-  font-weight: var(--fw-semibold, 600);
+  font-size: var(--text-body);
+  font-weight: var(--fw-medium);
+  font-family: inherit;
   border: none;
   cursor: pointer;
+  text-align: center;
+  transition: background var(--transition-fast);
 }
 
 .primaryAction:hover {
@@ -191,15 +207,60 @@
 }
 
 .secondaryAction {
-  padding: 12px 20px;
-  border-radius: var(--radius-md, 8px);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--btn-padding-y) var(--btn-padding-x);
+  border-radius: var(--btn-radius);
   background: transparent;
+  border: var(--border-default);
   color: var(--color-text-secondary);
-  font-size: 15px;
-  border: 1px solid var(--color-border);
+  font-size: var(--text-body);
+  font-weight: var(--fw-medium);
+  font-family: inherit;
   cursor: pointer;
+  text-align: center;
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
 
 .secondaryAction:hover {
   background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+.tertiaryAction {
+  display: block;
+  width: 100%;
+  font-size: var(--text-caption);
+  font-family: inherit;
+  color: var(--color-text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-top: var(--space-md);
+  padding: 0;
+  text-align: center;
+  transition: color var(--transition-fast);
+}
+
+.tertiaryAction:hover {
+  color: var(--color-text-primary);
+}
+
+/* ── Mobile: compact layout ──────────────────────────────────────────────── */
+
+@media (max-width: 639px) {
+  .card {
+    padding: var(--space-md);
+  }
+
+  /* Stats wrap to 2-column grid instead of a single overflow row */
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+  }
+
+  .errorRow {
+    font-size: var(--text-caption);
+  }
 }

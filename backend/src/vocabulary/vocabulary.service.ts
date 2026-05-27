@@ -407,13 +407,17 @@ export class VocabularyService {
     if (q) {
       params.push(`%${q}%`)
       const p = params.length
-      where.push(`(
-        w.text ILIKE $${p}
-        OR EXISTS (
-          SELECT 1 FROM meanings m2
-          WHERE m2.word_id = w.id AND m2.definition ILIKE $${p}
-        )
-      )`)
+      // Filter by word text only.
+      //
+      // The previous implementation also searched definitions via:
+      //   OR EXISTS (SELECT 1 FROM meanings m2 WHERE m2.definition ILIKE $p)
+      //
+      // That caused severe false positives: ILIKE '%cat%' matches any definition
+      // containing the substring "cat" inside a longer word — "indicate",
+      // "locate", "educate", "dedicate", etc. — so searching "cat" would return
+      // dozens of unrelated words like "from", "here", "get", "even".
+      // Word-text filtering is precise, predictable, and fast (citext index).
+      where.push(`w.text ILIKE $${p}`)
     }
 
     if (activeFilters.length > 0) {
@@ -477,9 +481,28 @@ export class VocabularyService {
     if (totalCount === 0) return { items: [], total: 0, hasMore: false }
 
     // ── Items ──────────────────────────────────────────────────────────────
-    const itemParams = [...params, limit, offset]
-    const limitIdx   = itemParams.length - 1
-    const offsetIdx  = itemParams.length
+    //
+    // When q is active, prepend a three-tier relevance rank to ORDER BY so the
+    // most relevant word surfaces first regardless of the user's sort setting:
+    //   0 — exact word match   (w.text = q  — citext column, case-insensitive)
+    //   1 — starts-with match  (w.text ILIKE 'q%')
+    //   2 — anywhere match     (everything else still in the result set)
+    //
+    // The rank params (raw q and prefix 'q%') are appended to itemParams only —
+    // they must NOT appear in the COUNT query or modify the WHERE clause.
+    const itemParams = [...params]
+    let itemOrderClause = sort
+
+    if (q) {
+      itemParams.push(q, `${q}%`)
+      const exactIdx  = itemParams.length - 1  // $N   = raw q  (exact via citext =)
+      const prefixIdx = itemParams.length      // $N+1 = 'q%'  (starts-with)
+      itemOrderClause = `CASE WHEN w.text = $${exactIdx} THEN 0 WHEN w.text ILIKE $${prefixIdx} THEN 1 ELSE 2 END, ${sort}`
+    }
+
+    itemParams.push(limit, offset)
+    const limitIdx  = itemParams.length - 1
+    const offsetIdx = itemParams.length
 
     const words = await this.dataSource.query<{
       userWordId: string;
@@ -512,7 +535,7 @@ export class VocabularyService {
        JOIN words w ON w.id = uw.word_id
        LEFT JOIN cards c ON c.user_id = uw.user_id AND c.word_id = uw.word_id
        WHERE ${whereClause}
-       ORDER BY ${sort}
+       ORDER BY ${itemOrderClause}
        LIMIT $${limitIdx} OFFSET $${offsetIdx}`,
       itemParams,
     )

@@ -324,6 +324,122 @@ describe('VocabularyService', () => {
       expect(result.hasMore).toBe(true);
       expect(result.total).toBe(10);
     });
+
+    // ── search query (q filter) ──────────────────────────────────────────────
+
+    describe('search query (q filter)', () => {
+      it('adds w.text ILIKE filter to WHERE for exact match (q="cat")', async () => {
+        mockFullFetch({ count: '0' });
+        await service.getUserVocabulary(userId, { q: 'cat' });
+
+        const [countSql, countParams] = dataSource.query.mock.calls[0] as [string, unknown[]];
+        expect(countSql).toContain('w.text ILIKE');
+        expect(countParams).toContain('%cat%');
+      });
+
+      it('adds w.text ILIKE filter for partial match (q="ca")', async () => {
+        mockFullFetch({ count: '0' });
+        await service.getUserVocabulary(userId, { q: 'ca' });
+
+        const [, countParams] = dataSource.query.mock.calls[0] as [string, unknown[]];
+        expect(countParams).toContain('%ca%');
+      });
+
+      it('does not fire items query when count is 0 (no results for q="zzzz")', async () => {
+        dataSource.query.mockResolvedValueOnce([{ total: '0' }]);
+        const result = await service.getUserVocabulary(userId, { q: 'zzzz' });
+
+        expect(result).toEqual({ items: [], total: 0, hasMore: false });
+        // Only the COUNT query should have been called — no items query
+        expect(dataSource.query).toHaveBeenCalledTimes(1);
+      });
+
+      it('uses ILIKE operator (case-insensitive) — not LIKE', async () => {
+        mockFullFetch({ count: '0' });
+        await service.getUserVocabulary(userId, { q: 'CAT' });
+
+        const [countSql] = dataSource.query.mock.calls[0] as [string, unknown[]];
+        // ILIKE is the case-insensitive variant; plain LIKE would be wrong
+        expect(countSql).toContain('ILIKE');
+        expect(countSql).not.toMatch(/\bLIKE\b(?!.*ILIKE)/);
+      });
+
+      it('does not search definitions — no m2.definition in WHERE (regression)', async () => {
+        mockFullFetch({ count: '0' });
+        await service.getUserVocabulary(userId, { q: 'cat' });
+
+        const [countSql] = dataSource.query.mock.calls[0] as [string, unknown[]];
+        // The old implementation had OR EXISTS (...m2.definition ILIKE...) which
+        // caused "indicate"/"locate" etc. to match "cat". Must not be present.
+        expect(countSql).not.toContain('m2.definition');
+        // Also must not reference a meanings subquery in the WHERE clause at all
+        expect(countSql).not.toMatch(/WHERE.*meanings/s);
+      });
+
+      it('adds relevance CASE expression to ORDER BY in items query', async () => {
+        mockFullFetch();
+        await service.getUserVocabulary(userId, { q: 'cat' });
+
+        const [itemsSql, itemsParams] = dataSource.query.mock.calls[1] as [string, unknown[]];
+        // CASE rank should be present in the items ORDER BY
+        expect(itemsSql).toContain('CASE WHEN');
+        expect(itemsSql).toContain('THEN 0');
+        expect(itemsSql).toContain('THEN 1');
+        expect(itemsSql).toContain('ORDER BY');
+        // itemsParams must include the raw query value for exact-match ranking ($N = 'cat')
+        expect(itemsParams).toContain('cat');
+        // …and the starts-with prefix ($N+1 = 'cat%')
+        expect(itemsParams).toContain('cat%');
+      });
+
+      it('COUNT params do not include raw q or prefix — only the ILIKE pattern', async () => {
+        mockFullFetch();
+        await service.getUserVocabulary(userId, { q: 'cat' });
+
+        const [, countParams] = dataSource.query.mock.calls[0] as [string, unknown[]];
+        // COUNT WHERE uses '%cat%' only; raw 'cat' and 'cat%' must not leak in
+        expect(countParams).toContain('%cat%');
+        expect(countParams).not.toContain('cat%');   // prefix pattern is items-only
+        // 'cat' exactly appears in '%cat%', so check it's NOT a standalone element
+        const standalone = (countParams as unknown[]).filter((p) => p === 'cat');
+        expect(standalone).toHaveLength(0);
+      });
+
+      it('trims whitespace before building the filter (q="  cat  " → %cat%)', async () => {
+        mockFullFetch({ count: '0' });
+        await service.getUserVocabulary(userId, { q: '  cat  ' });
+
+        const [, countParams] = dataSource.query.mock.calls[0] as [string, unknown[]];
+        expect(countParams).toContain('%cat%');
+        // Untrimmed pattern must not appear
+        expect(countParams).not.toContain('%  cat  %');
+      });
+
+      it('combines q filter with reviewState — both conditions in WHERE', async () => {
+        mockFullFetch({ count: '0' });
+        await service.getUserVocabulary(userId, { q: 'cat', reviewState: 'new' });
+
+        const [countSql, countParams] = dataSource.query.mock.calls[0] as [string, unknown[]];
+        expect(countSql).toContain('w.text ILIKE');
+        expect(countParams).toContain('%cat%');
+        // reviewState="new" maps to "last_reviewed_at IS NULL" condition
+        expect(countSql).toContain('last_reviewed_at IS NULL');
+      });
+
+      it('COUNT and items use the same WHERE params (pagination consistency)', async () => {
+        mockFullFetch();
+        await service.getUserVocabulary(userId, { q: 'light', limit: '5', offset: '0' });
+
+        const countParams = (dataSource.query.mock.calls[0] as [string, unknown[]])[1];
+        const itemsParams = (dataSource.query.mock.calls[1] as [string, unknown[]])[1];
+
+        // The WHERE-clause params (userId + ILIKE pattern) must appear in both
+        expect(itemsParams).toContain(countParams[0]); // userId
+        expect(itemsParams).toContain('%light%');      // ILIKE pattern
+        // items has additional rank + pagination params on top
+        expect(itemsParams.length).toBeGreaterThan(countParams.length);
+      });
+    });
   });
 
   // ── removeWord ────────────────────────────────────────────────────────────

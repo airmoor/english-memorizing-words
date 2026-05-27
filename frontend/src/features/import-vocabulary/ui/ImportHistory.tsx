@@ -20,30 +20,22 @@ async function copyToClipboard(text: string): Promise<boolean> {
 
 function formatDate(iso: string): string {
   const d = new Date(iso)
-  return d.toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
+  return d.toLocaleDateString('en-GB', {
     day: 'numeric',
+    month: 'short',
+    year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
   })
 }
 
-function statusDotClass(status: ImportSession['status']): string {
-  switch (status) {
-    case 'completed':       return styles.dotCompleted
-    case 'partial_failure': return styles.dotPartial
-    case 'no_changes':      return styles.dotNoChanges
-    case 'failed':          return styles.dotFailed
-  }
-}
-
-function sourceLabel(sourceType: ImportSession['sourceType']): string {
-  switch (sourceType) {
-    case 'paste': return 'paste'
-    case 'csv':   return 'csv'
-    case 'anki':  return 'anki'
-  }
+function getStatusBadge(
+  imported: number,
+  errors: number,
+): { text: string; cls: string } {
+  if (errors === 0)                  return { text: 'Complete', cls: styles.statusBadgeComplete }
+  if (errors > 0 && imported > 0)   return { text: 'Partial',  cls: styles.statusBadgePartial  }
+  return                                    { text: 'Failed',   cls: styles.statusBadgeFailed   }
 }
 
 // ── Session row ───────────────────────────────────────────────────────────────
@@ -59,7 +51,7 @@ function SessionRow({ session, onRetry }: SessionRowProps) {
   const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle')
 
   const {
-    status, sourceType, createdAt,
+    createdAt,
     imported, skipped, duplicatesIgnored, errors,
     errorRows,
   } = session
@@ -77,12 +69,13 @@ function SessionRow({ session, onRetry }: SessionRowProps) {
     }
   }
 
+  const badge = getStatusBadge(imported, errors)
+
   return (
     <div className={styles.sessionItem}>
       <div className={styles.sessionHeader}>
-        <span className={[styles.dot, statusDotClass(status)].join(' ')} aria-hidden="true" />
         <span className={styles.sessionDate}>{formatDate(createdAt)}</span>
-        <span className={styles.sessionSource}>{sourceLabel(sourceType)}</span>
+        <span className={[styles.statusBadge, badge.cls].join(' ')}>{badge.text}</span>
       </div>
 
       <div className={styles.sessionCounts}>

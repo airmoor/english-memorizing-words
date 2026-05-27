@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CheckCircle, AlertTriangle, XCircle, ChevronDown, ChevronRight, Check } from 'lucide-react'
+import { CheckCircle, XCircle, ChevronDown, ChevronRight, Check } from 'lucide-react'
 import { Icon } from '../../../shared/ui/Icon/Icon'
 import type { ImportExecuteResult } from '../../../entities/import-session/model/types'
 import styles from './ImportResult.module.css'
@@ -22,7 +22,7 @@ interface ImportResultProps {
 
 export function ImportResult({ result, onViewVocabulary, onImportMore }: ImportResultProps) {
   const [errorRowsExpanded, setErrorRowsExpanded] = useState(false)
-  const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle')
+  const [copyState, setCopyState]   = useState<'idle' | 'copied'>('idle')
   const navigate = useNavigate()
 
   const handleCopyFailed = async () => {
@@ -35,12 +35,16 @@ export function ImportResult({ result, onViewVocabulary, onImportMore }: ImportR
   }
 
   const isCompleted = result.status === 'completed'
-  const isPartial = result.status === 'partial_failure'
-  const isFailed = result.status === 'failed'
+  const isPartial   = result.status === 'partial_failure'
+  const isFailed    = result.status === 'failed'
 
   const handleViewVocabulary = () => {
     navigate('/vocabulary')
     onViewVocabulary()
+  }
+
+  const handleReviewNewWords = () => {
+    navigate('/review')
   }
 
   const handleSearchWord = (word: string) => {
@@ -48,124 +52,137 @@ export function ImportResult({ result, onViewVocabulary, onImportMore }: ImportR
     onViewVocabulary()
   }
 
-  const statusIcon = isCompleted ? CheckCircle : isPartial ? AlertTriangle : XCircle
+  // Partial success still uses the check icon — it's a success with a footnote.
+  // Only all-failed uses the X icon.
+  const statusIcon = isFailed ? XCircle : CheckCircle
 
   return (
     <div className={styles.result}>
-      {/* ── Status icon + heading ────────────────────────────────────── */}
-      <div
-        className={[
-          styles.statusHeader,
-          isCompleted ? styles.statusSuccess : '',
-          isPartial ? styles.statusWarning : '',
-          isFailed ? styles.statusDanger : '',
-        ].join(' ')}
-      >
-        <span className={styles.statusIcon} aria-hidden="true">
-          <Icon icon={statusIcon} size={28} />
-        </span>
-        <h2 className={styles.statusTitle}>
-          {isCompleted
-            ? 'Import complete'
-            : isPartial
-              ? 'Partially imported'
-              : 'Import failed'}
-        </h2>
-        {isCompleted && (
-          <p className={styles.statusSubtitle}>
-            All words were imported successfully.
-          </p>
-        )}
-        {isFailed && (
-          <p className={styles.statusSubtitle}>
-            No words could be imported. They may not be in our dictionary yet.
-          </p>
-        )}
-      </div>
+      <div className={styles.card}>
 
-      {/* ── Counts ──────────────────────────────────────────────────── */}
-      <div className={styles.counts}>
-        <div className={styles.countItem}>
-          <span className={styles.countValue}>{result.imported}</span>
-          <span className={styles.countLabel}>Imported</span>
+        {/* ── Status row ──────────────────────────────────────────────── */}
+        <div className={styles.statusRow}>
+          <span
+            className={[styles.statusIcon, isFailed ? styles.iconDanger : styles.iconSuccess].join(' ')}
+            aria-hidden="true"
+          >
+            <Icon icon={statusIcon} size={20} />
+          </span>
+          <h2 className={styles.statusTitle}>
+            {isCompleted
+              ? 'Import complete'
+              : isPartial
+                ? 'Imported with some issues'
+                : 'Import failed'}
+          </h2>
         </div>
-        {result.skipped > 0 && (
-          <div className={styles.countItem}>
-            <span className={styles.countValue}>{result.skipped}</span>
-            <span className={styles.countLabel}>Skipped</span>
-          </div>
-        )}
-        {result.errors > 0 && (
-          <div className={[styles.countItem, styles.countDanger].join(' ')}>
-            <span className={styles.countValue}>{result.errors}</span>
-            <span className={styles.countLabel}>Failed</span>
-          </div>
-        )}
-      </div>
 
-      {/* ── Failed words (expandable) ────────────────────────────────── */}
-      {result.errorRows.length > 0 && (
-        <div className={styles.errorSection}>
-          <div className={styles.errorHeader}>
-            <button
-              type="button"
-              className={styles.errorToggle}
-              onClick={() => setErrorRowsExpanded((v) => !v)}
-              aria-expanded={errorRowsExpanded}
-            >
-              <Icon icon={errorRowsExpanded ? ChevronDown : ChevronRight} size={14} />
-              {' '}View {result.errors} failed word{result.errors !== 1 ? 's' : ''}
-            </button>
-            <button
-              type="button"
-              className={styles.copyBtn}
-              onClick={() => void handleCopyFailed()}
-              aria-label="Copy failed words to clipboard"
-            >
-              {copyState === 'copied'
-                ? <><Icon icon={Check} size={12} strokeWidth={2.5} /> Copied</>
-                : 'Copy'}
-            </button>
+        {/* ── Stats row ───────────────────────────────────────────────── */}
+        <div className={styles.stats}>
+          <div className={styles.stat}>
+            <span className={[styles.statValue, styles.statSuccess].join(' ')}>
+              {result.imported}
+            </span>
+            <span className={styles.statLabel}>imported</span>
           </div>
-          {errorRowsExpanded && (
-            <ul className={styles.errorList} aria-label="Failed words">
-              {result.errorRows.map((row) => (
-                <li key={row.word} className={styles.errorRow}>
-                  <span className={styles.errorWord}>{row.word}</span>
-                  <span className={styles.errorReason}>{row.reason}</span>
-                  <button
-                    type="button"
-                    className={styles.searchLink}
-                    onClick={() => handleSearchWord(row.word)}
-                    aria-label={`Search for ${row.word}`}
-                  >
-                    Search
-                  </button>
-                </li>
-              ))}
-            </ul>
+          {result.errors > 0 && (
+            <div className={styles.stat}>
+              <span className={[styles.statValue, styles.statDanger].join(' ')}>
+                {result.errors}
+              </span>
+              <span className={styles.statLabel}>failed</span>
+            </div>
+          )}
+          {result.skipped > 0 && (
+            <div className={styles.stat}>
+              <span className={styles.statValue}>{result.skipped}</span>
+              <span className={styles.statLabel}>skipped (duplicates)</span>
+            </div>
           )}
         </div>
-      )}
 
-      {/* ── Actions ─────────────────────────────────────────────────── */}
-      <div className={styles.actions}>
-        {result.imported > 0 && (
+        {/* ── Failed words collapsible ─────────────────────────────────── */}
+        {result.errorRows.length > 0 && (
+          <div className={styles.errorSection}>
+            <div className={styles.errorHeader}>
+              <button
+                type="button"
+                className={styles.errorToggle}
+                onClick={() => setErrorRowsExpanded((v) => !v)}
+                aria-expanded={errorRowsExpanded}
+                aria-controls="result-error-list"
+              >
+                <Icon icon={errorRowsExpanded ? ChevronDown : ChevronRight} size={13} />
+                {errorRowsExpanded
+                  ? 'Hide failed words'
+                  : `View ${result.errors} failed word${result.errors !== 1 ? 's' : ''}`}
+              </button>
+              <button
+                type="button"
+                className={styles.copyBtn}
+                onClick={() => void handleCopyFailed()}
+                aria-label="Copy failed words to clipboard"
+              >
+                {copyState === 'copied'
+                  ? <><Icon icon={Check} size={12} strokeWidth={2.5} /> Copied</>
+                  : 'Copy'}
+              </button>
+            </div>
+            {errorRowsExpanded && (
+              <ul
+                id="result-error-list"
+                className={styles.errorList}
+                aria-label="Failed words"
+              >
+                {result.errorRows.map((row) => (
+                  <li key={row.word} className={styles.errorRow}>
+                    <span className={styles.errorWord}>{row.word}</span>
+                    <span className={styles.errorReason}>{row.reason}</span>
+                    <button
+                      type="button"
+                      className={styles.searchLink}
+                      onClick={() => handleSearchWord(row.word)}
+                      aria-label={`Search for ${row.word}`}
+                    >
+                      Search
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
+        {/* ── Divider ─────────────────────────────────────────────────── */}
+        <div className={styles.divider} aria-hidden="true" />
+
+        {/* ── Actions ─────────────────────────────────────────────────── */}
+        <div className={styles.actions}>
+          {result.imported > 0 && (
+            <button
+              type="button"
+              className={styles.primaryAction}
+              onClick={handleReviewNewWords}
+            >
+              Review new words →
+            </button>
+          )}
           <button
             type="button"
-            className={styles.primaryAction}
+            className={styles.secondaryAction}
             onClick={handleViewVocabulary}
           >
             View vocabulary
           </button>
-        )}
-        <button
-          type="button"
-          className={styles.secondaryAction}
-          onClick={onImportMore}
-        >
-          Import more
-        </button>
+          <button
+            type="button"
+            className={styles.tertiaryAction}
+            onClick={onImportMore}
+          >
+            Import more words
+          </button>
+        </div>
+
       </div>
     </div>
   )
