@@ -47,8 +47,9 @@
 /* ── Column cells ─────────────────────────────────────────────────────────── */
 
 .tdDate {
-  font-size: var(--text-body);
-  color: var(--color-text-primary);
+  /* Date is tertiary — status + counts carry the primary hierarchy */
+  font-size: var(--text-caption);
+  color: var(--color-text-secondary);
 }
 
 .tdNumber {
@@ -274,7 +275,7 @@
 /* ── Expansion panel ──────────────────────────────────────────────────────── */
 
 .expansionPanel {
-  background: var(--surface-page);
+  background: var(--surface-card);
   border-top: var(--border-card);
   border-bottom: var(--border-default);
 }
@@ -617,8 +618,17 @@
 
   .mobileCard {
     border: var(--border-default);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     overflow: hidden;
+    /* Explicit card surface so cards lift off the --surface-page background */
+    background: var(--surface-card);
+  }
+
+  /* Badge reads at caption size in card context — micro is too small alongside
+     the muted date text. Both now at the same scale; color/border carry
+     the visual weight. */
+  .mobileCard .statusBadge {
+    font-size: var(--text-caption);
   }
 
   /* ── Card header: date (left) · badge (right) ──────────────────────────── */
@@ -632,9 +642,10 @@
   }
 
   .mobileCardDate {
-    font-size: var(--text-body);
-    font-weight: var(--fw-medium);
-    color: var(--color-text-primary);
+    /* Tertiary: date yields visual priority to the status badge on its right */
+    font-size: var(--text-caption);
+    font-weight: var(--fw-regular);
+    color: var(--color-text-secondary);
   }
 
   /* ── Meta row: stats expand trigger (left) · retry button (right) ─────── */
