@@ -411,6 +411,12 @@
   padding: 0;
 }
 
+/* ── Mobile card list (hidden on desktop) ────────────────────────────────── */
+
+.mobileList {
+  display: none;
+}
+
 /* ── Empty state (no sessions yet) ───────────────────────────────────────── */
 
 .emptyRow {
@@ -567,5 +573,115 @@
   .panelBody {
     padding-left: var(--space-sm);
     padding-right: var(--space-sm);
+  }
+}
+
+/* ── Mobile card layout (≤ 639 px) ───────────────────────────────────────── */
+
+@media (max-width: 639px) {
+
+  /* Swap layouts: hide table, show card list */
+  .tableWrap {
+    display: none;
+  }
+
+  .mobileList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-md) 0 var(--space-xl, 48px);
+  }
+
+  /* ── Card shell ──────────────────────────────────────────────────────────── */
+
+  .mobileCard {
+    border: var(--border-card);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  /* ── Card header: date (left) · badge (right) ──────────────────────────── */
+
+  .mobileCardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-sm) var(--space-md);
+    gap: var(--space-sm);
+  }
+
+  .mobileCardDate {
+    font-size: var(--text-body);
+    font-weight: var(--fw-medium);
+    color: var(--color-text-primary);
+  }
+
+  /* ── Meta row: stats expand trigger (left) · retry button (right) ─────── */
+
+  .mobileCardMeta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-xs) var(--space-md) var(--space-sm);
+    border-top: var(--border-card);
+    gap: var(--space-sm);
+    min-height: 40px;
+  }
+
+  /* ── Expand trigger button ───────────────────────────────────────────────── */
+
+  .mobileExpandBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--space-xs) 0;
+    font-size: var(--text-caption);
+    color: var(--color-text-secondary);
+    text-align: left;
+    transition: color var(--transition-fast);
+  }
+
+  .mobileExpandBtn:hover {
+    color: var(--color-text-primary);
+  }
+
+  .mobileExpandBtn:focus-visible {
+    outline: var(--border-focus);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+
+  .mobileExpandBtnOpen {
+    color: var(--color-text-primary);
+  }
+
+  /* ── Stat labels inside the expand trigger ───────────────────────────────── */
+
+  .mobileStatImported {
+    font-weight: var(--fw-medium);
+    color: color-mix(in srgb, var(--color-success) 70%, var(--color-text-secondary));
+  }
+
+  .mobileStatFailed {
+    font-weight: var(--fw-medium);
+    color: color-mix(in srgb, var(--color-danger) 70%, var(--color-text-secondary));
+  }
+
+  .mobileStatSep {
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+  }
+
+  /* ── Retry button text — restore display inside mobile cards ─────────────── */
+  /* The existing @media block hides .btnText for icon-only table buttons;
+     the higher-specificity compound selector re-shows it in card context. */
+
+  .mobileCard .btnText {
+    display: inline;
   }
 }
