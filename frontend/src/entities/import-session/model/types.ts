@@ -155,6 +155,13 @@ export interface ImportSession {
   duplicatesIgnored: number
   errors: number
   errorRows: ImportSessionErrorRow[]
+  /**
+   * Words successfully imported in this session (capped snapshot).
+   * Empty array for sessions created before this field was added to the API.
+   * Use `imported` for the accurate total; show "…and N more" when
+   * `imported > importedWords.length`.
+   */
+  importedWords: string[]
   createdAt: string
 }
 

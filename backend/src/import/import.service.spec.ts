@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { ImportService } from './import.service';
+import { ImportSession } from '../database/entities/import-session.entity';
 import { WordsService } from '../words/words.service';
 import { VocabularyService } from '../vocabulary/vocabulary.service';
 import { ImportRequestDto } from './dto/import-request.dto';
@@ -34,12 +36,20 @@ describe('ImportService', () => {
     vocabularyService = { saveWord: jest.fn().mockResolvedValue(undefined) };
     dataSource = { query: jest.fn() };
 
+    // sessionRepo is fire-and-forget in execute(); save() only needs to not crash.
+    const sessionRepo = {
+      save: jest.fn().mockResolvedValue({}),
+      find: jest.fn().mockResolvedValue([]),
+      findOne: jest.fn().mockResolvedValue(null),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ImportService,
         { provide: WordsService, useValue: wordsService },
         { provide: VocabularyService, useValue: vocabularyService },
         { provide: DataSource, useValue: dataSource },
+        { provide: getRepositoryToken(ImportSession), useValue: sessionRepo },
       ],
     }).compile();
 

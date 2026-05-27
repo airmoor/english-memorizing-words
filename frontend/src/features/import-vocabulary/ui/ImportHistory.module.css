@@ -12,10 +12,6 @@
   border-collapse: collapse;
 }
 
-/* ── Column visibility helpers (desktop default) ──────────────────────────── */
-
-/* Status and Imported columns collapse on mobile — declared in responsive section */
-
 /* ── Header ───────────────────────────────────────────────────────────────── */
 
 .th {
@@ -90,7 +86,7 @@
   color: var(--color-danger);
 }
 
-/* Mobile-only duplicate badge inside Date cell (hidden on desktop) */
+/* Mobile-only duplicate badge inside Date cell */
 .mobileBadge {
   display: none;
 }
@@ -114,7 +110,36 @@
   color: color-mix(in srgb, var(--color-danger) 70%, var(--color-text-secondary));
 }
 
-/* ── Failed toggle button (desktop) ──────────────────────────────────────── */
+/* ── Shared toggle state (open = full color) ──────────────────────────────── */
+
+.toggleOpen.importedToggle { color: var(--color-success); }
+.toggleOpen.failedToggle   { color: var(--color-danger); }
+
+/* ── Imported count toggle ────────────────────────────────────────────────── */
+
+.importedToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-body);
+  font-weight: var(--fw-medium);
+  color: color-mix(in srgb, var(--color-success) 70%, var(--color-text-secondary));
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color var(--transition-fast);
+}
+
+.importedToggle:hover { color: var(--color-success); }
+
+.importedToggle:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* ── Failed count toggle ──────────────────────────────────────────────────── */
 
 .failedToggle {
   display: inline-flex;
@@ -130,24 +155,21 @@
   transition: color var(--transition-fast);
 }
 
-.failedToggle:hover,
-.failedToggleOpen {
-  color: var(--color-danger);
-}
+.failedToggle:hover { color: var(--color-danger); }
 
 .failedToggle:focus-visible,
-.mobileFailedToggle:focus-visible {
+.mobileFailedToggle:focus-visible,
+.mobileImportedToggle:focus-visible {
   outline: var(--border-focus);
   outline-offset: 2px;
   border-radius: 3px;
 }
 
-/* ── Chevron icon ─────────────────────────────────────────────────────────── */
+/* ── Chevron ──────────────────────────────────────────────────────────────── */
 
 .chevron {
   display: inline-flex;
   align-items: center;
-  font-size: 12px;
   transition: transform var(--transition-fast);
 }
 
@@ -174,34 +196,6 @@
   gap: var(--space-sm);
 }
 
-/* ── Copy button ──────────────────────────────────────────────────────────── */
-
-.copyBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--color-text-secondary);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: var(--btn-radius);
-  font-size: var(--text-caption);
-  min-width: 68px;
-  justify-content: center;
-  transition: color var(--transition-fast), background var(--transition-fast);
-}
-
-.copyBtn:hover {
-  color: var(--color-text-primary);
-  background: color-mix(in srgb, var(--color-text-primary) 6%, transparent);
-}
-
-.copyBtn:focus-visible {
-  outline: var(--border-focus);
-  outline-offset: 2px;
-}
-
 /* ── Retry button ─────────────────────────────────────────────────────────── */
 
 .retryBtn {
@@ -218,16 +212,43 @@
   transition: background var(--transition-fast);
 }
 
-.retryBtn:hover {
-  background: var(--surface-accent);
-}
+.retryBtn:hover { background: var(--surface-accent); }
 
 .retryBtn:focus-visible {
   outline: var(--border-focus);
   outline-offset: 2px;
 }
 
-/* ── Expansion row ────────────────────────────────────────────────────────── */
+/* ── Copy button (inside expansion panel header) ──────────────────────────── */
+
+.copyBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--btn-radius);
+  font-size: var(--text-caption);
+  min-width: 68px;
+  justify-content: center;
+  transition: color var(--transition-fast), background var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.copyBtn:hover {
+  color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--color-text-primary) 6%, transparent);
+}
+
+.copyBtn:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* ── Expansion row shell ──────────────────────────────────────────────────── */
 
 .expansionTd {
   padding: 0;
@@ -241,14 +262,100 @@
 }
 
 .expansionWrapOpen {
-  max-height: 400px;
+  max-height: 800px;
   opacity: 1;
 }
 
-.failedExpansion {
-  background: color-mix(in srgb, var(--color-danger) 4%, transparent);
+/* ── Expansion panel ──────────────────────────────────────────────────────── */
+
+.expansionPanel {
+  background: color-mix(in srgb, var(--color-text-primary) 3%, transparent);
   border-bottom: var(--border-default);
+}
+
+/* Panel header: counts + Copy button */
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: var(--border-default);
+  gap: var(--space-md);
+}
+
+.panelCounts {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.panelImportedCount {
+  font-size: var(--text-caption);
+  font-weight: var(--fw-medium);
+  color: color-mix(in srgb, var(--color-success) 70%, var(--color-text-secondary));
+}
+
+.panelFailedCount {
+  font-size: var(--text-caption);
+  font-weight: var(--fw-medium);
+  color: color-mix(in srgb, var(--color-danger) 70%, var(--color-text-secondary));
+}
+
+.panelDot {
+  color: var(--color-text-secondary);
+  font-size: var(--text-caption);
+}
+
+/* Panel body: word lists */
+.panelBody {
   padding: var(--space-sm) var(--space-md) var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.panelSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+/* Section title — only shown when both sections are present */
+.sectionTitle {
+  font-size: var(--text-micro);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-secondary);
+}
+
+.sectionDivider {
+  height: 1px;
+  background: color-mix(in srgb, var(--color-text-primary) 8%, transparent);
+  margin: var(--space-xs) 0;
+}
+
+/* ── Imported word chips ──────────────────────────────────────────────────── */
+
+.importedChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs) var(--space-sm);
+}
+
+.importedChip {
+  font-size: var(--text-caption);
+  font-weight: var(--fw-medium);
+  color: color-mix(in srgb, var(--color-success) 80%, var(--color-text-primary));
+  background: color-mix(in srgb, var(--color-success) 8%, transparent);
+  border-radius: var(--badge-radius);
+  padding: var(--badge-padding-y) var(--badge-padding-x);
+}
+
+.importedChip::before {
+  content: '✓ ';
+  font-weight: normal;
 }
 
 /* ── Failed word grid ─────────────────────────────────────────────────────── */
@@ -286,7 +393,9 @@
   color: var(--color-text-secondary);
 }
 
-.hiddenCount {
+/* ── Shared notes ─────────────────────────────────────────────────────────── */
+
+.truncatedNote {
   font-size: var(--text-micro);
   color: var(--color-text-secondary);
   font-style: italic;
@@ -294,7 +403,15 @@
   padding: 0;
 }
 
-/* ── Empty state ──────────────────────────────────────────────────────────── */
+.emptySection {
+  font-size: var(--text-caption);
+  color: var(--color-text-secondary);
+  font-style: italic;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Empty state (no sessions yet) ───────────────────────────────────────── */
 
 .emptyRow {
   height: 120px;
@@ -334,7 +451,7 @@
 
 @media (max-width: 639px) {
 
-  /* Switch to auto layout so collapsed columns reclaim their space */
+  /* Auto layout so collapsed columns reclaim space */
   .table {
     table-layout: auto;
   }
@@ -352,14 +469,14 @@
     display: none;
   }
 
-  /* Hide the Failed header text (column is repurposed as merged counts) */
+  /* Hide Failed header text (column repurposed as merged counts) */
   .thColFailed {
     visibility: hidden;
   }
 
-  /* Date cell: stack badge below date */
+  /* Stack badge below date */
   .tdDate {
-    display: flex; /* safe on td in auto-layout mode */
+    display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 3px;
@@ -382,7 +499,27 @@
     font-size: var(--text-caption);
   }
 
-  /* Mobile failed toggle — same colour/style as desktop */
+  /* Mobile imported toggle */
+  .mobileImportedToggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: var(--text-caption);
+    font-weight: var(--fw-medium);
+    color: color-mix(in srgb, var(--color-success) 70%, var(--color-text-secondary));
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: color var(--transition-fast);
+  }
+
+  .mobileImportedToggle:hover,
+  .mobileImportedToggle.toggleOpen {
+    color: var(--color-success);
+  }
+
+  /* Mobile failed toggle */
   .mobileFailedToggle {
     display: inline-flex;
     align-items: center;
@@ -398,7 +535,7 @@
   }
 
   .mobileFailedToggle:hover,
-  .mobileFailedToggle.failedToggleOpen {
+  .mobileFailedToggle.toggleOpen {
     color: var(--color-danger);
   }
 
@@ -406,21 +543,12 @@
     color: var(--color-text-secondary);
   }
 
-  .mobileImportedText {
-    font-size: var(--text-caption);
-  }
-
-  /* Icon-only action buttons on mobile — hide text labels */
+  /* Icon-only action buttons on mobile */
   .btnText {
     display: none;
   }
 
-  /* Reset min-width since there's no text label */
-  .copyBtn {
-    min-width: unset;
-  }
-
-  /* Tighten row padding on mobile */
+  /* Tighten padding on mobile */
   .dataRow td {
     padding: var(--space-xs) var(--space-sm);
   }
@@ -429,13 +557,15 @@
     padding: var(--space-xs) var(--space-sm);
   }
 
-  /* Mobile expansion: slightly less padding */
-  .failedExpansion {
-    padding: var(--space-xs) var(--space-sm) var(--space-sm);
-  }
-
-  /* Narrow the failed grid on mobile */
+  /* Narrower failed grid on mobile */
   .failedGrid {
     grid-template-columns: 120px 1fr;
+  }
+
+  /* Tighten panel padding on mobile */
+  .panelHeader,
+  .panelBody {
+    padding-left: var(--space-sm);
+    padding-right: var(--space-sm);
   }
 }

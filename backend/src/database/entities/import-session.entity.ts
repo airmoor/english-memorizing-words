@@ -73,6 +73,15 @@ export class ImportSession {
   @Column({ name: 'error_rows', type: 'jsonb', default: '[]' })
   errorRows: ImportErrorRowSnapshot[];
 
+  /**
+   * Snapshot of word strings successfully imported during this session.
+   * Stored as JSONB (array of strings). Capped at MAX_STORED_IMPORTED_WORDS
+   * to bound size; the `imported` counter remains the accurate total.
+   * Empty array for sessions created before this column existed.
+   */
+  @Column({ name: 'imported_words', type: 'jsonb', default: '[]' })
+  importedWords: string[];
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 

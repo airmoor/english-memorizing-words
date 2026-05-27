@@ -48,6 +48,15 @@ export class ImportSessionDto {
   @ApiProperty({ type: [ImportSessionErrorRowDto] })
   errorRows: ImportSessionErrorRowDto[];
 
+  @ApiProperty({
+    type: [String],
+    example: ['ephemeral', 'zymurgy'],
+    description:
+      'Words successfully imported in this session (capped snapshot). ' +
+      'Empty array for sessions created before this field was added.',
+  })
+  importedWords: string[];
+
   @ApiProperty({ example: '2026-05-26T12:00:00.000Z' })
   createdAt: string;
 }

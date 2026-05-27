@@ -29,6 +29,16 @@ const ENRICH_CONCURRENCY = 5;
 const MAX_STORED_ERROR_ROWS = 50;
 
 /**
+ * Maximum imported-word strings stored per session.
+ *
+ * Only the word text is stored (no metadata). At ~15 bytes/word:
+ * 100 words ≈ 1.5 KB per session → ~150 KB per user (100 sessions). Safe.
+ * The `imported` counter remains the accurate total; the UI shows
+ * "…and N more" when imported > importedWords.length.
+ */
+const MAX_STORED_IMPORTED_WORDS = 100;
+
+/**
  * Maximum import sessions retained per user.
  *
  * After each successful session save, older sessions beyond this threshold are
@@ -197,6 +207,7 @@ export class ImportService {
     let skipped = 0;
     let duplicatesIgnored = 0;
     const errorRows: ImportErrorRowDto[] = [];
+    const importedWordsList: string[] = [];
 
     const seenInBatch = new Set<string>();
     const candidates: Array<{
@@ -322,6 +333,7 @@ export class ImportService {
       const result = enrichResults[i];
       if (result.ok) {
         imported++;
+        importedWordsList.push(toEnrich[i].word);
       } else {
         const word = toEnrich[i].word;
         const reason =
@@ -360,6 +372,7 @@ export class ImportService {
     // trimmed in the same chain — no cron job needed.
     const submitted = imported + skipped + duplicatesIgnored + errors;
     const storedErrorRows = errorRows.slice(0, MAX_STORED_ERROR_ROWS);
+    const storedImportedWords = importedWordsList.slice(0, MAX_STORED_IMPORTED_WORDS);
 
     this.sessionRepo
       .save({
@@ -372,6 +385,7 @@ export class ImportService {
         duplicatesIgnored,
         errors,
         errorRows: storedErrorRows,
+        importedWords: storedImportedWords,
       })
       .then(async () => {
         // Trim sessions beyond MAX_SESSIONS_PER_USER (fire-and-forget cleanup).
@@ -437,6 +451,7 @@ export class ImportService {
       duplicatesIgnored: s.duplicatesIgnored,
       errors: s.errors,
       errorRows: s.errorRows,
+      importedWords: s.importedWords ?? [],
       createdAt: s.createdAt.toISOString(),
     };
   }

@@ -43,10 +43,6 @@ export function ImportResult({ result, onViewVocabulary, onImportMore }: ImportR
     onViewVocabulary()
   }
 
-  const handleReviewNewWords = () => {
-    navigate('/review')
-  }
-
   const handleSearchWord = (word: string) => {
     navigate(`/search?q=${encodeURIComponent(word)}`)
     onViewVocabulary()
@@ -158,15 +154,6 @@ export function ImportResult({ result, onViewVocabulary, onImportMore }: ImportR
 
         {/* ── Actions ─────────────────────────────────────────────────── */}
         <div className={styles.actions}>
-          {result.imported > 0 && (
-            <button
-              type="button"
-              className={styles.primaryAction}
-              onClick={handleReviewNewWords}
-            >
-              Review new words →
-            </button>
-          )}
           <button
             type="button"
             className={styles.secondaryAction}
