@@ -10,9 +10,9 @@
   --color-accent-hover: #4f46e5;
   --color-accent-subtle:#eef2ff;
   --color-border:       #e5e7eb;
-  --color-danger:       #ef4444;
-  --color-success:      #22c55e;
-  --color-warning:      #f59e0b;
+  --color-danger:       #c94040;  /* was #ef4444 — HSL(0 52% 52%)  deeper, less harsh  */
+  --color-success:      #27a551;  /* was #22c55e — HSL(144 60% 40%) forest green        */
+  --color-warning:      #c98510;  /* was #f59e0b — HSL(38 85% 42%)  warm golden amber   */
 
   /* Spacing — fluid scale from ≈360px (mobile) to ≈1024px (desktop).
      Each token clamps between a compact mobile floor and its current

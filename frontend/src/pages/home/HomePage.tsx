@@ -25,7 +25,7 @@ function HomePageSkeleton() {
     <>
       {/* Hero */}
       <DashboardCell span="full">
-        <Card padding="lg" variant="glass" className={styles.hero}>
+        <Card padding="lg" variant="flat" className={styles.hero}>
           <div className={styles.skeletonHeroContent}>
             <div className={styles.skeletonLine} style={{ width: '48%' }} />
             <div className={styles.skeletonLine} style={{ width: '72%', height: 15 }} />
@@ -37,7 +37,7 @@ function HomePageSkeleton() {
       {/* Boards — same position as the loaded boards card */}
       {featureFlags.boardsTags && (
         <DashboardCell span="full">
-          <Card variant="floating" padding="lg">
+          <Card variant="flat" padding="lg">
             <div className={styles.skeletonBoards}>
               <div className={styles.skeletonBoardsHeader}>
                 <div className={styles.skeletonLine} style={{ width: 92, height: 13 }} />
@@ -58,7 +58,7 @@ function HomePageSkeleton() {
       <DashboardCell span="auto">
         <div className={styles.stats}>
           {STAT_LABEL_WIDTHS.map((w, i) => (
-            <Card key={i} variant="floating" padding="md" className={styles.statTile}>
+            <Card key={i} variant="flat" padding="md" className={styles.statTile}>
               <div className={styles.skeletonIcon} />
               <div className={styles.skeletonNum} />
               <div className={styles.skeletonLine} style={{ width: w }} />
@@ -69,7 +69,7 @@ function HomePageSkeleton() {
 
       {/* Recent words */}
       <DashboardCell>
-        <Card variant="floating" padding="lg" className={styles.recent}>
+        <Card variant="flat" padding="lg" className={styles.recent}>
           <div className={styles.recentHeader}>
             <div className={styles.skeletonLine} style={{ width: 132, height: 20 }} />
             <div className={styles.skeletonLine} style={{ width: 52, height: 14 }} />
@@ -124,7 +124,7 @@ export function HomePage() {
             <>
               {/* Hero CTA: due today — always full width */}
               <DashboardCell span="full" className={styles.contentCell}>
-                <Card padding="lg" variant="glass" className={styles.hero}>
+                <Card padding="lg" variant="flat" className={styles.hero}>
                   <div className={styles.heroBody}>
                     {dueToday > 0 ? (
                       <>
@@ -170,7 +170,7 @@ export function HomePage() {
               {/* Your boards — quick re-entry into active collections */}
               {featureFlags.boardsTags && (
                 <DashboardCell span="full" className={styles.contentCell}>
-                  <Card variant="floating" padding="lg">
+                  <Card variant="flat" padding="lg">
                     <BoardsHomeSection />
                   </Card>
                 </DashboardCell>
@@ -180,7 +180,7 @@ export function HomePage() {
               <DashboardCell span={recent.length === 0 ? 'full' : 'auto'} className={styles.contentCell}>
                 <div className={styles.stats}>
                   {streak === 0 ? (
-                    <Card variant="floating" padding="md" className={styles.statTile}>
+                    <Card variant="flat" padding="md" className={styles.statTile}>
                       <div className={styles.streakEmptyPrimary}>Start today</div>
                       <div className={styles.streakEmptySecondary}>Review cards to begin your streak</div>
                     </Card>
@@ -217,7 +217,7 @@ export function HomePage() {
               {/* Recently saved — Bento right column on desktop */}
               {recent.length > 0 && (
                 <DashboardCell className={styles.contentCell}>
-                  <Card variant="floating" padding="lg" className={styles.recent}>
+                  <Card variant="flat" padding="lg" className={styles.recent}>
                     <div className={styles.recentHeader}>
                       <Text variant="title" as="h3">Recently saved</Text>
                       <button
@@ -268,7 +268,7 @@ function StatTile({
   accent?: boolean
 }) {
   return (
-    <Card variant="floating" padding="md" className={[styles.statTile, accent ? styles.statAccent : ''].join(' ')}>
+    <Card variant="flat" padding="md" className={[styles.statTile, accent ? styles.statAccent : ''].join(' ')}>
       <div className={styles.statIcon} aria-hidden>
         <Icon icon={icon} size={18} muted />
       </div>
