@@ -82,6 +82,15 @@ export function useWordDetailUrl({
     isRestoringFromUrl.current = true
     const sourceList = vocabularyItems.map((v) => v.wordId)
     open(match.wordId, sourceList)
+
+    // Scroll the matching card into view after the first paint.
+    // Uses data-word-id attribute on vocabulary list items — gracefully
+    // degrades to a no-op if the attribute is absent on another page.
+    requestAnimationFrame(() => {
+      document
+        .querySelector<HTMLElement>(`[data-word-id="${match.wordId}"]`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vocabularyItems.length]) // Re-run when vocabulary finishes loading
 

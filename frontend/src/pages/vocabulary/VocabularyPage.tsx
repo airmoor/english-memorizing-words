@@ -107,11 +107,6 @@ interface ContentProps {
   isFetchingNextPage: boolean
   onLoadMore: () => void
   onClearFilters?: () => void
-  /**
-   * When true, automatically open the first card in `items` once it loads.
-   * Driven by the ?open=true URL param — consumed and removed after use.
-   */
-  autoOpen: boolean
 }
 
 function VocabularyPageContent({
@@ -124,10 +119,8 @@ function VocabularyPageContent({
   isFetchingNextPage,
   onLoadMore,
   onClearFilters,
-  autoOpen,
 }: ContentProps) {
   const detail = useWordDetail()
-  const [, setSearchParams] = useSearchParams()
 
   useWordDetailUrl({
     detail,
@@ -135,39 +128,6 @@ function VocabularyPageContent({
     open:  detail.open,
     close: detail.close,
   })
-
-  // ── Auto-open first card when ?open=true is present ───────────────────────
-  //
-  // Fires once items have loaded. Opens the first card in the (possibly filtered)
-  // list, scrolls it into view, then removes ?open=true from the URL so
-  // the action is not repeated on re-renders or history revisits.
-  //
-  // The ?word= write from useWordDetailUrl fires in a subsequent effect, so
-  // ?open=true is already gone by the time that push-history call runs.
-  useEffect(() => {
-    if (!autoOpen || items.length === 0) return
-
-    const first      = items[0]
-    const sourceList = items.map((v) => v.wordId)
-    detail.open(first.wordId, sourceList)
-
-    // Scroll the card into view after the next paint
-    requestAnimationFrame(() => {
-      document
-        .querySelector<HTMLElement>(`[data-word-id="${first.wordId}"]`)
-        ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    })
-
-    // Consume the param so this effect doesn't fire again
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev)
-      next.delete('open')
-      return next
-    }, { replace: true })
-  // Intentionally limited deps: re-run only when items arrive or the flag changes.
-  // detail.open and setSearchParams are stable references.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoOpen, items.length])
 
   return (
     <VocabularyList
@@ -212,7 +172,6 @@ export function VocabularyPage() {
   // a useEffect and the cascading-renders lint warning it triggers.
 
   const committedQuery = searchParams.get('q')?.trim() ?? ''
-  const shouldAutoOpen = searchParams.get('open') === 'true'
 
   const [inputValue, setInputValue] = useState(committedQuery)
 
@@ -564,7 +523,6 @@ export function VocabularyPage() {
                       isFetchingNextPage={isFetchingNextPage}
                       onLoadMore={fetchNextPage}
                       onClearFilters={handleClearFilters}
-                      autoOpen={shouldAutoOpen}
                     />
                   </WordDetailProvider>
                 </div>
