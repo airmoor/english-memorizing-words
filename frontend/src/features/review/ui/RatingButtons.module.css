@@ -15,14 +15,14 @@
   font-weight: var(--fw-semibold);
   font-family: inherit;
   cursor: pointer;
-  background: transparent;
   white-space: nowrap;
-  transition: background var(--transition-fast), color var(--transition-fast), opacity var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast), opacity var(--transition-fast);
   /* Default: single-line layout */
-  display: inline-flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
+  border: none;
+  color: var(--color-bg-secondary);
 }
 
 /* When a sub-label is present, give slightly more vertical room */
@@ -48,12 +48,27 @@
   cursor: not-allowed;
 }
 
-.again { border: 2px solid var(--color-danger);  color: var(--color-danger); }
-.hard  { border: 2px solid var(--color-warning); color: var(--color-warning); }
-.good  { border: 2px solid var(--color-success); color: var(--color-success); }
-.easy  { border: 2px solid var(--color-accent);  color: var(--color-accent); }
+.again {
+  /* background-color: var(--color-error-soft); */
+  background-color:  color-mix(in srgb, var(--color-danger) 75%, #888)
+}
 
-.again:hover:not(:disabled) { background: var(--color-danger);  color: #fff; }
-.hard:hover:not(:disabled)  { background: var(--color-warning); color: #fff; }
-.good:hover:not(:disabled)  { background: var(--color-success); color: #fff; }
-.easy:hover:not(:disabled)  { background: var(--color-accent);  color: #fff; }
+.hard {
+  /* background-color: var(--color-warning-soft); */
+  background-color:  color-mix(in srgb, var(--color-warning) 75%, #888)
+}
+
+.good {
+  /* background-color: var(--color-success-soft);  */
+  background-color:  color-mix(in srgb, var(--color-success) 75%, #888)
+}
+
+.easy {
+  /* background-color: var(--color-easy-soft); */
+  background-color:  color-mix(in srgb, var(--color-easy) 75%, #888)
+}
+
+.again:hover:not(:disabled) { background-color: var(--color-danger);   }
+.hard:hover:not(:disabled)  { background-color: var(--color-warning); }
+.good:hover:not(:disabled)  { background-color: var(--color-success);  }
+.easy:hover:not(:disabled)  { background-color: var(--color-accent);  }
