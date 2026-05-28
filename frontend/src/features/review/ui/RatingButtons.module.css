@@ -38,7 +38,7 @@
 .subLabel {
   display: block;
   font-size: 10px;
-  font-weight: var(--fw-medium);
+  font-weight: var(--fw-bold);
   opacity: 0.8;
   line-height: 1.2;
 }

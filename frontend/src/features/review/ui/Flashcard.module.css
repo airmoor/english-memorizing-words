@@ -164,12 +164,12 @@
 
 @media (max-width: 1023px) {
   .ratingSlot {
-    bottom: calc(var(--mobile-nav-height));
+    bottom: 0;
     background-color: var(--surface-page);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     padding-top: 0;
-    padding-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
     /* Break out of container padding so buttons span the full screen width */
     margin-inline: calc(-1 * var(--page-padding-x));
     padding-inline: var(--page-padding-x);

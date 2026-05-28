@@ -30,10 +30,10 @@ export function RatingButtons({ onRate, disabled, previews }: Props) {
             disabled={disabled}
             className={[styles.btn, cls, subLabel ? styles.withSub : ''].join(' ').trim()}
           >
-            <span className={styles.mainLabel}>{label}</span>
             {subLabel && (
               <span className={styles.subLabel}>{subLabel}</span>
             )}
+            <span className={styles.mainLabel}>{label}</span>
           </button>
         )
       })}
