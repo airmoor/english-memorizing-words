@@ -1,18 +1,6 @@
-.greeting {
-  margin: 0;
-  font-size: clamp(2rem, 5vw, 3rem);
-  line-height: 1.1;
-  letter-spacing: -0.03em;
-  /* Subtle two-stop gradient: primary color bleeds into theme accent */
-  background: linear-gradient(135deg, var(--color-text-primary) 55%, var(--gradient-a));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
 /* ── Skeleton loading placeholders ──────────────────────────────────────────
-   Skeleton elements share Card structure so the bento layout is pre-allocated
-   and doesn't reflow when data arrives. */
+   Skeleton elements share the real layout so the page doesn't reflow when
+   data arrives. */
 
 @keyframes skeletonPulse {
   0%, 100% { opacity: 1; }
@@ -90,18 +78,21 @@
   flex-shrink: 0;
 }
 
-/* ── Content entrance ─────────────────────────────────────────────────────── */
+/* ── Page container ───────────────────────────────────────────────────────── */
 
 @keyframes contentEnter {
   from { opacity: 0; transform: translateY(5px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.contentCell {
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
   animation: contentEnter 0.22s var(--ease-out) both;
 }
 
-/* Hero CTA */
+/* ── Hero CTA ─────────────────────────────────────────────────────────────── */
 
 .hero {
   display: flex;
@@ -141,11 +132,16 @@
 
 .heroTitle {
   margin: 0;
-  font-size: var(--font-xl);
+  font-family: var(--font-serif);
+  font-size: var(--text-page-title);
+  font-weight: var(--fw-regular);
+  color: var(--color-text-primary);
 }
 
 .heroSubtitle {
   margin: 0;
+  font-size: var(--text-caption);
+  color: var(--color-text-secondary);
 }
 
 .heroActions {
@@ -154,79 +150,96 @@
   gap: var(--space-sm);
 }
 
-/* Stats grid — 4-up on tablet, 2×2 inside Bento left column on desktop */
+/* ── Stats row — 3 equal columns ──────────────────────────────────────────── */
 
-.stats {
+.statsRow {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: var(--space-md);
-  height: 100%;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--card-gap);
 }
 
-@media (min-width: 1024px) {
-  .stats {
-    grid-template-columns: repeat(2, 1fr);
-    align-content: start;
-  }
-}
-
-.statTile {
+.statCard {
+  background: var(--surface-card);
+  border: var(--border-card);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding-y) var(--card-padding-x);
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
+  align-items: flex-start;
+  min-height: 96px;
+  /* reset inherited button defaults when used as <button> */
+  font-family: inherit;
   text-align: left;
 }
 
-.statAccent {
-  border-color: var(--color-warning);
-  background: linear-gradient(180deg, rgba(245, 158, 11, 0.08), var(--color-bg-card) 60%);
+@media (max-width: 639px) {
+  .statCard {
+    padding: var(--space-sm) var(--space-md);
+  }
 }
 
-.statIcon {
-  font-size: 1.5rem;
-  line-height: 1;
+/* Vocabulary card — clickable */
+.statCardVocab {
+  cursor: pointer;
+  transition: background var(--transition-fast);
 }
 
-.statValue {
-  font-size: 2rem;
-  font-weight: var(--fw-semibold);
+.statCardVocab:hover {
+  background: color-mix(in srgb, var(--color-accent) 4%, var(--surface-card));
+}
+
+.statNum {
+  font-size: var(--text-section-title);
+  font-weight: var(--fw-medium);
   color: var(--color-text-primary);
   line-height: 1;
+  margin-top: var(--space-xs);
+}
+
+.statNumSuccess {
+  color: var(--color-success);
+}
+
+.statNumMuted {
+  color: var(--color-text-secondary);
 }
 
 .statLabel {
-  font-size: var(--font-sm);
+  font-size: var(--text-micro);
   color: var(--color-text-secondary);
+  margin-top: var(--space-xs);
 }
 
-.statUnit {
-  color: var(--color-text-secondary);
-  opacity: 0.7;
-}
-
-/* ── Zero-streak empty state ─────────────────────────────────────────────── */
-
-.streakEmptyPrimary {
-  font-size: var(--text-section-title);
-  font-weight: var(--fw-semibold);
+/* Zero-streak empty state inside Card A */
+.statPrimary {
+  font-size: var(--text-card-title);
+  font-weight: var(--fw-medium);
   color: var(--color-text-primary);
   line-height: 1.2;
 }
 
-.streakEmptySecondary {
-  font-size: var(--text-caption);
+.statSub {
+  font-size: var(--text-micro);
   color: var(--color-text-secondary);
   margin-top: var(--space-xs);
   line-height: 1.4;
 }
 
-/* Recently saved */
+/* ── Boards card ──────────────────────────────────────────────────────────── */
+
+.boardsCard {
+  background: var(--surface-card);
+  border: var(--border-card);
+  border-radius: var(--card-radius);
+  padding: var(--card-word-padding-y) var(--card-padding-x);
+}
+
+/* ── Recently saved ───────────────────────────────────────────────────────── */
 
 .recent {
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
-  height: 100%;
 }
 
 .recentHeader {
