@@ -13,3 +13,13 @@
     padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px));
   }
 }
+.content{
+  height: calc(100dvh - var(--app-header-height));
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+@media (max-width: 1023px) {
+  .content {
+    height: calc(100dvh - var(--app-header-height) - var(--app-footer-height));
+  }
+}

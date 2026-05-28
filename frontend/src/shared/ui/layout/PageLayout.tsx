@@ -13,7 +13,7 @@ export function PageLayout({ children, className }: Props) {
   return (
     <div className={[styles.page, className].filter(Boolean).join(' ')}>
       <AppHeader />
-      {children}
+      <div className={styles.content}>{children}</div>
       {/*
        * MobileBottomNav is fixed to the bottom of the viewport.
        * It is CSS-hidden on desktop (display:none at ≥1024px) so no JS
