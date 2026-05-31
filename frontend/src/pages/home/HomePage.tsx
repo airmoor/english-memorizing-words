@@ -31,17 +31,17 @@ function HomePageSkeleton() {
       {/* Stats row */}
       <div className={styles.statsRow}>
         {[0, 1, 2].map((i) => (
-          <div key={i} className={styles.statCard}>
+          <Card key={i} variant="flat" padding="sm" className={styles.statCard}>
             <div className={styles.skeletonIcon} />
             <div className={styles.skeletonNum} />
             <div className={styles.skeletonLine} style={{ width: 80 }} />
-          </div>
+          </Card>
         ))}
       </div>
 
       {/* Boards */}
       {featureFlags.boardsTags && (
-        <div className={styles.boardsCard}>
+        <Card variant="flat" padding="lg">
           <div className={styles.skeletonBoards}>
             <div className={styles.skeletonBoardsHeader}>
               <div className={styles.skeletonLine} style={{ width: 92, height: 13 }} />
@@ -54,7 +54,7 @@ function HomePageSkeleton() {
               </div>
             ))}
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Recently saved */}
@@ -153,7 +153,7 @@ export function HomePage() {
             {/* ── 2. Stats row ─────────────────────────────────────── */}
             <div className={styles.statsRow}>
               {/* Card A: Streak */}
-              <div className={styles.statCard}>
+              <Card variant="flat" padding="sm" className={styles.statCard}>
                 {streak === 0 ? (
                   <>
                     <span className={styles.statPrimary}>Start today</span>
@@ -173,10 +173,10 @@ export function HomePage() {
                     </span>
                   </>
                 )}
-              </div>
+              </Card>
 
               {/* Card B: Today's progress */}
-              <div className={styles.statCard}>
+              <Card variant="flat" padding="sm" className={styles.statCard}>
                 <Icon
                   icon={Check}
                   size={16}
@@ -190,7 +190,7 @@ export function HomePage() {
                   {' / '}{dueToday}
                 </span>
                 <span className={styles.statLabel}>reviewed today</span>
-              </div>
+              </Card>
 
               {/* Card C: Vocabulary — navigates to /vocabulary on click */}
               <button
@@ -211,9 +211,9 @@ export function HomePage() {
 
             {/* ── 3. Boards ─────────────────────────────────────────── */}
             {featureFlags.boardsTags && (
-              <div className={styles.boardsCard}>
+              <Card variant="flat" padding="lg">
                 <BoardsHomeSection />
-              </div>
+              </Card>
             )}
 
             {/* ── 4. Recently saved ─────────────────────────────────── */}

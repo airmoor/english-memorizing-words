@@ -158,34 +158,33 @@
   gap: var(--card-gap);
 }
 
+/* Card component provides bg / border / radius / padding.
+   This class only adds the flex-column content layout. */
 .statCard {
-  background: var(--surface-card);
-  border: var(--border-card);
-  border-radius: var(--card-radius);
-  padding: var(--card-padding-y) var(--card-padding-x);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  min-height: 96px;
-  /* reset inherited button defaults when used as <button> */
+}
+
+/* ── Vocabulary stat card — the only interactive stat card ──────────────── */
+/* Rendered as a native <button> so it matches Card flat visually while
+   retaining proper button semantics and type-safe props.                    */
+.statCardVocab {
+  /* Replicate Card flat visual style exactly */
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--card-radius);
+  padding: var(--space-md); /* matches Card padding="sm" */
+  /* Button resets */
   font-family: inherit;
   text-align: left;
-}
-
-@media (max-width: 639px) {
-  .statCard {
-    padding: var(--space-sm) var(--space-md);
-  }
-}
-
-/* Vocabulary card — clickable */
-.statCardVocab {
+  /* Interactive */
   cursor: pointer;
   transition: background var(--transition-fast);
 }
 
 .statCardVocab:hover {
-  background: color-mix(in srgb, var(--color-accent) 4%, var(--surface-card));
+  background: color-mix(in srgb, var(--color-accent) 5%, var(--color-bg-card));
 }
 
 .statNum {
@@ -223,15 +222,6 @@
   color: var(--color-text-secondary);
   margin-top: var(--space-xs);
   line-height: 1.4;
-}
-
-/* ── Boards card ──────────────────────────────────────────────────────────── */
-
-.boardsCard {
-  background: var(--surface-card);
-  border: var(--border-card);
-  border-radius: var(--card-radius);
-  padding: var(--card-word-padding-y) var(--card-padding-x);
 }
 
 /* ── Recently saved ───────────────────────────────────────────────────────── */
