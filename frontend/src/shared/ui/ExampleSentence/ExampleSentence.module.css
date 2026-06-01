@@ -1,0 +1,35 @@
+/* Canonical example sentence — left accent bar + italic body text.
+   Applied wherever dictionary examples appear: Search / Vocabulary word detail,
+   Review flashcard (front hint + back meanings), MeaningPicker sheet.          */
+
+.example {
+  display: block;
+  position: relative;
+  padding-left: var(--space-md);
+  font-style: italic;
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Left accent bar — rendered via ::before to keep markup clean */
+.example::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 70%;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+}
+
+/* ── Truncation variant — 2-line clamp for compact surfaces ─────────────────
+   Use in MeaningPickerSheet where vertical space is constrained.              */
+.truncate {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}

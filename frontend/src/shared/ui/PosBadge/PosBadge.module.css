@@ -1,0 +1,17 @@
+/* Canonical part-of-speech badge — filled accent surface, uppercase micro label.
+   Use everywhere POS needs to be displayed: search results, vocabulary list,
+   review flashcard back, meaning picker sheet. */
+
+.badge {
+  display: inline-block;
+  padding: var(--badge-padding-y) var(--badge-padding-x);
+  background: var(--surface-accent);
+  border-radius: var(--badge-radius);
+  font-size: var(--text-micro);
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  /* Allows the badge to top-align itself in a flex-row or flex-column context */
+  align-self: flex-start;
+}
