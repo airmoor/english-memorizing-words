@@ -33,10 +33,6 @@
   letter-spacing: 0.02em;
 }
 
-.example {
-  font-style: italic;
-}
-
 .revealBtn {
   margin-top: var(--space-sm);
 }
@@ -99,35 +95,21 @@
   border-left: 2px solid var(--color-border);
 }
 
-/* Part-of-speech badge — sits on its own line above the definition */
-.badge {
-  display: inline-block;
-  width: fit-content;
-  font-size: var(--font-xs);
-  font-weight: var(--fw-medium);
-  color: var(--color-text-secondary);
-  background: var(--color-bg-primary);
-  border: 1px solid var(--color-border);
-  padding: 0.2rem 0.6rem;
-  border-radius: var(--radius-md);
-}
 
 .definition {
   margin: 0;
   line-height: 1.6;
 }
 
-/* ── Examples ──────────────────────────────────────────────────────────────── */
+/* ── Examples — ExampleSentence component handles individual item styling ───── */
 
 .examples {
   list-style: none;
   padding: 0;
   margin: 0;
-}
-
-.examples li {
-  padding: 0.2rem 0;
-  font-style: italic;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
 }
 
 /* ── Synonyms ──────────────────────────────────────────────────────────────── */

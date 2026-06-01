@@ -1,6 +1,6 @@
 import type { MeaningPayload } from './types'
-import { Text } from '../Typography/Typography'
 import { Sense } from '../Sense/Sense'
+import { PosBadge } from '../PosBadge/PosBadge'
 import { isSubSense } from './utils'
 import styles from './MeaningGroup.module.css'
 
@@ -34,11 +34,7 @@ export function MeaningGroup({ pos, meanings, selectionMode, selectedIds, onTogg
 
   return (
     <section className={styles.group}>
-      {pos && (
-        <Text variant="label" color="secondary" as="span" className={styles.pos}>
-          {pos}
-        </Text>
-      )}
+      {pos && <PosBadge pos={pos} />}
       <ol className={styles.senses}>
         {withCounters.map(({ meaning, isSubSense: sub, counter: c }) => (
           <Sense

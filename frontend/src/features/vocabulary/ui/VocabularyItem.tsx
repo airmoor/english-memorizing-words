@@ -6,6 +6,7 @@ import { Card } from '../../../shared/ui/Card/Card'
 import { Text } from '../../../shared/ui/Typography/Typography'
 import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog/ConfirmDialog'
 import { useWordDetail } from '../../../shared/ui/WordDetail/WordDetailContext'
+import { PosBadge } from '../../../shared/ui/PosBadge/PosBadge'
 import { getCardState } from '../model/cardState'
 import { featureFlags } from '../../../shared/lib/featureFlags'
 import styles from './VocabularyItem.module.css'
@@ -88,7 +89,7 @@ export function VocabularyItem({ item, onRemove, sourceList }: Props) {
               {item.meanings.slice(0, 3).map((m) => (
                 <li key={m.id} className={styles.meaning}>
                   {m.partOfSpeech && (
-                    <span className={styles.pos}>{m.partOfSpeech}</span>
+                    <PosBadge pos={m.partOfSpeech} />
                   )}
                   <Text variant="caption" color="secondary" as="span" className={styles.definition}>
                     {m.definition}

@@ -156,7 +156,7 @@ export function ImportResult({ result, onViewVocabulary, onImportMore }: ImportR
         <div className={styles.actions}>
           <button
             type="button"
-            className={styles.secondaryAction}
+            className={styles.primaryAction}
             onClick={handleViewVocabulary}
           >
             View vocabulary

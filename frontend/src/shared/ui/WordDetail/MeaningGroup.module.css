@@ -4,18 +4,6 @@
   gap: var(--space-sm);
 }
 
-.pos {
-  display: inline-block;
-  padding: var(--badge-padding-y) var(--badge-padding-x);
-  background: var(--surface-accent);
-  border-radius: var(--badge-radius);
-  font-size: var(--text-micro);
-  font-weight: var(--fw-medium);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-accent);
-  align-self: flex-start;
-}
 
 .senses {
   list-style: none;

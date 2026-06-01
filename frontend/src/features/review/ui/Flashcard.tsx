@@ -7,6 +7,8 @@ import { Card } from '../../../shared/ui/Card/Card'
 import { Button } from '../../../shared/ui/Button/Button'
 import { Text } from '../../../shared/ui/Typography/Typography'
 import { Stack } from '../../../shared/ui/Stack/Stack'
+import { PosBadge } from '../../../shared/ui/PosBadge/PosBadge'
+import { ExampleSentence } from '../../../shared/ui/ExampleSentence/ExampleSentence'
 import { RatingButtons } from './RatingButtons'
 import styles from './Flashcard.module.css'
 
@@ -49,9 +51,7 @@ export function Flashcard({ card, onRated }: Props) {
           )}
 
           {card.example && (
-            <Text variant="body" color="secondary" as="p" className={styles.example}>
-              "{card.example}"
-            </Text>
+            <ExampleSentence>&ldquo;{card.example}&rdquo;</ExampleSentence>
           )}
 
           {!revealed && (
@@ -77,14 +77,14 @@ export function Flashcard({ card, onRated }: Props) {
                       <li key={m.id} className={styles.meaning}>
                         <Stack gap="xs">
                           {m.partOfSpeech && (
-                            <span className={styles.badge}>{m.partOfSpeech}</span>
+                            <PosBadge pos={m.partOfSpeech} />
                           )}
                           <Text variant="body" as="p" className={styles.definition}>{m.definition}</Text>
                           {m.examples.length > 0 && (
                             <ul className={styles.examples}>
                               {m.examples.map((ex, j) => (
                                 <li key={j}>
-                                  <Text variant="caption" color="secondary" as="span">"{ex}"</Text>
+                                  <ExampleSentence>&ldquo;{ex}&rdquo;</ExampleSentence>
                                 </li>
                               ))}
                             </ul>

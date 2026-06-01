@@ -1,5 +1,6 @@
 import type { Meaning } from '../../../entities/word/model/types'
 import { parseDefinition, renderWithEditorialNotes } from './parseDefinition'
+import { ExampleSentence } from '../ExampleSentence/ExampleSentence'
 import styles from './Sense.module.css'
 
 interface Props {
@@ -110,8 +111,8 @@ export function Sense({
           {meaning.examples.length > 0 && (
             <ul className={styles.examples}>
               {meaning.examples.slice(0, 3).map((ex, i) => (
-                <li key={i} className={styles.example}>
-                  <span className={styles.exampleText}>
+                <li key={i}>
+                  <ExampleSentence>
                     &ldquo;
                     {renderWithEditorialNotes(ex).map((part, j) =>
                       part.type === 'editorial' ? (
@@ -121,7 +122,7 @@ export function Sense({
                       )
                     )}
                     &rdquo;
-                  </span>
+                  </ExampleSentence>
                 </li>
               ))}
             </ul>

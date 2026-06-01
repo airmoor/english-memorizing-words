@@ -148,35 +148,11 @@
   gap: 3px;
 }
 
-.pos {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: var(--fw-medium);
-  color: var(--color-text-secondary);
-  background: var(--color-bg-primary);
-  border: 1px solid var(--color-border);
-  padding: 0 5px;
-  border-radius: var(--radius-full);
-  width: fit-content;
-  text-transform: lowercase;
-}
 
 .definition {
   font-size: var(--font-sm);
   color: var(--color-text-primary);
   line-height: 1.45;
-}
-
-.example {
-  font-size: var(--font-xs);
-  color: var(--color-text-secondary);
-  font-style: italic;
-  line-height: 1.4;
-  /* Truncate long examples */
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
 }
 
 /* ── Footer ──────────────────────────────────────────────────────────────── */

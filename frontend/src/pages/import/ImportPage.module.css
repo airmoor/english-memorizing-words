@@ -178,6 +178,14 @@
   overflow: hidden;
   position: sticky;
   top: var(--space-lg);
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* Subdue the uploader once the import is complete — focus shifts to the result */
+.leftPanel[data-complete='true'] {
+  opacity: 0.45;
+  pointer-events: none;
+  filter: grayscale(30%);
 }
 
 /* Right panel — contextual content */

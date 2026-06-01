@@ -4,6 +4,8 @@ import { Icon } from '../../../shared/ui/Icon/Icon'
 import { AdaptiveSheet } from '../../../shared/ui/AdaptiveSheet/AdaptiveSheet'
 import { BottomSheetContent } from '../../../shared/ui/BottomSheet/BottomSheetContent'
 import { useSaveSelectedMeaningsMutation } from '../api/useSaveSelectedMeaningsMutation'
+import { PosBadge } from '../../../shared/ui/PosBadge/PosBadge'
+import { ExampleSentence } from '../../../shared/ui/ExampleSentence/ExampleSentence'
 import type { MeaningPayload } from '../../../shared/ui/WordDetail/types'
 import styles from './MeaningPickerSheet.module.css'
 
@@ -180,11 +182,11 @@ export function MeaningPickerSheet({
                   </span>
                   <span className={styles.rowBody}>
                     {m.partOfSpeech && (
-                      <span className={styles.pos}>{m.partOfSpeech}</span>
+                      <PosBadge pos={m.partOfSpeech} />
                     )}
                     <span className={styles.definition}>{m.definition}</span>
                     {m.examples.length > 0 && (
-                      <span className={styles.example}>&ldquo;{m.examples[0]}&rdquo;</span>
+                      <ExampleSentence truncate>&ldquo;{m.examples[0]}&rdquo;</ExampleSentence>
                     )}
                   </span>
                 </button>

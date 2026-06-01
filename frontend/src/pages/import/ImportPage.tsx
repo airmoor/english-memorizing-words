@@ -218,6 +218,7 @@ export function ImportPage() {
               <div
                 className={styles.leftPanel}
                 data-hidden={(!isUploadStep && hasRightContent).toString()}
+                data-complete={(flow.step === 'complete').toString()}
               >
                 <ImportUploader
                   key={uploaderKey}
