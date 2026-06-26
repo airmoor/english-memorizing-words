@@ -9,21 +9,21 @@
     --color-text-primary: #18181b;
     --color-text-secondary: #52525b;
 
-    /* Accent — Ink Amber. The one chromatic color allowed on the page.
+    /* Accent — Viridian. The one chromatic color allowed on the page.
        --accent       : button fill, focus ring, active markers (both themes)
-       --accent-text  : foreground ON the amber fill (dark ink, 7.7:1 AA)
-       --accent-fg    : amber used AS text/icon — darkened on light surfaces
-                        (amber is unreadable on white; #9a6500 = 4.9:1 AA) */
-    --color-accent: #e0a03c;
-    --color-accent-hover: #d2902e;
-    --color-accent-text: #1a1206;
-    --color-accent-fg: #9a6500;
-    --color-accent-subtle: #fbf3e2;
+       --accent-text  : foreground ON the viridian fill (dark ink, 5.7:1 AA)
+       --accent-fg    : viridian used AS text/icon — darkened on light surfaces
+                        (bright viridian is unreadable on white; #347e6e = 4.7:1 AA) */
+    --color-accent: #3f9e8d;
+    --color-accent-hover: #378b7c;
+    --color-accent-text: #0a1712;
+    --color-accent-fg: #347e6e;
+    --color-accent-subtle: #edf5f2;
     --color-border: #e8e8ec;
 
     --color-danger: #dc2626;
     --color-warning: #b45309;
-    --color-easy: #e0a03c;
+    --color-easy: #3f9e8d;
     --color-success: #15803d;
 
     /* Spacing — fluid scale from ≈360px (mobile) to ≈1024px (desktop).
@@ -86,14 +86,14 @@
     --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
     --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-    /* Text selection — amber accent highlight visible on all surfaces */
-    --selection-bg: rgba(224, 160, 60, 0.30);
+    /* Text selection — viridian accent highlight visible on all surfaces */
+    --selection-bg: rgba(63, 158, 141, 0.30);
     --selection-text: inherit;
 
     /* Gradient palette — DEPRECATED. The aurora system was removed in the
        calm pass. These now resolve to the single accent so any remaining
        linear-gradient (e.g. the review progress track) renders as a calm
-       monochrome amber fill instead of a rainbow. Do not use for new work. */
+       monochrome accent fill instead of a rainbow. Do not use for new work. */
     --gradient-a: var(--color-accent);
     --gradient-b: var(--color-accent-hover);
     --gradient-c: var(--color-accent);
@@ -200,8 +200,8 @@
     --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.35);
     --shadow-md: 0 6px 28px rgba(0, 0, 0, 0.45);
     --shadow-lg: 0 14px 48px rgba(0, 0, 0, 0.55);
-    /* Brighter selection on dark backgrounds — amber tint at higher opacity */
-    --selection-bg: rgba(224, 160, 60, 0.34);
+    /* Brighter selection on dark backgrounds — viridian tint at higher opacity */
+    --selection-bg: rgba(63, 158, 141, 0.36);
     /* --border-card uses black at near-zero opacity — invisible on dark surfaces */
     --border-card: 0.5px solid rgba(255, 255, 255, 0.10);
 }
