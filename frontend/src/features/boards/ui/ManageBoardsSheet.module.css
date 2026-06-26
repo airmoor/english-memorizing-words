@@ -18,7 +18,7 @@
   background: none;
   border: 1px solid var(--color-accent);
   border-radius: var(--radius-full);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
   font-size: var(--font-xs);
   font-family: inherit;
   font-weight: 600;

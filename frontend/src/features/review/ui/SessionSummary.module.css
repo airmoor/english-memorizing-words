@@ -48,7 +48,7 @@
   font-size: var(--font-xs);
   font-weight: 500;
   background: color-mix(in srgb, var(--color-accent) 12%, transparent);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
   border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
 }
 
@@ -111,7 +111,7 @@
 }
 .item_easy {
   border-color: color-mix(in srgb, var(--color-accent)  40%, transparent);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
   background: color-mix(in srgb, var(--color-accent)  8%, transparent);
 }
 
@@ -146,5 +146,5 @@
 
 .fallbackBtn:hover {
   border-color: var(--color-accent);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
 }

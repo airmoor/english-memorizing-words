@@ -30,8 +30,10 @@ export function SettingsPage() {
   const [tagsOpen,   setTagsOpen]     = useState(false)
   const [importOpen, setImportOpen]   = useState(false)
 
-  const showLightVariants = settings.mode === 'light' || settings.mode === 'system'
-  const showDarkVariants  = settings.mode === 'dark'  || settings.mode === 'system'
+  // Decorative palette variants are archived behind a flag (calm redesign).
+  // With the flag off, only the Light/Dark/System mode toggle remains.
+  const showLightVariants = featureFlags.legacyThemes && (settings.mode === 'light' || settings.mode === 'system')
+  const showDarkVariants  = featureFlags.legacyThemes && (settings.mode === 'dark'  || settings.mode === 'system')
 
   return (
     <PageLayout>

@@ -39,7 +39,7 @@
 }
 
 .bar:focus-within .iconLeft {
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
 }
 
 /* ── Input wrapper — flex child that hosts the text field + clear button ─── */

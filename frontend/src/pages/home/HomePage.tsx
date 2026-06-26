@@ -144,7 +144,12 @@ export function HomePage() {
                 {dueToday > 0 && (
                   <Button onClick={() => navigate('/review')}>Start review</Button>
                 )}
-                <Button variant="secondary" onClick={() => navigate('/search')}>
+                {/* Search is the page's single primary action whenever there's
+                    no review to start (empty + caught-up states). */}
+                <Button
+                  variant={dueToday > 0 ? 'secondary' : 'primary'}
+                  onClick={() => navigate('/search')}
+                >
                   Search words
                 </Button>
               </div>

@@ -95,7 +95,7 @@
   font-family: var(--font-sans);
   font-size: var(--font-sm);
   font-weight: var(--fw-medium);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
   cursor: pointer;
   white-space: nowrap;
   transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
@@ -104,7 +104,7 @@
 .reviewBtn:hover {
   background: color-mix(in srgb, var(--color-accent) 10%, transparent);
   border-color: var(--color-accent);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
 }
 
 .reviewBtn:active {
@@ -131,7 +131,7 @@
   font-family: var(--font-sans);
   font-size: var(--font-sm);
   font-weight: var(--fw-medium);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
   cursor: pointer;
   opacity: 0.8;
   transition: opacity var(--transition-fast);

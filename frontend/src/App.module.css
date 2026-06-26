@@ -13,25 +13,10 @@
   z-index: -1;
   pointer-events: none;
 
-  background:
-    /* Top-center glow — brand accent bloom */
-    radial-gradient(ellipse 80% 45% at 50% -5%,
-      var(--gradient-glow) 0%,
-      transparent 70%
-    ),
-    /* Left-mid accent orb */
-    radial-gradient(ellipse 55% 35% at 15% 65%,
-      color-mix(in srgb, var(--gradient-a) 8%, transparent) 0%,
-      transparent 65%
-    ),
-    /* Right-mid accent orb */
-    radial-gradient(ellipse 50% 30% at 88% 40%,
-      color-mix(in srgb, var(--gradient-b) 6%, transparent) 0%,
-      transparent 60%
-    ),
-    /* Base surface color */
-    var(--color-bg-primary);
+  /* Flat, calm canvas. The decorative aurora orbs were removed in the
+     calm/neutral pass — content is the only color on the page. */
+  background: var(--color-bg-primary);
 
-  /* Smooth palette shift when the user switches themes */
+  /* Smooth palette shift when the user switches light ↔ dark */
   transition: background 0.25s var(--ease-out);
 }

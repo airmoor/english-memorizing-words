@@ -83,7 +83,7 @@
   right: var(--space-xs);
   font-size: var(--font-xs);
   font-weight: var(--fw-semibold);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
 }
 
 /* ── Variant tiles ──────────────────────────────────────────────────────── */

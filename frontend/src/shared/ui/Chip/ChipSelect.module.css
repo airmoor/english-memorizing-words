@@ -31,7 +31,7 @@
 
 .chip:hover:not(:disabled) {
   border-color: var(--color-accent);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
 }
 
 .chip:disabled {
@@ -42,7 +42,7 @@
 .selected {
   border-color: var(--color-accent);
   background: var(--color-accent-subtle);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
 }
 
 .selected:hover:not(:disabled) {

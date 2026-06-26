@@ -27,7 +27,7 @@
 
 /* New card (never reviewed) */
 .new {
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
 }
 
 /* Mastered / long interval */

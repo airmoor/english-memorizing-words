@@ -29,7 +29,7 @@
 .chipActive {
   background: var(--color-accent-subtle);
   border-color: var(--color-accent);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
 }
 
 .moreChip {
@@ -102,7 +102,7 @@
 .sortBtnActive {
   background: var(--color-accent-subtle);
   border-color: var(--color-accent);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
 }
 
 .sortDropdown {
@@ -150,7 +150,7 @@
 }
 
 .sortOptionActive {
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
   font-weight: var(--fw-medium);
 }
 
@@ -239,7 +239,7 @@
 .groupChipActive {
   border-color: var(--color-accent);
   background: var(--color-accent-subtle);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
 }
 
 /* ── Clear footer ─────────────────────────────────────────────────────────────── */

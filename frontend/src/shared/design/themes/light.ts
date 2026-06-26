@@ -1,20 +1,24 @@
 import type { ThemeVars } from '../tokens'
 
+// Calm light. Flat off-white surfaces, Ink Amber accent.
 export const lightTheme: ThemeVars = {
-  '--color-bg-primary':   '#f4f5f9',
+  '--color-bg-primary':   '#fcfcfd',
   '--color-bg-secondary': '#ffffff',
   '--color-bg-card':      '#ffffff',
-  '--color-text-primary':   '#1a1a2e',
-  '--color-text-secondary': '#6b7280',
-  '--color-accent':       '#6366f1',
-  '--color-accent-hover': '#4f46e5',
-  '--color-accent-subtle':'#eef2ff',
-  '--color-border':       '#e5e7eb',
-  '--color-danger':       '#ef4444',
-  '--color-success':      '#22c55e',
-  '--color-warning':      '#f59e0b',
-  '--gradient-a':         '#2dd4bf',
-  '--gradient-b':         '#a78bfa',
-  '--gradient-c':         '#f9a8d4',
-  '--gradient-glow':      'rgba(167, 139, 250, 0.18)',
+  '--color-text-primary':   '#18181b',
+  '--color-text-secondary': '#52525b',
+  '--color-accent':       '#e0a03c',
+  '--color-accent-hover': '#d2902e',
+  '--color-accent-text':  '#1a1206',
+  '--color-accent-fg':    '#9a6500', // darkened — amber is unreadable on white
+  '--color-accent-subtle':'#fbf3e2',
+  '--color-border':       '#e8e8ec',
+  '--color-danger':       '#dc2626',
+  '--color-success':      '#15803d',
+  '--color-warning':      '#b45309',
+  // Gradients deprecated — resolve to the accent so any residual fill is calm.
+  '--gradient-a':         '#e0a03c',
+  '--gradient-b':         '#d2902e',
+  '--gradient-c':         '#e0a03c',
+  '--gradient-glow':      'transparent',
 }

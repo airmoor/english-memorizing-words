@@ -32,6 +32,6 @@
 /* colors */
 .color-primary   { color: var(--color-text-primary); }
 .color-secondary { color: var(--color-text-secondary); }
-.color-accent    { color: var(--color-accent); }
+.color-accent    { color: var(--color-accent-fg); }
 .color-danger    { color: var(--color-danger); }
 .color-warning   { color: var(--color-warning); }

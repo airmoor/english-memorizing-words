@@ -39,6 +39,6 @@
 .addBtn:hover,
 .addBtn:focus-visible {
   border-color: var(--color-accent);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
   outline: none;
 }

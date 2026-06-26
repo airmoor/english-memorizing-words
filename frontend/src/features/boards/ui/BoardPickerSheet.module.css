@@ -28,7 +28,7 @@
   gap: 5px;
   background: none;
   border: none;
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
   font-size: var(--font-sm);
   font-family: var(--font-sans);
   font-weight: var(--fw-medium);

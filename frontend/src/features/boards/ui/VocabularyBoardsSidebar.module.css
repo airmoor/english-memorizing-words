@@ -110,7 +110,7 @@
 
 .itemAction:hover {
   opacity: 1;
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
 }
 
 .itemMuted {
@@ -132,7 +132,7 @@
 
 .itemActive .icon {
   opacity: 1;
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
 }
 
 .itemLabel {

@@ -28,7 +28,7 @@
   min-width: 20px;
   font-size: var(--font-sm);
   font-weight: var(--fw-medium);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
   padding-top: 2px;
   user-select: none;
 }
@@ -73,7 +73,7 @@
 
 .seeAlsoChip {
   font-size: var(--text-micro);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
   background: var(--surface-accent);
   border-radius: var(--radius-full);
   padding: 1px var(--space-sm); /* no token — sub-xs vertical for chip micro text */
@@ -190,7 +190,7 @@
   align-items: center;
   padding: 0.2rem 0.55rem;
   background: var(--color-accent-subtle);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
   border-radius: var(--radius-md);
   font-size: var(--font-xs);
   font-weight: var(--fw-semibold);
@@ -216,5 +216,5 @@
 
 .saveBtn:hover {
   border-color: var(--color-accent);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
 }

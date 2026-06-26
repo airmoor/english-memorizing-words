@@ -20,4 +20,12 @@ export const featureFlags = {
    * Enabled by default in development. Set VITE_IMPORT_ENABLED=false to hide.
    */
   vocabularyImport: import.meta.env.VITE_IMPORT_ENABLED !== 'false',
+
+  /**
+   * Legacy decorative themes (sepia, marshmallow, neon, sakura, etc.).
+   * The calm/neutral redesign ships a single dark + light system; the 9
+   * decorative variants are archived behind this flag (default OFF).
+   * Set VITE_LEGACY_THEMES_ENABLED=true to restore the full variant picker.
+   */
+  legacyThemes: import.meta.env.VITE_LEGACY_THEMES_ENABLED === 'true',
 } as const

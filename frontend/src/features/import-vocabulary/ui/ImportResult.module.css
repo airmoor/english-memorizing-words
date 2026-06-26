@@ -172,7 +172,7 @@
   border: none;
   font-size: var(--text-micro);
   font-family: inherit;
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
   cursor: pointer;
   padding: 2px 0;
   white-space: nowrap;

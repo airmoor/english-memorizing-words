@@ -137,7 +137,7 @@
 .filterTabActive {
   background: var(--color-accent-subtle);
   border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
 }
 
 .tabCount {
@@ -186,7 +186,7 @@
   gap: 6px;
   background: none;
   border: none;
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
   font-size: 13px;
   font-weight: var(--fw-medium, 500);
   cursor: pointer;
@@ -281,7 +281,7 @@
   font-size: 10px;
   font-weight: var(--fw-medium, 500);
   background: color-mix(in srgb, var(--color-accent) 12%, transparent);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
   white-space: nowrap;
 }
 
@@ -472,7 +472,7 @@
   display: block;
   margin-top: 4px;
   font-size: 11px;
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
   text-decoration: none;
   white-space: nowrap;
 }
@@ -504,7 +504,7 @@
 .emptyImportLink {
   font-size: 14px;
   font-weight: var(--fw-medium, 500);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
   text-decoration: none;
 }
 

@@ -128,7 +128,7 @@
 .sortBtnActive {
   background: var(--color-accent-subtle);
   border-color: var(--color-accent);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
 }
 
 .sortDropdown {
@@ -178,14 +178,14 @@
 }
 
 .sortOptionActive {
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
   font-weight: var(--fw-medium);
 }
 
 .sortOptionCheck {
   flex-shrink: 0;
   margin-left: var(--space-sm);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
 }
 
 /* ── View mode toggle ────────────────────────────────────────────────────── */
@@ -221,7 +221,7 @@
 
 .viewBtnActive {
   background: var(--color-accent-subtle);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
 }
 
 /* ── Filter chips row ────────────────────────────────────────────────────── */
@@ -286,7 +286,7 @@
 .chipActive {
   background: var(--color-accent-subtle);
   border-color: var(--color-accent);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
 }
 
 /* ── State dots inside chips ─────────────────────────────────────────────── */
@@ -329,5 +329,5 @@
 
 .clearFiltersBtn:hover {
   border-color: var(--color-accent);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
 }

@@ -32,7 +32,7 @@
   font-family: inherit;
   font-size: var(--font-sm);
   font-weight: var(--fw-medium);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
   cursor: pointer;
   transition: opacity var(--transition-fast);
 }
@@ -151,7 +151,7 @@
   border: none;
   font-family: inherit;
   font-size: var(--font-sm);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
   cursor: pointer;
   padding: 0;
 }

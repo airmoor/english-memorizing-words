@@ -25,7 +25,7 @@
   min-width: 1.75rem;
   font-size: var(--font-sm);
   font-weight: var(--fw-semibold);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
   padding-top: 2px;
   user-select: none;
 }
@@ -92,7 +92,7 @@
   align-items: center;
   padding: 0.2rem 0.55rem;
   background: var(--color-accent-subtle);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
   border-radius: var(--radius-md);
   font-size: var(--font-xs);
   font-weight: var(--fw-semibold);
@@ -118,5 +118,5 @@
 
 .saveBtn:hover {
   border-color: var(--color-accent);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
 }

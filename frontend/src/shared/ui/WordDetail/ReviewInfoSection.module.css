@@ -31,7 +31,7 @@
 
 .state_new      { background: color-mix(in srgb, var(--color-text-secondary) 12%, transparent); color: var(--color-text-secondary); }
 .state_due      { background: color-mix(in srgb, var(--color-warning) 20%, transparent); color: var(--color-warning); }
-.state_upcoming { background: color-mix(in srgb, var(--color-accent) 12%, transparent); color: var(--color-accent); }
+.state_upcoming { background: color-mix(in srgb, var(--color-accent) 12%, transparent); color: var(--color-accent-fg); }
 .state_mastered { background: color-mix(in srgb, var(--color-success) 15%, transparent); color: var(--color-success); }
 
 .list {

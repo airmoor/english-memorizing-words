@@ -15,6 +15,11 @@
   cursor: not-allowed;
 }
 
+/* Subtle press feedback — restrained, no spring overshoot (calm pass). */
+.base:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
 /* sizes */
 .sm  { padding: 0.375rem 0.75rem;  font-size: var(--font-sm); }
 .md  { padding: 0.625rem 1.25rem;  font-size: var(--font-md); }
@@ -23,7 +28,7 @@
 /* variants */
 .primary {
   background: var(--color-accent);
-  color: #fff;
+  color: var(--color-accent-text); /* dark ink on amber — 7.7:1 AA */
 }
 .primary:hover:not(:disabled) {
   background: var(--color-accent-hover);
@@ -36,7 +41,7 @@
 }
 .secondary:hover:not(:disabled) {
   border-color: var(--color-accent);
-  color: var(--color-accent);
+  color: var(--color-accent-fg); /* readable amber on every surface */
 }
 
 .ghost {
@@ -46,7 +51,7 @@
 }
 .ghost:hover:not(:disabled) {
   border-color: var(--color-accent);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
 }
 
 .fullWidth { width: 100%; }

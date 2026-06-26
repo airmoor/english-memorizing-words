@@ -81,7 +81,7 @@
 
 .sortBtn:hover {
   border-color: var(--color-accent);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
 }
 
 .sortBtn:focus-visible {
@@ -91,7 +91,7 @@
 
 .sortActive {
   border-color: var(--color-accent);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
 }
 
 .divider {
