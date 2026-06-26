@@ -1,22 +1,31 @@
 .input {
   padding: var(--input-padding-y) var(--input-padding-x);
-  border: 1.5px solid var(--color-border);
+  border: 1px solid var(--color-border);
   border-radius: var(--input-radius);
   font-size: var(--text-body);
   font-family: inherit;
   background: var(--color-bg-secondary);
   color: var(--color-text-primary);
   outline: none;
-  transition: border-color var(--transition-fast), background var(--transition-base);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow   var(--transition-fast),
+    background   var(--transition-base);
   min-width: 0;
+}
+
+.input:hover {
+  border-color: color-mix(in srgb, var(--color-accent) 30%, var(--color-border));
 }
 
 .input::placeholder {
   color: var(--color-text-secondary);
 }
 
+/* Calm, modern focus: accent border + a small soft ring (no glow halo). */
 .input:focus {
   border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 10%, transparent);
 }
 
 .fullWidth {
