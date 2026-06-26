@@ -25,7 +25,7 @@ export function ResetPasswordPage() {
     return (
       <div className={styles.page}>
         <div className={formStyles.wrapper}>
-          <Card padding="lg" className={formStyles.card}>
+          <Card variant="flat" padding="lg" className={formStyles.card}>
             <Stack gap="md">
               <Text variant="label" as="p">Invalid link</Text>
               <Text variant="body" color="secondary" as="p">
@@ -83,7 +83,7 @@ export function ResetPasswordPage() {
           <Text variant="body" color="secondary">Choose a new password</Text>
         </Stack>
 
-        <Card padding="lg" className={formStyles.card}>
+        <Card variant="flat" padding="lg" className={formStyles.card}>
           {success ? (
             <Stack gap="md">
               <Text variant="label" as="p">Password updated!</Text>

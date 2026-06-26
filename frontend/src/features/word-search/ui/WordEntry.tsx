@@ -128,7 +128,7 @@ export function WordEntry({ word, onSeeAlso }: Props) {
   }
 
   return (
-    <Card padding="lg" className={styles.entry}>
+    <Card variant="flat" padding="lg" className={styles.entry}>
       <WordDetailContent
         word={wordPayload}
         learningState={isSaved ? { nextReview: '', lastReviewedAt: null, intervalDays: 0, easeFactor: 2.5 } : null}

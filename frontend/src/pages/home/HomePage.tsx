@@ -20,7 +20,7 @@ function HomePageSkeleton() {
   return (
     <div className={styles.page}>
       {/* Hero */}
-      <Card padding="lg" variant="flat" className={styles.hero}>
+      <Card variant="flat" padding="lg" className={styles.hero}>
         <div className={styles.skeletonHeroContent}>
           <div className={styles.skeletonLine} style={{ width: '48%' }} />
           <div className={styles.skeletonLine} style={{ width: '72%', height: 15 }} />
@@ -31,7 +31,7 @@ function HomePageSkeleton() {
       {/* Stats row */}
       <div className={styles.statsRow}>
         {[0, 1, 2].map((i) => (
-          <Card key={i} variant="flat" padding="sm" className={styles.statCard}>
+          <Card key={i} variant="flat" padding="lg" className={styles.statCard}>
             <div className={styles.skeletonIcon} />
             <div className={styles.skeletonNum} />
             <div className={styles.skeletonLine} style={{ width: 80 }} />
@@ -110,7 +110,7 @@ export function HomePage() {
         ) : (
           <div className={styles.page}>
             {/* ── 1. Hero CTA ──────────────────────────────────────── */}
-            <Card padding="lg" variant="flat" className={styles.hero}>
+            <Card variant="flat" padding="lg" className={styles.hero}>
               <div className={styles.heroBody}>
                 {dueToday > 0 ? (
                   <>
@@ -158,7 +158,7 @@ export function HomePage() {
             {/* ── 2. Stats row ─────────────────────────────────────── */}
             <div className={styles.statsRow}>
               {/* Card A: Streak */}
-              <Card variant="flat" padding="sm" className={styles.statCard}>
+              <Card variant="flat" padding="lg" className={styles.statCard}>
                 {streak === 0 ? (
                   <>
                     <span className={styles.statPrimary}>Start today</span>
@@ -181,7 +181,7 @@ export function HomePage() {
               </Card>
 
               {/* Card B: Today's progress */}
-              <Card variant="flat" padding="sm" className={styles.statCard}>
+              <Card variant="flat" padding="lg" className={styles.statCard}>
                 <Icon
                   icon={Check}
                   size={16}

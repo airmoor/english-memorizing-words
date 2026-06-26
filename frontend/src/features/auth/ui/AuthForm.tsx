@@ -60,7 +60,7 @@ export function AuthForm({ mode, onSubmit, onToggle }: Props) {
         </Text>
       </Stack>
 
-      <Card padding="lg" className={styles.card}>
+      <Card variant="flat" padding="lg" className={styles.card}>
         <form onSubmit={handleSubmit}>
           <Stack gap="md">
             <label className={styles.label}>

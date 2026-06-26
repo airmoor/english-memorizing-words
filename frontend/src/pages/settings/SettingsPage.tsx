@@ -47,7 +47,7 @@ export function SettingsPage() {
           </header>
 
           {/* Theme Mode */}
-          <Card padding="lg" className={styles.section}>
+          <Card variant="flat" padding="lg" className={styles.section}>
             <div className={styles.sectionHeader}>
               <Text variant="label" as="h2" className={styles.sectionTitle}>Theme mode</Text>
               <Text variant="caption" color="secondary" as="p">
@@ -70,7 +70,7 @@ export function SettingsPage() {
 
           {/* Light variants */}
           {showLightVariants && (
-            <Card variant="floating" padding="lg" className={styles.section}>
+            <Card variant="flat" padding="lg" className={styles.section}>
               <div className={styles.sectionHeader}>
                 <Text variant="label" as="h2" className={styles.sectionTitle}>Light palette</Text>
                 <Text variant="caption" color="secondary" as="p">
@@ -94,7 +94,7 @@ export function SettingsPage() {
 
           {/* Dark variants */}
           {showDarkVariants && (
-            <Card variant="floating" padding="lg" className={styles.section}>
+            <Card variant="flat" padding="lg" className={styles.section}>
               <div className={styles.sectionHeader}>
                 <Text variant="label" as="h2" className={styles.sectionTitle}>Dark palette</Text>
                 <Text variant="caption" color="secondary" as="p">
@@ -122,7 +122,7 @@ export function SettingsPage() {
 
           {/* ── Vocabulary Import ────────────────────────────────────────── */}
           {featureFlags.vocabularyImport && (
-            <Card padding="lg" className={styles.section}>
+            <Card variant="flat" padding="lg" className={styles.section}>
               <div className={styles.sectionHeader}>
                 <Text variant="label" as="h2" className={styles.sectionTitle}>Import vocabulary</Text>
                 <Text variant="caption" color="secondary" as="p">
@@ -140,7 +140,7 @@ export function SettingsPage() {
           )}
 
           {/* ── Boards ───────────────────────────────────────────────────── */}
-          <Card padding="lg" className={styles.section}>
+          <Card variant="flat" padding="lg" className={styles.section}>
             <div className={styles.sectionHeader}>
               <Text variant="label" as="h2" className={styles.sectionTitle}>Boards</Text>
               <Text variant="caption" color="secondary" as="p">
@@ -157,7 +157,7 @@ export function SettingsPage() {
           </Card>
 
           {/* ── Tags ─────────────────────────────────────────────────────── */}
-          <Card padding="lg" className={styles.section}>
+          <Card variant="flat" padding="lg" className={styles.section}>
             <div className={styles.sectionHeader}>
               <Text variant="label" as="h2" className={styles.sectionTitle}>Tags</Text>
               <Text variant="caption" color="secondary" as="p">
@@ -174,7 +174,7 @@ export function SettingsPage() {
           </Card>
 
           {/* ── Change Password ──────────────────────────────────────────── */}
-          <Card padding="lg" className={styles.section}>
+          <Card variant="flat" padding="lg" className={styles.section}>
             <div className={styles.sectionHeader}>
               <Text variant="label" as="h2" className={styles.sectionTitle}>Change password</Text>
               <Text variant="caption" color="secondary" as="p">
@@ -189,7 +189,7 @@ export function SettingsPage() {
               On mobile it is the primary logout path (not in the top bar).
               On desktop it duplicates the header button for discoverability.
           ─────────────────────────────────────────────────────────────────── */}
-          <Card padding="lg" className={styles.section}>
+          <Card variant="flat" padding="lg" className={styles.section}>
             <div className={styles.sectionHeader}>
               <Text variant="label" as="h2" className={styles.sectionTitle}>Account</Text>
               <Text variant="caption" color="secondary" as="p">

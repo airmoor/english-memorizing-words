@@ -39,7 +39,7 @@ export function Flashcard({ card, onRated }: Props) {
 
   return (
     <div className={styles.wrapper}>
-      <Card variant="glass" className={styles.card}>
+      <Card variant="flat" padding="lg" className={styles.card}>
         {/* Front */}
         <Stack gap="md">
           <Text variant="heading" className={styles.word}>{card.word}</Text>

@@ -38,7 +38,7 @@ export function ForgotPasswordPage() {
           <Text variant="body" color="secondary">Reset your password</Text>
         </Stack>
 
-        <Card padding="lg" className={formStyles.card}>
+        <Card variant="flat" padding="lg" className={formStyles.card}>
           {submitted ? (
             <Stack gap="md">
               <Stack gap="xs">

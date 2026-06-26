@@ -40,10 +40,11 @@
     --space-xxl: clamp(28px, 3vw + 17px, 48px);
 
     /* Border radius — modern, generous (Framer/premium SaaS), not blobby */
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 18px;
     --radius-full: 9999px;
+
+    --radius-sm: 12px;
+    --radius-md: 18px;
+    --radius-lg: 28px;
 
     /* Shadows — very soft and low. Cards lean on a thin border for separation;
        the shadow only adds a barely-there sense of lift ("air"). */
@@ -143,12 +144,12 @@
     --surface-accent: var(--color-accent-subtle);
 
     /* — Component spacing — */
-    --card-padding-x: var(--space-lg);
-    --card-padding-y: var(--space-md);
+    --card-padding-x: var(--space-xl);
+    --card-padding-y: var(--space-xl);
     --card-gap: var(--space-md);
     --card-radius: var(--radius-lg);
 
-    --section-gap: var(--space-xxl);
+    --section-gap: var(--space-xl);
     --inline-gap: var(--space-sm);
 
     --input-padding-x: var(--space-md);
