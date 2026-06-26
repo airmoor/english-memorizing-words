@@ -6,6 +6,10 @@ import { Text } from '../../../shared/ui/Typography/Typography'
 import { Stack } from '../../../shared/ui/Stack/Stack'
 import { Logo } from '../../../shared/ui/Logo/Logo'
 import { PasswordInput } from '../../../shared/ui/PasswordInput/PasswordInput'
+import {
+  PasswordRequirements,
+  isPasswordValid,
+} from '../../../shared/ui/PasswordRequirements/PasswordRequirements'
 import styles from './AuthForm.module.css'
 
 interface Props {
@@ -28,8 +32,10 @@ export function AuthForm({ mode, onSubmit, onToggle }: Props) {
       setError('Enter a valid email address.')
       return
     }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.')
+    // Only enforce the strength rules on registration — login must accept any
+    // existing password as-is and let the backend decide.
+    if (mode === 'register' && !isPasswordValid(password)) {
+      setError('Password does not meet all the requirements below.')
       return
     }
 
@@ -85,7 +91,9 @@ export function AuthForm({ mode, onSubmit, onToggle }: Props) {
                 className={styles.input}
                 placeholder="••••••"
                 required
+                autoComplete={isLogin ? 'current-password' : 'new-password'}
               />
+              {!isLogin && <PasswordRequirements password={password} />}
             </label>
 
             {error && (
