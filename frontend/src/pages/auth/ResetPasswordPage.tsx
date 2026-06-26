@@ -6,6 +6,7 @@ import { Button } from '../../shared/ui/Button/Button'
 import { Text } from '../../shared/ui/Typography/Typography'
 import { Stack } from '../../shared/ui/Stack/Stack'
 import { Logo } from '../../shared/ui/Logo/Logo'
+import { PasswordInput } from '../../shared/ui/PasswordInput/PasswordInput'
 import styles from './AuthPage.module.css'
 import formStyles from '../../features/auth/ui/AuthForm.module.css'
 
@@ -95,8 +96,7 @@ export function ResetPasswordPage() {
               <Stack gap="md">
                 <label className={formStyles.label}>
                   <Text variant="label" as="span">New password</Text>
-                  <input
-                    type="password"
+                  <PasswordInput
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className={formStyles.input}
@@ -109,8 +109,7 @@ export function ResetPasswordPage() {
 
                 <label className={formStyles.label}>
                   <Text variant="label" as="span">Confirm new password</Text>
-                  <input
-                    type="password"
+                  <PasswordInput
                     value={confirm}
                     onChange={(e) => setConfirm(e.target.value)}
                     className={formStyles.input}

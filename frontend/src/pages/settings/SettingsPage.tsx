@@ -3,6 +3,7 @@ import { Container } from '../../shared/ui/layout/Container'
 import { PageLayout } from '../../shared/ui/layout/PageLayout'
 import { Card } from '../../shared/ui/Card/Card'
 import { Text } from '../../shared/ui/Typography/Typography'
+import { PasswordInput } from '../../shared/ui/PasswordInput/PasswordInput'
 import {
   useTheme,
   MODE_OPTIONS,
@@ -264,8 +265,7 @@ function ChangePasswordForm() {
     <form onSubmit={handleSubmit} className={styles.changePasswordForm}>
       <label className={styles.pwLabel}>
         <Text variant="caption" color="secondary" as="span">Current password</Text>
-        <input
-          type="password"
+        <PasswordInput
           value={current}
           onChange={(e) => setCurrent(e.target.value)}
           className={styles.pwInput}
@@ -275,8 +275,7 @@ function ChangePasswordForm() {
       </label>
       <label className={styles.pwLabel}>
         <Text variant="caption" color="secondary" as="span">New password</Text>
-        <input
-          type="password"
+        <PasswordInput
           value={next}
           onChange={(e) => setNext(e.target.value)}
           className={styles.pwInput}
@@ -287,8 +286,7 @@ function ChangePasswordForm() {
       </label>
       <label className={styles.pwLabel}>
         <Text variant="caption" color="secondary" as="span">Confirm new password</Text>
-        <input
-          type="password"
+        <PasswordInput
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
           className={styles.pwInput}

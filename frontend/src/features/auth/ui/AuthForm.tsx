@@ -5,6 +5,7 @@ import { Button } from '../../../shared/ui/Button/Button'
 import { Text } from '../../../shared/ui/Typography/Typography'
 import { Stack } from '../../../shared/ui/Stack/Stack'
 import { Logo } from '../../../shared/ui/Logo/Logo'
+import { PasswordInput } from '../../../shared/ui/PasswordInput/PasswordInput'
 import styles from './AuthForm.module.css'
 
 interface Props {
@@ -78,8 +79,7 @@ export function AuthForm({ mode, onSubmit, onToggle }: Props) {
                   </Link>
                 )}
               </span>
-              <input
-                type="password"
+              <PasswordInput
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className={styles.input}
