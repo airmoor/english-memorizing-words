@@ -58,7 +58,7 @@
   background: transparent;
   border: none;
   outline: none;
-  font-family: var(--font-serif);
+  font-family: var(--font-serif), sans-serif;
   font-size: 1.15rem;
   letter-spacing: -0.01em;
   color: var(--color-text-primary);
@@ -106,7 +106,7 @@
 
 .btn {
   flex-shrink: 0;
-  margin: 6px;
+  margin:  var(--space-sm);
   padding: 8px 18px;
   background: var(--color-accent);
   color: var(--color-accent-text);

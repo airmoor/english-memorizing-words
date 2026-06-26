@@ -57,3 +57,36 @@
 }
 
 .fullWidth { width: 100%; }
+
+/* ── Loading ──────────────────────────────────────────────────────────────
+   Label is hidden (keeps the button width stable) and a spinner is centered.
+   Spinner uses currentColor so it matches each variant's text colour. */
+.loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.labelHidden {
+  opacity: 0;
+}
+
+.spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.05em;
+  height: 1.05em;
+  margin: -0.525em 0 0 -0.525em;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: var(--radius-full);
+  animation: btnSpin 0.6s linear infinite;
+}
+
+@keyframes btnSpin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation-duration: 1.2s; }
+}

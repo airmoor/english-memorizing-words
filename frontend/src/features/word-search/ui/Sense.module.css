@@ -39,7 +39,8 @@
 
 .definition {
   margin: 0;
-  line-height: 1.6;
+  line-height: var(--leading-relaxed);
+  max-width: var(--measure);
   color: var(--color-text-primary);
 }
 

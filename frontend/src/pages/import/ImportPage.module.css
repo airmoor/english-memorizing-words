@@ -81,9 +81,7 @@
   align-items: center;
   gap: 10px;
   margin-bottom: var(--space-lg);
-  padding: 10px 0;
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
+  padding: 10px;
   border-radius: var(--radius-md, 8px);
   width: fit-content;
 }

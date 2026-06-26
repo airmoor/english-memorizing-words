@@ -28,6 +28,23 @@
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 10%, transparent);
 }
 
+/* Disabled */
+.input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: var(--color-bg-primary);
+}
+
+/* Error — danger border + matching focus ring */
+.input[aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+
+.input[aria-invalid='true']:focus {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger) 12%, transparent);
+}
+
 .fullWidth {
   width: 100%;
 }

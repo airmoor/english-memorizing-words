@@ -79,9 +79,10 @@
     --fw-semibold: 600;
     --fw-bold: 700;
 
-    /* Font families — system stacks only (no web font loads) */
-    --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-    --font-serif: 'Iowan Old Style', 'Source Serif 4', 'Source Serif Pro', Charter, Georgia, 'Times New Roman', serif;
+    /* Font families — Inter (UI grotesk) + Source Serif 4 (editorial headings),
+       loaded in index.html. System stacks remain as graceful fallbacks. */
+    --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    --font-serif: 'Source Serif 4', 'Iowan Old Style', 'Source Serif Pro', Charter, Georgia, 'Times New Roman', serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
     /* Motion */
@@ -266,8 +267,10 @@ body {
     margin: 0;
     font-family: var(--font-sans);
     font-size: var(--font-md);
+    line-height: var(--leading-normal);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
     /* Transparent so the html canvas gradient always shows through */
     background: transparent;
     color: var(--color-text-primary);
@@ -316,7 +319,9 @@ h1, h2, h3, h4 {
     margin: 0;
     color: var(--color-text-primary);
     font-family: var(--font-serif);
-    letter-spacing: -0.01em;
+    line-height: var(--leading-tight);
+    letter-spacing: -0.015em;
+    font-weight: var(--fw-medium);
 }
 
 p {
