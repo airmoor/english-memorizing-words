@@ -5,8 +5,8 @@ import { Icon } from '../../shared/ui/Icon/Icon'
 import { Text } from '../../shared/ui/Typography/Typography'
 import { Container } from '../../shared/ui/layout/Container'
 import { PageLayout } from '../../shared/ui/layout/PageLayout'
-import { WordDetailProvider } from '../../shared/ui/WordDetail/WordDetailProvider'
-import { useWordDetail } from '../../shared/ui/WordDetail/WordDetailContext'
+import { WordDetailProvider } from '../../shared/ui/WordDetail'
+import { useWordDetail } from '../../shared/ui/WordDetail'
 import { useWordDetailUrl } from '../../shared/ui/WordDetail/useWordDetailUrl'
 import { VocabularyList } from '../../features/vocabulary/ui/VocabularyList'
 import { VocabularyToolbar } from '../../features/vocabulary/ui/VocabularyToolbar'
@@ -15,11 +15,11 @@ import { VocabularyBoardsSidebar } from '../../features/boards/ui/VocabularyBoar
 import { MobileBoardsSelector } from '../../features/boards/ui/MobileBoardsSelector'
 import { useVocabularyInfinite } from '../../features/vocabulary/model/useVocabularyInfinite'
 import { useVocabularyFilters } from '../../features/vocabulary/model/useVocabularyFilters'
-import { useBoardsQuery } from '../../features/boards/model/useBoardsQuery'
+import { useBoardsQuery } from '../../features/boards'
 import { featureFlags } from '../../shared/lib/featureFlags'
 import type { VocabularyFilter, SortOption } from '../../features/vocabulary/model/cardState'
 import type { ViewMode } from '../../features/vocabulary/ui/VocabularyToolbar'
-import type { VocabularyWord } from '../../entities/vocabulary/model/types'
+import type { VocabularyWord } from '../../entities/vocabulary'
 import styles from './VocabularyPage.module.css'
 
 // ── Skeleton loading placeholders ─────────────────────────────────────────────
@@ -81,9 +81,9 @@ function useViewMode(): [ViewMode, (m: ViewMode) => void] {
   const [mode, setMode] = useState<ViewMode>(() => {
     try {
       const stored = localStorage.getItem('vocab-view')
-      return stored === 'compact' ? 'compact' : 'detailed'
+      return stored === 'detailed' ? 'detailed' : 'compact'
     } catch {
-      return 'detailed'
+      return 'compact'
     }
   })
 

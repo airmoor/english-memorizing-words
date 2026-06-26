@@ -64,7 +64,7 @@
   gap: 8px;
   width: 100%;
   padding: 7px var(--space-sm);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   border: none;
   background: none;
   cursor: pointer;
