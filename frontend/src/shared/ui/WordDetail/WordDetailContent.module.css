@@ -18,6 +18,29 @@
   gap: var(--space-lg);
 }
 
+/* ── Show more / fewer meanings toggle ────────────────────────────────────── */
+/* Collapses long entries (e.g. "get") to the first few senses. Low-prominence
+   text button so it reads as a control, not a primary action. */
+.showMoreBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  align-self: flex-start;
+  padding: var(--space-xs) 0;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: var(--font-sm);
+  font-weight: var(--fw-medium);
+  color: var(--color-accent);
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.showMoreBtn:hover {
+  opacity: 0.75;
+}
+
 /* ── Learning layer separator ─────────────────────────────────────────────── */
 .learningSeparator {
   border: none;

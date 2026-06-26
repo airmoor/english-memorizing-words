@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 import type { WordDetailContentProps } from './types'
 import { DictionaryHeader } from './DictionaryHeader'
 import { MeaningGroup } from './MeaningGroup'
-import { groupByPos } from './utils'
+import { Icon } from '../Icon/Icon'
+import { groupByPos, takeTopSenses } from './utils'
 import { NoteSection } from '../../../features/card-note/ui/NoteSection'
 import { TagInputSection } from '../../../features/tags/ui/TagInputSection'
 import { BoardsSection } from './BoardsSection'
@@ -33,6 +35,12 @@ interface SelectionProps {
 }
 
 type Props = WordDetailContentProps & SelectionProps
+
+// Long entries (e.g. "get" has 40+ senses) collapse to the first few top-level
+// senses behind a "Show all" toggle. Counting top-level senses keeps the preview
+// meaningful; the threshold avoids a toggle that would hide only a row or two.
+const DEFAULT_VISIBLE_TOP_SENSES = 3
+const COLLAPSE_MIN_TOTAL = 6
 
 /**
  * The canonical word detail view — section-composed, layout-agnostic.
@@ -74,7 +82,23 @@ export function WordDetailContent({
   onSeeAlso,
   onEdit,
 }: Props) {
-  const groups = groupByPos(word.meanings)
+  const totalMeanings = word.meanings.length
+  const collapsedMeanings = takeTopSenses(word.meanings, DEFAULT_VISIBLE_TOP_SENSES)
+  const canCollapse =
+    totalMeanings >= COLLAPSE_MIN_TOTAL && collapsedMeanings.length < totalMeanings
+
+  // Start expanded when a saved or pre-selected meaning would otherwise be
+  // hidden under the cut — never bury the user's own selection behind the toggle.
+  const [expanded, setExpanded] = useState(() => {
+    if (!canCollapse) return false
+    const visibleIds = new Set(collapsedMeanings.map((m) => m.id))
+    const mustShow = [...(savedMeaningIds ?? []), ...(selectedIds ?? [])]
+    return mustShow.some((id) => !visibleIds.has(id))
+  })
+
+  const groups = groupByPos(
+    canCollapse && !expanded ? collapsedMeanings : word.meanings,
+  )
   const [removeConfirm, setRemoveConfirm] = useState(false)
 
   return (
@@ -117,6 +141,18 @@ export function WordDetailContent({
             onSeeAlso={onSeeAlso}
           />
         ))}
+
+        {canCollapse && (
+          <button
+            type="button"
+            className={styles.showMoreBtn}
+            onClick={() => setExpanded((v) => !v)}
+            aria-expanded={expanded}
+          >
+            <Icon icon={expanded ? ChevronUp : ChevronDown} size={16} />
+            {expanded ? 'Show fewer meanings' : `Show all ${totalMeanings} meanings`}
+          </button>
+        )}
       </div>
 
       {/* ── Sticky save footer — inline selection mode ───────────────── */}
