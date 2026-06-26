@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
+  ParseUUIDPipe,
   Post,
   Query,
   DefaultValuePipe,
@@ -95,7 +96,7 @@ export class ImportController {
   @ApiResponse({ status: 404, description: 'Session not found' })
   getSession(
     @CurrentUser() user: AuthUser,
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
   ): Promise<ImportSessionDto> {
     return this.importService.getSession(user.id, id);
   }

@@ -264,6 +264,15 @@ export class ImportService {
       }
     }
 
+    // Resolve global tag IDs upfront, keeping only those the user actually owns.
+    // settings.tagIds is validated as UUIDs by the DTO but never checked for
+    // ownership; without this filter a caller could pass another user's tag UUID
+    // and link their cards to it (cross-tenant tag association / name leak).
+    const ownedTagIds =
+      dto.settings.tagIds && dto.settings.tagIds.length > 0
+        ? await this.filterOwnedTagIds(userId, dto.settings.tagIds)
+        : [];
+
     // Resolve board IDs upfront — deduplicate board names within the batch.
     // settings.boardId is already a resolved ID; per-row board names need a find-or-create.
     const boardIdCache = new Map<string, string>();
@@ -311,8 +320,8 @@ export class ImportService {
           await this.assignCardToBoard(userId, cardId, resolvedBoardId);
         }
 
-        if (dto.settings.tagIds && dto.settings.tagIds.length > 0) {
-          for (const tagId of dto.settings.tagIds) {
+        if (ownedTagIds.length > 0) {
+          for (const tagId of ownedTagIds) {
             await this.assignCardToTag(cardId, tagId);
           }
         }
@@ -545,6 +554,20 @@ export class ImportService {
        ON CONFLICT (card_id, board_id) DO NOTHING`,
       [cardId, boardId],
     );
+  }
+
+  /**
+   * Filter a list of tag IDs down to those owned by the user.
+   * Guards the global `settings.tagIds` against cross-tenant assignment —
+   * mirrors the ownership check in TagsService.assignTag.
+   */
+  private async filterOwnedTagIds(userId: string, tagIds: string[]): Promise<string[]> {
+    if (tagIds.length === 0) return [];
+    const rows = await this.dataSource.query<{ id: string }[]>(
+      `SELECT id FROM tags WHERE user_id = $1 AND id = ANY($2)`,
+      [userId, tagIds],
+    );
+    return rows.map((r) => r.id);
   }
 
   private async assignCardToTag(cardId: string, tagId: string): Promise<void> {
