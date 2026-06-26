@@ -22,7 +22,7 @@
 .pageTitle {
   font-size: 22px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--color-text-primary);
   margin: 0 0 16px;
   line-height: 1.2;
 }
@@ -33,7 +33,7 @@
   display: flex;
   align-items: flex-end;
   gap: 2px;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .tab {
@@ -43,7 +43,7 @@
   padding: 8px 16px;
   font-size: 14px;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   cursor: pointer;
   margin-bottom: -1px;
   transition: color var(--transition-fast), border-color var(--transition-fast);
@@ -51,7 +51,7 @@
 }
 
 .tab:hover {
-  color: var(--text-primary);
+  color: var(--color-text-primary);
 }
 
 .tabActive {
@@ -82,8 +82,8 @@
   gap: 10px;
   margin-bottom: var(--space-lg);
   padding: 10px 0;
-  background: var(--surface-1);
-  border: 1px solid var(--border-subtle);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md, 8px);
   width: fit-content;
 }
@@ -137,17 +137,17 @@
 
 /* Pending step (step 2 before moving to preview) */
 .stepPending .stepBadge {
-  background: var(--border-subtle);
-  color: var(--text-secondary);
+  background: var(--color-border);
+  color: var(--color-text-secondary);
 }
 
 .stepPending .stepLabel {
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .stepArrow {
   font-size: 14px;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   opacity: 0.5;
 }
 
@@ -172,9 +172,9 @@
 .leftPanel {
   display: flex;
   flex-direction: column;
-  background: var(--surface-1);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg, 12px);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--card-radius);
   overflow: hidden;
   position: sticky;
   top: var(--space-lg);
@@ -222,9 +222,10 @@
   gap: 10px;
   padding: 64px 24px;
   text-align: center;
-  color: var(--text-secondary);
-  border: 2px dashed var(--border-subtle);
-  border-radius: var(--radius-lg, 12px);
+  color: var(--color-text-secondary);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--card-radius);
 }
 
 .rightEmptyIcon {
@@ -236,13 +237,13 @@
 .rightEmptyTitle {
   font-size: 15px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--color-text-primary);
   margin: 0;
 }
 
 .rightEmptyBody {
   font-size: 13px;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   margin: 0;
   max-width: 240px;
 }
@@ -262,7 +263,7 @@
 
 .loadingText {
   font-size: 14px;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
@@ -276,7 +277,7 @@
 
 .errorHint {
   font-size: 13px;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   margin: 0;
   max-width: 320px;
   padding: 8px 12px;
@@ -312,9 +313,9 @@
   border-radius: 6px;
   font-size: 13px;
   font-weight: 500;
-  background: var(--surface-2);
-  color: var(--text-secondary);
-  border: 1px solid var(--border-subtle);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
   cursor: pointer;
   transition: background var(--transition-fast);
 }
@@ -324,9 +325,9 @@
 /* ── History tab ──────────────────────────────────────────────────────────── */
 
 .historyPane {
-  background: var(--surface-1);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg, 12px);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--card-radius);
   overflow: hidden;
   display: flex;
   flex-direction: column;

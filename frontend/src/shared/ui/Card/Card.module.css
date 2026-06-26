@@ -1,83 +1,48 @@
+/* ── The single, standard card ──────────────────────────────────────────────
+   One surface for the whole app (calm/unification pass): bg-card, 1px border,
+   card radius, no shadow. This matches the Home page, which is the design
+   reference. The `glass` / `floating` / `default` variant props are kept for
+   API compatibility but now all resolve to this same standard card.
+   ─────────────────────────────────────────────────────────────────────────── */
 .card {
   background: var(--color-bg-card);
   border-radius: var(--card-radius);
-  border: var(--border-default);
-  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border);
+  box-shadow: none;
 }
 
 .padding-sm  { padding: var(--space-md); }
 .padding-md  { padding: var(--space-lg); }
 .padding-lg  { padding: var(--card-word-padding-y) var(--card-padding-x); }
 
-/* ── Interactive — hover lift for clickable cards/list items ─────────────── */
+/* Legacy variants — intentionally identical to the standard card. Override any
+   shadow / translucency they used to carry so every card looks the same. */
+.flat,
+.floating,
+.glass {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* ── Interactive — only for cards that are themselves a clickable target ─────
+   Unified, restrained hover: accent border + a 1px lift. No heavy shadow. */
 .interactive {
   list-style: none;
+  cursor: pointer;
   transition:
     border-color var(--transition-base),
-    box-shadow   var(--transition-base),
     transform    var(--transition-base);
 }
 
 .interactive:hover {
   border-color: var(--color-accent);
-  box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.14),
-    0 3px  10px rgba(0, 0, 0, 0.08);
-  transform: translateY(-3px);
-}
-
-/* ── Glass — real translucent surface with backdrop blur ─────────────────── */
-/*
- * Use selectively: hero CTA, review flashcard.
- * backdrop-filter is GPU-intensive — apply to at most one or two surfaces
- * visible at any time.
- */
-.glass {
-  background: var(--glass-bg);
-  backdrop-filter: saturate(var(--glass-saturate)) blur(var(--glass-blur));
-  -webkit-backdrop-filter: saturate(var(--glass-saturate)) blur(var(--glass-blur));
-  border-color: var(--glass-border);
-  box-shadow:
-    var(--shadow-md),
-    inset 0 1px 0 var(--glass-highlight);
-}
-
-/* ── Floating — opaque widget surface with layered depth ─────────────────── */
-/*
- * Preferred for stat tiles, dashboard widgets, settings sections, list cards.
- * No backdrop-filter — uses shadow layering + inset top highlight for depth.
- */
-.floating {
-  background: var(--color-bg-card);
-  border-color: var(--color-border);
-  box-shadow:
-    var(--shadow-lg),
-    inset 0 1px 0 var(--glass-highlight);
-  transition:
-    box-shadow   var(--transition-base),
-    border-color var(--transition-base),
-    transform    var(--transition-base);
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .floating:hover {
-    box-shadow:
-      0 16px 48px rgba(0, 0, 0, 0.13),
-      0 4px  12px rgba(0, 0, 0, 0.07),
-      inset 0 1px 0 var(--glass-highlight);
+  .interactive:hover {
     transform: translateY(-1px);
   }
-}
-
-/* ── Flat — borderlined container, no shadow, no hover lift ─────────────── */
-/*
- * Static surface: use for dashboard sections, info panels, any card whose
- * shell is NOT itself a navigation target.  Hover/focus states belong on
- * interactive elements INSIDE the card (buttons, links), not on the card
- * shell.  For a card that IS clickable as a whole, use variant="interactive".
- */
-.flat {
-  box-shadow: none;
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
 }

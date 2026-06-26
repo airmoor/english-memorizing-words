@@ -4,12 +4,6 @@
   flex-direction: column;
   gap: var(--space-lg);
   animation: fadeUp 0.32s var(--ease-out) both;
-  transition: box-shadow 0.25s var(--ease-out), transform 0.25s var(--ease-out);
-}
-
-.entry:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
 }
 
 @keyframes fadeUp {

@@ -1,7 +1,9 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(10, 12, 14, 0.38);
+  backdrop-filter: blur(4px) saturate(120%);
+  -webkit-backdrop-filter: blur(4px) saturate(120%);
   z-index: var(--z-sheet-backdrop, 200);
   /* Entrance animation */
   animation: fadeIn 0.22s ease-out both;
