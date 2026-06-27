@@ -18,6 +18,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { ImportService } from './import.service';
 import { ImportRequestDto } from './dto/import-request.dto';
 import { ImportPreviewResultDto } from './dto/import-preview-result.dto';
@@ -58,6 +59,9 @@ export class ImportController {
    */
   @Post('execute')
   @HttpCode(HttpStatus.OK)
+  // Expensive: one call enriches up to 500 words, each uncached word triggering
+  // outbound dictionary API requests. Cap per IP to prevent amplification abuse.
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @ApiOperation({ summary: 'Execute an import batch — enrich and create cards' })
   @ApiResponse({ status: 200, type: ImportExecuteResultDto, description: 'Import result (partial failure is still 200)' })
   @ApiResponse({ status: 400, description: 'Validation error or batch size exceeds 500' })
