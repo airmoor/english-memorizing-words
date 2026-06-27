@@ -26,17 +26,28 @@ Create `backend/.env`:
 # Database
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/learnenglish
 
-# JWT
-JWT_SECRET=change-me-secret
+# JWT (required)
+JWT_ACCESS_SECRET=change-me-secret
+
+# JWT token lifetimes (optional — defaults shown)
+ACCESS_TOKEN_TTL_SECONDS=900        # 15 minutes
+REFRESH_TOKEN_TTL=2592000000        # 30 days, in ms
 
 # App
 PORT=3001
 NODE_ENV=development
 
+# Frontend URL — used to build password-reset links in emails
+FRONTEND_URL=http://localhost:5173
+
 # Merriam-Webster Learner's Dictionary API (optional)
 # Register at: https://dictionaryapi.com/register/index
 # Falls back to Free Dictionary API if unset.
 MERRIAM_API_KEY=
+
+# Transactional email (optional)
+# Without it, password-reset emails are simulated (link logged to console).
+RESEND_API_KEY=
 ```
 
 Frontend has no `.env` file — it proxies `/api` to `localhost:3001` via Vite.
@@ -68,7 +79,7 @@ npm --workspace frontend run dev
 |----------|------------------------------|
 | Frontend | http://localhost:5173         |
 | Backend  | http://localhost:3001         |
-| Swagger  | http://localhost:3001/api     |
+| Swagger  | http://localhost:3001/api/docs |
 
 ## Scripts
 
