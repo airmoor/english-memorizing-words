@@ -1,0 +1,88 @@
+# Full dev stack — Postgres + backend + frontend, all with hot reload.
+#
+#   docker compose -f docker-compose.dev.yaml up        # start everything
+#   docker compose -f docker-compose.dev.yaml up --build # rebuild after dep changes
+#   docker compose -f docker-compose.dev.yaml down       # stop
+#   docker compose -f docker-compose.dev.yaml down -v     # stop + wipe db/node_modules volumes
+#
+# Source is bind-mounted, so edits on the host trigger live reload inside the
+# containers. node_modules are kept in anonymous volumes so the linux builds
+# (esp. native bcrypt) are not clobbered by the host's darwin node_modules.
+#
+# Frontend → http://localhost:5173   Backend → http://localhost:3001/api
+# Swagger  → http://localhost:3001/api/docs
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: learnenglish
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d learnenglish"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    # Run pending migrations, then start Nest in watch mode.
+    command: sh -c "npm --workspace backend run migration:run && npm --workspace backend run start:dev"
+    environment:
+      NODE_ENV: development
+      PORT: "3001"
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/learnenglish
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev-access-secret-change-me}
+      ACCESS_TOKEN_TTL_SECONDS: "900"
+      REFRESH_TOKEN_TTL: "2592000000"
+      FRONTEND_URL: http://localhost:5173
+      MERRIAM_API_KEY: ${MERRIAM_API_KEY:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      # Force TypeScript's watcher to poll — fs events don't cross the
+      # macOS host → linux container bind-mount boundary reliably.
+      TSC_WATCHFILE: DynamicPriorityPolling
+      TSC_WATCHDIRECTORY: DynamicPriorityPolling
+      CHOKIDAR_USEPOLLING: "true"
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./:/app
+      # Anonymous volumes mask the bind-mounted host node_modules with the
+      # image's linux install. Order matters: more specific paths win.
+      - /app/node_modules
+      - /app/backend/node_modules
+      - /app/frontend/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: sh -c "npm --workspace frontend run dev -- --host 0.0.0.0"
+    environment:
+      # Vite's dev-server proxy runs inside this container, so /api must target
+      # the backend service by name, not localhost. vite.config.ts reads this.
+      VITE_PROXY_TARGET: http://backend:3001
+      # Vite/chokidar file watching over the bind mount needs polling on macOS.
+      CHOKIDAR_USEPOLLING: "true"
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./:/app
+      - /app/node_modules
+      - /app/backend/node_modules
+      - /app/frontend/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
