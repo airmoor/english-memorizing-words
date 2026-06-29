@@ -56,8 +56,16 @@
 
     --color-danger: #dc2626;
     --color-warning: #b45309;
-    --color-easy: #3f9e8d;
     --color-success: #15803d;
+
+    /* Review rating scale — "soft tinted": pale tint background + colored text.
+       Four distinct hue families (red → amber → green → blue) so no two options
+       read alike, but muted to fit the calm aesthetic. Dark-mode pairs are in
+       the [data-theme] block below. */
+    --color-rate-again-bg: #f7ddd8; --color-rate-again-fg: #a8453c;
+    --color-rate-hard-bg:  #f7e4cf; --color-rate-hard-fg:  #95591f;
+    --color-rate-good-bg:  #d9ebe0; --color-rate-good-fg:  #2f6b46;
+    --color-rate-easy-bg:  #dde7f5; --color-rate-easy-fg:  #34588a;
 
     /* Spacing — fluid scale from ≈360px (mobile) to ≈1024px (desktop).
        Each token clamps between a compact mobile floor and its current
@@ -240,6 +248,12 @@
     --selection-bg: rgba(63, 158, 141, 0.36);
     /* --border-card uses black at near-zero opacity — invisible on dark surfaces */
     --border-card: 0.5px solid rgba(255, 255, 255, 0.10);
+
+    /* Soft-tinted rating buttons, dark variant: dark hue-tinted fill + light text. */
+    --color-rate-again-bg: #3b2421; --color-rate-again-fg: #e6a39b;
+    --color-rate-hard-bg:  #3a2f20; --color-rate-hard-fg:  #e6b87f;
+    --color-rate-good-bg:  #20302a; --color-rate-good-fg:  #8fccab;
+    --color-rate-easy-bg:  #20293a; --color-rate-easy-fg:  #9fb9e6;
 }
 
 /* Per-theme glass + aurora-gradient overrides were removed in the calm pass.

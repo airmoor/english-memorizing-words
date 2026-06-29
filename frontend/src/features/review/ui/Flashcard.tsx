@@ -124,7 +124,6 @@ export function Flashcard({ card, onRated }: Props) {
           <RatingButtons
             onRate={(r) => rateMutation.mutate(r)}
             disabled={rateMutation.isPending}
-            previews={answerQuery.data?.nextReviewPreviews}
           />
         </div>
       )}
