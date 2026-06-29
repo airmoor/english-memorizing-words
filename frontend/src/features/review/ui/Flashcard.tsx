@@ -10,6 +10,7 @@ import { Stack } from '../../../shared/ui/Stack/Stack'
 import { PosBadge } from '../../../shared/ui/PosBadge/PosBadge'
 import { ExampleSentence } from '../../../shared/ui/ExampleSentence/ExampleSentence'
 import { RatingButtons } from './RatingButtons'
+import { TranslationBlock } from '../../translation/ui/TranslationBlock'
 import styles from './Flashcard.module.css'
 
 interface Props {
@@ -100,6 +101,10 @@ export function Flashcard({ card, onRated }: Props) {
                       </li>
                     ))}
                   </ol>
+
+                  {/* Native-language translation — bottom fallback, collapsed by
+                      default so the learner reasons in English first. */}
+                  <TranslationBlock wordId={card.wordId} variant="footer" />
                 </Stack>
               )}
 
@@ -119,7 +124,6 @@ export function Flashcard({ card, onRated }: Props) {
           <RatingButtons
             onRate={(r) => rateMutation.mutate(r)}
             disabled={rateMutation.isPending}
-            previews={answerQuery.data?.nextReviewPreviews}
           />
         </div>
       )}

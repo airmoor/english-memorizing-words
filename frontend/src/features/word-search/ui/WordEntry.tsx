@@ -96,13 +96,12 @@ export function WordEntry({ word, onSeeAlso }: Props) {
   }
 
   function handleSaveSelection() {
+    // Flip badge immediately — user confirmed save, don't wait for server.
+    // (Runs synchronously before mutate(), matching the old onMutate timing.)
+    setOptimistic(true)
     saveMutation.mutate(
       { wordId: word.id, meaningIds: selectedIds },
       {
-        onMutate: () => {
-          // Flip badge immediately — user confirmed save, don't wait for server
-          setOptimistic(true)
-        },
         onError: () => {
           setOptimistic(null) // revert on failure
         },

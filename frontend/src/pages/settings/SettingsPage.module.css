@@ -320,3 +320,11 @@
 .successMsg {
   color: var(--color-success, #22c55e);
 }
+
+/* ── Native language selector ─────────────────────────────────────────────── */
+
+.languageRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}

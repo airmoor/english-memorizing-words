@@ -254,8 +254,6 @@ export function VocabularyPage() {
   const {
     filters:          apiFilters,
     setFilter:        setApiFilter,
-    clearFilters:     clearApiFilters,
-    hasActiveFilters: hasApiFilters,
   } = useVocabularyFilters()
 
   // ── Board context — URL-backed ────────────────────────────────────────────

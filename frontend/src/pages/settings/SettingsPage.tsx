@@ -19,6 +19,9 @@ import { changePasswordApi } from '../../features/auth/api/changePassword'
 import { ManageBoardsSheet } from '../../features/boards/ui/ManageBoardsSheet'
 import { ManageTagsSheet } from '../../features/tags/ui/ManageTagsSheet'
 import { ImportSheet } from '../../features/import-vocabulary/ui/ImportSheet'
+import { useProfile, useUpdateNativeLanguage } from '../../features/profile/model/useProfile'
+import { SelectMenu, type SelectMenuOption } from '../../shared/ui/SelectMenu'
+import { SUPPORTED_LANGUAGES } from '../../shared/lib/languages'
 import { featureFlags } from '../../shared/lib/featureFlags'
 import styles from './SettingsPage.module.css'
 
@@ -120,6 +123,17 @@ export function SettingsPage() {
             Currently active: <strong>{resolved}</strong>
           </Text>
 
+          {/* ── Native language ──────────────────────────────────────────── */}
+          <Card variant="flat" padding="lg" className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <Text variant="label" as="h2" className={styles.sectionTitle}>Native language</Text>
+              <Text variant="caption" color="secondary" as="p">
+                Used for the translation shown on word cards and the review fallback.
+              </Text>
+            </div>
+            <NativeLanguageSection />
+          </Card>
+
           {/* ── Vocabulary Import ────────────────────────────────────────── */}
           {featureFlags.vocabularyImport && (
             <Card variant="flat" padding="lg" className={styles.section}>
@@ -213,6 +227,39 @@ export function SettingsPage() {
         <ImportSheet open={importOpen} onClose={() => setImportOpen(false)} />
       )}
     </PageLayout>
+  )
+}
+
+// ── Native Language Section ────────────────────────────────────────────────────
+
+const LANGUAGE_OPTIONS: SelectMenuOption<string>[] = [
+  { value: '', label: 'Not set' },
+  ...SUPPORTED_LANGUAGES.map((lang) => ({ value: lang.code, label: lang.label })),
+]
+
+function NativeLanguageSection() {
+  const { data: profile, isPending } = useProfile()
+  const updateLanguage = useUpdateNativeLanguage()
+
+  const current = profile?.nativeLanguageCode ?? ''
+
+  return (
+    <div className={styles.languageRow}>
+      <SelectMenu
+        value={current}
+        options={LANGUAGE_OPTIONS}
+        ariaLabel="Native language"
+        placeholder="Not set"
+        disabled={isPending || updateLanguage.isPending}
+        onChange={(value) => updateLanguage.mutate(value === '' ? null : value)}
+      />
+      {updateLanguage.isPending && (
+        <Text variant="caption" color="secondary" as="span">Saving…</Text>
+      )}
+      {updateLanguage.isError && (
+        <Text variant="caption" color="danger" as="span">Couldn’t save. Try again.</Text>
+      )}
+    </div>
   )
 }
 

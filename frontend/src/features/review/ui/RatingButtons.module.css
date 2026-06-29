@@ -21,25 +21,13 @@
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  border: none;
-  color: var(--color-bg-secondary);
-}
-
-/* When a sub-label is present, give slightly more vertical room */
-.withSub {
-  padding: var(--space-xs) 0;
+  /* Soft-tinted: background + text colour + hue-matched hairline are set per
+     rating class below. */
+  border: 1px solid transparent;
 }
 
 .mainLabel {
   display: block;
-  line-height: 1.2;
-}
-
-.subLabel {
-  display: block;
-  font-size: 10px;
-  font-weight: var(--fw-bold);
-  opacity: 0.8;
   line-height: 1.2;
 }
 
@@ -48,27 +36,15 @@
   cursor: not-allowed;
 }
 
-.again {
-  /* background-color: var(--color-error-soft); */
-  background-color:  color-mix(in srgb, var(--color-danger) 75%, #888)
-}
+/* Soft-tinted: pale tint background + colored text, with a faint hue-matched
+   hairline so the pills read as buttons on a white card. */
+.again { background-color: var(--color-rate-again-bg); color: var(--color-rate-again-fg); border-color: color-mix(in srgb, var(--color-rate-again-fg) 20%, transparent); }
+.hard  { background-color: var(--color-rate-hard-bg);  color: var(--color-rate-hard-fg);  border-color: color-mix(in srgb, var(--color-rate-hard-fg)  20%, transparent); }
+.good  { background-color: var(--color-rate-good-bg);  color: var(--color-rate-good-fg);  border-color: color-mix(in srgb, var(--color-rate-good-fg)  20%, transparent); }
+.easy  { background-color: var(--color-rate-easy-bg);  color: var(--color-rate-easy-fg);  border-color: color-mix(in srgb, var(--color-rate-easy-fg)  20%, transparent); }
 
-.hard {
-  /* background-color: var(--color-warning-soft); */
-  background-color:  color-mix(in srgb, var(--color-warning) 75%, #888)
-}
-
-.good {
-  /* background-color: var(--color-success-soft);  */
-  background-color:  color-mix(in srgb, var(--color-success) 75%, #888)
-}
-
-.easy {
-  /* background-color: var(--color-easy-soft); */
-  background-color:  color-mix(in srgb, var(--color-easy) 75%, #888)
-}
-
-.again:hover:not(:disabled) { background-color: var(--color-danger);   }
-.hard:hover:not(:disabled)  { background-color: var(--color-warning); }
-.good:hover:not(:disabled)  { background-color: var(--color-success);  }
-.easy:hover:not(:disabled)  { background-color: var(--color-accent);  }
+/* Hover deepens the tint by mixing a little of the text hue into the fill. */
+.again:hover:not(:disabled) { background-color: color-mix(in srgb, var(--color-rate-again-bg) 88%, var(--color-rate-again-fg)); }
+.hard:hover:not(:disabled)  { background-color: color-mix(in srgb, var(--color-rate-hard-bg)  88%, var(--color-rate-hard-fg)); }
+.good:hover:not(:disabled)  { background-color: color-mix(in srgb, var(--color-rate-good-bg)  88%, var(--color-rate-good-fg)); }
+.easy:hover:not(:disabled)  { background-color: color-mix(in srgb, var(--color-rate-easy-bg)  88%, var(--color-rate-easy-fg)); }

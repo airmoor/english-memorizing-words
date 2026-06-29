@@ -21,6 +21,13 @@ export class User {
   @Column({ name: 'password_hash', type: 'text' })
   passwordHash: string;
 
+  /**
+   * ISO 639-1 code of the user's native language ('ru', 'uk', …).
+   * Drives which translation the UI surfaces on cards. NULL = not chosen yet.
+   */
+  @Column({ name: 'native_language_code', type: 'text', nullable: true })
+  nativeLanguageCode: string | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 

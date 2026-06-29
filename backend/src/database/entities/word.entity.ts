@@ -9,6 +9,7 @@ import { DictionaryProvider } from '../enums/dictionary-provider.enum';
 import { Meaning } from './meaning.entity';
 import { UserWord } from './user-word.entity';
 import { Card } from './card.entity';
+import { WordTranslation } from './word-translation.entity';
 
 @Entity('words')
 export class Word {
@@ -46,4 +47,7 @@ export class Word {
 
   @OneToMany(() => Card, (card) => card.word)
   cards: Card[];
+
+  @OneToMany(() => WordTranslation, (translation) => translation.word)
+  translations: WordTranslation[];
 }

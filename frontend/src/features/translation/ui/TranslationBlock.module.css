@@ -1,0 +1,76 @@
+/* One morphing disclosure row: "Show translation" → the translation itself. */
+.block {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-subtle);
+  font-size: var(--font-sm);
+  /* Fixed line-height (length, not unitless) so the row height stays identical
+     whether it shows the smaller "Show translation" label or the larger
+     translation text — otherwise the line box grows and the row jumps. */
+  line-height: 1.5rem;
+  text-align: left;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background var(--transition-fast) var(--ease-out);
+}
+
+.block:hover {
+  background: var(--surface-accent);
+}
+
+/* Footer variant (review answer): a touch more separation from the meanings. */
+.footer {
+  margin-top: var(--space-md);
+}
+
+.leadIcon {
+  color: var(--color-accent-fg);
+  flex-shrink: 0;
+}
+
+/* Content row — remounted on each phase change (keyed in TSX) so this
+   fade-in replays when the label morphs into the translation. */
+.content {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  animation: translationContentIn 0.3s var(--ease-out, ease) both;
+}
+
+@keyframes translationContentIn {
+  from { opacity: 0; transform: translateY(2px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.toggleLabel {
+  font-weight: var(--fw-medium);
+  color: var(--color-accent-fg);
+}
+
+.translation {
+  font-size: var(--font-md);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-primary);
+}
+
+.muted {
+  color: var(--color-text-secondary);
+}
+
+/* Show / hide eye icon, pinned to the far right in every state. */
+.toggleIcon {
+  color: var(--color-accent-fg);
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .content {
+    animation: none;
+  }
+}
