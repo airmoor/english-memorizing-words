@@ -13,6 +13,7 @@ import { TagsModule } from './tags/tags.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { WordsModule } from './words/words.module';
 import { VocabularyModule } from './vocabulary/vocabulary.module';
+import { TranslationsModule } from './translations/translations.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { VocabularyModule } from './vocabulary/vocabulary.module';
     ReviewsModule,
     WordsModule,
     VocabularyModule,
+    TranslationsModule,
   ],
   providers: [
     {
