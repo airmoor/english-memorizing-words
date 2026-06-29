@@ -7,6 +7,7 @@ import { Icon } from '../Icon/Icon'
 import { groupByPos, takeTopSenses } from './utils'
 import { NoteSection } from '../../../features/card-note/ui/NoteSection'
 import { TagInputSection } from '../../../features/tags/ui/TagInputSection'
+import { TranslationBlock } from '../../../features/translation/ui/TranslationBlock'
 import { BoardsSection } from './BoardsSection'
 import { ReviewInfoSection } from './ReviewInfoSection'
 import { featureFlags } from '../../../shared/lib/featureFlags'
@@ -125,6 +126,14 @@ export function WordDetailContent({
           <button type="button" className={styles.selectionBarCancel} onClick={onCancelSelection}>
             Cancel
           </button>
+        </div>
+      )}
+
+      {/* ── Native-language gloss — tap to reveal. Hidden during save selection
+            so it never competes with the meaning-picker flow. ─────────────── */}
+      {!selectionMode && (
+        <div className={styles.translationRow}>
+          <TranslationBlock wordId={word.id} />
         </div>
       )}
 

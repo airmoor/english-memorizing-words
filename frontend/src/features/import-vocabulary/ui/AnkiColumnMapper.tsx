@@ -9,7 +9,7 @@ interface AnkiColumnMapperProps {
   onBack: () => void
 }
 
-export function AnkiColumnMapper({ suggestions, rawText, onConfirm, onBack }: AnkiColumnMapperProps) {
+export function AnkiColumnMapper({ suggestions, onConfirm, onBack }: AnkiColumnMapperProps) {
   // Default: pre-select the highest-confidence column
   const [selectedWord, setSelectedWord] = useState<number>(suggestions[0]?.index ?? 0)
   const [selectedTags, setSelectedTags] = useState<number | undefined>(undefined)

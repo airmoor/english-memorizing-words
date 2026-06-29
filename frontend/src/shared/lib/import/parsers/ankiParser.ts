@@ -19,7 +19,7 @@ function hasLexisHeader(firstLine: string): boolean {
  *
  * Returns columns sorted by descending confidence.
  */
-function scoreColumns(rows: string[][], delimiter: '\t' | ','): ColumnSuggestion[] {
+function scoreColumns(rows: string[][]): ColumnSuggestion[] {
   if (rows.length === 0) return []
 
   const colCount   = Math.max(...rows.map((r) => r.length))
@@ -108,7 +108,7 @@ async function parseAnki(
 
   // If no column map provided, return suggestions and require mapping
   if (columnMap === undefined) {
-    const columnSuggestions = scoreColumns(dataRows, delimiter)
+    const columnSuggestions = scoreColumns(dataRows)
     emitParserEvent('parse_complete', {
       parser: 'anki',
       rowsParsed: 0,

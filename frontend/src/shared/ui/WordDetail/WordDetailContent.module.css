@@ -18,6 +18,11 @@
   gap: var(--space-lg);
 }
 
+/* Native-language gloss sits between the header and the meanings list. */
+.translationRow {
+  margin-bottom: var(--space-md);
+}
+
 /* ── Show more / fewer meanings toggle ────────────────────────────────────── */
 /* Collapses long entries (e.g. "get") to the first few senses. Low-prominence
    text button so it reads as a control, not a primary action. */
