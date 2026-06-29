@@ -47,7 +47,6 @@ export const tokens = {
     regular:  'var(--fw-regular)',
     medium:   'var(--fw-medium)',
     semibold: 'var(--fw-semibold)',
-    bold:     'var(--fw-bold)',
   },
 } as const
 

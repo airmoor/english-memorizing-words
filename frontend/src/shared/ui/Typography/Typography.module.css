@@ -1,13 +1,13 @@
 .heading {
   font-size: var(--text-page-title);
-  font-weight: var(--fw-bold);
+  font-weight: var(--fw-medium);
   line-height: 1.2;
   letter-spacing: -0.02em;
 }
 
 .title {
   font-size: var(--text-section-title);
-  font-weight: var(--fw-bold);
+  font-weight: var(--fw-semibold);
   line-height: 1.3;
 }
 

@@ -118,7 +118,8 @@
     --fw-regular: 400;
     --fw-medium: 500;
     --fw-semibold: 600;
-    --fw-bold: 700;
+    /* 700 removed — the system tops out at semibold (600). Headings/titles use
+       500 (serif headword) and 600 (page/section titles); 700 read too heavy. */
 
     /* Font families — Inter (UI grotesk) + Source Serif 4 (editorial headings),
        loaded in index.html. System stacks remain as graceful fallbacks. */

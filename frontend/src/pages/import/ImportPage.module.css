@@ -21,7 +21,7 @@
 
 .pageTitle {
   font-size: 22px;
-  font-weight: 700;
+  font-weight: var(--fw-semibold);
   color: var(--color-text-primary);
   margin: 0 0 16px;
   line-height: 1.2;
@@ -100,7 +100,7 @@
   height: 22px;
   border-radius: 50%;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: var(--fw-semibold);
   flex-shrink: 0;
   transition: background var(--transition-base), color var(--transition-base);
 }
