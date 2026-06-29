@@ -30,9 +30,11 @@ export class TranslationsService {
 
   /** Collapses concurrent misses on the same (word, lang) into one API call. */
   private readonly inflight = new Map<string, Promise<WordTranslation | null>>();
-  /** key → epoch ms of last empty/error result; suppresses re-query for a TTL. */
-  private readonly recentFailures = new Map<string, number>();
-  private readonly FAILURE_TTL_MS = 60_000;
+  /** key → epoch ms of last *genuine empty* result; suppresses re-query for a
+   *  TTL. Provider errors are deliberately NOT recorded here (see fetchAndStore)
+   *  so a transient outage can't mask a word as untranslatable. */
+  private readonly recentEmpties = new Map<string, number>();
+  private readonly EMPTY_TTL_MS = 60_000;
 
   constructor(
     @InjectRepository(WordTranslation)
@@ -81,9 +83,13 @@ export class TranslationsService {
 
     const key = `${wordId}:${lang}`;
 
-    // Negative guard: skip the provider during empty/error storms.
-    const failedAt = this.recentFailures.get(key);
-    if (failedAt && Date.now() - failedAt < this.FAILURE_TTL_MS) return null;
+    // Negative guard: skip the provider for a short window after a genuine
+    // empty result. Evict expired entries on read so the map can't grow.
+    const emptyAt = this.recentEmpties.get(key);
+    if (emptyAt !== undefined) {
+      if (Date.now() - emptyAt < this.EMPTY_TTL_MS) return null;
+      this.recentEmpties.delete(key);
+    }
 
     // Single-flight: one API call per key even under concurrent misses.
     const pending = this.inflight.get(key);
@@ -118,12 +124,15 @@ export class TranslationsService {
         lang,
       );
     } catch (err) {
-      this.recentFailures.set(key, Date.now());
+      // Do NOT negative-cache provider errors — a transient outage would
+      // otherwise mask the word as untranslatable (surfaced as 404 and cached
+      // forever client-side). Let the error propagate (it surfaces as 503);
+      // only the genuine empty result below is recorded.
       throw err;
     }
 
     if (!normalized) {
-      this.recentFailures.set(key, Date.now());
+      this.recentEmpties.set(key, Date.now());
       return null;
     }
 
