@@ -1,0 +1,84 @@
+.block {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-xs) var(--space-sm);
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-subtle);
+  font-size: var(--font-sm);
+  text-align: left;
+  color: var(--color-text-secondary);
+}
+
+/* When collapsed the whole block is a button — give it affordance. */
+button.block {
+  cursor: pointer;
+  transition: background var(--transition-fast) var(--ease-out);
+}
+
+button.block:hover {
+  background: var(--surface-accent);
+}
+
+/* Footer variant (review answer): a touch more separation from the meanings. */
+.footer {
+  margin-top: var(--space-md);
+}
+
+.header {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--color-accent-fg);
+}
+
+.leadIcon {
+  color: var(--color-accent-fg);
+  flex-shrink: 0;
+}
+
+.toggleLabel {
+  font-weight: var(--fw-medium);
+  color: var(--color-accent-fg);
+}
+
+.langTag {
+  font-weight: var(--fw-medium);
+  color: var(--color-accent-fg);
+}
+
+.chevron {
+  color: var(--color-accent-fg);
+  margin-left: auto;
+}
+
+.body {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  width: 100%;
+}
+
+.translation {
+  font-size: var(--font-md);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-primary);
+}
+
+.attribution {
+  font-size: var(--font-xs);
+  color: var(--color-text-secondary);
+  opacity: 0.8;
+}
+
+.muted {
+  color: var(--color-text-secondary);
+}
