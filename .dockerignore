@@ -1,0 +1,16 @@
+# Keep the build context small/fast. Does NOT affect runtime bind mounts —
+# only what gets sent to the daemon for `docker build`.
+node_modules
+**/node_modules
+backend/dist
+frontend/dist
+coverage
+.git
+.gitignore
+*.log
+.env
+.env.local
+.DS_Store
+.claude/
+.vscode/
+.idea/

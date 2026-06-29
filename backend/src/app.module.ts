@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { dataSourceOptions } from './data-source';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
@@ -36,6 +36,13 @@ import { UsersModule } from './users/users.module';
     UsersModule,
   ],
   providers: [
+    // Throttler must run BEFORE the JWT guard so that rate limits apply to
+    // unauthenticated requests too (login brute-force, password-reset spam).
+    // Global guards execute in declaration order.
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

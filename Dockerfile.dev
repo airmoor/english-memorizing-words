@@ -1,0 +1,27 @@
+# Shared dev image for backend + frontend (npm workspaces).
+#
+# Why one image for both: the monorepo hoists dependencies to the root
+# node_modules, so a single `npm ci` at the root installs everything both
+# workspaces need. The two services differ only in their runtime command.
+#
+# Native modules (bcrypt) are compiled here for linux/musl. The host's
+# node_modules (built for darwin) must therefore NEVER be mounted over this —
+# docker-compose.dev.yaml masks node_modules with anonymous volumes so the
+# image's linux build is what actually runs.
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Copy only manifests first so the dependency layer caches independently of
+# source changes. Workspace package.json files are required for `npm ci` to
+# resolve the workspace graph.
+COPY package.json package-lock.json ./
+COPY backend/package.json ./backend/
+COPY frontend/package.json ./frontend/
+
+# Full install (incl. dev deps) — start:dev, ts-node migrations, and vite all
+# need devDependencies. Builds bcrypt against linux/musl.
+RUN npm ci
+
+# Source is bind-mounted at runtime (see compose). Nothing else to copy.
+# The actual command is provided per-service by docker-compose.dev.yaml.

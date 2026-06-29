@@ -2,6 +2,10 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
+// In Docker the dev-server proxy must reach the backend by service name
+// (http://backend:3001); on the host it stays http://localhost:3001.
+const proxyTarget = process.env.VITE_PROXY_TARGET ?? 'http://localhost:3001'
+
 export default defineConfig({
   plugins: [
     react(),
@@ -79,7 +83,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        target: proxyTarget,
         changeOrigin: true,
         cookieDomainRewrite: 'localhost',
       },
