@@ -1,9 +1,8 @@
-import { useState } from 'react'
-import { Languages, ChevronDown, ChevronUp } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
+import { Languages, Eye, EyeOff } from 'lucide-react'
 import { Icon } from '../../../shared/ui/Icon/Icon'
 import { useProfile } from '../../profile/model/useProfile'
 import { useTranslation } from '../model/useTranslation'
-import { languageLabel } from '../../../shared/lib/languages'
 import styles from './TranslationBlock.module.css'
 
 interface Props {
@@ -16,9 +15,17 @@ interface Props {
 }
 
 /**
- * Tap-to-reveal native-language gloss for a word. Collapsed by default so the
- * learner engages with the English first; the translation is fetched lazily
- * only once revealed. Renders nothing until the user has set a native language.
+ * Tap-to-reveal native-language gloss for a word.
+ *
+ * One morphing row: collapsed it reads "Show translation"; revealed, the same
+ * row shows the translation itself (label → answer). No provider attribution and
+ * no language label — the language is a global user setting, and the engine is
+ * irrelevant to the learner. Fetched lazily only once revealed. Renders nothing
+ * until the user has set a native language.
+ *
+ * The content fades in on every phase change (keyed by `phase`); the trailing
+ * eye / eye-off icon signals show / hide. The fade is disabled under
+ * prefers-reduced-motion via CSS.
  */
 export function TranslationBlock({ wordId, variant = 'inline' }: Props) {
   const { data: profile } = useProfile()
@@ -30,62 +37,47 @@ export function TranslationBlock({ wordId, variant = 'inline' }: Props) {
   // No native language chosen yet → keep the surface clean.
   if (!native) return null
 
-  const langName = languageLabel(native)
+  // `phase` is both the render branch and the animation key — changing it
+  // remounts the content span so the fade-in replays.
+  let phase: string
+  let label: ReactNode
+  if (!revealed) {
+    phase = 'label'
+    label = <span className={styles.toggleLabel}>Show translation</span>
+  } else if (query.isPending) {
+    phase = 'loading'
+    label = <span className={styles.muted}>Translating…</span>
+  } else if (query.isError) {
+    phase = 'error'
+    label = <span className={styles.muted}>Translation unavailable</span>
+  } else if (query.data) {
+    phase = 'data'
+    label = (
+      <span className={styles.translation} lang={native}>
+        {query.data.text}
+      </span>
+    )
+  } else {
+    phase = 'empty'
+    label = <span className={styles.muted}>No translation available</span>
+  }
+
   const containerClass = [styles.block, variant === 'footer' ? styles.footer : '']
     .filter(Boolean)
     .join(' ')
 
-  if (!revealed) {
-    return (
-      <button
-        type="button"
-        className={containerClass}
-        onClick={() => setRevealed(true)}
-        aria-expanded={false}
-      >
-        <Icon icon={Languages} size={15} className={styles.leadIcon} />
-        <span className={styles.toggleLabel}>Show translation</span>
-        <span className={styles.langTag}>{langName}</span>
-        <Icon icon={ChevronDown} size={15} className={styles.chevron} />
-      </button>
-    )
-  }
-
   return (
-    <div className={containerClass}>
-      <button
-        type="button"
-        className={styles.header}
-        onClick={() => setRevealed(false)}
-        aria-expanded
-      >
-        <Icon icon={Languages} size={15} className={styles.leadIcon} />
-        <span className={styles.langTag}>{langName}</span>
-        <Icon icon={ChevronUp} size={15} className={styles.chevron} />
-      </button>
-
-      <div className={styles.body}>
-        {query.isPending && (
-          <span className={styles.muted}>Translating…</span>
-        )}
-
-        {query.isError && (
-          <span className={styles.muted}>Translation unavailable right now.</span>
-        )}
-
-        {query.isSuccess && query.data === null && (
-          <span className={styles.muted}>No translation available.</span>
-        )}
-
-        {query.data && (
-          <>
-            <span className={styles.translation} lang={native}>
-              {query.data.text}
-            </span>
-            <span className={styles.attribution}>via {query.data.provider}</span>
-          </>
-        )}
-      </div>
-    </div>
+    <button
+      type="button"
+      className={containerClass}
+      onClick={() => setRevealed((v) => !v)}
+      aria-expanded={revealed}
+    >
+      <Icon icon={Languages} size={15} className={styles.leadIcon} />
+      <span key={phase} className={styles.content}>
+        {label}
+      </span>
+      <Icon icon={revealed ? EyeOff : Eye} size={15} className={styles.toggleIcon} />
+    </button>
   )
 }
