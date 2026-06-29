@@ -14,6 +14,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { CurrentUser, AuthUser } from '../common/decorators/current-user.decorator';
 import { TranslationsService } from './translations.service';
 
@@ -38,6 +39,9 @@ export class TranslationsController {
   constructor(private readonly service: TranslationsService) {}
 
   @Get()
+  // Cache-misses hit the external DeepL API (paid, one-time free credit), so
+  // cap this like the dictionary lookup to protect quota from abuse/loops.
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
   @ApiOperation({
     summary:
       "Get a word's translation (DB-cached, falls back to the translation API). " +
