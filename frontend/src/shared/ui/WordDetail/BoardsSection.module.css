@@ -10,7 +10,7 @@
   font-size: var(--font-xs);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--tracking-wide);
   color: var(--color-text-secondary);
 }
 

@@ -50,7 +50,7 @@
   font-weight: var(--fw-regular);
   color: var(--color-text-primary);
   margin: 0;
-  line-height: 1.2;
+  line-height: var(--leading-snug);
 }
 
 /* ── Stats row ───────────────────────────────────────────────────────────── */

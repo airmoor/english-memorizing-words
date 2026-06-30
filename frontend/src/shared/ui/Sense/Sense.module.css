@@ -69,7 +69,7 @@
 .seeAlsoLabel {
   font-size: var(--text-micro);
   color: var(--color-text-secondary);
-  letter-spacing: 0.04em;
+  letter-spacing: var(--tracking-wide);
 }
 
 .seeAlsoChip {

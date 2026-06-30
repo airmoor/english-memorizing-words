@@ -195,14 +195,14 @@
   font-size: var(--text-card-title);
   font-weight: var(--fw-medium);
   color: var(--color-text-primary);
-  line-height: 1.2;
+  line-height: var(--leading-snug);
 }
 
 .statSub {
   font-size: var(--text-micro);
   color: var(--color-text-secondary);
   margin-top: var(--space-xs);
-  line-height: 1.4;
+  line-height: var(--leading-normal);
 }
 
 /* ── Recently saved ───────────────────────────────────────────────────────── */

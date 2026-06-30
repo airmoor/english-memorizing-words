@@ -39,12 +39,11 @@
 .groupLabel {
   display: block;
   padding: var(--space-sm) var(--space-sm) 4px;
-  font-size: 10px;
+  font-size: var(--font-2xs);
   font-weight: var(--fw-semibold);
-  letter-spacing: 0.08em;
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  color: var(--color-text-secondary);
-  opacity: 0.55;
+  color: var(--color-text-muted);
   user-select: none;
   font-family: var(--font-sans);
 }
@@ -104,8 +103,7 @@
 
 /* "New board" and muted items */
 .itemAction {
-  color: var(--color-text-secondary);
-  opacity: 0.75;
+  color: var(--color-text-muted);
 }
 
 .itemAction:hover {
@@ -148,10 +146,9 @@
 
 .itemCount {
   flex-shrink: 0;
-  font-size: 11px;
+  font-size: var(--font-2xs);
   font-weight: var(--fw-regular);
-  color: var(--color-text-secondary);
-  opacity: 0.55;
+  color: var(--color-text-muted);
   margin-left: auto;
   font-variant-numeric: tabular-nums;
 }
@@ -196,10 +193,9 @@
 
 /* ── Count ─────────────────────────────────────────────────────────────────── */
 .trailingCount {
-  font-size: 11px;
+  font-size: var(--font-2xs);
   font-weight: var(--fw-regular);
-  color: var(--color-text-secondary);
-  opacity: 0.55;
+  color: var(--color-text-muted);
   pointer-events: none;
   font-variant-numeric: tabular-nums;
 }

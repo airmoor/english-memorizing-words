@@ -78,7 +78,7 @@
   font-family: var(--font-serif);
   font-size: var(--text-card-title);
   font-weight: var(--fw-semibold);
-  letter-spacing: -0.01em;
+  letter-spacing: var(--tracking-snug);
   color: var(--color-text-primary);
 }
 
@@ -86,7 +86,7 @@
   font-size: var(--font-xs);
   color: var(--color-text-secondary);
   font-style: italic;
-  letter-spacing: 0.02em;
+  letter-spacing: var(--tracking-normal);
 }
 
 .meanings {
@@ -162,7 +162,7 @@
   padding: 0 6px;
   height: 18px;
   border-radius: var(--radius-full);
-  font-size: 11px;
+  font-size: var(--font-2xs);
   white-space: nowrap;
   max-width: 120px;
   overflow: hidden;

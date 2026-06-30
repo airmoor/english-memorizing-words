@@ -13,7 +13,7 @@
   font-size: var(--font-xs);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--tracking-wide);
   color: var(--color-text-secondary);
 }
 
@@ -23,10 +23,10 @@
   padding: 0 6px;
   height: 18px;
   border-radius: var(--radius-full);
-  font-size: 11px;
+  font-size: var(--font-2xs);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: var(--tracking-wide);
 }
 
 .state_new      { background: color-mix(in srgb, var(--color-text-secondary) 12%, transparent); color: var(--color-text-secondary); }
