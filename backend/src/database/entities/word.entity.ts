@@ -10,6 +10,7 @@ import { Meaning } from './meaning.entity';
 import { UserWord } from './user-word.entity';
 import { Card } from './card.entity';
 import { WordTranslation } from './word-translation.entity';
+import { WordPronunciation } from './word-pronunciation.entity';
 
 @Entity('words')
 export class Word {
@@ -50,4 +51,7 @@ export class Word {
 
   @OneToMany(() => WordTranslation, (translation) => translation.word)
   translations: WordTranslation[];
+
+  @OneToMany(() => WordPronunciation, (pronunciation) => pronunciation.word)
+  pronunciations: WordPronunciation[];
 }
