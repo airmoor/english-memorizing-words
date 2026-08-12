@@ -2,34 +2,8 @@
    comes from the global `.icon-action` class; this file adds color, sizing and
    the loading/playing motion. */
 
-/* Button + source credit share one inline row. */
-.wrapper {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2xs, 0.25rem);
-  min-width: 0;
-}
-
-/* Attribution required by the Merriam-Webster and CC BY-SA licenses. Visually
-   quiet — it must be readable, not prominent. Truncates rather than pushing the
-   headword row around on narrow screens. */
-.credit {
-  overflow: hidden;
-  font-size: var(--font-xs, 0.75rem);
-  color: var(--color-text-secondary);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.creditLink {
-  color: inherit;
-  text-decoration: none;
-}
-
-.creditLink:hover,
-.creditLink:focus-visible {
-  text-decoration: underline;
-}
+/* The source credit lives in PronunciationCredit at the foot of the card, not
+   here — see that component for why. */
 
 .button {
   display: inline-flex;

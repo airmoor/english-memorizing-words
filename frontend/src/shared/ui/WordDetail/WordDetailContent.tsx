@@ -8,6 +8,7 @@ import { groupByPos, takeTopSenses } from './utils'
 import { NoteSection } from '../../../features/card-note/ui/NoteSection'
 import { TagInputSection } from '../../../features/tags/ui/TagInputSection'
 import { TranslationBlock } from '../../../features/translation/ui/TranslationBlock'
+import { PronunciationCredit } from '../../../features/pronunciation/ui/PronunciationCredit'
 import { BoardsSection } from './BoardsSection'
 import { ReviewInfoSection } from './ReviewInfoSection'
 import { featureFlags } from '../../../shared/lib/featureFlags'
@@ -259,6 +260,10 @@ export function WordDetailContent({
           </div>
         </div>
       )}
+
+      {/* ── Source credit — last thing in the card. Renders only once a
+            recording has been loaded; required by the audio licenses. ────── */}
+      <PronunciationCredit wordId={word.id} />
     </div>
   )
 }

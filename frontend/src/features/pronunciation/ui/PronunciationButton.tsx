@@ -29,9 +29,10 @@ const SILENT_WAV =
  * no recording anywhere) and "error" (fetch or playback failed; clicking
  * retries).
  *
- * Licensing: when the backend reports an `attribution`, it is rendered next to
- * the button. Merriam-Webster's free tier and Wiktionary's CC BY-SA both
- * require visible credit, so this is not optional chrome.
+ * Licensing: the required source credit is NOT rendered here. It lives in
+ * <PronunciationCredit>, at the foot of the word card — a credit line squeezed
+ * in beside the transcription pushed the headword row into wrapping on narrow
+ * screens, and attribution is footnote material anyway.
  */
 export function PronunciationButton({ wordId, word, accent = 'us' }: Props) {
   const [activated, setActivated] = useState(false)
@@ -148,53 +149,30 @@ export function PronunciationButton({ wordId, word, accent = 'us' }: Props) {
       ? `Pronunciation of ${word} failed to load — activate to retry`
       : `Play pronunciation of ${word}`
 
-  const attribution = query.data?.attribution
-  const sourceRefUrl = query.data?.sourceRefUrl
-
   return (
-    <span className={styles.wrapper}>
-      <button
-        type="button"
-        className={[
-          styles.button,
-          'icon-action',
-          loading ? styles.spinning : '',
-          playing ? styles.playing : '',
-          failed ? styles.failed : '',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-        onClick={handleClick}
-        disabled={loading || unavailable}
-        aria-label={label}
-        title={
-          unavailable
-            ? 'Pronunciation unavailable'
-            : failed
-              ? 'Could not play — click to retry'
-              : 'Play pronunciation'
-        }
-      >
-        <Icon icon={icon} size={16} />
-      </button>
-
-      {/* Required by the source licenses whenever the recording is available. */}
-      {attribution && (
-        <span className={styles.credit}>
-          {sourceRefUrl ? (
-            <a
-              href={sourceRefUrl}
-              target="_blank"
-              rel="noopener noreferrer nofollow"
-              className={styles.creditLink}
-            >
-              {attribution}
-            </a>
-          ) : (
-            attribution
-          )}
-        </span>
-      )}
-    </span>
+    <button
+      type="button"
+      className={[
+        styles.button,
+        'icon-action',
+        loading ? styles.spinning : '',
+        playing ? styles.playing : '',
+        failed ? styles.failed : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      onClick={handleClick}
+      disabled={loading || unavailable}
+      aria-label={label}
+      title={
+        unavailable
+          ? 'Pronunciation unavailable'
+          : failed
+            ? 'Could not play — click to retry'
+            : 'Play pronunciation'
+      }
+    >
+      <Icon icon={icon} size={16} />
+    </button>
   )
 }
