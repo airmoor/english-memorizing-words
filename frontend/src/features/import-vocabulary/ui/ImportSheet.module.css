@@ -78,14 +78,14 @@
   font-size: 14px;
   color: var(--color-danger);
   margin: 0;
-  line-height: 1.5;
+  line-height: var(--leading-normal);
 }
 
 .errorHint {
-  font-size: 13px;
+  font-size: var(--font-sm);
   color: var(--color-text-secondary);
   margin: 0;
-  line-height: 1.5;
+  line-height: var(--leading-normal);
   padding: 10px 12px;
   border-radius: var(--radius-sm, 6px);
   background: var(--color-bg-primary);

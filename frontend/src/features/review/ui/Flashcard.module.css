@@ -23,14 +23,14 @@
 
 .word {
   word-break: break-word;
-  font-size: clamp(2rem, 6vw, 2.75rem);
-  line-height: 1.1;
-  letter-spacing: -0.03em;
+  font-size: var(--font-display);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
 }
 
 .transcription {
   font-family: var(--font-mono, monospace);
-  letter-spacing: 0.02em;
+  letter-spacing: var(--tracking-normal);
 }
 
 .revealBtn {
@@ -98,7 +98,7 @@
 
 .definition {
   margin: 0;
-  line-height: 1.6;
+  line-height: var(--leading-relaxed);
 }
 
 /* ── Examples — ExampleSentence component handles individual item styling ───── */

@@ -12,7 +12,7 @@
 /* ── Page header ──────────────────────────────────────────────────────────── */
 
 .pageHeader {
-  padding: var(--space-lg) var(--space-lg) 0 0;
+  padding: 0 var(--space-lg) 0 0;
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
@@ -20,11 +20,11 @@
 }
 
 .pageTitle {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: var(--font-xl);
+  font-weight: var(--fw-semibold);
   color: var(--color-text-primary);
   margin: 0 0 16px;
-  line-height: 1.2;
+  line-height: var(--leading-snug);
 }
 
 /* ── Tab bar ──────────────────────────────────────────────────────────────── */
@@ -100,13 +100,13 @@
   height: 22px;
   border-radius: 50%;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: var(--fw-semibold);
   flex-shrink: 0;
   transition: background var(--transition-base), color var(--transition-base);
 }
 
 .stepLabel {
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 500;
   white-space: nowrap;
   transition: color var(--transition-base);
@@ -233,14 +233,14 @@
 }
 
 .rightEmptyTitle {
-  font-size: 15px;
+  font-size: var(--font-md);
   font-weight: 600;
   color: var(--color-text-primary);
   margin: 0;
 }
 
 .rightEmptyBody {
-  font-size: 13px;
+  font-size: var(--font-sm);
   color: var(--color-text-secondary);
   margin: 0;
   max-width: 240px;
@@ -274,7 +274,7 @@
 }
 
 .errorHint {
-  font-size: 13px;
+  font-size: var(--font-sm);
   color: var(--color-text-secondary);
   margin: 0;
   max-width: 320px;
@@ -295,7 +295,7 @@
 .errorRetryBtn {
   padding: 8px 16px;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 600;
   background: var(--color-accent, #6366f1);
   color: #fff;
@@ -309,7 +309,7 @@
 .errorCloseBtn {
   padding: 8px 16px;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 500;
   background: var(--color-bg-secondary);
   color: var(--color-text-secondary);

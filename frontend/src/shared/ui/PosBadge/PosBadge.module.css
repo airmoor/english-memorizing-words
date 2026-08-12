@@ -9,7 +9,7 @@
   border-radius: var(--badge-radius);
   font-size: var(--text-micro);
   font-weight: var(--fw-medium);
-  letter-spacing: 0.06em;
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   color: var(--color-accent-fg);
   /* Allows the badge to top-align itself in a flex-row or flex-column context */

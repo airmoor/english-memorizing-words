@@ -14,7 +14,7 @@
 }
 
 .label {
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: var(--fw-semibold, 600);
   color: var(--color-text-primary);
 }
@@ -47,7 +47,7 @@
 .hintWarning {
   font-size: 12px;
   margin: 0;
-  line-height: 1.4;
+  line-height: var(--leading-normal);
   min-height: 36px;
   display: flex;
   align-items: center;

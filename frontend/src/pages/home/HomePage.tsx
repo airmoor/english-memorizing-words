@@ -1,13 +1,12 @@
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Flame, BookOpen, Check } from 'lucide-react'
+import { Flame } from 'lucide-react'
 import { Icon } from '../../shared/ui/Icon/Icon'
 import { getProgress } from '../../features/review/api/getProgress'
 import { fetchVocabularyPage } from '../../features/vocabulary/api/vocabularyApi'
 import { BoardsHomeSection } from '../../features/boards/ui/BoardsHomeSection'
 import { Card } from '../../shared/ui/Card/Card'
 import { Button } from '../../shared/ui/Button/Button'
-import { Text } from '../../shared/ui/Typography/Typography'
 import { Container } from '../../shared/ui/layout/Container'
 import { PageLayout } from '../../shared/ui/layout/PageLayout'
 import { featureFlags } from '../../shared/lib/featureFlags'
@@ -24,20 +23,10 @@ function HomePageSkeleton() {
         <div className={styles.skeletonHeroContent}>
           <div className={styles.skeletonLine} style={{ width: '48%' }} />
           <div className={styles.skeletonLine} style={{ width: '72%', height: 15 }} />
+          <div className={styles.skeletonLine} style={{ width: '100%', height: 4, marginTop: 8 }} />
         </div>
         <div className={styles.skeletonBtn} />
       </Card>
-
-      {/* Stats row */}
-      <div className={styles.statsRow}>
-        {[0, 1, 2].map((i) => (
-          <Card key={i} variant="flat" padding="lg" className={styles.statCard}>
-            <div className={styles.skeletonIcon} />
-            <div className={styles.skeletonNum} />
-            <div className={styles.skeletonLine} style={{ width: 80 }} />
-          </Card>
-        ))}
-      </div>
 
       {/* Boards */}
       {featureFlags.boardsTags && (
@@ -112,6 +101,12 @@ export function HomePage() {
             {/* ── 1. Hero CTA ──────────────────────────────────────── */}
             <Card variant="flat" padding="lg" className={styles.hero}>
               <div className={styles.heroBody}>
+                {streak > 0 && (
+                  <span className={styles.streakPill}>
+                    <Icon icon={Flame} size={13} style={{ color: 'var(--color-warning)' }} aria-hidden />
+                    {streak} day{streak !== 1 ? 's' : ''}
+                  </span>
+                )}
                 {dueToday > 0 ? (
                   <>
                     <h2 className={styles.heroTitle}>
@@ -138,6 +133,27 @@ export function HomePage() {
                     <p className={styles.heroSubtitle}>Come back tomorrow for more reviews.</p>
                   </>
                 )}
+
+                {dueToday > 0 && (
+                  <div className={styles.progressRow}>
+                    <div
+                      className={styles.progress}
+                      role="progressbar"
+                      aria-valuemin={0}
+                      aria-valuemax={dueToday}
+                      aria-valuenow={Math.min(reviewedToday, dueToday)}
+                      aria-label="Today's review progress"
+                    >
+                      <div
+                        className={styles.progressFill}
+                        style={{ width: `${Math.min(100, (reviewedToday / dueToday) * 100)}%` }}
+                      />
+                    </div>
+                    <span className={styles.progressCount}>
+                      {Math.min(reviewedToday, dueToday)} / {dueToday}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className={styles.heroActions}>
@@ -155,83 +171,38 @@ export function HomePage() {
               </div>
             </Card>
 
-            {/* ── 2. Stats row ─────────────────────────────────────── */}
-            <div className={styles.statsRow}>
-              {/* Card A: Streak */}
-              <Card variant="flat" padding="lg" className={styles.statCard}>
-                {streak === 0 ? (
-                  <>
-                    <span className={styles.statPrimary}>Start today</span>
-                    <span className={styles.statSub}>Review to begin your streak</span>
-                  </>
-                ) : (
-                  <>
-                    <Icon
-                      icon={Flame}
-                      size={18}
-                      style={{ color: 'var(--color-warning)' }}
-                      aria-hidden
-                    />
-                    <span className={styles.statNum}>{streak}</span>
-                    <span className={styles.statLabel}>
-                      {streak === 1 ? 'day streak' : 'days streak'}
-                    </span>
-                  </>
-                )}
-              </Card>
-
-              {/* Card B: Today's progress */}
-              <Card variant="flat" padding="lg" className={styles.statCard}>
-                <Icon
-                  icon={Check}
-                  size={16}
-                  style={{ color: 'var(--color-success)', opacity: 0.7 }}
-                  aria-hidden
-                />
-                <span className={styles.statNum}>
-                  <span className={reviewedToday > 0 ? styles.statNumSuccess : styles.statNumMuted}>
-                    {reviewedToday}
-                  </span>
-                  {' / '}{dueToday}
-                </span>
-                <span className={styles.statLabel}>reviewed today</span>
-              </Card>
-
-              {/* Card C: Vocabulary — navigates to /vocabulary on click */}
-              <button
-                type="button"
-                className={[styles.statCard, styles.statCardVocab].join(' ')}
-                onClick={() => navigate('/vocabulary')}
-              >
-                <Icon
-                  icon={BookOpen}
-                  size={16}
-                  style={{ color: 'var(--color-accent)', opacity: 0.7 }}
-                  aria-hidden
-                />
-                <span className={styles.statNum}>{total}</span>
-                <span className={styles.statLabel}>words saved</span>
-              </button>
-            </div>
-
-            {/* ── 3. Boards ─────────────────────────────────────────── */}
+            {/* ── 2. Boards ─────────────────────────────────────────── */}
             {featureFlags.boardsTags && (
               <Card variant="flat" padding="lg">
                 <BoardsHomeSection />
               </Card>
             )}
 
-            {/* ── 4. Recently saved ─────────────────────────────────── */}
+            {/* ── 3. Recently saved ─────────────────────────────────── */}
             {recent.length > 0 && (
               <Card variant="flat" padding="lg" className={styles.recent}>
                 <div className={styles.recentHeader}>
-                  <Text variant="title" as="h3">Recently saved</Text>
-                  <button
-                    onClick={() => navigate('/vocabulary')}
-                    className={styles.recentLink}
-                  >
-                    View all →
-                  </button>
+                  <div className={styles.recentHeading}>
+                    <h3 className={styles.recentTitle}>Recently saved</h3>
+                    {/* Mobile-only count (variant B): subtitle under the title. */}
+                    {total > 0 && (
+                      <p className={styles.recentSubcount}>
+                        {total} word{total !== 1 ? 's' : ''} in your vocabulary
+                      </p>
+                    )}
+                  </div>
+                  <div className={styles.recentMeta}>
+                    {/* Desktop-only count (variant A): grouped with the link. */}
+                    {total > 0 && (
+                      <span className={styles.recentCount}>{total} word{total !== 1 ? 's' : ''}</span>
+                    )}
+                    <button
+                      onClick={() => navigate('/vocabulary')}
+                      className={styles.recentLink}
+                    >
+                      View all →
+                    </button>
+                  </div>
                 </div>
                 <ul className={styles.recentList}>
                   {recent.map((entry) => {

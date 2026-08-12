@@ -59,8 +59,8 @@
   border: none;
   outline: none;
   font-family: var(--font-serif), sans-serif;
-  font-size: 1.15rem;
-  letter-spacing: -0.01em;
+  font-size: var(--font-lg);
+  letter-spacing: var(--tracking-snug);
   color: var(--color-text-primary);
 }
 
@@ -74,7 +74,7 @@
   color: var(--color-text-secondary);
   opacity: 0.65;
   font-style: italic;
-  letter-spacing: 0;
+  letter-spacing: var(--tracking-normal);
 }
 
 /* ── Clear (×) button ───────────────────────────────────────────────────── */
@@ -115,7 +115,7 @@
   font-family: inherit;
   font-size: var(--font-sm);
   font-weight: var(--fw-semibold);
-  letter-spacing: 0.01em;
+  letter-spacing: var(--tracking-normal);
   cursor: pointer;
   transition: background var(--transition-base), transform var(--transition-base);
 }

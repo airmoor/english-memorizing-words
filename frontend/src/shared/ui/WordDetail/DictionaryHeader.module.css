@@ -18,15 +18,15 @@
   margin: 0;
   font-size: var(--font-xxl);
   font-weight: var(--fw-regular);
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
   color: var(--color-text-primary);
   word-break: break-word;
 }
 
 .transcription {
   font-style: italic;
-  letter-spacing: 0.02em;
+  letter-spacing: var(--tracking-normal);
 }
 
 /* ── Save / Remove action ────────────────────────────────────────────────── */

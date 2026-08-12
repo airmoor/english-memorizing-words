@@ -16,7 +16,7 @@
 
 .th {
   font-size: var(--text-micro);
-  letter-spacing: 0.06em;
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   color: var(--color-text-secondary);
   text-align: left;
@@ -332,7 +332,7 @@
   font-size: var(--text-micro);
   font-weight: var(--fw-medium);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--tracking-wide);
   color: var(--color-text-secondary);
 }
 
@@ -364,7 +364,7 @@
   content: '✓ ';
   font-weight: normal;
   color: var(--color-success);
-  font-size: 11px; /* no token */
+  font-size: var(--font-2xs);
 }
 
 /* ── Failed word grid ─────────────────────────────────────────────────────── */

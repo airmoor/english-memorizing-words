@@ -10,7 +10,7 @@
   font-size: var(--font-xs);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--tracking-wide);
   color: var(--color-text-secondary);
 }
 
@@ -38,7 +38,7 @@
   border-radius: var(--radius-full);
   color: var(--color-text-primary);
   font-size: var(--font-xs);
-  line-height: 1.4;
+  line-height: var(--leading-normal);
   box-sizing: border-box;
   font-family: inherit;
   outline: none;

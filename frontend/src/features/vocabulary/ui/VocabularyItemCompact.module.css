@@ -65,7 +65,7 @@
   font-size: var(--font-md);
   font-weight: var(--fw-semibold);
   color: var(--color-text-primary);
-  letter-spacing: -0.01em;
+  letter-spacing: var(--tracking-snug);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -77,7 +77,7 @@
   font-size: var(--font-xs);
   color: var(--color-text-secondary);
   font-style: italic;
-  letter-spacing: 0.01em;
+  letter-spacing: var(--tracking-normal);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

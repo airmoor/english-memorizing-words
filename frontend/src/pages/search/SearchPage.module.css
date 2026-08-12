@@ -44,21 +44,21 @@
   font-size: var(--text-section-title);
   font-weight: var(--fw-regular);
   color: var(--color-text-primary);
-  line-height: 1.2;
+  line-height: var(--leading-snug);
 }
 
 .idleSubtext {
   margin: 0;
   font-size: var(--text-caption);
   color: var(--color-text-secondary);
-  line-height: 1.4;
+  line-height: var(--leading-normal);
 }
 
 .chipsLabel {
   margin: var(--space-md) 0 var(--space-xs);
   font-size: var(--text-micro);
   font-weight: var(--fw-medium);
-  letter-spacing: 0.06em;
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   color: var(--color-text-secondary);
 }

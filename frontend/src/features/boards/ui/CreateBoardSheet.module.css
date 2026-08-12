@@ -63,7 +63,7 @@
   font-size: var(--font-xs);
   font-weight: var(--fw-medium);
   color: var(--color-text-secondary);
-  letter-spacing: 0.02em;
+  letter-spacing: var(--tracking-normal);
   text-transform: uppercase;
 }
 
@@ -80,7 +80,7 @@
   color: var(--color-text-primary);
   font-size: var(--font-sm);
   font-family: var(--font-sans);
-  line-height: 1.5;
+  line-height: var(--leading-normal);
   box-sizing: border-box;
   outline: none;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
@@ -110,8 +110,7 @@
   top: 50%;
   transform: translateY(-50%);
   font-size: var(--font-xs);
-  color: var(--color-text-secondary);
-  opacity: 0.55;
+  color: var(--color-text-muted);
   pointer-events: none;
   font-variant-numeric: tabular-nums;
 }

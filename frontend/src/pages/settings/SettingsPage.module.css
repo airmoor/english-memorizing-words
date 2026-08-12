@@ -31,7 +31,7 @@
   margin: 0;
   font-size: var(--text-body);
   text-transform: none;
-  letter-spacing: 0;
+  letter-spacing: var(--tracking-normal);
 }
 
 /* ── Mode tiles ─────────────────────────────────────────────────────────── */

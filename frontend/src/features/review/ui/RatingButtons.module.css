@@ -28,7 +28,7 @@
 
 .mainLabel {
   display: block;
-  line-height: 1.2;
+  line-height: var(--leading-snug);
 }
 
 .btn:disabled {

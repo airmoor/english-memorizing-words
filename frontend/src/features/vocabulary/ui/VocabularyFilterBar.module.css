@@ -206,7 +206,7 @@
   font-size: var(--font-xs);
   font-weight: var(--fw-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: var(--tracking-wide);
   color: var(--color-text-secondary);
   margin: 0 0 var(--space-sm);
 }

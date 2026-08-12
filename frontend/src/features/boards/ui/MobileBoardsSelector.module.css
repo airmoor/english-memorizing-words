@@ -83,10 +83,9 @@
 .sheetTitle {
   font-size: var(--font-xs);
   font-weight: var(--fw-semibold);
-  letter-spacing: 0.08em;
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  color: var(--color-text-secondary);
-  opacity: 0.55;
+  color: var(--color-text-muted);
   font-family: var(--font-sans);
 }
 
@@ -134,8 +133,7 @@
 
 .boardRowCount {
   font-size: var(--font-sm);
-  color: var(--color-text-secondary);
-  opacity: 0.55;
+  color: var(--color-text-muted);
   font-variant-numeric: tabular-nums;
   margin-right: 4px;
 }

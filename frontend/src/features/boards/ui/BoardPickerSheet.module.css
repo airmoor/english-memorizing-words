@@ -112,7 +112,7 @@
 .rowName {
   flex: 1;
   font-size: var(--font-sm);
-  line-height: 1.4;
+  line-height: var(--leading-normal);
 }
 
 /* .rowCount removed — counts add noise and compete with board names */

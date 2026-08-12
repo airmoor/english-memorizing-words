@@ -8,8 +8,6 @@
 }
 
 .skeletonLine,
-.skeletonIcon,
-.skeletonNum,
 .skeletonBtn {
   background: var(--color-border);
   animation: skeletonPulse 1.8s ease-in-out infinite;
@@ -18,16 +16,6 @@
 
 .skeletonLine {
   height: 17px;
-}
-
-.skeletonIcon {
-  width: 26px;
-  height: 26px;
-}
-
-.skeletonNum {
-  width: 44px;
-  height: 28px;
 }
 
 .skeletonBtn {
@@ -111,6 +99,54 @@
   gap: var(--space-xs);
 }
 
+/* Streak pill — quiet motivational marker above the title. Hidden at 0. */
+.streakPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  padding: 2px var(--space-sm);
+  margin-bottom: var(--space-xs);
+  font-size: var(--text-micro);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-secondary);
+  background: color-mix(in srgb, var(--color-warning) 10%, transparent);
+  border-radius: var(--radius-full);
+}
+
+/* Inline review progress — replaces the old standalone progress stat card.
+   A slim track tucked under the subtitle with an exact "n / total" count,
+   so it reads as a quiet anchor rather than a loading bar. */
+.progressRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-top: var(--space-sm);
+}
+
+.progress {
+  flex: 1;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: var(--radius-full);
+  transition: width var(--transition-base);
+}
+
+.progressCount {
+  flex-shrink: 0;
+  font-size: var(--text-micro);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
 .heroTitle {
   margin: 0;
   font-family: var(--font-serif);
@@ -131,80 +167,6 @@
   gap: var(--space-sm);
 }
 
-/* ── Stats row — 3 equal columns ──────────────────────────────────────────── */
-
-.statsRow {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--card-gap);
-}
-
-/* Card component provides bg / border / radius / padding.
-   This class only adds the flex-column content layout. */
-.statCard {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-/* ── Vocabulary stat card — the only interactive stat card ──────────────── */
-/* Rendered as a native <button> so it matches Card flat visually while
-   retaining proper button semantics and type-safe props.                    */
-.statCardVocab {
-  /* Replicate Card flat visual style exactly */
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--card-radius);
-  padding: var(--space-md); /* matches Card padding="sm" */
-  /* Button resets */
-  font-family: inherit;
-  text-align: left;
-  /* Interactive */
-  cursor: pointer;
-  transition: background var(--transition-fast);
-}
-
-.statCardVocab:hover {
-  background: color-mix(in srgb, var(--color-accent) 5%, var(--color-bg-card));
-}
-
-.statNum {
-  font-size: var(--text-section-title);
-  font-weight: var(--fw-medium);
-  color: var(--color-text-primary);
-  line-height: 1;
-  margin-top: var(--space-xs);
-}
-
-.statNumSuccess {
-  color: var(--color-success);
-}
-
-.statNumMuted {
-  color: var(--color-text-secondary);
-}
-
-.statLabel {
-  font-size: var(--text-micro);
-  color: var(--color-text-secondary);
-  margin-top: var(--space-xs);
-}
-
-/* Zero-streak empty state inside Card A */
-.statPrimary {
-  font-size: var(--text-card-title);
-  font-weight: var(--fw-medium);
-  color: var(--color-text-primary);
-  line-height: 1.2;
-}
-
-.statSub {
-  font-size: var(--text-micro);
-  color: var(--color-text-secondary);
-  margin-top: var(--space-xs);
-  line-height: 1.4;
-}
-
 /* ── Recently saved ───────────────────────────────────────────────────────── */
 
 .recent {
@@ -215,9 +177,59 @@
 
 .recentHeader {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
   gap: var(--space-md);
+}
+
+.recentHeading {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.recentTitle {
+  margin: 0;
+  font-size: var(--text-section-title);
+  font-weight: var(--fw-semibold);
+}
+
+/* The word count sits on the right, grouped with the "View all" link. */
+.recentMeta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-md);
+  flex-shrink: 0;
+}
+
+/* Count placement is responsive:
+   - Desktop (A): inline .recentCount next to "View all".
+   - Mobile  (B): .recentSubcount as a quiet line under the title.
+   The app switches to its mobile (bottom-nav) layout at 1023px, so the
+   count follows the same breakpoint. Mobile-first: subtitle is the default. */
+.recentSubcount {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-micro);
+  color: var(--color-text-muted);
+}
+
+.recentCount {
+  display: none;
+  font-family: var(--font-sans);
+  font-size: var(--text-micro);
+  color: var(--color-text-muted);
+}
+
+@media (min-width: 1024px) {
+  .recentSubcount {
+    display: none;
+  }
+
+  .recentCount {
+    display: inline;
+  }
 }
 
 .recentLink {

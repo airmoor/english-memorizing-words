@@ -152,7 +152,7 @@
 .definition {
   font-size: var(--font-sm);
   color: var(--color-text-primary);
-  line-height: 1.45;
+  line-height: var(--leading-normal);
 }
 
 /* ── Footer ──────────────────────────────────────────────────────────────── */

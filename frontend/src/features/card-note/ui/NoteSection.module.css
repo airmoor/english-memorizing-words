@@ -13,7 +13,7 @@
   font-size: var(--font-xs);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--tracking-wide);
   color: var(--color-text-secondary);
 }
 
@@ -42,7 +42,7 @@
   border-radius: var(--radius-md);
   color: var(--color-text-primary);
   font-size: var(--font-sm);
-  line-height: 1.5;
+  line-height: var(--leading-normal);
   resize: vertical;
   box-sizing: border-box;
   font-family: inherit;
@@ -66,7 +66,7 @@
   padding: var(--space-sm) 0;
   color: var(--color-text-primary);
   font-size: var(--font-sm);
-  line-height: 1.5;
+  line-height: var(--leading-normal);
   cursor: text;
   white-space: pre-wrap;
   word-break: break-word;
