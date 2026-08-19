@@ -138,6 +138,30 @@
   color: #fff;
 }
 
+/* Pop-in on check — the moment-of-tap confirmation that a bare color change
+   doesn't give. Element remounts fresh each time (conditionally rendered),
+   so the animation replays on every check, not just the first. */
+@keyframes checkPop {
+  0%   { transform: scale(0.3); opacity: 0; }
+  60%  { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.checkboxChecked svg {
+  animation: checkPop 0.22s var(--ease-out, ease-out) both;
+}
+
+/* Row itself gets a brief accent wash so the whole row — not just the tiny
+   checkbox — reads as "this one, right now". */
+@keyframes rowFlash {
+  0%   { background: color-mix(in srgb, var(--color-accent) 14%, transparent); }
+  100% { background: transparent; }
+}
+
+.rowChecked {
+  animation: rowFlash 0.5s var(--ease-out, ease-out);
+}
+
 /* ── Archived section ─────────────────────────────────────────────────────────── */
 
 .archivedSection {
@@ -150,4 +174,31 @@
   color: var(--color-text-secondary);
   cursor: pointer;
   user-select: none;
+}
+
+/* ── Footer ───────────────────────────────────────────────────────────────────── */
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--space-md) var(--space-lg) var(--space-lg);
+  border-top: 1px solid var(--color-border);
+  margin-top: var(--space-sm);
+}
+
+.doneBtn {
+  padding: 9px var(--space-lg);
+  background: var(--color-accent);
+  border: none;
+  border-radius: var(--radius-full);
+  color: #fff;
+  font-size: var(--font-sm);
+  font-family: var(--font-sans);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition: filter var(--transition-fast);
+}
+
+.doneBtn:hover {
+  filter: brightness(1.08);
 }

@@ -126,6 +126,13 @@ export function BoardPickerSheet({
             </ul>
           </details>
         )}
+
+        {/* ── Footer — explicit "Done" beats relying on the corner × ────── */}
+        <div className={styles.footer}>
+          <button type="button" className={styles.doneBtn} onClick={onClose}>
+            Done
+          </button>
+        </div>
       </BottomSheetContent>
     </AdaptiveSheet>
   )
