@@ -1,0 +1,61 @@
+/* Speaker button — sits inline next to the transcription. Hover/press feedback
+   comes from the global `.icon-action` class; this file adds color, sizing and
+   the loading/playing motion. */
+
+/* The source credit lives in PronunciationCredit at the foot of the card, not
+   here — see that component for why. */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xs, 0.25rem);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-accent-fg);
+  cursor: pointer;
+}
+
+.button:disabled {
+  cursor: default;
+  color: var(--color-text-secondary);
+}
+
+/* Fetch or playback failed — still clickable, since clicking retries. */
+.failed {
+  color: var(--color-danger-fg, var(--color-text-secondary));
+}
+
+/* Loading — spin the Loader2 icon. */
+.spinning {
+  animation: pronunciationSpin 0.8s linear infinite;
+}
+
+@keyframes pronunciationSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Playing — a subtle pulse so the user sees the tap registered. */
+.playing {
+  animation: pronunciationPulse 0.6s var(--ease-out, ease) infinite;
+}
+
+@keyframes pronunciationPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinning,
+  .playing {
+    animation: none;
+  }
+}

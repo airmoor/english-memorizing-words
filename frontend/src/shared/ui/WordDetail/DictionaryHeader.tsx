@@ -4,10 +4,11 @@ import { Icon } from '../Icon/Icon'
 import type { WordPayload, LearningState } from './types'
 import { Text } from '../Typography/Typography'
 import { Button } from '../Button/Button'
+import { PronunciationButton } from '../../../features/pronunciation/ui/PronunciationButton'
 import styles from './DictionaryHeader.module.css'
 
 interface Props {
-  word: Pick<WordPayload, 'text' | 'transcription'>
+  word: Pick<WordPayload, 'id' | 'text' | 'transcription'>
   /** Determines save vs. remove action. Null = word not saved. */
   learningState: LearningState | null
   onSave: () => void
@@ -63,11 +64,14 @@ export function DictionaryHeader({
         <Text variant="heading" as="h2" className={styles.word}>
           {word.text}
         </Text>
-        {word.transcription && (
-          <Text variant="caption" color="secondary" as="span" className={styles.transcription}>
-            /{word.transcription}/
-          </Text>
-        )}
+        <div className={styles.pronunciationRow}>
+          {word.transcription && (
+            <Text variant="caption" color="secondary" as="span" className={styles.transcription}>
+              /{word.transcription}/
+            </Text>
+          )}
+          <PronunciationButton wordId={word.id} word={word.text} />
+        </div>
       </div>
 
       {/* Action area — three cases:

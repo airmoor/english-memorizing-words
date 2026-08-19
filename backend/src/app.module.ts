@@ -14,6 +14,7 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { WordsModule } from './words/words.module';
 import { VocabularyModule } from './vocabulary/vocabulary.module';
 import { TranslationsModule } from './translations/translations.module';
+import { PronunciationsModule } from './pronunciations/pronunciations.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -33,6 +34,7 @@ import { UsersModule } from './users/users.module';
     WordsModule,
     VocabularyModule,
     TranslationsModule,
+    PronunciationsModule,
     UsersModule,
   ],
   providers: [
