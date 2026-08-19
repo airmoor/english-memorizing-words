@@ -9,6 +9,7 @@ import { WordEntry } from '../../features/word-search/ui/WordEntry'
 import { Container } from '../../shared/ui/layout/Container'
 import { PageLayout } from '../../shared/ui/layout/PageLayout'
 import { useWordSearch } from '../../features/word-search/model/useWordSearch'
+import { useWordSuggestions } from '../../features/word-search/model/useWordSuggestions'
 import styles from './SearchPage.module.css'
 
 function normalizeText(raw: string): string {
@@ -40,6 +41,7 @@ export function SearchPage() {
   }
 
   const searchState = useWordSearch(query)
+  const suggestions = useWordSuggestions(searchState.status === 'idle')
 
   return (
     <PageLayout className={styles.flexPage}>
@@ -63,7 +65,7 @@ export function SearchPage() {
                 <p className={styles.idleSubtext}>Meanings, transcription, and usage examples</p>
                 <p className={styles.chipsLabel}>Try these words</p>
                 <div className={styles.chipsRow}>
-                  {['ephemeral', 'serendipity', 'ambiguous', 'resilient', 'eloquent'].map((word) => (
+                  {suggestions.map((word) => (
                     <button
                       key={word}
                       className={styles.chip}
