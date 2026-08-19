@@ -5,6 +5,8 @@
 .vscode/
 .env
 .env.local
+# local backups of env files — may contain secrets
+*.bak.*
 node_modules
 backend/dist/
 
