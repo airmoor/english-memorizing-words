@@ -1,9 +1,10 @@
-import { Inbox, Plus, Archive, Trash2 } from 'lucide-react'
+import { Inbox, Plus, Archive, Trash2, Share2, Link2 } from 'lucide-react'
 import { useState } from 'react'
 import { Icon } from '../../../shared/ui/Icon/Icon'
 import { useBoardsQuery } from '../model/useBoardsQuery'
 import { useDeleteBoardMutation } from '../model/useUpdateBoardMutation'
 import { CreateBoardSheet } from './CreateBoardSheet'
+import { ShareBoardSheet } from './ShareBoardSheet'
 import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog/ConfirmDialog'
 import styles from './VocabularyBoardsSidebar.module.css'
 
@@ -34,6 +35,7 @@ export function VocabularyBoardsSidebar({
   onSelect,
 }: VocabularyBoardsSidebarProps) {
   const [createOpen, setCreateOpen]           = useState(false)
+  const [shareBoardId, setShareBoardId]       = useState<string | null>(null)
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const { data: boards = [] }                 = useBoardsQuery()
   const deleteMutation                        = useDeleteBoardMutation()
@@ -41,6 +43,7 @@ export function VocabularyBoardsSidebar({
   const activeBoards  = boards.filter((b) => !b.isArchived)
   const archivedCount = boards.filter((b) => b.isArchived).length
   const boardToDelete = activeBoards.find((b) => b.id === deleteConfirmId)
+  const boardToShare   = activeBoards.find((b) => b.id === shareBoardId)
 
   const handleCreated = (boardId: string) => {
     // Auto-select the newly created board
@@ -91,23 +94,44 @@ export function VocabularyBoardsSidebar({
                     title={board.name}
                   >
                     <span className={styles.itemLabel}>{board.name}</span>
+                    {board.visibility === 'unlisted' && (
+                      <span
+                        role="img"
+                        aria-label="Shared — anyone with the link can view"
+                        className={styles.sharedIndicator}
+                      >
+                        <Icon icon={Link2} size={11} />
+                      </span>
+                    )}
                   </button>
 
-                  {/* Trailing slot — count and delete share the same position and cross-fade */}
+                  {/* Trailing slot — count fades out on hover, actions fade in */}
                   <div className={styles.itemTrailing} aria-hidden="true">
                     {board.cardCount > 0 && (
                       <span className={styles.trailingCount}>{board.cardCount}</span>
                     )}
-                    <button
-                      type="button"
-                      className={styles.itemDeleteBtn}
-                      onClick={(e) => { e.stopPropagation(); setDeleteConfirmId(board.id) }}
-                      aria-label={`Delete ${board.name}`}
-                      title="Delete board"
-                      tabIndex={0}
-                    >
-                      <Icon icon={Trash2} size={13} />
-                    </button>
+                    <div className={styles.itemActions}>
+                      <button
+                        type="button"
+                        className={styles.itemShareBtn}
+                        onClick={(e) => { e.stopPropagation(); setShareBoardId(board.id) }}
+                        aria-label={`Share ${board.name}`}
+                        title="Share board"
+                        tabIndex={0}
+                      >
+                        <Icon icon={Share2} size={13} />
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.itemDeleteBtn}
+                        onClick={(e) => { e.stopPropagation(); setDeleteConfirmId(board.id) }}
+                        aria-label={`Delete ${board.name}`}
+                        title="Delete board"
+                        tabIndex={0}
+                      >
+                        <Icon icon={Trash2} size={13} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               )
@@ -148,6 +172,12 @@ export function VocabularyBoardsSidebar({
         open={createOpen}
         onClose={() => setCreateOpen(false)}
         onCreated={handleCreated}
+      />
+
+      <ShareBoardSheet
+        open={shareBoardId !== null}
+        onClose={() => setShareBoardId(null)}
+        board={boardToShare}
       />
 
       <ConfirmDialog

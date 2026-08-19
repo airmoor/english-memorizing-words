@@ -1,1 +1,8 @@
-export type { Board, BoardSummary } from './model/types'
+export type {
+  Board,
+  BoardSummary,
+  BoardVisibility,
+  SharedBoard,
+  SharedBoardMeaning,
+  SharedBoardWord,
+} from './model/types'

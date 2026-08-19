@@ -17,11 +17,20 @@ export function AuthPage() {
       ? await loginApi(email, password)
       : await registerApi(email, password)
     setToken(token)
-    navigate('/home')
+
+    // Preserve a return destination (e.g. a shared board link that prompted
+    // sign-in). Restricted to same-origin relative paths to avoid an open
+    // redirect via a crafted ?next= value.
+    const next = new URLSearchParams(location.search).get('next')
+    const isSafeRelativePath = next && next.startsWith('/') && !next.startsWith('//')
+    navigate(isSafeRelativePath ? next : '/home')
   }
 
   function handleToggle() {
-    navigate(mode === 'login' ? '/register' : '/login')
+    navigate({
+      pathname: mode === 'login' ? '/register' : '/login',
+      search: location.search,
+    })
   }
 
   return (

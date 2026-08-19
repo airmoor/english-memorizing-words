@@ -9,6 +9,7 @@ import { ReviewPage } from '../../pages/review/ReviewPage'
 import { VocabularyPage } from '../../pages/vocabulary/VocabularyPage'
 import { ImportPage } from '../../pages/import/ImportPage'
 import { SettingsPage } from '../../pages/settings/SettingsPage'
+import { SharedBoardPage } from '../../pages/shared-board/SharedBoardPage'
 
 export function AppRouter() {
   return (
@@ -26,6 +27,9 @@ export function AppRouter() {
       <Route path="/register" element={<AuthPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
+      {/* Public — no RequireAuth. Read-only preview of an unlisted board;
+          signed-in visitors get an "Add to my vocabulary" action. */}
+      <Route path="/board/:slug" element={<SharedBoardPage />} />
       <Route
         path="/home"
         element={

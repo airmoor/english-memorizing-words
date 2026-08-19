@@ -168,26 +168,35 @@
 
 /* ── Trailing slot ────────────────────────────────────────────────────────── */
 /*
- * Fixed-width container shared by count and delete icon.
- * Both children are absolute-filled so they occupy the exact same position
- * and cross-fade — zero layout shift, no cramping.
+ * Fixed-width container shared by count and the action buttons (share, delete).
+ * Count is absolute-filled; the actions row occupies the same position and
+ * cross-fades in on hover — zero layout shift, no cramping.
  */
 .itemTrailing {
   position: relative;
   flex-shrink: 0;
-  width: 28px;
+  width: 52px;
   height: 34px;   /* matches .item min-height */
   margin-right: 4px;
 }
 
-/* Count and delete button both fill .itemTrailing and cross-fade */
-.trailingCount,
-.itemDeleteBtn {
+.trailingCount {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: opacity var(--transition-fast);
+}
+
+.itemActions {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  opacity: 0;
   transition: opacity var(--transition-fast);
 }
 
@@ -200,27 +209,39 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* ── Delete button ─────────────────────────────────────────────────────────── */
+/* ── Share / delete buttons ───────────────────────────────────────────────── */
+.itemShareBtn,
 .itemDeleteBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
   background: none;
   border: none;
   border-radius: var(--radius-sm);
   color: var(--color-text-secondary);
   cursor: pointer;
   padding: 0;
-  opacity: 0;
 }
 
-/* Hover state: count fades out, delete fades in */
+/* Hover state: count fades out, actions fade in */
 .boardSlot:hover .trailingCount {
   opacity: 0;
 }
 
-.boardSlot:hover .itemDeleteBtn {
+.boardSlot:hover .itemActions {
   opacity: 0.45;
 }
 
-/* Direct hover/focus on delete button: danger colour */
+/* Direct hover/focus on an action button: full opacity + semantic colour */
+.itemShareBtn:hover,
+.itemShareBtn:focus-visible {
+  opacity: 1 !important;
+  color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+}
+
 .itemDeleteBtn:hover,
 .itemDeleteBtn:focus-visible {
   opacity: 1 !important;
@@ -228,21 +249,32 @@
   background: color-mix(in srgb, var(--color-danger) 8%, transparent);
 }
 
+.itemShareBtn:focus-visible,
 .itemDeleteBtn:focus-visible {
-  outline: 2px solid var(--color-danger);
+  outline: 2px solid currentColor;
   outline-offset: 1px;
+}
+
+/* ── Shared indicator ─────────────────────────────────────────────────────── */
+/* Persistent (not hover-gated) — tells the owner this board is currently live. */
+.sharedIndicator {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--color-accent);
+  opacity: 0.7;
 }
 
 /* ── Mobile: (hover: none) ────────────────────────────────────────────────── */
 /*
- * Touch devices cannot hover — always show delete at low opacity.
+ * Touch devices cannot hover — always show actions at low opacity.
  * Count is hidden to avoid overlap in the shared slot.
  */
 @media (hover: none) {
   .trailingCount {
     opacity: 0;
   }
-  .itemDeleteBtn {
-    opacity: 0.3;
+  .itemActions {
+    opacity: 0.35;
   }
 }

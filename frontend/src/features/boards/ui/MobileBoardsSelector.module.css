@@ -96,11 +96,17 @@
   padding: 0;
 }
 
+.boardRowWrap {
+  display: flex;
+  align-items: stretch;
+}
+
 .boardRow {
   display: flex;
   align-items: center;
   gap: 12px;
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   padding: 13px var(--space-md);
   border: none;
   background: none;
@@ -111,6 +117,31 @@
   text-align: left;
   transition: background var(--transition-fast);
   min-height: 48px; /* touch-friendly */
+}
+
+.rowShareBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  flex-shrink: 0;
+  border: none;
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.rowShareBtn:hover,
+.rowShareBtn:focus-visible {
+  color: var(--color-accent);
+}
+
+.sharedIndicator {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--color-accent);
+  opacity: 0.7;
 }
 
 .boardRow:hover {
