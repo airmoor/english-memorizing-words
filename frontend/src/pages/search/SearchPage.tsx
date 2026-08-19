@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Search, AlertTriangle } from 'lucide-react'
 import { Icon } from '../../shared/ui/Icon/Icon'
 import { Spinner } from '../../shared/ui/Spinner'
@@ -15,8 +16,14 @@ function normalizeText(raw: string): string {
 }
 
 export function SearchPage() {
-  const [input, setInput] = useState('')
-  const [query, setQuery] = useState('')
+  // Seed from ?q= so links from elsewhere in the app (e.g. "search the
+  // dictionary for X" from an empty Vocabulary search) land pre-filled
+  // instead of on a blank box the visitor has to retype into.
+  const [searchParams] = useSearchParams()
+  const initialQuery = normalizeText(searchParams.get('q') ?? '')
+
+  const [input, setInput] = useState(initialQuery)
+  const [query, setQuery] = useState(initialQuery)
 
   // Debounce input → query (300 ms)
   useEffect(() => {

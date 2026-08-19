@@ -105,6 +105,7 @@ interface ContentProps {
   isEmpty: boolean
   isEmptyBoard: boolean
   hasActiveFilters?: boolean
+  searchQuery?: string
   hasNextPage: boolean
   isFetchingNextPage: boolean
   onLoadMore: () => void
@@ -119,6 +120,7 @@ function VocabularyPageContent({
   isEmpty,
   isEmptyBoard,
   hasActiveFilters,
+  searchQuery,
   hasNextPage,
   isFetchingNextPage,
   onLoadMore,
@@ -142,6 +144,7 @@ function VocabularyPageContent({
       isEmpty={isEmpty}
       isEmptyBoard={isEmptyBoard}
       hasActiveFilters={hasActiveFilters}
+      searchQuery={searchQuery}
       hasNextPage={hasNextPage}
       isFetchingNextPage={isFetchingNextPage}
       onLoadMore={onLoadMore}
@@ -569,6 +572,7 @@ export function VocabularyPage() {
                       isEmpty={isEmpty}
                       isEmptyBoard={isEmptyBoard}
                       hasActiveFilters={isFiltering}
+                      searchQuery={committedQuery}
                       hasNextPage={hasNextPage}
                       isFetchingNextPage={isFetchingNextPage}
                       onLoadMore={fetchNextPage}

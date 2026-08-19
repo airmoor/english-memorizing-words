@@ -21,6 +21,8 @@ interface Props {
   isEmptyBoard?: boolean
   /** True when at least one filter is active (board, tag, reviewState, etc.) */
   hasActiveFilters?: boolean
+  /** The committed text search query, if any — used to offer a dictionary bridge on zero matches. */
+  searchQuery?: string
   hasNextPage?: boolean
   isFetchingNextPage?: boolean
   onLoadMore?: () => void
@@ -37,6 +39,7 @@ export function VocabularyList({
   isEmpty = false,
   isEmptyBoard = false,
   hasActiveFilters = false,
+  searchQuery = '',
   hasNextPage = false,
   isFetchingNextPage = false,
   onLoadMore,
@@ -107,6 +110,10 @@ export function VocabularyList({
 
   // ── Empty: filters excluded everything ────────────────────────────────────
   if (items.length === 0) {
+    // A text query with zero hits means the word isn't in *your* vocabulary —
+    // not that it doesn't exist. Bridge to the dictionary instead of a dead end.
+    const trimmedQuery = searchQuery.trim()
+
     return (
       <div className={styles.empty}>
         <span className={styles.emptyIcon}><Icon icon={Search} size={32} muted /></span>
@@ -114,14 +121,25 @@ export function VocabularyList({
           No matches
         </Text>
         <Text variant="body" color="secondary" as="p" className={styles.emptyText}>
-          {hasActiveFilters
-            ? 'No words match these filters. Try adjusting or clearing them.'
-            : 'Try a different search term.'}
+          {trimmedQuery
+            ? `"${trimmedQuery}" isn't in your saved words.`
+            : hasActiveFilters
+              ? 'No words match these filters. Try adjusting or clearing them.'
+              : 'Try a different search term.'}
         </Text>
-        {hasActiveFilters && onClearFilters && (
-          <Button onClick={onClearFilters} variant="secondary">
-            Clear filters
+        {trimmedQuery ? (
+          <Button
+            onClick={() => navigate(`/search?q=${encodeURIComponent(trimmedQuery)}`)}
+            variant="secondary"
+          >
+            Search the dictionary for &ldquo;{trimmedQuery}&rdquo;
           </Button>
+        ) : (
+          hasActiveFilters && onClearFilters && (
+            <Button onClick={onClearFilters} variant="secondary">
+              Clear filters
+            </Button>
+          )
         )}
       </div>
     )
