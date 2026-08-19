@@ -65,7 +65,7 @@ export function BoardsHomeSection() {
           <button
             type="button"
             className={styles.emptyBtn}
-            onClick={() => navigate('/vocabulary')}
+            onClick={() => navigate('/vocabulary?createBoard=1')}
           >
             Create your first board →
           </button>

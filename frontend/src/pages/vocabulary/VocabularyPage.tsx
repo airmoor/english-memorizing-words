@@ -13,6 +13,7 @@ import { VocabularyToolbar } from '../../features/vocabulary/ui/VocabularyToolba
 import { VocabularyFilterBar } from '../../features/vocabulary/ui/VocabularyFilterBar'
 import { VocabularyBoardsSidebar } from '../../features/boards/ui/VocabularyBoardsSidebar'
 import { MobileBoardsSelector } from '../../features/boards/ui/MobileBoardsSelector'
+import { CreateBoardSheet } from '../../features/boards'
 import { useVocabularyInfinite } from '../../features/vocabulary/model/useVocabularyInfinite'
 import { useVocabularyFilters } from '../../features/vocabulary/model/useVocabularyFilters'
 import { useBoardsQuery } from '../../features/boards'
@@ -269,6 +270,26 @@ export function VocabularyPage() {
   const urlBoard = searchParams.get('board') ?? undefined
   const { data: boards = [], isLoading: boardsLoading } = useBoardsQuery()
   const activeBoard = boards.find((b) => b.id === urlBoard)
+
+  // ── Deep-linked "create board" intent ─────────────────────────────────────
+  //
+  // The Home page's "Create your first board" CTA links here with
+  // ?createBoard=1 so the create flow opens immediately instead of just
+  // landing on the generic vocabulary list. Seeded once from the URL, then
+  // the param is stripped so refresh/back doesn't reopen the sheet.
+  const [createBoardOpen, setCreateBoardOpen] = useState(
+    () => searchParams.get('createBoard') === '1',
+  )
+  useEffect(() => {
+    if (searchParams.get('createBoard') === '1') {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev)
+        next.delete('createBoard')
+        return next
+      }, { replace: true })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Keep the apiFilters.boardId in sync with the URL board param
   // so the existing vocabulary query stays board-scoped.
@@ -547,6 +568,12 @@ export function VocabularyPage() {
           </div>
         </div>
       </Container>
+
+      <CreateBoardSheet
+        open={createBoardOpen}
+        onClose={() => setCreateBoardOpen(false)}
+        onCreated={(boardId) => handleBoardSelect(boardId)}
+      />
 
     </PageLayout>
   )
