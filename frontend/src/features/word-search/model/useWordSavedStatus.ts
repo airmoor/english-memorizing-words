@@ -27,6 +27,10 @@ export function useWordSavedStatus(wordId: string) {
     isSaved:        optimisticSaved ?? data?.isSaved ?? false,
     /** Meaning IDs currently saved for this word. Empty = all meanings / not yet loaded. */
     savedMeaningIds: data?.meaningIds ?? [],
+    /** The saved word's card id — null when not saved / not yet loaded. */
+    cardId:          data?.cardId ?? null,
+    /** Boards the word's card currently belongs to. */
+    boards:          data?.boards ?? [],
     /**
      * Set to `true` for instant optimistic feedback; `null` to revert to
      * server data (call after mutation settles).

@@ -1,8 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { FolderPlus } from 'lucide-react'
 import { Card } from '../../../shared/ui/Card/Card'
+import { Icon } from '../../../shared/ui/Icon/Icon'
 import { WordDetailContent } from '../../../shared/ui/WordDetail/WordDetailContent'
+import { BoardPickerSheet } from '../../boards/ui/BoardPickerSheet'
+import { CreateBoardSheet } from '../../boards/ui/CreateBoardSheet'
+import { useAssignCardToBoard } from '../../boards/model/useCardBoardMutation'
+import { featureFlags } from '../../../shared/lib/featureFlags'
 import { useSaveSelectedMeaningsMutation } from '../../meaning-picker/api/useSaveSelectedMeaningsMutation'
 import { deleteWord } from '../../vocabulary/api/vocabularyApi'
 import { useWordSavedStatus } from '../model/useWordSavedStatus'
@@ -31,9 +37,12 @@ export function WordEntry({ word, onSeeAlso }: Props) {
   const [selectionMode, setSelectionMode] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [boardPickerOpen, setBoardPickerOpen] = useState(false)
+  const [boardCreateOpen, setBoardCreateOpen] = useState(false)
 
-  const { isSaved, savedMeaningIds, setOptimistic } = useWordSavedStatus(word.id)
+  const { isSaved, savedMeaningIds, cardId, boards, setOptimistic } = useWordSavedStatus(word.id)
   const saveMutation = useSaveSelectedMeaningsMutation()
+  const assignBoardMutation = useAssignCardToBoard()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
@@ -147,6 +156,44 @@ export function WordEntry({ word, onSeeAlso }: Props) {
         onViewInVocabulary={isSaved ? handleViewInVocabulary : undefined}
         onSeeAlso={onSeeAlso}
       />
+
+      {/* Board assignment — right where the word was just saved, rather than
+          only reachable after navigating to the vocabulary page. */}
+      {featureFlags.boardsTags && isSaved && cardId && (
+        <div className={styles.boardAssignRow}>
+          <button
+            type="button"
+            className={styles.boardAssignBtn}
+            onClick={() => setBoardPickerOpen(true)}
+          >
+            <Icon icon={FolderPlus} size={14} />
+            {boards.length > 0
+              ? `On ${boards.length} board${boards.length !== 1 ? 's' : ''}`
+              : 'Add to board'}
+          </button>
+        </div>
+      )}
+
+      {cardId && (
+        <>
+          <BoardPickerSheet
+            open={boardPickerOpen}
+            onClose={() => setBoardPickerOpen(false)}
+            cardId={cardId}
+            wordId={word.id}
+            assignedBoards={boards}
+            onCreateNew={() => { setBoardPickerOpen(false); setBoardCreateOpen(true) }}
+          />
+          <CreateBoardSheet
+            open={boardCreateOpen}
+            onClose={() => setBoardCreateOpen(false)}
+            onCreated={(boardId) => {
+              assignBoardMutation.mutate({ boardId, cardId, wordId: word.id })
+              setBoardPickerOpen(true)
+            }}
+          />
+        </>
+      )}
     </Card>
   )
 }

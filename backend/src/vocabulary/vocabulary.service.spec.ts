@@ -503,4 +503,49 @@ describe('VocabularyService', () => {
       expect(qr.rollbackTransaction).toHaveBeenCalled();
     });
   });
+
+  // ── getWordSavedStatus ───────────────────────────────────────────────────────
+
+  describe('getWordSavedStatus', () => {
+    const userId = 'user-1';
+    const wordId = 'word-1';
+
+    it('returns isSaved false with no cardId/boards when the word is not saved', async () => {
+      dataSource.query.mockResolvedValueOnce([]);
+
+      const result = await service.getWordSavedStatus(userId, wordId);
+
+      expect(result).toEqual({ isSaved: false, meaningIds: [], cardId: null, boards: [] });
+      expect(dataSource.query).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns cardId and boards when the word is saved and on boards', async () => {
+      dataSource.query
+        .mockResolvedValueOnce([{ meaningIds: ['m-1', 'm-2'] }])
+        .mockResolvedValueOnce([{ id: 'card-1' }])
+        .mockResolvedValueOnce([{ id: 'board-1', name: 'Travel' }]);
+
+      const result = await service.getWordSavedStatus(userId, wordId);
+
+      expect(result).toEqual({
+        isSaved: true,
+        meaningIds: ['m-1', 'm-2'],
+        cardId: 'card-1',
+        boards: [{ id: 'board-1', name: 'Travel' }],
+      });
+      expect(dataSource.query).toHaveBeenCalledTimes(3);
+    });
+
+    it('returns an empty boards array without a boards query when no card is found', async () => {
+      dataSource.query
+        .mockResolvedValueOnce([{ meaningIds: [] }])
+        .mockResolvedValueOnce([]); // no card row
+
+      const result = await service.getWordSavedStatus(userId, wordId);
+
+      expect(result.cardId).toBeNull();
+      expect(result.boards).toEqual([]);
+      expect(dataSource.query).toHaveBeenCalledTimes(2);
+    });
+  });
 });

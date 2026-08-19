@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useMemo, useEffect, useRef } from 'react'
-import { Library, Search } from 'lucide-react'
+import { Folder, Library, Search } from 'lucide-react'
 import { Icon } from '../../../shared/ui/Icon/Icon'
 import type { VocabularyWord } from '../../../entities/vocabulary/model/types'
 import { Text } from '../../../shared/ui/Typography/Typography'
@@ -17,6 +17,8 @@ interface Props {
   viewMode?: ViewMode
   /** True when the user has no words at all (not filtered out). */
   isEmpty?: boolean
+  /** True when the selected board itself has zero words (distinct from a filter matching nothing). */
+  isEmptyBoard?: boolean
   /** True when at least one filter is active (board, tag, reviewState, etc.) */
   hasActiveFilters?: boolean
   hasNextPage?: boolean
@@ -24,6 +26,8 @@ interface Props {
   onLoadMore?: () => void
   /** Called when user clicks "Clear filters" from the empty filtered state */
   onClearFilters?: () => void
+  /** Called when user clicks "Go to All Vocabulary" from the empty-board state */
+  onGoToAllVocabulary?: () => void
 }
 
 export function VocabularyList({
@@ -31,11 +35,13 @@ export function VocabularyList({
   onRemove,
   viewMode = 'detailed',
   isEmpty = false,
+  isEmptyBoard = false,
   hasActiveFilters = false,
   hasNextPage = false,
   isFetchingNextPage = false,
   onLoadMore,
   onClearFilters,
+  onGoToAllVocabulary,
 }: Props) {
   const navigate    = useNavigate()
   const sentinelRef = useRef<HTMLDivElement>(null)
@@ -73,6 +79,28 @@ export function VocabularyList({
         <Button onClick={() => navigate('/search')} variant="secondary">
           Go to Search
         </Button>
+      </div>
+    )
+  }
+
+  // ── Empty: board selected has genuinely zero words ─────────────────────────
+  // Distinct from the filter-matched-nothing case below — a brand-new board
+  // isn't "no matches," it's just not populated yet.
+  if (isEmptyBoard) {
+    return (
+      <div className={styles.empty}>
+        <span className={styles.emptyIcon}><Icon icon={Folder} size={32} muted /></span>
+        <Text variant="title" as="h3" className={styles.emptyTitle}>
+          This board is empty
+        </Text>
+        <Text variant="body" color="secondary" as="p" className={styles.emptyText}>
+          Add words from your vocabulary using the board icon on any word.
+        </Text>
+        {onGoToAllVocabulary && (
+          <Button onClick={onGoToAllVocabulary} variant="secondary">
+            Go to All Vocabulary
+          </Button>
+        )}
       </div>
     )
   }

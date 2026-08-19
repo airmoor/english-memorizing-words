@@ -1,4 +1,4 @@
-import { Trash2 } from 'lucide-react'
+import { FolderPlus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Icon } from '../../../shared/ui/Icon/Icon'
 import type { VocabularyWord } from '../../../entities/vocabulary/model/types'
@@ -7,6 +7,9 @@ import { Text } from '../../../shared/ui/Typography/Typography'
 import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog/ConfirmDialog'
 import { useWordDetail } from '../../../shared/ui/WordDetail/WordDetailContext'
 import { PosBadge } from '../../../shared/ui/PosBadge/PosBadge'
+import { BoardPickerSheet } from '../../boards/ui/BoardPickerSheet'
+import { CreateBoardSheet } from '../../boards/ui/CreateBoardSheet'
+import { useAssignCardToBoard } from '../../boards/model/useCardBoardMutation'
 import { getCardState } from '../model/cardState'
 import { featureFlags } from '../../../shared/lib/featureFlags'
 import styles from './VocabularyItem.module.css'
@@ -29,6 +32,9 @@ export function VocabularyItem({ item, onRemove, sourceList }: Props) {
   const { open, close, activeWordId } = useWordDetail()
   const isActive = activeWordId === item.wordId
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const [createOpen, setCreateOpen] = useState(false)
+  const assignMutation = useAssignCardToBoard()
   const state = getCardState(item)
 
   // Clicking an already-open card toggles it closed; otherwise opens it
@@ -124,15 +130,29 @@ export function VocabularyItem({ item, onRemove, sourceList }: Props) {
           )}
         </div>
 
-        {/* Delete button — opens confirmation dialog, does not open the panel */}
-        <button
-          className={[styles.removeBtn, 'icon-action'].join(' ')}
-          onClick={handleRemoveClick}
-          aria-label={`Delete ${item.wordText} from vocabulary`}
-          title="Delete word"
-        >
-          <Icon icon={Trash2} size={15} muted />
-        </button>
+        {/* Action buttons — stop propagation so they don't also open the panel */}
+        <div className={styles.rowActions}>
+          {featureFlags.boardsTags && item.cardId && (
+            <button
+              className={[styles.addBoardBtn, 'icon-action'].join(' ')}
+              onClick={(e) => { e.stopPropagation(); setPickerOpen(true) }}
+              aria-label={`Add ${item.wordText} to a board`}
+              title="Add to board"
+            >
+              <Icon icon={FolderPlus} size={15} muted />
+            </button>
+          )}
+
+          {/* Delete button — opens confirmation dialog, does not open the panel */}
+          <button
+            className={[styles.removeBtn, 'icon-action'].join(' ')}
+            onClick={handleRemoveClick}
+            aria-label={`Delete ${item.wordText} from vocabulary`}
+            title="Delete word"
+          >
+            <Icon icon={Trash2} size={15} muted />
+          </button>
+        </div>
       </Card>
 
       <ConfirmDialog
@@ -145,6 +165,27 @@ export function VocabularyItem({ item, onRemove, sourceList }: Props) {
         onCancel={handleCancelRemove}
         danger
       />
+
+      {item.cardId && (
+        <>
+          <BoardPickerSheet
+            open={pickerOpen}
+            onClose={() => setPickerOpen(false)}
+            cardId={item.cardId}
+            wordId={item.wordId}
+            assignedBoards={item.boards}
+            onCreateNew={() => { setPickerOpen(false); setCreateOpen(true) }}
+          />
+          <CreateBoardSheet
+            open={createOpen}
+            onClose={() => setCreateOpen(false)}
+            onCreated={(boardId) => {
+              assignMutation.mutate({ boardId, cardId: item.cardId!, wordId: item.wordId })
+              setPickerOpen(true)
+            }}
+          />
+        </>
+      )}
     </>
   )
 }

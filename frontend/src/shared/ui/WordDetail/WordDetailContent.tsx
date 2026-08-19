@@ -57,8 +57,9 @@ const COLLAPSE_MIN_TOTAL = 6
  *   DictionaryHeader    — word, transcription, source, save/remove
  *   MeaningGroup[]      — one section per part of speech
  *   (separator)         — visual rule between dictionary and learning layers
+ *   BoardsSection       — board chips + add-to-board picker (Phase 4) — kept
+ *                         ahead of Note/Tags so it's visible without scrolling
  *   NoteSection         — inline-edit personal note (Phase 4)
- *   BoardsSection       — board chips + add-to-board picker (Phase 4)
  *   TagInputSection     — tag chips + autocomplete input (Phase 4)
  *   ReviewInfoSection   — interval, next review, date added (Phase 4)
  */
@@ -196,11 +197,6 @@ export function WordDetailContent({
       {/* ── Vocabulary card sections — only in vocabulary context ────── */}
       {context === 'vocabulary' && vocabCard?.cardId && (
         <div className={styles.vocabSections}>
-          <NoteSection
-            cardId={vocabCard.cardId}
-            note={vocabCard.note}
-          />
-
           {featureFlags.boardsTags && (
             <BoardsSection
               cardId={vocabCard.cardId}
@@ -208,6 +204,11 @@ export function WordDetailContent({
               boards={vocabCard.boards}
             />
           )}
+
+          <NoteSection
+            cardId={vocabCard.cardId}
+            note={vocabCard.note}
+          />
 
           {featureFlags.boardsTags && (
             <TagInputSection

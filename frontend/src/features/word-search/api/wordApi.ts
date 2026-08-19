@@ -1,5 +1,6 @@
 import { apiClient } from '../../../shared/api/base'
 import type { WordResult } from '../../../entities/word/model/types'
+import type { BoardSummary } from '../../../entities/board/model/types'
 
 export const fetchWord = (text: string): Promise<WordResult> =>
   apiClient.get(`/words/${encodeURIComponent(text)}`)
@@ -8,6 +9,10 @@ export const fetchWord = (text: string): Promise<WordResult> =>
 export interface WordSavedStatus {
   isSaved: boolean
   meaningIds: string[]
+  /** The saved word's card id — null when isSaved is false. */
+  cardId: string | null
+  /** Boards the word's card currently belongs to — empty when isSaved is false. */
+  boards: BoardSummary[]
 }
 
 /**

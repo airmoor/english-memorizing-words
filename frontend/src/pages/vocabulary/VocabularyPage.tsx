@@ -103,11 +103,13 @@ interface ContentProps {
   onRemove: (wordId: string) => void
   viewMode: ViewMode
   isEmpty: boolean
+  isEmptyBoard: boolean
   hasActiveFilters?: boolean
   hasNextPage: boolean
   isFetchingNextPage: boolean
   onLoadMore: () => void
   onClearFilters?: () => void
+  onGoToAllVocabulary: () => void
 }
 
 function VocabularyPageContent({
@@ -115,11 +117,13 @@ function VocabularyPageContent({
   onRemove,
   viewMode,
   isEmpty,
+  isEmptyBoard,
   hasActiveFilters,
   hasNextPage,
   isFetchingNextPage,
   onLoadMore,
   onClearFilters,
+  onGoToAllVocabulary,
 }: ContentProps) {
   const detail = useWordDetail()
 
@@ -136,11 +140,13 @@ function VocabularyPageContent({
       onRemove={onRemove}
       viewMode={viewMode}
       isEmpty={isEmpty}
+      isEmptyBoard={isEmptyBoard}
       hasActiveFilters={hasActiveFilters}
       hasNextPage={hasNextPage}
       isFetchingNextPage={isFetchingNextPage}
       onLoadMore={onLoadMore}
       onClearFilters={onClearFilters}
+      onGoToAllVocabulary={onGoToAllVocabulary}
     />
   )
 }
@@ -378,6 +384,12 @@ export function VocabularyPage() {
 
   const isEmpty = !isLoading && !isError && !isFiltering && !urlBoard && total === 0
 
+  // A board with genuinely zero words (not "this filter matched nothing") —
+  // mutually exclusive with `isEmpty` by construction (`!urlBoard` above vs
+  // `!!urlBoard` here). stableContextTotal is null mid-switch, which correctly
+  // keeps this false rather than flashing the empty state during a board change.
+  const isEmptyBoard = !isLoading && !isError && !isFiltering && !!urlBoard && stableContextTotal === 0
+
   // Clear only non-board filters — board stays as the navigation context
   const handleClearFilters = useCallback(() => {
     const { boardId: _, ...withoutBoard } = apiFilters
@@ -555,11 +567,13 @@ export function VocabularyPage() {
                       onRemove={remove}
                       viewMode={viewMode}
                       isEmpty={isEmpty}
+                      isEmptyBoard={isEmptyBoard}
                       hasActiveFilters={isFiltering}
                       hasNextPage={hasNextPage}
                       isFetchingNextPage={isFetchingNextPage}
                       onLoadMore={fetchNextPage}
                       onClearFilters={handleClearFilters}
+                      onGoToAllVocabulary={() => handleBoardSelect(undefined)}
                     />
                   </WordDetailProvider>
                 </div>
