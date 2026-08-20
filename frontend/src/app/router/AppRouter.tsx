@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { createBrowserRouter, createRoutesFromElements, Route, Navigate, RouterProvider } from 'react-router-dom'
 import { RequireAuth } from '../../features/auth/ui/RequireAuth'
 import { AuthPage } from '../../pages/auth/AuthPage'
 import { ForgotPasswordPage } from '../../pages/auth/ForgotPasswordPage'
@@ -11,9 +11,13 @@ import { ImportPage } from '../../pages/import/ImportPage'
 import { SettingsPage } from '../../pages/settings/SettingsPage'
 import { SharedBoardPage } from '../../pages/shared-board/SharedBoardPage'
 
-export function AppRouter() {
-  return (
-    <Routes>
+// A data router (rather than plain <BrowserRouter>) is required for the
+// `viewTransition` navigation option used throughout the app — see
+// shared/lib/navigation.tsx — which is what gives route changes their
+// native cross-fade instead of a hard cut.
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <>
       {/* Root: authenticated → /home, unauthenticated → /login (handled by RequireAuth) */}
       <Route
         path="/"
@@ -79,6 +83,10 @@ export function AppRouter() {
         }
       />
       <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
+    </>
   )
+)
+
+export function AppRouter() {
+  return <RouterProvider router={router} />
 }

@@ -1,5 +1,5 @@
 import { Home, Search, BookOpen, Upload, ClipboardCheck } from 'lucide-react'
-import { NavLink } from 'react-router-dom'
+import { NavLink } from '../../lib/navigation'
 import { Icon } from '../Icon/Icon'
 import styles from './MobileBottomNav.module.css'
 

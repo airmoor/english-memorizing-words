@@ -1,5 +1,5 @@
 import { ArrowRight, LayoutGrid } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '../../../shared/lib/useAppNavigate'
 import { Icon } from '../../../shared/ui/Icon/Icon'
 import { useBoardsQuery } from '../model/useBoardsQuery'
 import styles from './BoardsHomeSection.module.css'

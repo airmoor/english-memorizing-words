@@ -1,4 +1,6 @@
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
+import { Link } from '../../shared/lib/navigation'
+import { useNavigate } from '../../shared/lib/useAppNavigate'
 import { Library, Link2 } from 'lucide-react'
 import { Icon } from '../../shared/ui/Icon/Icon'
 import { Logo } from '../../shared/ui/Logo/Logo'

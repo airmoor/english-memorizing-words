@@ -17,11 +17,21 @@
   height: calc(100dvh - var(--app-header-height));
   overflow-y: auto;
   scrollbar-gutter: stable;
-  /* Smooth cross-route entrance. PageLayout re-keys this element per route, so
-     the fade replays on every navigation. Opacity-only (no transform) so it
-     never creates a containing block that would disturb sticky/fixed children.
-     `backwards` applies the start frame before the first paint to avoid a flash.
-     Honoured by the global prefers-reduced-motion rule in index.css. */
+}
+
+/* Cross-route entrance, CSS fallback only. Browsers that support the native
+   View Transitions API get their cross-fade from `navigate(..., { viewTransition:
+   true })` (shared/lib/navigation.tsx) instead — see the `.no-view-transitions`
+   class set in main.tsx before first paint. Running both at once would fade
+   the content in twice (the browser's snapshot cross-fade, then this keyframe
+   replaying underneath it), so the two are mutually exclusive.
+   PageLayout re-keys .content per route, so this replays on every navigation.
+   Opacity-only (no transform) so it never creates a containing block that
+   would disturb the position:fixed overlays (SidePanel, MeaningPickerSheet)
+   some pages mount inline inside .content.
+   `backwards` applies the start frame before the first paint to avoid a flash.
+   Honoured by the global prefers-reduced-motion rule in index.css. */
+:global(.no-view-transitions) .content {
   animation: pageEnter 240ms var(--ease-out) backwards;
 }
 

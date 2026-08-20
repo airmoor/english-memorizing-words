@@ -1,5 +1,4 @@
 import { type ReactNode, useEffect } from 'react'
-import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from '../../shared/design/ThemeProvider'
 import { Toaster } from '../../shared/ui/Toast'
@@ -41,15 +40,13 @@ function AuthBootstrap({ children }: { children: ReactNode }) {
 
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <AuthBootstrap>
-            {children}
-          </AuthBootstrap>
-          <Toaster />
-        </ThemeProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <AuthBootstrap>
+          {children}
+        </AuthBootstrap>
+        <Toaster />
+      </ThemeProvider>
+    </QueryClientProvider>
   )
 }

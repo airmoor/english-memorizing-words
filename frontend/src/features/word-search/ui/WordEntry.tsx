@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '../../../shared/lib/useAppNavigate'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { FolderPlus } from 'lucide-react'
 import { Card } from '../../../shared/ui/Card/Card'

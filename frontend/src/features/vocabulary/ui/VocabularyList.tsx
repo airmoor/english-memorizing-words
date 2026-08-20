@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '../../../shared/lib/useAppNavigate'
 import { useMemo, useEffect, useRef } from 'react'
 import { Folder, Library, Search } from 'lucide-react'
 import { Icon } from '../../../shared/ui/Icon/Icon'

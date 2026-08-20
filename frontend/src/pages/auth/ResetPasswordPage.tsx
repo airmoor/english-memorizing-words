@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from 'react'
-import { useSearchParams, useNavigate, Link } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
+import { Link } from '../../shared/lib/navigation'
+import { useNavigate } from '../../shared/lib/useAppNavigate'
 import { resetPasswordApi } from '../../features/auth/api/resetPassword'
 import { Card } from '../../shared/ui/Card/Card'
 import { Button } from '../../shared/ui/Button/Button'

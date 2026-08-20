@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '../../shared/lib/useAppNavigate'
 import { useQuery } from '@tanstack/react-query'
 import { Flame } from 'lucide-react'
 import { Icon } from '../../shared/ui/Icon/Icon'

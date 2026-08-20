@@ -1,5 +1,6 @@
 import { useCallback, useState, useEffect, useRef } from 'react'
-import { useSearchParams, useNavigate } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
+import { useNavigate } from '../../shared/lib/useAppNavigate'
 import { Play, Upload, ArrowLeft } from 'lucide-react'
 import { Icon } from '../../shared/ui/Icon/Icon'
 import { Text } from '../../shared/ui/Typography/Typography'
