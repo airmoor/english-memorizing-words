@@ -7,7 +7,8 @@
      see footer comment). Bottom padding closes the card. */
   padding: 0 var(--space-lg) var(--space-lg);
   /* Footer (CTA) is sticky at the bottom; content above scrolls if needed */
-  overflow: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ── Scrollable content area ─────────────────────────────────────────────── */
