@@ -6,8 +6,6 @@ import { Card } from '../../../shared/ui/Card/Card'
 import { Icon } from '../../../shared/ui/Icon/Icon'
 import { WordDetailContent } from '../../../shared/ui/WordDetail/WordDetailContent'
 import { BoardPickerSheet } from '../../boards/ui/BoardPickerSheet'
-import { CreateBoardSheet } from '../../boards/ui/CreateBoardSheet'
-import { useAssignCardToBoard } from '../../boards/model/useCardBoardMutation'
 import { featureFlags } from '../../../shared/lib/featureFlags'
 import { useSaveSelectedMeaningsMutation } from '../../meaning-picker/api/useSaveSelectedMeaningsMutation'
 import { deleteWord } from '../../vocabulary/api/vocabularyApi'
@@ -38,11 +36,9 @@ export function WordEntry({ word, onSeeAlso }: Props) {
   const [isEditMode, setIsEditMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [boardPickerOpen, setBoardPickerOpen] = useState(false)
-  const [boardCreateOpen, setBoardCreateOpen] = useState(false)
 
   const { isSaved, savedMeaningIds, cardId, boards, setOptimistic } = useWordSavedStatus(word.id)
   const saveMutation = useSaveSelectedMeaningsMutation()
-  const assignBoardMutation = useAssignCardToBoard()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
@@ -175,24 +171,13 @@ export function WordEntry({ word, onSeeAlso }: Props) {
       )}
 
       {cardId && (
-        <>
-          <BoardPickerSheet
-            open={boardPickerOpen}
-            onClose={() => setBoardPickerOpen(false)}
-            cardId={cardId}
-            wordId={word.id}
-            assignedBoards={boards}
-            onCreateNew={() => { setBoardPickerOpen(false); setBoardCreateOpen(true) }}
-          />
-          <CreateBoardSheet
-            open={boardCreateOpen}
-            onClose={() => setBoardCreateOpen(false)}
-            onCreated={(boardId) => {
-              assignBoardMutation.mutate({ boardId, cardId, wordId: word.id })
-              setBoardPickerOpen(true)
-            }}
-          />
-        </>
+        <BoardPickerSheet
+          open={boardPickerOpen}
+          onClose={() => setBoardPickerOpen(false)}
+          cardId={cardId}
+          wordId={word.id}
+          assignedBoards={boards}
+        />
       )}
     </Card>
   )

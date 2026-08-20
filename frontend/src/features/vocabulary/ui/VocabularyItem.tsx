@@ -9,8 +9,6 @@ import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog/ConfirmDialog'
 import { useWordDetail } from '../../../shared/ui/WordDetail/WordDetailContext'
 import { PosBadge } from '../../../shared/ui/PosBadge/PosBadge'
 import { BoardPickerSheet } from '../../boards/ui/BoardPickerSheet'
-import { CreateBoardSheet } from '../../boards/ui/CreateBoardSheet'
-import { useAssignCardToBoard } from '../../boards/model/useCardBoardMutation'
 import { getCardState } from '../model/cardState'
 import { featureFlags } from '../../../shared/lib/featureFlags'
 import { useIsPointerDesktop } from '../../../shared/lib/useIsPointerDesktop'
@@ -35,8 +33,6 @@ export function VocabularyItem({ item, onRemove, sourceList }: Props) {
   const isActive = activeWordId === item.wordId
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
-  const [createOpen, setCreateOpen] = useState(false)
-  const assignMutation = useAssignCardToBoard()
   const state = getCardState(item)
   const isPointerDesktop = useIsPointerDesktop()
 
@@ -186,24 +182,13 @@ export function VocabularyItem({ item, onRemove, sourceList }: Props) {
       />
 
       {item.cardId && (
-        <>
-          <BoardPickerSheet
-            open={pickerOpen}
-            onClose={() => setPickerOpen(false)}
-            cardId={item.cardId}
-            wordId={item.wordId}
-            assignedBoards={item.boards}
-            onCreateNew={() => { setPickerOpen(false); setCreateOpen(true) }}
-          />
-          <CreateBoardSheet
-            open={createOpen}
-            onClose={() => setCreateOpen(false)}
-            onCreated={(boardId) => {
-              assignMutation.mutate({ boardId, cardId: item.cardId!, wordId: item.wordId })
-              setPickerOpen(true)
-            }}
-          />
-        </>
+        <BoardPickerSheet
+          open={pickerOpen}
+          onClose={() => setPickerOpen(false)}
+          cardId={item.cardId}
+          wordId={item.wordId}
+          assignedBoards={item.boards}
+        />
       )}
     </>
   )

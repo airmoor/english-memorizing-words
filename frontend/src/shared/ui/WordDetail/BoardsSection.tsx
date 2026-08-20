@@ -2,8 +2,7 @@ import { useState } from 'react'
 import type { BoardSummary } from '../../../entities/board/model/types'
 import { BoardChip } from '../Chip/BoardChip'
 import { BoardPickerSheet } from '../../../features/boards/ui/BoardPickerSheet'
-import { CreateBoardSheet } from '../../../features/boards/ui/CreateBoardSheet'
-import { useAssignCardToBoard, useRemoveCardFromBoard } from '../../../features/boards/model/useCardBoardMutation'
+import { useRemoveCardFromBoard } from '../../../features/boards/model/useCardBoardMutation'
 import styles from './BoardsSection.module.css'
 
 interface BoardsSectionProps {
@@ -15,12 +14,10 @@ interface BoardsSectionProps {
 /**
  * Boards section in card detail.
  * Shows board chips with remove button and an "+ Add to board" button
- * that opens the BoardPickerSheet (nested bottom sheet).
+ * that opens the BoardPickerSheet.
  */
 export function BoardsSection({ cardId, wordId, boards }: BoardsSectionProps) {
   const [pickerOpen, setPickerOpen] = useState(false)
-  const [createOpen, setCreateOpen] = useState(false)
-  const assignMutation              = useAssignCardToBoard()
   const removeMutation              = useRemoveCardFromBoard()
 
   return (
@@ -54,20 +51,6 @@ export function BoardsSection({ cardId, wordId, boards }: BoardsSectionProps) {
         cardId={cardId}
         wordId={wordId}
         assignedBoards={boards}
-        onCreateNew={() => {
-          setPickerOpen(false)
-          setCreateOpen(true)
-        }}
-      />
-
-      <CreateBoardSheet
-        open={createOpen}
-        onClose={() => setCreateOpen(false)}
-        onCreated={(boardId) => {
-          // Pre-select the board that prompted its own creation — no extra tap.
-          assignMutation.mutate({ boardId, cardId, wordId })
-          setPickerOpen(true)
-        }}
       />
     </section>
   )

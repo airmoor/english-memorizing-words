@@ -1,14 +1,44 @@
+/* ── Sliding viewport ─────────────────────────────────────────────────────────── */
+/* List view and create-board view live side by side in one sheet; switching
+   slides the track horizontally instead of stacking a second sheet on top. */
+
+.viewport {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+}
+
+.track {
+  display: flex;
+  width: 200%;
+  flex-shrink: 0;
+  transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.track[data-view='create'] {
+  transform: translateX(-50%);
+}
+
+.pane {
+  width: 50%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 /* ── Header ───────────────────────────────────────────────────────────────────── */
 
 .header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: var(--space-sm);
   padding: var(--space-lg) var(--space-lg) var(--space-lg);
   border-bottom: 1px solid var(--color-border);
 }
 
 .title {
+  flex: 1;
   font-size: var(--font-md);
   font-weight: var(--fw-semibold);
   color: var(--color-text-primary);
@@ -180,7 +210,9 @@
 
 .footer {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: var(--space-sm);
   padding: var(--space-md) var(--space-lg) var(--space-lg);
   border-top: 1px solid var(--color-border);
   margin-top: var(--space-sm);
@@ -201,4 +233,110 @@
 
 .doneBtn:hover {
   filter: brightness(1.08);
+}
+
+.doneBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.cancelBtn {
+  padding: 9px var(--space-md);
+  background: none;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text-secondary);
+  font-size: var(--font-sm);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.cancelBtn:hover {
+  background: color-mix(in srgb, var(--color-text-primary) 6%, transparent);
+  border-color: var(--color-text-secondary);
+  color: var(--color-text-primary);
+}
+
+/* ── Create-board form ────────────────────────────────────────────────────────── */
+
+.createForm {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.createBody {
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.labelText {
+  font-size: var(--font-xs);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-secondary);
+  letter-spacing: var(--tracking-normal);
+  text-transform: uppercase;
+}
+
+.inputWrap {
+  position: relative;
+}
+
+.input {
+  width: 100%;
+  padding: 12px 52px 12px 14px;
+  background: var(--color-bg-secondary);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-size: var(--font-sm);
+  font-family: var(--font-sans);
+  line-height: var(--leading-normal);
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.input::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 0.6;
+}
+
+.input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 15%, transparent);
+}
+
+.inputError {
+  border-color: var(--color-danger);
+}
+
+.inputError:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger) 15%, transparent);
+}
+
+.charCount {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: var(--font-xs);
+  color: var(--color-text-muted);
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.error {
+  font-size: var(--font-xs);
+  color: var(--color-danger);
+  margin: 0;
 }
