@@ -1,4 +1,5 @@
 import { createBrowserRouter, createRoutesFromElements, Route, Navigate, RouterProvider } from 'react-router-dom'
+import { RouteErrorBoundary } from './RouteErrorBoundary'
 import { RequireAuth } from '../../features/auth/ui/RequireAuth'
 import { RequireOnboarding } from '../../features/onboarding/ui/RequireOnboarding'
 import { AuthPage } from '../../pages/auth/AuthPage'
@@ -19,7 +20,10 @@ import { SharedBoardPage } from '../../pages/shared-board/SharedBoardPage'
 // native cross-fade instead of a hard cut.
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <>
+    // Pathless wrapper route: no path/element of its own (renders an <Outlet/>
+    // by default), exists purely so its errorElement catches a render-time
+    // throw from ANY page below instead of React Router's raw crash screen.
+    <Route errorElement={<RouteErrorBoundary />}>
       {/* Root: authenticated → /home, unauthenticated → /login (handled by RequireAuth) */}
       <Route
         path="/"
@@ -106,7 +110,7 @@ const router = createBrowserRouter(
         }
       />
       <Route path="*" element={<Navigate to="/login" replace />} />
-    </>
+    </Route>
   )
 )
 
