@@ -1,6 +1,19 @@
+import { z } from 'zod'
 import { apiClient } from '../../../shared/api/base'
 import type { PaginatedVocabulary } from '../../../entities/vocabulary/model/types'
 import type { VocabularyFilters } from '../../../entities/vocabulary/model/filters'
+
+// Validates only the envelope shape (items is really an array, counts are
+// really numbers) — not the full VocabularyWord field set, which would
+// duplicate the domain type and drift out of sync with it. This is the
+// check that would have caught items:null before it reached `.find()`
+// three call frames downstream (see WordDetailContainer / useWordDetailData).
+const paginatedVocabularySchema = z.object({
+  items: z.array(z.unknown()),
+  total: z.number(),
+  totalCount: z.number(),
+  hasMore: z.boolean(),
+})
 
 export interface VocabularyPageParams {
   q?: string
@@ -37,8 +50,14 @@ export const fetchVocabularyPage = async (params: VocabularyPageParams): Promise
   }
 
   const qs = search.toString()
-  const page = await apiClient.get<PaginatedVocabulary | null>(`/vocabulary${qs ? `?${qs}` : ''}`)
-  return page ?? EMPTY_PAGE
+  const page = await apiClient.get<unknown>(`/vocabulary${qs ? `?${qs}` : ''}`)
+  if (page === null) return EMPTY_PAGE
+
+  const result = paginatedVocabularySchema.safeParse(page)
+  if (!result.success) {
+    throw new Error(`Malformed /vocabulary response: ${result.error.message}`)
+  }
+  return result.data as PaginatedVocabulary
 }
 
 export const saveWord = (wordId: string): Promise<void> =>
