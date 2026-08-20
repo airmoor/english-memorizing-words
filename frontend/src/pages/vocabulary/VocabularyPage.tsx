@@ -1,5 +1,7 @@
 import { useCallback, useState, useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
 import { useNavigate } from '../../shared/lib/useAppNavigate'
 import { Play, Upload, ArrowLeft } from 'lucide-react'
 import { Icon } from '../../shared/ui/Icon/Icon'
@@ -13,12 +15,15 @@ import { Card } from '../../shared/ui/Card/Card'
 import { VocabularyList } from '../../features/vocabulary/ui/VocabularyList'
 import { VocabularyToolbar } from '../../features/vocabulary/ui/VocabularyToolbar'
 import { VocabularyFilterBar } from '../../features/vocabulary/ui/VocabularyFilterBar'
+import { DragPreviewPill } from '../../features/vocabulary/ui/DragPreviewPill'
 import { VocabularyBoardsSidebar } from '../../features/boards/ui/VocabularyBoardsSidebar'
 import { MobileBoardsSelector } from '../../features/boards/ui/MobileBoardsSelector'
 import { CreateBoardSheet } from '../../features/boards'
+import { useAssignCardToBoard } from '../../features/boards/model/useCardBoardMutation'
 import { useVocabularyInfinite } from '../../features/vocabulary/model/useVocabularyInfinite'
 import { useVocabularyFilters } from '../../features/vocabulary/model/useVocabularyFilters'
 import { useBoardsQuery } from '../../features/boards'
+import { toast } from '../../shared/ui/Toast'
 import { featureFlags } from '../../shared/lib/featureFlags'
 import type { VocabularyFilter, SortOption } from '../../features/vocabulary/model/cardState'
 import type { ViewMode } from '../../features/vocabulary/ui/VocabularyToolbar'
@@ -384,6 +389,59 @@ export function VocabularyPage() {
 
   const isRefetching = isFetching && !isLoading
 
+  // ── Drag-to-board ─────────────────────────────────────────────────────────
+  //
+  // Desktop-pointer only (see useIsPointerDesktop in the draggable rows /
+  // droppable sidebar items) — dragging is additive to the existing "Add to
+  // board" button + BoardPickerSheet, never a replacement, so keyboard and
+  // touch users keep a fully working path regardless.
+  //
+  // The 8px activation distance lets a plain click still open the word detail
+  // panel / fire icon buttons; only a sustained pointer move starts a drag.
+
+  const [draggedWord, setDraggedWord] = useState<string | null>(null)
+  // Briefly identifies the board that just received a card via drag — lets the
+  // sidebar flash a local success cue right where the drop happened, since the
+  // global toast renders bottom-center and is easy to miss while looking at
+  // the sidebar (see VocabularyBoardsSidebar's `justAdded` prop).
+  const [recentlyAddedBoardId, setRecentlyAddedBoardId] = useState<string | null>(null)
+  const assignToBoard = useAssignCardToBoard()
+  const dndSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+  )
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    const data = event.active.data.current as { wordText: string } | undefined
+    setDraggedWord(data?.wordText ?? null)
+  }, [])
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    setDraggedWord(null)
+    const overData = event.over?.data.current as { boardId: string; boardName: string } | undefined
+    const activeData = event.active.data.current as
+      | { wordId: string; cardId: string; wordText: string }
+      | undefined
+    if (!overData || !activeData) return
+
+    const draggedItem = items.find((i) => i.wordId === activeData.wordId)
+    if (draggedItem?.boards.some((b) => b.id === overData.boardId)) {
+      toast.info(`Already in "${overData.boardName}"`)
+      return
+    }
+
+    assignToBoard.mutate({
+      boardId: overData.boardId,
+      cardId: activeData.cardId,
+      wordId: activeData.wordId,
+    })
+    toast.success(`Added "${activeData.wordText}" to "${overData.boardName}"`)
+
+    setRecentlyAddedBoardId(overData.boardId)
+    window.setTimeout(() => {
+      setRecentlyAddedBoardId((current) => (current === overData.boardId ? null : current))
+    }, 700)
+  }, [items, assignToBoard])
+
   // ── Display state ─────────────────────────────────────────────────────────
 
   // `contextTotal` comes directly from the API (backend always computes the
@@ -464,6 +522,7 @@ export function VocabularyPage() {
     <PageLayout>
       <Container as="main" width="xl">
         {/* ── Two-column layout: sidebar (desktop) + content ──────────── */}
+        <DndContext sensors={dndSensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div className={[styles.pageLayout, featureFlags.boardsTags ? '' : styles.pageLayoutNoSidebar].join(' ').trim()}>
 
           {/* Desktop sidebar — hidden on mobile/tablet via CSS */}
@@ -471,6 +530,7 @@ export function VocabularyPage() {
             <VocabularyBoardsSidebar
               activeBoardId={urlBoard}
               onSelect={handleBoardSelect}
+              recentlyAddedBoardId={recentlyAddedBoardId}
             />
           )}
 
@@ -615,6 +675,10 @@ export function VocabularyPage() {
             )}
           </div>
         </div>
+        <DragOverlay>
+          {draggedWord && <DragPreviewPill word={draggedWord} />}
+        </DragOverlay>
+        </DndContext>
       </Container>
 
       <CreateBoardSheet

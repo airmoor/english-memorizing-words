@@ -17,6 +17,21 @@
 .state_mature    { border-left-color: var(--color-success); }
 .state_difficult { border-left-color: var(--color-danger); }
 
+/* Pointer-desktop only — see useIsPointerDesktop. Signals the card can be
+   dragged onto a board in the sidebar without adding new chrome. */
+.itemDraggable {
+  cursor: grab;
+}
+
+.itemDraggable:active {
+  cursor: grabbing;
+}
+
+/* Dimmed while its DragOverlay pill is following the cursor elsewhere */
+.itemDragging {
+  opacity: 0.35;
+}
+
 /* The main row body is now a button for accessibility (§17.3) */
 .rowButton {
   flex: 1;

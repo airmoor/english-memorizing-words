@@ -1,5 +1,6 @@
 import { FolderPlus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { useDraggable } from '@dnd-kit/core'
 import { Icon } from '../../../shared/ui/Icon/Icon'
 import type { VocabularyWord } from '../../../entities/vocabulary/model/types'
 import { Card } from '../../../shared/ui/Card/Card'
@@ -12,6 +13,7 @@ import { CreateBoardSheet } from '../../boards/ui/CreateBoardSheet'
 import { useAssignCardToBoard } from '../../boards/model/useCardBoardMutation'
 import { getCardState } from '../model/cardState'
 import { featureFlags } from '../../../shared/lib/featureFlags'
+import { useIsPointerDesktop } from '../../../shared/lib/useIsPointerDesktop'
 import styles from './VocabularyItem.module.css'
 
 interface Props {
@@ -36,6 +38,16 @@ export function VocabularyItem({ item, onRemove, sourceList }: Props) {
   const [createOpen, setCreateOpen] = useState(false)
   const assignMutation = useAssignCardToBoard()
   const state = getCardState(item)
+  const isPointerDesktop = useIsPointerDesktop()
+
+  // Drag-to-board — desktop pointer only (no equivalent affordance on touch);
+  // "Add to board" button below stays as the accessible/mobile path either way.
+  const { listeners: dragListeners, setNodeRef: setDragRef, isDragging } = useDraggable({
+    id: `card-${item.cardId}`,
+    data: { wordId: item.wordId, cardId: item.cardId, wordText: item.wordText },
+    disabled: !featureFlags.boardsTags || !item.cardId || !isPointerDesktop,
+  })
+  const dndActive = featureFlags.boardsTags && !!item.cardId && isPointerDesktop
 
   // Clicking an already-open card toggles it closed; otherwise opens it
   const handleOpen = () => {
@@ -66,10 +78,17 @@ export function VocabularyItem({ item, onRemove, sourceList }: Props) {
           The card-level onClick catches clicks on padding/whitespace areas. */}
       <Card
         as="li"
+        ref={setDragRef}
         padding="sm"
         interactive
-        className={[styles.item, styles[`state_${state}`]].join(' ')}
+        className={[
+          styles.item,
+          styles[`state_${state}`],
+          dndActive ? styles.itemDraggable : '',
+          isDragging ? styles.itemDragging : '',
+        ].join(' ')}
         onClick={handleOpen}
+        {...dragListeners}
       >
         {/* Main row body — content + keyboard activation */}
         <div

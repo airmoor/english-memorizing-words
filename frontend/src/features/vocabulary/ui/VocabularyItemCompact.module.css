@@ -34,6 +34,21 @@
   background: var(--color-accent-subtle);
 }
 
+/* Pointer-desktop only — see useIsPointerDesktop. Signals the row can be
+   dragged onto a board in the sidebar without adding new chrome. */
+.rowDraggable {
+  cursor: grab;
+}
+
+.rowDraggable:active {
+  cursor: grabbing;
+}
+
+/* Dimmed while its DragOverlay pill is following the cursor elsewhere */
+.rowDragging {
+  opacity: 0.35;
+}
+
 /* ── State dot ────────────────────────────────────────────────────────────── */
 
 .dot {
