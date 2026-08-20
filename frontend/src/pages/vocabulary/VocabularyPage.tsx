@@ -9,6 +9,7 @@ import { PageLayout } from '../../shared/ui/layout/PageLayout'
 import { WordDetailProvider } from '../../shared/ui/WordDetail'
 import { useWordDetail } from '../../shared/ui/WordDetail'
 import { useWordDetailUrl } from '../../shared/ui/WordDetail/useWordDetailUrl'
+import { Card } from '../../shared/ui/Card/Card'
 import { VocabularyList } from '../../features/vocabulary/ui/VocabularyList'
 import { VocabularyToolbar } from '../../features/vocabulary/ui/VocabularyToolbar'
 import { VocabularyFilterBar } from '../../features/vocabulary/ui/VocabularyFilterBar'
@@ -22,58 +23,81 @@ import { featureFlags } from '../../shared/lib/featureFlags'
 import type { VocabularyFilter, SortOption } from '../../features/vocabulary/model/cardState'
 import type { ViewMode } from '../../features/vocabulary/ui/VocabularyToolbar'
 import type { VocabularyWord } from '../../entities/vocabulary'
+import itemStyles from '../../features/vocabulary/ui/VocabularyItem.module.css'
+import compactStyles from '../../features/vocabulary/ui/VocabularyItemCompact.module.css'
+import listStyles from '../../features/vocabulary/ui/VocabularyList.module.css'
 import styles from './VocabularyPage.module.css'
 
 // ── Skeleton loading placeholders ─────────────────────────────────────────────
+// Built from the same CSS modules as the loaded list, so compact/detailed
+// rows occupy the same grid as real items. Count undershoots a typical
+// first page — the list grows downward instead of the page shrinking.
 
-function ToolbarSkeleton() {
-  return (
-    <div className={styles.skeletonToolbar} aria-hidden="true">
-      <div className={styles.skeletonTopRow}>
-        <div className={styles.skeletonSearch} />
-        <div className={styles.skeletonControl} style={{ width: 94 }} />
-        <div className={styles.skeletonControl} style={{ width: 74 }} />
-      </div>
-      <div className={styles.skeletonChipRow}>
-        <div className={styles.skeletonChip} style={{ width: 48 }} />
-        <div className={styles.skeletonChip} style={{ width: 44 }} />
-        <div className={styles.skeletonChip} style={{ width: 76 }} />
-        <div className={styles.skeletonDivider} />
-        <div className={styles.skeletonChip} style={{ width: 80 }} />
-        <div className={styles.skeletonChip} style={{ width: 66 }} />
-        <div className={styles.skeletonChip} style={{ width: 56 }} />
-      </div>
-    </div>
-  )
-}
-
-const SKELETON_CARDS: [number, number[]][] = [
-  [130, [1, 0.82]],
-  [96,  [1]],
-  [158, [1, 0.74, 0.58]],
-  [112, [1, 0.88]],
-  [80,  [1, 0.65]],
+const COMPACT_ROWS = ['8ch', '11ch', '7ch', '10ch', '9ch'] as const
+const DETAILED_ROWS: [string, number][] = [
+  ['8ch', 1],
+  ['11ch', 2],
+  ['7ch', 1],
+  ['10ch', 1],
+  ['9ch', 2],
 ]
 
-function ListSkeleton() {
+function ListSkeleton({ viewMode }: { viewMode: ViewMode }) {
+  if (viewMode === 'compact') {
+    return (
+      <ul className={[listStyles.listCompact, styles.skeletonList].join(' ')} aria-hidden="true">
+        {COMPACT_ROWS.map((w, i) => (
+          <li key={i} className={compactStyles.row}>
+            <span className={[compactStyles.dot, styles.skeletonFill].join(' ')} />
+            <div className={compactStyles.wordBlock}>
+              <span className={compactStyles.word}>
+                <span className={styles.skeletonBlock} style={{ width: w }} />
+              </span>
+              <span className={compactStyles.transcription}>
+                <span className={styles.skeletonBlock} style={{ width: '6ch' }} />
+              </span>
+            </div>
+            {featureFlags.boardsTags && <span className={compactStyles.addBoardBtn} />}
+            <span className={compactStyles.deleteBtn} />
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
   return (
-    <div className={styles.skeletonList} aria-hidden="true">
-      {SKELETON_CARDS.map(([wordWidth, defs], i) => (
-        <div key={i} className={styles.skeletonCard}>
-          <div className={styles.skeletonCardBody}>
-            <div className={styles.skeletonWord} style={{ width: wordWidth }} />
-            {defs.map((pct, j) => (
-              <div
-                key={j}
-                className={styles.skeletonDef}
-                style={{ width: `${Math.round(pct * 100)}%` }}
-              />
-            ))}
+    <ul className={[listStyles.list, styles.skeletonList].join(' ')} aria-hidden="true">
+      {DETAILED_ROWS.map(([w, defs], i) => (
+        <Card
+          key={i}
+          as="li"
+          padding="sm"
+          className={[itemStyles.item, styles.skeletonItem].join(' ')}
+        >
+          <div className={itemStyles.rowButton}>
+            <div className={itemStyles.wordRow}>
+              <span className={itemStyles.word}>
+                <span className={styles.skeletonBlock} style={{ width: w }} />
+              </span>
+            </div>
+            <ul className={itemStyles.meanings}>
+              {Array.from({ length: defs }, (_, j) => (
+                <li key={j} className={itemStyles.meaning}>
+                  <span className={styles.skeletonPos}>noun</span>
+                  <span className={itemStyles.definition}>
+                    <span className={styles.skeletonBlock} style={{ width: j === 0 ? '72%' : '54%' }} />
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
-          <div className={styles.skeletonTrash} />
-        </div>
+          <div className={itemStyles.rowActions}>
+            {featureFlags.boardsTags && <span className={itemStyles.addBoardBtn} />}
+            <span className={itemStyles.removeBtn} />
+          </div>
+        </Card>
       ))}
-    </div>
+    </ul>
   )
 }
 
@@ -476,7 +500,9 @@ export function VocabularyPage() {
                     )}
                   </div>
                   {isLoading ? (
-                    <div className={styles.skeletonWordCount} aria-hidden="true" />
+                    <Text variant="body" color="secondary" as="p" className={styles.wordCount} aria-hidden="true">
+                      <span className={styles.skeletonText}>00 saved words</span>
+                    </Text>
                   ) : wordCountText ? (
                     <Text variant="body" color="secondary" as="p" className={styles.wordCount}>
                       {wordCountText}
@@ -499,7 +525,12 @@ export function VocabularyPage() {
                     </button>
                   )}
                   {/* Review button — shown when there's something to review */}
-                  {!isLoading && !isError && !isEmpty && (
+                  {isLoading ? (
+                    <span className={styles.reviewBtn} aria-hidden="true">
+                      <span className={styles.skeletonIcon} />
+                      <span className={styles.skeletonText}>Review all</span>
+                    </span>
+                  ) : !isError && !isEmpty && (
                     <button
                       type="button"
                       className={styles.reviewBtn}
@@ -522,12 +553,7 @@ export function VocabularyPage() {
               </div>
             </div>
 
-            {isLoading ? (
-              <>
-                <ToolbarSkeleton />
-                <ListSkeleton />
-              </>
-            ) : isError ? (
+            {isError ? (
               <Text variant="body" color="secondary" as="p">
                 Failed to load vocabulary. Please try again.
               </Text>
@@ -535,9 +561,8 @@ export function VocabularyPage() {
               <div className={[styles.contentArea, isRefetching ? styles.contentAreaFetching : ''].join(' ').trim()}>
                 {isRefetching && <div className={styles.fetchingBar} aria-hidden="true" />}
 
-                {showToolbar && (
+                {(isLoading || showToolbar) && (
                   <>
-                    {/* Mobile boards selector — shown only below 1024px */}
                     {featureFlags.boardsTags && (
                       <MobileBoardsSelector
                         activeBoardId={urlBoard}
@@ -565,22 +590,26 @@ export function VocabularyPage() {
                 )}
 
                 <div className={[styles.listWrapper, isRefetching ? styles.fetching : ''].join(' ').trim()}>
-                  <WordDetailProvider onRemove={remove} context="vocabulary">
-                    <VocabularyPageContent
-                      items={items}
-                      onRemove={remove}
-                      viewMode={viewMode}
-                      isEmpty={isEmpty}
-                      isEmptyBoard={isEmptyBoard}
-                      hasActiveFilters={isFiltering}
-                      searchQuery={committedQuery}
-                      hasNextPage={hasNextPage}
-                      isFetchingNextPage={isFetchingNextPage}
-                      onLoadMore={fetchNextPage}
-                      onClearFilters={handleClearFilters}
-                      onGoToAllVocabulary={() => handleBoardSelect(undefined)}
-                    />
-                  </WordDetailProvider>
+                  {isLoading ? (
+                    <ListSkeleton viewMode={viewMode} />
+                  ) : (
+                    <WordDetailProvider onRemove={remove} context="vocabulary">
+                      <VocabularyPageContent
+                        items={items}
+                        onRemove={remove}
+                        viewMode={viewMode}
+                        isEmpty={isEmpty}
+                        isEmptyBoard={isEmptyBoard}
+                        hasActiveFilters={isFiltering}
+                        searchQuery={committedQuery}
+                        hasNextPage={hasNextPage}
+                        isFetchingNextPage={isFetchingNextPage}
+                        onLoadMore={fetchNextPage}
+                        onClearFilters={handleClearFilters}
+                        onGoToAllVocabulary={() => handleBoardSelect(undefined)}
+                      />
+                    </WordDetailProvider>
+                  )}
                 </div>
               </div>
             )}

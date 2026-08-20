@@ -148,148 +148,79 @@
 
 .wordCount {
   margin: 0;
-  /* Fades in with the same timing as .contentArea so header and body
-     appear as one cohesive unit rather than at different moments. */
-  animation: contentEnter 0.22s var(--ease-out) both;
-}
-
-/* Skeleton placeholder for the "N saved words" subtitle */
-.skeletonWordCount {
-  height: 26px;
-  width: 112px;
-  border-radius: var(--radius-sm);
-  margin-top: var(--space-xs);
 }
 
 /* ── Skeleton loading placeholders ──────────────────────────────────────────
-   Skeleton elements share the same spatial footprint as the real content so
-   the layout doesn't reflow when data arrives. A gentle pulse keeps them
-   calm rather than a moving shimmer which draws too much attention.
-   ─────────────────────────────────────────────────────────────────────────── */
+   Built from the loaded list's own CSS modules (see ListSkeleton). These
+   helpers only fill the text/icon slots so the surrounding chrome is identical. */
 
 @keyframes skeletonPulse {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.42; }
 }
 
-/* Apply animation + base style to every skeleton shape element */
-.skeletonWordCount,
-.skeletonSearch,
-.skeletonControl,
-.skeletonChip,
-.skeletonDivider,
-.skeletonWord,
-.skeletonDef,
-.skeletonTrash {
+.skeletonText {
+  color: transparent;
   background: var(--color-border);
+  border-radius: var(--radius-sm);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  animation: skeletonPulse 1.8s ease-in-out infinite;
+  user-select: none;
+}
+
+.skeletonBlock {
+  display: inline-block;
+  height: 1em;
+  vertical-align: -0.15em;
+  background: var(--color-border);
+  border-radius: var(--radius-sm);
   animation: skeletonPulse 1.8s ease-in-out infinite;
 }
 
-/* ── Toolbar skeleton ────────────────────────────────────────────────────── */
-
-.skeletonToolbar {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-  margin-bottom: var(--space-lg);
+.skeletonFill {
+  background: var(--color-border) !important;
+  animation: skeletonPulse 1.8s ease-in-out infinite;
 }
 
-.skeletonTopRow {
-  display: flex;
-  gap: var(--space-sm);
-  align-items: center;
-}
-
-.skeletonSearch {
-  flex: 1;
-  height: 36px;
-  border-radius: var(--radius-md);
-}
-
-.skeletonControl {
-  height: 36px;
-  border-radius: var(--radius-md);
+.skeletonIcon {
+  width: 12px;
+  height: 12px;
   flex-shrink: 0;
+  background: var(--color-border);
+  border-radius: var(--radius-sm);
+  animation: skeletonPulse 1.8s ease-in-out infinite;
 }
 
-.skeletonChipRow {
-  display: flex;
-  gap: var(--space-xs);
-  align-items: center;
+.skeletonPos {
+  display: inline-block;
+  padding: var(--badge-padding-y) var(--badge-padding-x);
+  border-radius: var(--badge-radius);
+  font-size: var(--text-micro);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: transparent;
+  background: var(--color-border);
+  animation: skeletonPulse 1.8s ease-in-out infinite;
+  user-select: none;
+  align-self: flex-start;
 }
 
-.skeletonChip {
-  height: 28px;
-  border-radius: var(--radius-full);
-  flex-shrink: 0;
+.skeletonItem {
+  animation: none !important;
+  pointer-events: none;
+  border-left-color: var(--color-border);
 }
-
-.skeletonDivider {
-  width: 1px;
-  height: 20px;
-  flex-shrink: 0;
-  border-radius: 1px;
-}
-
-/* ── List skeleton ────────────────────────────────────────────────────────── */
 
 .skeletonList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
+  pointer-events: none;
 }
 
-.skeletonCard {
-  /* Matches Card padding-sm + border + border-left rules from VocabularyItem */
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-left-width: 3px;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-  padding: var(--space-md);
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-md);
-}
-
-.skeletonCardBody {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-}
-
-.skeletonWord {
-  height: 20px;
-  border-radius: var(--radius-sm);
-}
-
-.skeletonDef {
-  height: 13px;
-  border-radius: var(--radius-sm);
-}
-
-.skeletonTrash {
-  width: 32px;
-  height: 32px;
-  flex-shrink: 0;
-  border-radius: var(--radius-md);
-}
-
-/* ── Content entrance ─────────────────────────────────────────────────────
-   Toolbar + list fade in together as one unit when data arrives, creating a
-   single coherent composition rather than elements appearing piece by piece.
-   The translateY nudge adds intent without being dramatic.
-   ─────────────────────────────────────────────────────────────────────────── */
-
-@keyframes contentEnter {
-  from { opacity: 0; transform: translateY(5px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
+/* Chrome (toolbar, filters) stays mounted across loading → loaded, so this
+   wrapper does not animate — a fade-from-0 here was the blank frame. */
 .contentArea {
-  animation: contentEnter 0.22s var(--ease-out) both;
+  min-width: 0;
 }
 
 /* ── Filter-change loading indicator ──────────────────────────────────────

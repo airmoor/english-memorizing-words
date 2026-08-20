@@ -10,7 +10,10 @@ const MAX_BOARDS = 4
  * Lightweight "Your boards" widget for the Home page.
  *
  * Shows up to 4 active boards with word counts.
- * - Loading: pulsing skeleton rows.
+ * - Loading: pulsing placeholder that matches the empty-state layout
+ *   (icon + two lines of copy + CTA). Guessing a 4-row board list made
+ *   the card shrink — and during the crossfade both layers were visible
+ *   at once, so the count pills sat beside the empty copy.
  * - Empty: quiet CTA to create the first board.
  * - Loaded: scannable board list with word counts.
  *
@@ -45,18 +48,18 @@ export function BoardsHomeSection() {
       </div>
 
       {isLoading ? (
-        /* ── Loading skeleton ─────────────────────────────────────────── */
-        <div className={styles.skeleton}>
-          {[88, 112, 72, 96].map((w, i) => (
-            <div key={i} className={styles.skeletonRow}>
-              <div className={styles.skeletonDot} />
-              <div className={styles.skeletonName} style={{ width: w }} />
-              <div className={styles.skeletonCount} />
-            </div>
-          ))}
+        <div className={styles.emptyState} aria-hidden="true">
+          <span className={styles.skeletonIcon} />
+          <p className={styles.emptyText}>
+            <span className={styles.skeletonText}>
+              Group your vocabulary into boards for focused review.
+            </span>
+          </p>
+          <span className={styles.emptyBtn}>
+            <span className={styles.skeletonText}>Create your first board →</span>
+          </span>
         </div>
       ) : activeBoards.length === 0 ? (
-        /* ── Empty state ──────────────────────────────────────────────── */
         <div className={styles.emptyState}>
           <span className={styles.emptyIcon}><Icon icon={LayoutGrid} size={28} muted /></span>
           <p className={styles.emptyText}>
@@ -71,7 +74,6 @@ export function BoardsHomeSection() {
           </button>
         </div>
       ) : (
-        /* ── Board list ───────────────────────────────────────────────── */
         <ul className={styles.list}>
           {activeBoards.map((board) => (
             <li key={board.id}>

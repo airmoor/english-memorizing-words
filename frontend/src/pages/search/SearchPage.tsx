@@ -86,7 +86,7 @@ export function SearchPage() {
             )}
 
             {searchState.status === 'notFound' && (
-              <div className={styles.emptyState}>
+              <div className={[styles.emptyState, 'content-fade-in'].join(' ')}>
                 <span className={styles.emptyIcon}>
                   <Icon icon={Search} size={32} muted />
                 </span>
@@ -100,7 +100,7 @@ export function SearchPage() {
             )}
 
             {searchState.status === 'unavailable' && (
-              <div className={styles.emptyState}>
+              <div className={[styles.emptyState, 'content-fade-in'].join(' ')}>
                 <span className={styles.emptyIcon}>
                   <Icon icon={AlertTriangle} size={32} muted />
                 </span>
@@ -114,7 +114,7 @@ export function SearchPage() {
             )}
 
             {searchState.status === 'error' && (
-              <div className={styles.emptyState}>
+              <div className={[styles.emptyState, 'content-fade-in'].join(' ')}>
                 <span className={styles.emptyIcon}>
                   <Icon icon={AlertTriangle} size={32} muted />
                 </span>
@@ -125,13 +125,15 @@ export function SearchPage() {
             )}
 
             {searchState.status === 'success' && (
-              <WordEntry
-                word={searchState.word}
-                onSeeAlso={(term) => {
-                  setInput(term)
-                  setQuery(normalizeText(term))
-                }}
-              />
+              <div className="content-fade-in">
+                <WordEntry
+                  word={searchState.word}
+                  onSeeAlso={(term) => {
+                    setInput(term)
+                    setQuery(normalizeText(term))
+                  }}
+                />
+              </div>
             )}
           </div>
         </div>

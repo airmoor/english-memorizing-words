@@ -422,6 +422,22 @@ button {
     animation-timing-function: var(--ease-out);
 }
 
+/* ── Loading → content fade ───────────────────────────────────────────
+   The route-level transitions above only cover the initial route paint.
+   Pages that show a skeleton/spinner while a query is pending then swap
+   straight to the real content with a bare ternary — an abrupt, unanimated
+   cut a beat after the smooth route entrance, which is what actually reads
+   as "jerky". Apply this class to a page's content branch (the ternary's
+   loaded-state root) so that swap eases in the same language as everything
+   else instead of popping. */
+@keyframes contentFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+.content-fade-in {
+    animation: contentFadeIn var(--transition-base) backwards;
+}
+
 /* ── Reduced motion: respect OS preference ────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
