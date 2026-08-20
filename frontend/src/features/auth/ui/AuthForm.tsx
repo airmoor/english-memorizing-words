@@ -67,6 +67,14 @@ export function AuthForm({ mode, onSubmit, onToggle }: Props) {
               <Text variant="label" as="span">Email</Text>
               <input
                 type="email"
+                name="email"
+                // Password managers classify a form from the PAIR of a
+                // username field and a new-password field. Without a hint on
+                // the identifier they fall back to guessing and stop offering
+                // to generate a password on registration. "username" is the
+                // spec's value for the identifier even when it holds an email,
+                // and managers recognise it more reliably than "email".
+                autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={styles.input}
@@ -86,6 +94,7 @@ export function AuthForm({ mode, onSubmit, onToggle }: Props) {
                 )}
               </span>
               <PasswordInput
+                name="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className={styles.input}
