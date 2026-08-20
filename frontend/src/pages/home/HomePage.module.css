@@ -7,87 +7,58 @@
   50%       { opacity: 0.42; }
 }
 
-.skeletonLine,
-.skeletonBtn {
+/* Invisible copy + a pulsing fill — sits inside the real typography
+   classes so the skeleton occupies the same line-box as the loaded text. */
+.skeletonText {
+  color: transparent;
   background: var(--color-border);
-  animation: skeletonPulse 1.8s ease-in-out infinite;
   border-radius: var(--radius-sm);
-}
-
-.skeletonLine {
-  height: 17px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  animation: skeletonPulse 1.8s ease-in-out infinite;
+  user-select: none;
 }
 
 .skeletonBtn {
-  width: 120px;
-  height: 36px;
-  border-radius: var(--radius-md);
-}
-
-.skeletonHeroContent {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-}
-
-/* ── Boards skeleton ──────────────────────────────────────────────────────── */
-
-.skeletonBoards {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-}
-
-.skeletonBoardsHeader {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 2px;
-}
-
-.skeletonBoardsRow {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-sm) 0;
-  border-top: 1px solid var(--color-border);
-}
-
-.skeletonBoardsRow:first-of-type {
-  border-top: none;
-}
-
-.skeletonBoardsDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
+  justify-content: center;
+  padding: 0.625rem 1.25rem;
+  font-size: var(--font-md);
+  font-weight: var(--fw-semibold);
+  line-height: inherit;
+  color: transparent;
   background: var(--color-border);
+  border-radius: var(--btn-radius);
   animation: skeletonPulse 1.8s ease-in-out infinite;
-  flex-shrink: 0;
+  user-select: none;
 }
 
-/* ── Page container ───────────────────────────────────────────────────────── */
-
-@keyframes contentEnter {
-  from { opacity: 0; transform: translateY(5px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+/* ── Page container ─────────────────────────────────────────────────────────
+   No enter animation here: replaying a fade-from-0 when the skeleton swaps
+   to real content is what left a blank frame between loading and loaded.
+   Route-level motion lives on PageLayout / View Transitions; in-card swaps
+   use Crossfade so the outgoing layer stays visible underneath. */
 
 .page {
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
-  animation: contentEnter 0.22s var(--ease-out) both;
 }
 
 /* ── Hero CTA ─────────────────────────────────────────────────────────────── */
 
 .hero {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Flex + gap used to live on .hero; they move onto the Crossfade layers so
+   skeleton and loaded hero share the same internal rhythm while stacked. */
+.heroInner {
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
-  position: relative;
-  overflow: hidden;
 }
 
 /* The perpetual hero shimmer sweep was removed in the calm pass — ambient,
@@ -152,12 +123,14 @@
   font-family: var(--font-serif);
   font-size: var(--text-page-title);
   font-weight: var(--fw-regular);
+  line-height: var(--leading-snug);
   color: var(--color-text-primary);
 }
 
 .heroSubtitle {
   margin: 0;
   font-size: var(--text-caption);
+  line-height: var(--leading-normal);
   color: var(--color-text-secondary);
 }
 
@@ -173,6 +146,12 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  animation: recentAppear 0.22s var(--ease-out) both;
+}
+
+@keyframes recentAppear {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 .recentHeader {

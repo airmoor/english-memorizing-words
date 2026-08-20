@@ -293,6 +293,12 @@ export class WordSavedStatusDto {
     description: 'IDs of saved meanings (selected subset, or all word meanings when no explicit selection was made). Empty when isSaved is false.',
   })
   meaningIds: string[];
+
+  @ApiProperty({ example: 'uuid-v4', nullable: true, description: 'The card id for this word, if saved. Null when isSaved is false.' })
+  cardId: string | null;
+
+  @ApiProperty({ type: [BoardSummaryDto], description: "Boards the word's card currently belongs to. Empty when isSaved is false." })
+  boards: BoardSummaryDto[];
 }
 
 // ── Service ──────────────────────────────────────────────────────────────────
@@ -377,8 +383,28 @@ export class VocabularyService {
        GROUP BY uw.word_id, uw.selected_meaning_ids`,
       [userId, wordId],
     );
-    if (rows.length === 0) return { isSaved: false, meaningIds: [] };
-    return { isSaved: true, meaningIds: rows[0].meaningIds ?? [] };
+    if (rows.length === 0) return { isSaved: false, meaningIds: [], cardId: null, boards: [] };
+
+    // A saved word always has a card (saveWord creates both in one transaction),
+    // but boards are only fetched when a card is actually found — defensive.
+    const cardRows = await this.dataSource.query<{ id: string }[]>(
+      `SELECT id FROM cards WHERE user_id = $1 AND word_id = $2`,
+      [userId, wordId],
+    );
+    const cardId = cardRows[0]?.id ?? null;
+
+    const boards = cardId
+      ? await this.dataSource.query<BoardSummaryDto[]>(
+          `SELECT b.id, b.name
+           FROM card_boards cb
+           JOIN boards b ON b.id = cb.board_id
+           WHERE cb.card_id = $1
+           ORDER BY b.name ASC`,
+          [cardId],
+        )
+      : [];
+
+    return { isSaved: true, meaningIds: rows[0].meaningIds ?? [], cardId, boards };
   }
 
   // ── GET /vocabulary ───────────────────────────────────────────────────────

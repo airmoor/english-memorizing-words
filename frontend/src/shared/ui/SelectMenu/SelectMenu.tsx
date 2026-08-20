@@ -17,6 +17,8 @@ interface Props<T extends string> {
   placeholder?: string
   ariaLabel?: string
   disabled?: boolean
+  /** Stretch the trigger to fill its container instead of sizing to content. */
+  fullWidth?: boolean
 }
 
 /**
@@ -32,6 +34,7 @@ export function SelectMenu<T extends string>({
   placeholder = 'Select…',
   ariaLabel = 'Select',
   disabled = false,
+  fullWidth = false,
 }: Props<T>) {
   const [open, setOpen] = useState(false)
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -80,11 +83,15 @@ export function SelectMenu<T extends string>({
   }, [open])
 
   return (
-    <div className={styles.wrap}>
+    <div className={[styles.wrap, fullWidth ? styles.wrapFullWidth : ''].join(' ').trim()}>
       <button
         ref={triggerRef}
         type="button"
-        className={[styles.trigger, hasValue ? styles.triggerActive : ''].join(' ').trim()}
+        className={[
+          styles.trigger,
+          hasValue ? styles.triggerActive : '',
+          fullWidth ? styles.triggerFullWidth : '',
+        ].join(' ').trim()}
         onClick={() => setOpen((o) => !o)}
         disabled={disabled}
         aria-haspopup="listbox"

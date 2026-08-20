@@ -408,6 +408,36 @@ button {
     border-radius: var(--radius-sm);
 }
 
+/* ── Page transitions — View Transitions API ──────────────────────────
+   navigate(..., { viewTransition: true }) (shared/lib/navigation.tsx) wraps
+   every route change in document.startViewTransition(), which by default
+   cross-fades a snapshot of the old page into the new one over 250ms ease.
+   Retuned here to the app's own easing/duration so a route change reads as
+   one motion language with every other transition instead of its own thing.
+   These are generated top-layer pseudo-elements, not part of the normal DOM,
+   so they need their own selectors rather than a class on <html> or `.content`. */
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 220ms;
+    animation-timing-function: var(--ease-out);
+}
+
+/* ── Loading → content fade ───────────────────────────────────────────
+   The route-level transitions above only cover the initial route paint.
+   Pages that show a skeleton/spinner while a query is pending then swap
+   straight to the real content with a bare ternary — an abrupt, unanimated
+   cut a beat after the smooth route entrance, which is what actually reads
+   as "jerky". Apply this class to a page's content branch (the ternary's
+   loaded-state root) so that swap eases in the same language as everything
+   else instead of popping. */
+@keyframes contentFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+.content-fade-in {
+    animation: contentFadeIn var(--transition-base) backwards;
+}
+
 /* ── Reduced motion: respect OS preference ────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
@@ -415,6 +445,13 @@ button {
         animation-iteration-count: 1 !important;
         transition-duration: 0.001ms !important;
         scroll-behavior: auto !important;
+    }
+
+    /* `*` above doesn't reach top-layer view-transition pseudo-elements. */
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+        animation-duration: 0.001ms !important;
     }
 }
 

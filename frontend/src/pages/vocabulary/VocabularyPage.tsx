@@ -1,5 +1,8 @@
 import { useCallback, useState, useEffect, useRef } from 'react'
-import { useSearchParams, useNavigate } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
+import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
+import { useNavigate } from '../../shared/lib/useAppNavigate'
 import { Play, Upload, ArrowLeft } from 'lucide-react'
 import { Icon } from '../../shared/ui/Icon/Icon'
 import { Text } from '../../shared/ui/Typography/Typography'
@@ -8,70 +11,98 @@ import { PageLayout } from '../../shared/ui/layout/PageLayout'
 import { WordDetailProvider } from '../../shared/ui/WordDetail'
 import { useWordDetail } from '../../shared/ui/WordDetail'
 import { useWordDetailUrl } from '../../shared/ui/WordDetail/useWordDetailUrl'
+import { Card } from '../../shared/ui/Card/Card'
 import { VocabularyList } from '../../features/vocabulary/ui/VocabularyList'
 import { VocabularyToolbar } from '../../features/vocabulary/ui/VocabularyToolbar'
 import { VocabularyFilterBar } from '../../features/vocabulary/ui/VocabularyFilterBar'
+import { DragPreviewPill } from '../../features/vocabulary/ui/DragPreviewPill'
 import { VocabularyBoardsSidebar } from '../../features/boards/ui/VocabularyBoardsSidebar'
 import { MobileBoardsSelector } from '../../features/boards/ui/MobileBoardsSelector'
+import { CreateBoardSheet } from '../../features/boards'
+import { useAssignCardToBoard } from '../../features/boards/model/useCardBoardMutation'
 import { useVocabularyInfinite } from '../../features/vocabulary/model/useVocabularyInfinite'
 import { useVocabularyFilters } from '../../features/vocabulary/model/useVocabularyFilters'
 import { useBoardsQuery } from '../../features/boards'
+import { toast } from '../../shared/ui/Toast'
 import { featureFlags } from '../../shared/lib/featureFlags'
 import type { VocabularyFilter, SortOption } from '../../features/vocabulary/model/cardState'
 import type { ViewMode } from '../../features/vocabulary/ui/VocabularyToolbar'
 import type { VocabularyWord } from '../../entities/vocabulary'
+import itemStyles from '../../features/vocabulary/ui/VocabularyItem.module.css'
+import compactStyles from '../../features/vocabulary/ui/VocabularyItemCompact.module.css'
+import listStyles from '../../features/vocabulary/ui/VocabularyList.module.css'
 import styles from './VocabularyPage.module.css'
 
 // ── Skeleton loading placeholders ─────────────────────────────────────────────
+// Built from the same CSS modules as the loaded list, so compact/detailed
+// rows occupy the same grid as real items. Count undershoots a typical
+// first page — the list grows downward instead of the page shrinking.
 
-function ToolbarSkeleton() {
-  return (
-    <div className={styles.skeletonToolbar} aria-hidden="true">
-      <div className={styles.skeletonTopRow}>
-        <div className={styles.skeletonSearch} />
-        <div className={styles.skeletonControl} style={{ width: 94 }} />
-        <div className={styles.skeletonControl} style={{ width: 74 }} />
-      </div>
-      <div className={styles.skeletonChipRow}>
-        <div className={styles.skeletonChip} style={{ width: 48 }} />
-        <div className={styles.skeletonChip} style={{ width: 44 }} />
-        <div className={styles.skeletonChip} style={{ width: 76 }} />
-        <div className={styles.skeletonDivider} />
-        <div className={styles.skeletonChip} style={{ width: 80 }} />
-        <div className={styles.skeletonChip} style={{ width: 66 }} />
-        <div className={styles.skeletonChip} style={{ width: 56 }} />
-      </div>
-    </div>
-  )
-}
-
-const SKELETON_CARDS: [number, number[]][] = [
-  [130, [1, 0.82]],
-  [96,  [1]],
-  [158, [1, 0.74, 0.58]],
-  [112, [1, 0.88]],
-  [80,  [1, 0.65]],
+const COMPACT_ROWS = ['8ch', '11ch', '7ch', '10ch', '9ch'] as const
+const DETAILED_ROWS: [string, number][] = [
+  ['8ch', 1],
+  ['11ch', 2],
+  ['7ch', 1],
+  ['10ch', 1],
+  ['9ch', 2],
 ]
 
-function ListSkeleton() {
+function ListSkeleton({ viewMode }: { viewMode: ViewMode }) {
+  if (viewMode === 'compact') {
+    return (
+      <ul className={[listStyles.listCompact, styles.skeletonList].join(' ')} aria-hidden="true">
+        {COMPACT_ROWS.map((w, i) => (
+          <li key={i} className={compactStyles.row}>
+            <span className={[compactStyles.dot, styles.skeletonFill].join(' ')} />
+            <div className={compactStyles.wordBlock}>
+              <span className={compactStyles.word}>
+                <span className={styles.skeletonBlock} style={{ width: w }} />
+              </span>
+              <span className={compactStyles.transcription}>
+                <span className={styles.skeletonBlock} style={{ width: '6ch' }} />
+              </span>
+            </div>
+            {featureFlags.boardsTags && <span className={compactStyles.addBoardBtn} />}
+            <span className={compactStyles.deleteBtn} />
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
   return (
-    <div className={styles.skeletonList} aria-hidden="true">
-      {SKELETON_CARDS.map(([wordWidth, defs], i) => (
-        <div key={i} className={styles.skeletonCard}>
-          <div className={styles.skeletonCardBody}>
-            <div className={styles.skeletonWord} style={{ width: wordWidth }} />
-            {defs.map((pct, j) => (
-              <div
-                key={j}
-                className={styles.skeletonDef}
-                style={{ width: `${Math.round(pct * 100)}%` }}
-              />
-            ))}
+    <ul className={[listStyles.list, styles.skeletonList].join(' ')} aria-hidden="true">
+      {DETAILED_ROWS.map(([w, defs], i) => (
+        <Card
+          key={i}
+          as="li"
+          padding="sm"
+          className={[itemStyles.item, styles.skeletonItem].join(' ')}
+        >
+          <div className={itemStyles.rowButton}>
+            <div className={itemStyles.wordRow}>
+              <span className={itemStyles.word}>
+                <span className={styles.skeletonBlock} style={{ width: w }} />
+              </span>
+            </div>
+            <ul className={itemStyles.meanings}>
+              {Array.from({ length: defs }, (_, j) => (
+                <li key={j} className={itemStyles.meaning}>
+                  <span className={styles.skeletonPos}>noun</span>
+                  <span className={itemStyles.definition}>
+                    <span className={styles.skeletonBlock} style={{ width: j === 0 ? '72%' : '54%' }} />
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
-          <div className={styles.skeletonTrash} />
-        </div>
+          <div className={itemStyles.rowActions}>
+            {featureFlags.boardsTags && <span className={itemStyles.addBoardBtn} />}
+            <span className={itemStyles.removeBtn} />
+          </div>
+        </Card>
       ))}
-    </div>
+    </ul>
   )
 }
 
@@ -102,11 +133,14 @@ interface ContentProps {
   onRemove: (wordId: string) => void
   viewMode: ViewMode
   isEmpty: boolean
+  isEmptyBoard: boolean
   hasActiveFilters?: boolean
+  searchQuery?: string
   hasNextPage: boolean
   isFetchingNextPage: boolean
   onLoadMore: () => void
   onClearFilters?: () => void
+  onGoToAllVocabulary: () => void
 }
 
 function VocabularyPageContent({
@@ -114,11 +148,14 @@ function VocabularyPageContent({
   onRemove,
   viewMode,
   isEmpty,
+  isEmptyBoard,
   hasActiveFilters,
+  searchQuery,
   hasNextPage,
   isFetchingNextPage,
   onLoadMore,
   onClearFilters,
+  onGoToAllVocabulary,
 }: ContentProps) {
   const detail = useWordDetail()
 
@@ -135,11 +172,14 @@ function VocabularyPageContent({
       onRemove={onRemove}
       viewMode={viewMode}
       isEmpty={isEmpty}
+      isEmptyBoard={isEmptyBoard}
       hasActiveFilters={hasActiveFilters}
+      searchQuery={searchQuery}
       hasNextPage={hasNextPage}
       isFetchingNextPage={isFetchingNextPage}
       onLoadMore={onLoadMore}
       onClearFilters={onClearFilters}
+      onGoToAllVocabulary={onGoToAllVocabulary}
     />
   )
 }
@@ -270,6 +310,26 @@ export function VocabularyPage() {
   const { data: boards = [], isLoading: boardsLoading } = useBoardsQuery()
   const activeBoard = boards.find((b) => b.id === urlBoard)
 
+  // ── Deep-linked "create board" intent ─────────────────────────────────────
+  //
+  // The Home page's "Create your first board" CTA links here with
+  // ?createBoard=1 so the create flow opens immediately instead of just
+  // landing on the generic vocabulary list. Seeded once from the URL, then
+  // the param is stripped so refresh/back doesn't reopen the sheet.
+  const [createBoardOpen, setCreateBoardOpen] = useState(
+    () => searchParams.get('createBoard') === '1',
+  )
+  useEffect(() => {
+    if (searchParams.get('createBoard') === '1') {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev)
+        next.delete('createBoard')
+        return next
+      }, { replace: true })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // Keep the apiFilters.boardId in sync with the URL board param
   // so the existing vocabulary query stays board-scoped.
   useEffect(() => {
@@ -329,6 +389,59 @@ export function VocabularyPage() {
 
   const isRefetching = isFetching && !isLoading
 
+  // ── Drag-to-board ─────────────────────────────────────────────────────────
+  //
+  // Desktop-pointer only (see useIsPointerDesktop in the draggable rows /
+  // droppable sidebar items) — dragging is additive to the existing "Add to
+  // board" button + BoardPickerSheet, never a replacement, so keyboard and
+  // touch users keep a fully working path regardless.
+  //
+  // The 8px activation distance lets a plain click still open the word detail
+  // panel / fire icon buttons; only a sustained pointer move starts a drag.
+
+  const [draggedWord, setDraggedWord] = useState<string | null>(null)
+  // Briefly identifies the board that just received a card via drag — lets the
+  // sidebar flash a local success cue right where the drop happened, since the
+  // global toast renders bottom-center and is easy to miss while looking at
+  // the sidebar (see VocabularyBoardsSidebar's `justAdded` prop).
+  const [recentlyAddedBoardId, setRecentlyAddedBoardId] = useState<string | null>(null)
+  const assignToBoard = useAssignCardToBoard()
+  const dndSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+  )
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    const data = event.active.data.current as { wordText: string } | undefined
+    setDraggedWord(data?.wordText ?? null)
+  }, [])
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    setDraggedWord(null)
+    const overData = event.over?.data.current as { boardId: string; boardName: string } | undefined
+    const activeData = event.active.data.current as
+      | { wordId: string; cardId: string; wordText: string }
+      | undefined
+    if (!overData || !activeData) return
+
+    const draggedItem = items.find((i) => i.wordId === activeData.wordId)
+    if (draggedItem?.boards.some((b) => b.id === overData.boardId)) {
+      toast.info(`Already in "${overData.boardName}"`)
+      return
+    }
+
+    assignToBoard.mutate({
+      boardId: overData.boardId,
+      cardId: activeData.cardId,
+      wordId: activeData.wordId,
+    })
+    toast.success(`Added "${activeData.wordText}" to "${overData.boardName}"`)
+
+    setRecentlyAddedBoardId(overData.boardId)
+    window.setTimeout(() => {
+      setRecentlyAddedBoardId((current) => (current === overData.boardId ? null : current))
+    }, 700)
+  }, [items, assignToBoard])
+
   // ── Display state ─────────────────────────────────────────────────────────
 
   // `contextTotal` comes directly from the API (backend always computes the
@@ -356,6 +469,12 @@ export function VocabularyPage() {
   )
 
   const isEmpty = !isLoading && !isError && !isFiltering && !urlBoard && total === 0
+
+  // A board with genuinely zero words (not "this filter matched nothing") —
+  // mutually exclusive with `isEmpty` by construction (`!urlBoard` above vs
+  // `!!urlBoard` here). stableContextTotal is null mid-switch, which correctly
+  // keeps this false rather than flashing the empty state during a board change.
+  const isEmptyBoard = !isLoading && !isError && !isFiltering && !!urlBoard && stableContextTotal === 0
 
   // Clear only non-board filters — board stays as the navigation context
   const handleClearFilters = useCallback(() => {
@@ -403,6 +522,7 @@ export function VocabularyPage() {
     <PageLayout>
       <Container as="main" width="xl">
         {/* ── Two-column layout: sidebar (desktop) + content ──────────── */}
+        <DndContext sensors={dndSensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div className={[styles.pageLayout, featureFlags.boardsTags ? '' : styles.pageLayoutNoSidebar].join(' ').trim()}>
 
           {/* Desktop sidebar — hidden on mobile/tablet via CSS */}
@@ -410,6 +530,7 @@ export function VocabularyPage() {
             <VocabularyBoardsSidebar
               activeBoardId={urlBoard}
               onSelect={handleBoardSelect}
+              recentlyAddedBoardId={recentlyAddedBoardId}
             />
           )}
 
@@ -439,7 +560,9 @@ export function VocabularyPage() {
                     )}
                   </div>
                   {isLoading ? (
-                    <div className={styles.skeletonWordCount} aria-hidden="true" />
+                    <Text variant="body" color="secondary" as="p" className={styles.wordCount} aria-hidden="true">
+                      <span className={styles.skeletonText}>00 saved words</span>
+                    </Text>
                   ) : wordCountText ? (
                     <Text variant="body" color="secondary" as="p" className={styles.wordCount}>
                       {wordCountText}
@@ -462,7 +585,12 @@ export function VocabularyPage() {
                     </button>
                   )}
                   {/* Review button — shown when there's something to review */}
-                  {!isLoading && !isError && !isEmpty && (
+                  {isLoading ? (
+                    <span className={styles.reviewBtn} aria-hidden="true">
+                      <span className={styles.skeletonIcon} />
+                      <span className={styles.skeletonText}>Review all</span>
+                    </span>
+                  ) : !isError && !isEmpty && (
                     <button
                       type="button"
                       className={styles.reviewBtn}
@@ -485,12 +613,7 @@ export function VocabularyPage() {
               </div>
             </div>
 
-            {isLoading ? (
-              <>
-                <ToolbarSkeleton />
-                <ListSkeleton />
-              </>
-            ) : isError ? (
+            {isError ? (
               <Text variant="body" color="secondary" as="p">
                 Failed to load vocabulary. Please try again.
               </Text>
@@ -498,9 +621,8 @@ export function VocabularyPage() {
               <div className={[styles.contentArea, isRefetching ? styles.contentAreaFetching : ''].join(' ').trim()}>
                 {isRefetching && <div className={styles.fetchingBar} aria-hidden="true" />}
 
-                {showToolbar && (
+                {(isLoading || showToolbar) && (
                   <>
-                    {/* Mobile boards selector — shown only below 1024px */}
                     {featureFlags.boardsTags && (
                       <MobileBoardsSelector
                         activeBoardId={urlBoard}
@@ -528,25 +650,42 @@ export function VocabularyPage() {
                 )}
 
                 <div className={[styles.listWrapper, isRefetching ? styles.fetching : ''].join(' ').trim()}>
-                  <WordDetailProvider onRemove={remove} context="vocabulary">
-                    <VocabularyPageContent
-                      items={items}
-                      onRemove={remove}
-                      viewMode={viewMode}
-                      isEmpty={isEmpty}
-                      hasActiveFilters={isFiltering}
-                      hasNextPage={hasNextPage}
-                      isFetchingNextPage={isFetchingNextPage}
-                      onLoadMore={fetchNextPage}
-                      onClearFilters={handleClearFilters}
-                    />
-                  </WordDetailProvider>
+                  {isLoading ? (
+                    <ListSkeleton viewMode={viewMode} />
+                  ) : (
+                    <WordDetailProvider onRemove={remove} context="vocabulary">
+                      <VocabularyPageContent
+                        items={items}
+                        onRemove={remove}
+                        viewMode={viewMode}
+                        isEmpty={isEmpty}
+                        isEmptyBoard={isEmptyBoard}
+                        hasActiveFilters={isFiltering}
+                        searchQuery={committedQuery}
+                        hasNextPage={hasNextPage}
+                        isFetchingNextPage={isFetchingNextPage}
+                        onLoadMore={fetchNextPage}
+                        onClearFilters={handleClearFilters}
+                        onGoToAllVocabulary={() => handleBoardSelect(undefined)}
+                      />
+                    </WordDetailProvider>
+                  )}
                 </div>
               </div>
             )}
           </div>
         </div>
+        <DragOverlay>
+          {draggedWord && <DragPreviewPill word={draggedWord} />}
+        </DragOverlay>
+        </DndContext>
       </Container>
+
+      <CreateBoardSheet
+        open={createBoardOpen}
+        onClose={() => setCreateBoardOpen(false)}
+        onCreated={(boardId) => handleBoardSelect(boardId)}
+      />
 
     </PageLayout>
   )

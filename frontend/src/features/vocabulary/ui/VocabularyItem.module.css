@@ -1,15 +1,9 @@
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
 /* Layout only — card appearance comes from Card.module.css via interactive prop */
 .item {
   display: flex;
   align-items: center;
   gap: var(--card-gap);
   cursor: pointer;
-  animation: fadeIn 0.22s var(--ease-out) both;
   /* Left border color indicates card state — subtle accent, not intrusive */
   border-left-width: 3px;
 }
@@ -22,6 +16,21 @@
 .state_review    { border-left-color: var(--color-accent); }
 .state_mature    { border-left-color: var(--color-success); }
 .state_difficult { border-left-color: var(--color-danger); }
+
+/* Pointer-desktop only — see useIsPointerDesktop. Signals the card can be
+   dragged onto a board in the sidebar without adding new chrome. */
+.itemDraggable {
+  cursor: grab;
+}
+
+.itemDraggable:active {
+  cursor: grabbing;
+}
+
+/* Dimmed while its DragOverlay pill is following the cursor elsewhere */
+.itemDragging {
+  opacity: 0.35;
+}
 
 /* The main row body is now a button for accessibility (§17.3) */
 .rowButton {
@@ -117,6 +126,14 @@
   padding-top: 2px;
 }
 
+.rowActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.addBoardBtn,
 .removeBtn {
   flex-shrink: 0;
   width: 32px;
@@ -132,6 +149,17 @@
   transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
   font-family: inherit;
   line-height: 1;
+}
+
+.addBoardBtn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 6%, transparent);
+}
+
+.addBoardBtn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 .removeBtn:hover {

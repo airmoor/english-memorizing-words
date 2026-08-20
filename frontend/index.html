@@ -30,7 +30,41 @@
     <!-- Manifest (injected by vite-plugin-pwa in production) -->
   </head>
   <body>
-    <div id="root"></div>
+    <style>
+      /* Boot loader — fills the gap between the browser painting this shell
+         and React taking over #root. On a hard reload that gap is otherwise
+         a stark blank flash (measured ~300ms locally); a themed, branded
+         placeholder reads as "still loading" instead of "broke". Removed
+         automatically — React's render() replaces #root's children, no
+         cleanup script needed. Inline so it never waits on index.css. */
+      #boot-loader {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--color-bg-primary, #f4f4f2);
+      }
+      #boot-loader svg {
+        opacity: 0.5;
+        animation: boot-pulse 1.1s ease-in-out infinite;
+      }
+      @keyframes boot-pulse {
+        0%, 100% { opacity: 0.25; }
+        50%      { opacity: 0.6; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #boot-loader svg { animation: none; opacity: 0.5; }
+      }
+    </style>
+    <div id="root"><div id="boot-loader" aria-hidden="true">
+      <svg width="40" height="40" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <text x="16" y="23" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+          font-size="22" font-style="italic" font-weight="500" fill="currentColor" style="color: var(--color-text-primary, #1a1a1a)">
+          <tspan opacity="0.42">/</tspan><tspan>L</tspan><tspan opacity="0.42">/</tspan>
+        </text>
+      </svg>
+    </div></div>
     <!-- Theme bootstrap — runs synchronously before React to prevent FOUC.
          Reads saved theme from localStorage, resolves the correct palette,
          and sets --color-bg-primary on <html> so the CSS background rule

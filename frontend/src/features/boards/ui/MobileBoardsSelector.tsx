@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Inbox, ChevronDown, X, Check, Plus } from 'lucide-react'
+import { Inbox, ChevronDown, X, Check, Plus, Share2, Link2 } from 'lucide-react'
 import { Icon } from '../../../shared/ui/Icon/Icon'
 import { BottomSheet } from '../../../shared/ui/BottomSheet/BottomSheet'
 import { BottomSheetContent } from '../../../shared/ui/BottomSheet/BottomSheetContent'
 import { useBoardsQuery } from '../model/useBoardsQuery'
 import { CreateBoardSheet } from './CreateBoardSheet'
+import { ShareBoardSheet } from './ShareBoardSheet'
 import styles from './MobileBoardsSelector.module.css'
 
 interface MobileBoardsSelectorProps {
@@ -26,12 +27,14 @@ export function MobileBoardsSelector({
   activeBoardId,
   onSelect,
 }: MobileBoardsSelectorProps) {
-  const [sheetOpen, setSheetOpen]   = useState(false)
-  const [createOpen, setCreateOpen] = useState(false)
-  const { data: boards = [] }       = useBoardsQuery()
+  const [sheetOpen, setSheetOpen]     = useState(false)
+  const [createOpen, setCreateOpen]   = useState(false)
+  const [shareBoardId, setShareBoardId] = useState<string | null>(null)
+  const { data: boards = [] }         = useBoardsQuery()
 
   const activeBoards = boards.filter((b) => !b.isArchived)
   const activeBoard  = boards.find((b) => b.id === activeBoardId)
+  const boardToShare = activeBoards.find((b) => b.id === shareBoardId)
 
   const handleSelect = (boardId: string | undefined) => {
     onSelect(boardId)
@@ -113,7 +116,7 @@ export function MobileBoardsSelector({
             {activeBoards.map((board) => {
               const isActive = activeBoardId === board.id
               return (
-                <li key={board.id}>
+                <li key={board.id} className={styles.boardRowWrap}>
                   <button
                     type="button"
                     role="option"
@@ -126,12 +129,29 @@ export function MobileBoardsSelector({
                   >
                     <BoardDotIcon active={isActive} />
                     <span className={styles.boardRowLabel}>{board.name}</span>
+                    {board.visibility === 'unlisted' && (
+                      <span
+                        role="img"
+                        aria-label="Shared — anyone with the link can view"
+                        className={styles.sharedIndicator}
+                      >
+                        <Icon icon={Link2} size={12} />
+                      </span>
+                    )}
                     {board.cardCount > 0 && (
                       <span className={styles.boardRowCount}>{board.cardCount}</span>
                     )}
                     {isActive && (
                       <Icon icon={Check} size={14} strokeWidth={2.5} style={{ flexShrink: 0, color: 'var(--color-accent)' }} />
                     )}
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.rowShareBtn}
+                    onClick={() => setShareBoardId(board.id)}
+                    aria-label={`Share ${board.name}`}
+                  >
+                    <Icon icon={Share2} size={15} />
                   </button>
                 </li>
               )
@@ -155,6 +175,12 @@ export function MobileBoardsSelector({
         open={createOpen}
         onClose={() => setCreateOpen(false)}
         onCreated={handleCreated}
+      />
+
+      <ShareBoardSheet
+        open={shareBoardId !== null}
+        onClose={() => setShareBoardId(null)}
+        board={boardToShare}
       />
     </>
   )

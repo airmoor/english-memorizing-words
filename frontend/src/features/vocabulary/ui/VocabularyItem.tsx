@@ -1,5 +1,6 @@
-import { Trash2 } from 'lucide-react'
+import { FolderPlus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { useDraggable } from '@dnd-kit/core'
 import { Icon } from '../../../shared/ui/Icon/Icon'
 import type { VocabularyWord } from '../../../entities/vocabulary/model/types'
 import { Card } from '../../../shared/ui/Card/Card'
@@ -7,8 +8,10 @@ import { Text } from '../../../shared/ui/Typography/Typography'
 import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog/ConfirmDialog'
 import { useWordDetail } from '../../../shared/ui/WordDetail/WordDetailContext'
 import { PosBadge } from '../../../shared/ui/PosBadge/PosBadge'
+import { BoardPickerSheet } from '../../boards/ui/BoardPickerSheet'
 import { getCardState } from '../model/cardState'
 import { featureFlags } from '../../../shared/lib/featureFlags'
+import { useIsPointerDesktop } from '../../../shared/lib/useIsPointerDesktop'
 import styles from './VocabularyItem.module.css'
 
 interface Props {
@@ -29,7 +32,18 @@ export function VocabularyItem({ item, onRemove, sourceList }: Props) {
   const { open, close, activeWordId } = useWordDetail()
   const isActive = activeWordId === item.wordId
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [pickerOpen, setPickerOpen] = useState(false)
   const state = getCardState(item)
+  const isPointerDesktop = useIsPointerDesktop()
+
+  // Drag-to-board — desktop pointer only (no equivalent affordance on touch);
+  // "Add to board" button below stays as the accessible/mobile path either way.
+  const { listeners: dragListeners, setNodeRef: setDragRef, isDragging } = useDraggable({
+    id: `card-${item.cardId}`,
+    data: { wordId: item.wordId, cardId: item.cardId, wordText: item.wordText },
+    disabled: !featureFlags.boardsTags || !item.cardId || !isPointerDesktop,
+  })
+  const dndActive = featureFlags.boardsTags && !!item.cardId && isPointerDesktop
 
   // Clicking an already-open card toggles it closed; otherwise opens it
   const handleOpen = () => {
@@ -60,10 +74,17 @@ export function VocabularyItem({ item, onRemove, sourceList }: Props) {
           The card-level onClick catches clicks on padding/whitespace areas. */}
       <Card
         as="li"
+        ref={setDragRef}
         padding="sm"
         interactive
-        className={[styles.item, styles[`state_${state}`]].join(' ')}
+        className={[
+          styles.item,
+          styles[`state_${state}`],
+          dndActive ? styles.itemDraggable : '',
+          isDragging ? styles.itemDragging : '',
+        ].join(' ')}
         onClick={handleOpen}
+        {...dragListeners}
       >
         {/* Main row body — content + keyboard activation */}
         <div
@@ -124,15 +145,29 @@ export function VocabularyItem({ item, onRemove, sourceList }: Props) {
           )}
         </div>
 
-        {/* Delete button — opens confirmation dialog, does not open the panel */}
-        <button
-          className={[styles.removeBtn, 'icon-action'].join(' ')}
-          onClick={handleRemoveClick}
-          aria-label={`Delete ${item.wordText} from vocabulary`}
-          title="Delete word"
-        >
-          <Icon icon={Trash2} size={15} muted />
-        </button>
+        {/* Action buttons — stop propagation so they don't also open the panel */}
+        <div className={styles.rowActions}>
+          {featureFlags.boardsTags && item.cardId && (
+            <button
+              className={[styles.addBoardBtn, 'icon-action'].join(' ')}
+              onClick={(e) => { e.stopPropagation(); setPickerOpen(true) }}
+              aria-label={`Add ${item.wordText} to a board`}
+              title="Add to board"
+            >
+              <Icon icon={FolderPlus} size={15} muted />
+            </button>
+          )}
+
+          {/* Delete button — opens confirmation dialog, does not open the panel */}
+          <button
+            className={[styles.removeBtn, 'icon-action'].join(' ')}
+            onClick={handleRemoveClick}
+            aria-label={`Delete ${item.wordText} from vocabulary`}
+            title="Delete word"
+          >
+            <Icon icon={Trash2} size={15} muted />
+          </button>
+        </div>
       </Card>
 
       <ConfirmDialog
@@ -145,6 +180,16 @@ export function VocabularyItem({ item, onRemove, sourceList }: Props) {
         onCancel={handleCancelRemove}
         danger
       />
+
+      {item.cardId && (
+        <BoardPickerSheet
+          open={pickerOpen}
+          onClose={() => setPickerOpen(false)}
+          cardId={item.cardId}
+          wordId={item.wordId}
+          assignedBoards={item.boards}
+        />
+      )}
     </>
   )
 }

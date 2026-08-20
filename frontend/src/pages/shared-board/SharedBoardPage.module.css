@@ -1,0 +1,122 @@
+.shell {
+  min-height: 100vh;
+  background: var(--color-bg-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+.shellHeader {
+  padding: var(--space-md) var(--page-padding-x, var(--space-md));
+}
+
+.logoLink {
+  display: inline-flex;
+  color: var(--color-text-primary);
+}
+
+.page {
+  flex: 1;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--space-lg) var(--space-md) var(--space-2xl, var(--space-xl));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* ── Loading / error states ───────────────────────────────────────────────── */
+
+.centered {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--space-sm);
+  padding: var(--space-2xl, 48px) 0;
+}
+
+.emptyIcon {
+  margin-bottom: var(--space-xs);
+}
+
+.emptyTitle {
+  margin: 0;
+}
+
+.emptyText {
+  margin: 0 0 var(--space-sm);
+  max-width: 40ch;
+}
+
+/* ── Board header ─────────────────────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.headerBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  padding: 3px 10px 3px 8px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  color: var(--color-accent-fg);
+  font-size: var(--font-2xs);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+}
+
+.title {
+  margin: var(--space-xs) 0 0;
+}
+
+.description {
+  margin: 0;
+}
+
+.wordCount {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Call to action ───────────────────────────────────────────────────────── */
+
+.cta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: var(--space-md);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.ctaNote {
+  margin: 0;
+}
+
+/* ── Word list ────────────────────────────────────────────────────────────── */
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.emptyList {
+  margin: 0;
+  text-align: center;
+  padding: var(--space-lg) 0;
+}

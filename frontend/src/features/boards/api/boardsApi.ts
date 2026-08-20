@@ -1,5 +1,5 @@
 import { apiClient } from '../../../shared/api/base'
-import type { Board } from '../../../entities/board/model/types'
+import type { Board, BoardVisibility, SharedBoard } from '../../../entities/board/model/types'
 
 export interface CreateBoardDto {
   name: string
@@ -41,3 +41,12 @@ export const removeCardFromBoard = (
   cardId: string,
 ): Promise<{ removed: boolean }> =>
   apiClient.delete(`/boards/${boardId}/cards/${cardId}`)
+
+export const setBoardVisibility = (id: string, visibility: BoardVisibility): Promise<Board> =>
+  apiClient.patch(`/boards/${id}/visibility`, { visibility })
+
+export const fetchSharedBoard = (slug: string): Promise<SharedBoard> =>
+  apiClient.get(`/boards/shared/${slug}`)
+
+export const cloneSharedBoard = (slug: string): Promise<{ id: string }> =>
+  apiClient.post(`/boards/shared/${slug}/clone`)

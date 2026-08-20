@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '../../shared/lib/useAppNavigate'
 import { PageLayout } from '../../shared/ui/layout/PageLayout'
 import { ImportUploader } from '../../features/import-vocabulary/ui/ImportUploader'
 import { ImportPreview } from '../../features/import-vocabulary/ui/ImportPreview'

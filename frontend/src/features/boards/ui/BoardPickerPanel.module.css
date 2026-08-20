@@ -1,0 +1,342 @@
+/* ── Sliding viewport ─────────────────────────────────────────────────────────── */
+/* List view and create-board view live side by side in one sheet; switching
+   slides the track horizontally instead of stacking a second sheet on top. */
+
+.viewport {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+}
+
+.track {
+  display: flex;
+  width: 200%;
+  flex-shrink: 0;
+  transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.track[data-view='create'] {
+  transform: translateX(-50%);
+}
+
+.pane {
+  width: 50%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-lg) var(--space-lg) var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.title {
+  flex: 1;
+  font-size: var(--font-md);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+  font-family: var(--font-sans);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.newBoardLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  color: var(--color-accent-fg);
+  font-size: var(--font-sm);
+  font-family: var(--font-sans);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  padding: 6px var(--space-sm);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
+  white-space: nowrap;
+}
+
+.newBoardLink:hover {
+  background: var(--color-accent-subtle);
+}
+
+.closeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-full);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.closeBtn:hover {
+  background: color-mix(in srgb, var(--color-text-primary) 8%, transparent);
+  color: var(--color-text-primary);
+}
+
+/* ── Empty state ─────────────────────────────────────────────────────────────── */
+
+.empty {
+  padding: var(--space-xl) var(--space-lg);
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: var(--font-sm);
+}
+
+/* ── Board list ───────────────────────────────────────────────────────────────── */
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-sm) 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  width: 100%;
+  /* 52px min-height — comfortable touch target without feeling bloated */
+  min-height: 52px;
+  padding: var(--space-sm) var(--space-lg);
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+}
+
+.row:hover,
+.row:focus-visible {
+  background: color-mix(in srgb, var(--color-text-primary) 5%, transparent);
+  outline: none;
+}
+
+.rowChecked {}
+
+.rowArchived {
+  color: var(--color-text-secondary);
+}
+
+.rowName {
+  flex: 1;
+  font-size: var(--font-sm);
+  line-height: var(--leading-normal);
+}
+
+/* .rowCount removed — counts add noise and compete with board names */
+
+/* ── Checkbox visual ──────────────────────────────────────────────────────────── */
+
+.checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-border);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.checkboxChecked {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: #fff;
+}
+
+/* Pop-in on check — the moment-of-tap confirmation that a bare color change
+   doesn't give. Element remounts fresh each time (conditionally rendered),
+   so the animation replays on every check, not just the first. */
+@keyframes checkPop {
+  0%   { transform: scale(0.3); opacity: 0; }
+  60%  { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.checkboxChecked svg {
+  animation: checkPop 0.22s var(--ease-out, ease-out) both;
+}
+
+/* Row itself gets a brief accent wash so the whole row — not just the tiny
+   checkbox — reads as "this one, right now". */
+@keyframes rowFlash {
+  0%   { background: color-mix(in srgb, var(--color-accent) 14%, transparent); }
+  100% { background: transparent; }
+}
+
+.rowChecked {
+  animation: rowFlash 0.5s var(--ease-out, ease-out);
+}
+
+/* ── Archived section ─────────────────────────────────────────────────────────── */
+
+.archivedSection {
+  border-top: 1px solid var(--color-border);
+}
+
+.archivedToggle {
+  padding: var(--space-md) var(--space-lg);
+  font-size: var(--font-xs);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* ── Footer ───────────────────────────────────────────────────────────────────── */
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg) var(--space-lg);
+  border-top: 1px solid var(--color-border);
+  margin-top: var(--space-sm);
+}
+
+.doneBtn {
+  padding: 9px var(--space-lg);
+  background: var(--color-accent);
+  border: none;
+  border-radius: var(--radius-full);
+  color: #fff;
+  font-size: var(--font-sm);
+  font-family: var(--font-sans);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition: filter var(--transition-fast);
+}
+
+.doneBtn:hover {
+  filter: brightness(1.08);
+}
+
+.doneBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.cancelBtn {
+  padding: 9px var(--space-md);
+  background: none;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text-secondary);
+  font-size: var(--font-sm);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.cancelBtn:hover {
+  background: color-mix(in srgb, var(--color-text-primary) 6%, transparent);
+  border-color: var(--color-text-secondary);
+  color: var(--color-text-primary);
+}
+
+/* ── Create-board form ────────────────────────────────────────────────────────── */
+
+.createForm {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.createBody {
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.labelText {
+  font-size: var(--font-xs);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-secondary);
+  letter-spacing: var(--tracking-normal);
+  text-transform: uppercase;
+}
+
+.inputWrap {
+  position: relative;
+}
+
+.input {
+  width: 100%;
+  padding: 12px 52px 12px 14px;
+  background: var(--color-bg-secondary);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-size: var(--font-sm);
+  font-family: var(--font-sans);
+  line-height: var(--leading-normal);
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.input::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 0.6;
+}
+
+.input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 15%, transparent);
+}
+
+.inputError {
+  border-color: var(--color-danger);
+}
+
+.inputError:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger) 15%, transparent);
+}
+
+.charCount {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: var(--font-xs);
+  color: var(--color-text-muted);
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.error {
+  font-size: var(--font-xs);
+  color: var(--color-danger);
+  margin: 0;
+}

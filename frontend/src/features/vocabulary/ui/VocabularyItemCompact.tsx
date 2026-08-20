@@ -1,9 +1,13 @@
-import { Trash2 } from 'lucide-react'
+import { FolderPlus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { useDraggable } from '@dnd-kit/core'
 import { Icon } from '../../../shared/ui/Icon/Icon'
 import type { VocabularyWord } from '../../../entities/vocabulary/model/types'
 import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog/ConfirmDialog'
 import { useWordDetail } from '../../../shared/ui/WordDetail/WordDetailContext'
+import { BoardPickerSheet } from '../../boards/ui/BoardPickerSheet'
+import { featureFlags } from '../../../shared/lib/featureFlags'
+import { useIsPointerDesktop } from '../../../shared/lib/useIsPointerDesktop'
 import { getCardState } from '../model/cardState'
 import styles from './VocabularyItemCompact.module.css'
 
@@ -23,8 +27,19 @@ export function VocabularyItemCompact({ item, onRemove, sourceList }: Props) {
   const { open, close, activeWordId } = useWordDetail()
   const isActive = activeWordId === item.wordId
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const isPointerDesktop = useIsPointerDesktop()
 
   const state = getCardState(item)
+
+  // Drag-to-board — desktop pointer only (no equivalent affordance on touch);
+  // "Add to board" button above stays as the accessible/mobile path either way.
+  const { listeners: dragListeners, setNodeRef: setDragRef, isDragging } = useDraggable({
+    id: `card-${item.cardId}`,
+    data: { wordId: item.wordId, cardId: item.cardId, wordText: item.wordText },
+    disabled: !featureFlags.boardsTags || !item.cardId || !isPointerDesktop,
+  })
+  const dndActive = featureFlags.boardsTags && !!item.cardId && isPointerDesktop
 
   // Clicking an already-open card toggles it closed; otherwise opens it
   const handleOpen = () => {
@@ -43,7 +58,13 @@ export function VocabularyItemCompact({ item, onRemove, sourceList }: Props) {
   return (
     <>
       <li
-        className={[styles.row, isActive ? styles.rowActive : ''].join(' ')}
+        ref={setDragRef}
+        className={[
+          styles.row,
+          isActive ? styles.rowActive : '',
+          dndActive ? styles.rowDraggable : '',
+          isDragging ? styles.rowDragging : '',
+        ].join(' ')}
         onClick={handleOpen}
         role="button"
         tabIndex={0}
@@ -52,6 +73,7 @@ export function VocabularyItemCompact({ item, onRemove, sourceList }: Props) {
         }}
         aria-label={isActive ? `Close detail for ${item.wordText}` : `Open detail for ${item.wordText}`}
         aria-pressed={isActive}
+        {...dragListeners}
       >
         {/* State dot */}
         <span
@@ -71,6 +93,18 @@ export function VocabularyItemCompact({ item, onRemove, sourceList }: Props) {
             <span />
           )}
         </div>
+
+        {/* Add to board */}
+        {featureFlags.boardsTags && item.cardId && (
+          <button
+            className={[styles.addBoardBtn, 'icon-action'].join(' ')}
+            onClick={(e) => { e.stopPropagation(); setPickerOpen(true) }}
+            aria-label={`Add ${item.wordText} to a board`}
+            title="Add to board"
+          >
+            <Icon icon={FolderPlus} size={14} muted />
+          </button>
+        )}
 
         {/* Delete */}
         <button
@@ -93,6 +127,16 @@ export function VocabularyItemCompact({ item, onRemove, sourceList }: Props) {
         onCancel={() => setConfirmOpen(false)}
         danger
       />
+
+      {item.cardId && (
+        <BoardPickerSheet
+          open={pickerOpen}
+          onClose={() => setPickerOpen(false)}
+          cardId={item.cardId}
+          wordId={item.wordId}
+          assignedBoards={item.boards}
+        />
+      )}
     </>
   )
 }

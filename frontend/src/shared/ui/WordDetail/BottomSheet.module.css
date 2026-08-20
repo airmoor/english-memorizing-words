@@ -110,6 +110,45 @@
   padding: var(--space-md) var(--space-lg) var(--space-xxl);
 }
 
+/* ── Sliding secondary view (e.g. board picker) ──────────────────────────────
+   Used instead of `.body` when a secondary view is provided — same scroll
+   behavior as `.body`, just relocated onto `.paneScroll` so each pane in the
+   track scrolls independently. */
+.viewport {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+}
+
+.track {
+  display: flex;
+  width: 200%;
+  flex-shrink: 0;
+  transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.track[data-open='true'] {
+  transform: translateX(-50%);
+}
+
+.pane {
+  width: 50%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.paneScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  padding: var(--space-md) var(--space-lg) var(--space-xxl);
+}
+
 /* ── Navigation bar ───────────────────────────────────────────────────────── */
 .nav {
   flex-shrink: 0;

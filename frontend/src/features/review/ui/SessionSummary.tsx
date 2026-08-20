@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '../../../shared/lib/useAppNavigate'
 import { Text } from '../../../shared/ui/Typography/Typography'
 import type { Rating } from '../../../entities/review/model/types'
 import styles from './SessionSummary.module.css'

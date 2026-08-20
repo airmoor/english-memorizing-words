@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from '../../../shared/lib/navigation'
 import { ChevronDown, Pencil, Check, X } from 'lucide-react'
 import { Icon } from '../../../shared/ui/Icon/Icon'
 import { useImportPreviewMutation } from '../model/useImportPreviewMutation'

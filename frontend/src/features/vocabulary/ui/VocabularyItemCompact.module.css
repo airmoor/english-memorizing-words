@@ -2,8 +2,8 @@
 
 .row {
   display: grid;
-  /* dot  |  word  |  transcription (flex-fill)  |  delete */
-  grid-template-columns: 10px 1fr 32px;
+  /* dot  |  word  |  transcription (flex-fill)  |  add to board  |  delete */
+  grid-template-columns: 10px 1fr 32px 32px;
   align-items: center;
   gap: var(--space-md);
   padding: 10px var(--space-md);
@@ -32,6 +32,21 @@
 .rowActive {
   border-color: var(--color-accent);
   background: var(--color-accent-subtle);
+}
+
+/* Pointer-desktop only — see useIsPointerDesktop. Signals the row can be
+   dragged onto a board in the sidebar without adding new chrome. */
+.rowDraggable {
+  cursor: grab;
+}
+
+.rowDraggable:active {
+  cursor: grabbing;
+}
+
+/* Dimmed while its DragOverlay pill is following the cursor elsewhere */
+.rowDragging {
+  opacity: 0.35;
 }
 
 /* ── State dot ────────────────────────────────────────────────────────────── */
@@ -83,8 +98,9 @@
   text-overflow: ellipsis;
 }
 
-/* ── Delete button ───────────────────────────────────────────────────────── */
+/* ── Add-to-board / delete buttons ───────────────────────────────────────── */
 
+.addBoardBtn,
 .deleteBtn {
   width: 28px;
   height: 28px;
@@ -100,10 +116,23 @@
   justify-self: center;
 }
 
-/* Show delete button on row hover/active */
+/* Show both action buttons on row hover/active */
+.row:hover .addBoardBtn,
+.rowActive .addBoardBtn,
 .row:hover .deleteBtn,
 .rowActive .deleteBtn {
   color: var(--color-text-secondary);
+}
+
+.addBoardBtn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent) !important;
+  background: color-mix(in srgb, var(--color-accent) 6%, transparent);
+}
+
+.addBoardBtn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 .deleteBtn:hover {
@@ -121,6 +150,6 @@
 
 @media (max-width: 380px) {
   .row {
-    grid-template-columns: 10px 1fr 32px;
+    grid-template-columns: 10px 1fr 32px 32px;
   }
 }

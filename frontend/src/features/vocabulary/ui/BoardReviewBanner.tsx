@@ -1,5 +1,5 @@
 import { Play } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '../../../shared/lib/useAppNavigate'
 import { Icon } from '../../../shared/ui/Icon/Icon'
 import { useBoardsQuery } from '../../boards/model/useBoardsQuery'
 import styles from './BoardReviewBanner.module.css'

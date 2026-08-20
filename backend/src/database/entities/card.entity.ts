@@ -54,6 +54,13 @@ export class Card {
   @Column({ name: 'last_reviewed_at', type: 'timestamptz', nullable: true })
   lastReviewedAt: Date | null;
 
+  /**
+   * Most recent free-text self-check attempt the user typed before revealing
+   * the answer. Overwritten on each review that includes one — not a history.
+   */
+  @Column({ name: 'last_answer_text', type: 'text', nullable: true })
+  lastAnswerText: string | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 

@@ -1,0 +1,32 @@
+.root {
+  display: grid;
+  align-items: start;
+  width: 100%;
+}
+
+.root > * {
+  grid-area: 1 / 1;
+  min-width: 0;
+}
+
+.enter {
+  --crossfade-duration: 200ms;
+  animation: crossfadeIn var(--crossfade-duration) var(--ease-out) both;
+  z-index: 1;
+}
+
+.exit {
+  --crossfade-duration: 200ms;
+  animation: crossfadeOut var(--crossfade-duration) var(--ease-out) both;
+  pointer-events: none;
+}
+
+@keyframes crossfadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes crossfadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}

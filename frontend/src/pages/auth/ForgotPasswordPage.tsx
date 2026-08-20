@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from '../../shared/lib/navigation'
 import { forgotPasswordApi } from '../../features/auth/api/forgotPassword'
 import { Card } from '../../shared/ui/Card/Card'
 import { Button } from '../../shared/ui/Button/Button'

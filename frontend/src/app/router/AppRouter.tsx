@@ -1,5 +1,6 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { createBrowserRouter, createRoutesFromElements, Route, Navigate, RouterProvider } from 'react-router-dom'
 import { RequireAuth } from '../../features/auth/ui/RequireAuth'
+import { RequireOnboarding } from '../../features/onboarding/ui/RequireOnboarding'
 import { AuthPage } from '../../pages/auth/AuthPage'
 import { ForgotPasswordPage } from '../../pages/auth/ForgotPasswordPage'
 import { ResetPasswordPage } from '../../pages/auth/ResetPasswordPage'
@@ -9,10 +10,16 @@ import { ReviewPage } from '../../pages/review/ReviewPage'
 import { VocabularyPage } from '../../pages/vocabulary/VocabularyPage'
 import { ImportPage } from '../../pages/import/ImportPage'
 import { SettingsPage } from '../../pages/settings/SettingsPage'
+import { OnboardingPage } from '../../pages/onboarding/OnboardingPage'
+import { SharedBoardPage } from '../../pages/shared-board/SharedBoardPage'
 
-export function AppRouter() {
-  return (
-    <Routes>
+// A data router (rather than plain <BrowserRouter>) is required for the
+// `viewTransition` navigation option used throughout the app — see
+// shared/lib/navigation.tsx — which is what gives route changes their
+// native cross-fade instead of a hard cut.
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <>
       {/* Root: authenticated → /home, unauthenticated → /login (handled by RequireAuth) */}
       <Route
         path="/"
@@ -26,11 +33,25 @@ export function AppRouter() {
       <Route path="/register" element={<AuthPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
+      {/* Public — no RequireAuth. Read-only preview of an unlisted board;
+          signed-in visitors get an "Add to my vocabulary" action. */}
+      <Route path="/board/:slug" element={<SharedBoardPage />} />
+      {/* No RequireOnboarding here — this is the redirect target itself. */}
+      <Route
+        path="/onboarding"
+        element={
+          <RequireAuth>
+            <OnboardingPage />
+          </RequireAuth>
+        }
+      />
       <Route
         path="/home"
         element={
           <RequireAuth>
-            <HomePage />
+            <RequireOnboarding>
+              <HomePage />
+            </RequireOnboarding>
           </RequireAuth>
         }
       />
@@ -38,7 +59,9 @@ export function AppRouter() {
         path="/search"
         element={
           <RequireAuth>
-            <SearchPage />
+            <RequireOnboarding>
+              <SearchPage />
+            </RequireOnboarding>
           </RequireAuth>
         }
       />
@@ -46,7 +69,9 @@ export function AppRouter() {
         path="/vocabulary"
         element={
           <RequireAuth>
-            <VocabularyPage />
+            <RequireOnboarding>
+              <VocabularyPage />
+            </RequireOnboarding>
           </RequireAuth>
         }
       />
@@ -54,7 +79,9 @@ export function AppRouter() {
         path="/import"
         element={
           <RequireAuth>
-            <ImportPage />
+            <RequireOnboarding>
+              <ImportPage />
+            </RequireOnboarding>
           </RequireAuth>
         }
       />
@@ -62,7 +89,9 @@ export function AppRouter() {
         path="/review"
         element={
           <RequireAuth>
-            <ReviewPage />
+            <RequireOnboarding>
+              <ReviewPage />
+            </RequireOnboarding>
           </RequireAuth>
         }
       />
@@ -70,11 +99,17 @@ export function AppRouter() {
         path="/settings"
         element={
           <RequireAuth>
-            <SettingsPage />
+            <RequireOnboarding>
+              <SettingsPage />
+            </RequireOnboarding>
           </RequireAuth>
         }
       />
       <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
+    </>
   )
+)
+
+export function AppRouter() {
+  return <RouterProvider router={router} />
 }

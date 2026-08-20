@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Search, AlertTriangle } from 'lucide-react'
 import { Icon } from '../../shared/ui/Icon/Icon'
 import { Spinner } from '../../shared/ui/Spinner'
@@ -8,6 +9,7 @@ import { WordEntry } from '../../features/word-search/ui/WordEntry'
 import { Container } from '../../shared/ui/layout/Container'
 import { PageLayout } from '../../shared/ui/layout/PageLayout'
 import { useWordSearch } from '../../features/word-search/model/useWordSearch'
+import { useWordSuggestions } from '../../features/word-search/model/useWordSuggestions'
 import styles from './SearchPage.module.css'
 
 function normalizeText(raw: string): string {
@@ -15,8 +17,14 @@ function normalizeText(raw: string): string {
 }
 
 export function SearchPage() {
-  const [input, setInput] = useState('')
-  const [query, setQuery] = useState('')
+  // Seed from ?q= so links from elsewhere in the app (e.g. "search the
+  // dictionary for X" from an empty Vocabulary search) land pre-filled
+  // instead of on a blank box the visitor has to retype into.
+  const [searchParams] = useSearchParams()
+  const initialQuery = normalizeText(searchParams.get('q') ?? '')
+
+  const [input, setInput] = useState(initialQuery)
+  const [query, setQuery] = useState(initialQuery)
 
   // Debounce input → query (300 ms)
   useEffect(() => {
@@ -33,6 +41,7 @@ export function SearchPage() {
   }
 
   const searchState = useWordSearch(query)
+  const suggestions = useWordSuggestions(searchState.status === 'idle')
 
   return (
     <PageLayout className={styles.flexPage}>
@@ -56,7 +65,7 @@ export function SearchPage() {
                 <p className={styles.idleSubtext}>Meanings, transcription, and usage examples</p>
                 <p className={styles.chipsLabel}>Try these words</p>
                 <div className={styles.chipsRow}>
-                  {['ephemeral', 'serendipity', 'ambiguous', 'resilient', 'eloquent'].map((word) => (
+                  {suggestions.map((word) => (
                     <button
                       key={word}
                       className={styles.chip}
@@ -77,7 +86,7 @@ export function SearchPage() {
             )}
 
             {searchState.status === 'notFound' && (
-              <div className={styles.emptyState}>
+              <div className={[styles.emptyState, 'content-fade-in'].join(' ')}>
                 <span className={styles.emptyIcon}>
                   <Icon icon={Search} size={32} muted />
                 </span>
@@ -91,7 +100,7 @@ export function SearchPage() {
             )}
 
             {searchState.status === 'unavailable' && (
-              <div className={styles.emptyState}>
+              <div className={[styles.emptyState, 'content-fade-in'].join(' ')}>
                 <span className={styles.emptyIcon}>
                   <Icon icon={AlertTriangle} size={32} muted />
                 </span>
@@ -105,7 +114,7 @@ export function SearchPage() {
             )}
 
             {searchState.status === 'error' && (
-              <div className={styles.emptyState}>
+              <div className={[styles.emptyState, 'content-fade-in'].join(' ')}>
                 <span className={styles.emptyIcon}>
                   <Icon icon={AlertTriangle} size={32} muted />
                 </span>
@@ -116,13 +125,15 @@ export function SearchPage() {
             )}
 
             {searchState.status === 'success' && (
-              <WordEntry
-                word={searchState.word}
-                onSeeAlso={(term) => {
-                  setInput(term)
-                  setQuery(normalizeText(term))
-                }}
-              />
+              <div className="content-fade-in">
+                <WordEntry
+                  word={searchState.word}
+                  onSeeAlso={(term) => {
+                    setInput(term)
+                    setQuery(normalizeText(term))
+                  }}
+                />
+              </div>
             )}
           </div>
         </div>

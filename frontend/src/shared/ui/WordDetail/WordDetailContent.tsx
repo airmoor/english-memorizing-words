@@ -34,6 +34,13 @@ interface SelectionProps {
   onSeeAlso?: (term: string) => void
   /** Called when user clicks "Saved ✓" and edit mode should open. */
   onEdit?: () => void
+  /**
+   * Mobile only: routes "Add to board" to the parent sheet's own secondary
+   * view instead of BoardsSection opening its own stacked sheet. Omitted on
+   * desktop (SidePanel), where BoardsSection falls back to its standalone
+   * BoardPickerSheet — a centered modal doesn't have the same covering problem.
+   */
+  onRequestAddToBoard?: () => void
 }
 
 type Props = WordDetailContentProps & SelectionProps
@@ -57,8 +64,9 @@ const COLLAPSE_MIN_TOTAL = 6
  *   DictionaryHeader    — word, transcription, source, save/remove
  *   MeaningGroup[]      — one section per part of speech
  *   (separator)         — visual rule between dictionary and learning layers
+ *   BoardsSection       — board chips + add-to-board picker (Phase 4) — kept
+ *                         ahead of Note/Tags so it's visible without scrolling
  *   NoteSection         — inline-edit personal note (Phase 4)
- *   BoardsSection       — board chips + add-to-board picker (Phase 4)
  *   TagInputSection     — tag chips + autocomplete input (Phase 4)
  *   ReviewInfoSection   — interval, next review, date added (Phase 4)
  */
@@ -83,6 +91,7 @@ export function WordDetailContent({
   onViewInVocabulary,
   onSeeAlso,
   onEdit,
+  onRequestAddToBoard,
 }: Props) {
   const totalMeanings = word.meanings.length
   const collapsedMeanings = takeTopSenses(word.meanings, DEFAULT_VISIBLE_TOP_SENSES)
@@ -196,18 +205,19 @@ export function WordDetailContent({
       {/* ── Vocabulary card sections — only in vocabulary context ────── */}
       {context === 'vocabulary' && vocabCard?.cardId && (
         <div className={styles.vocabSections}>
-          <NoteSection
-            cardId={vocabCard.cardId}
-            note={vocabCard.note}
-          />
-
           {featureFlags.boardsTags && (
             <BoardsSection
               cardId={vocabCard.cardId}
               wordId={vocabCard.wordId}
               boards={vocabCard.boards}
+              onRequestAddToBoard={onRequestAddToBoard}
             />
           )}
+
+          <NoteSection
+            cardId={vocabCard.cardId}
+            note={vocabCard.note}
+          />
 
           {featureFlags.boardsTags && (
             <TagInputSection

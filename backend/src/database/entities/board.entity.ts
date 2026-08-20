@@ -12,6 +12,8 @@ import {
 import { User } from './user.entity';
 import { CardBoard } from './card-board.entity';
 
+export type BoardVisibility = 'private' | 'unlisted';
+
 /**
  * A named, user-owned collection. Cards are linked to boards via CardBoard.
  * Deleting a board cascades to CardBoard rows only — cards are unaffected.
@@ -20,6 +22,9 @@ import { CardBoard } from './card-board.entity';
  * in migration 1747000007000). The UNIQUE(user_id, name) constraint is therefore
  * case-insensitive at the database level. The application layer trims the name
  * before writing to produce consistent stored values.
+ *
+ * visibility/shareSlug: see migration 1753000001000. shareSlug is only ever
+ * populated while visibility is 'unlisted' — see BoardsService.setVisibility.
  */
 @Entity('boards')
 @Unique(['userId', 'name'])
@@ -44,6 +49,12 @@ export class Board {
 
   @Column({ name: 'is_archived', type: 'boolean', default: false })
   isArchived: boolean;
+
+  @Column({ type: 'enum', enum: ['private', 'unlisted'], default: 'private' })
+  visibility: BoardVisibility;
+
+  @Column({ name: 'share_slug', type: 'text', nullable: true })
+  shareSlug: string | null;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;

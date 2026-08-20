@@ -1,5 +1,7 @@
 import { Download, Settings, X } from 'lucide-react'
-import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
+import { NavLink, Link } from '../../lib/navigation'
+import { useNavigate } from '../../lib/useAppNavigate'
 import { useLogout } from '../../../features/auth/model/useLogout'
 import { Logo } from '../Logo/Logo'
 import { usePwaInstall } from '../../pwa/usePwaInstall'

@@ -65,6 +65,10 @@ export function useAssignCardToBoard() {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['vocabulary'] })
       queryClient.invalidateQueries({ queryKey: BOARDS_KEY })
+      // Search page's per-word status cache (5 min staleTime) also embeds
+      // board membership — without this, "Add to board" on Search would keep
+      // showing the pre-assignment state until that cache naturally expires.
+      queryClient.invalidateQueries({ queryKey: ['saved-status'] })
     },
   })
 }
@@ -115,6 +119,7 @@ export function useRemoveCardFromBoard() {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['vocabulary'] })
       queryClient.invalidateQueries({ queryKey: BOARDS_KEY })
+      queryClient.invalidateQueries({ queryKey: ['saved-status'] })
     },
   })
 }
