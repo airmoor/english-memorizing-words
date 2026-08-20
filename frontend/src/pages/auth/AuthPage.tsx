@@ -36,7 +36,13 @@ export function AuthPage() {
 
   return (
     <div className={styles.page}>
+      {/* key={mode} forces a fresh <form> when switching between /login and
+          /register. Without it React reuses the same DOM nodes and only flips
+          the password field's autocomplete attribute — but password managers
+          classify a form once and cache the verdict, so a form first seen as
+          login stays "login" and never offers to generate a password. */}
       <AuthForm
+        key={mode}
         mode={mode}
         onSubmit={handleSubmit}
         onToggle={handleToggle}

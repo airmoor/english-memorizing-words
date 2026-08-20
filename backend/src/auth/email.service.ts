@@ -1,20 +1,26 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
+import * as nodemailer from 'nodemailer';
+import type { Transporter } from 'nodemailer';
 import {
   buildResetPasswordHtml,
   buildResetPasswordText,
 } from '../mail/templates/reset-password.template';
 import { maskEmail, withTimeout } from '../mail/mail.utils';
 
-// Hard deadline for the Resend API call. Prevents a stalled provider from
-// tying up connection slots and degrading auth endpoint response times.
+// Hard deadline for the delivery call, whichever transport is in use. Prevents
+// a stalled provider from tying up connection slots and degrading auth endpoint
+// response times.
 const SEND_TIMEOUT_MS = 8_000;
+
+const DEFAULT_SMTP_PORT = 587;
 
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private readonly resend: Resend | null;
+  private readonly smtp: Transporter | null;
   private readonly from: string;
   private readonly frontendUrl: string;
 
@@ -37,6 +43,34 @@ export class EmailService {
     this.frontendUrl = rawFrontendUrl;
     this.from =
       this.configService.get<string>('EMAIL_FROM') ?? 'Lexis <noreply@lexis.app>';
+
+    // Transport selection, most specific first. SMTP is what the self-hosted
+    // deployment uses (our own Postfix); Resend stays the default everywhere
+    // else, including local development, so nothing changes without SMTP_* set.
+    const smtpHost = this.configService.get<string>('SMTP_HOST');
+    const smtpUser = this.configService.get<string>('SMTP_USER');
+    const smtpPassword = this.configService.get<string>('SMTP_PASSWORD');
+
+    if (smtpHost && smtpUser && smtpPassword) {
+      const port = Number(
+        this.configService.get<string>('SMTP_PORT') ?? DEFAULT_SMTP_PORT,
+      );
+      this.smtp = nodemailer.createTransport({
+        host: smtpHost,
+        port,
+        // `secure` means implicit TLS (port 465). On 587 the connection starts
+        // in the clear and is upgraded by STARTTLS, which `requireTLS` makes
+        // mandatory — so this is never an unencrypted submission either way.
+        secure: port === 465,
+        requireTLS: port !== 465,
+        auth: { user: smtpUser, pass: smtpPassword },
+      });
+      this.resend = null;
+      this.logger.log(`Email transport: SMTP (${smtpHost}:${port})`);
+      return;
+    }
+
+    this.smtp = null;
 
     if (apiKey) {
       this.resend = new Resend(apiKey);
@@ -61,6 +95,34 @@ export class EmailService {
     // From this point on, resetUrl must never appear in a log statement.
     // It contains the raw token, which grants one-time password-reset access.
 
+    const subject = 'Reset your Lexis password';
+    const html = buildResetPasswordHtml(resetUrl);
+    // Plain-text alternative: improves spam-filter scoring (multi-part MIME)
+    // and ensures the flow works on text-only email clients.
+    const text = buildResetPasswordText(resetUrl);
+
+    if (this.smtp) {
+      try {
+        const info = await withTimeout(
+          this.smtp.sendMail({ from: this.from, to: email, subject, html, text }),
+          SEND_TIMEOUT_MS,
+        );
+        // messageId is an opaque identifier with no security value — safe to
+        // log, and it is what correlates this send with the Postfix queue id.
+        this.logger.log(
+          `Password reset email dispatched for ${maskEmail(email)} — id: ${info.messageId}`,
+        );
+      } catch (err: unknown) {
+        // Swallowed for the same reason as the Resend branch below: the auth
+        // endpoint returns a generic 200 regardless of delivery outcome.
+        const message = err instanceof Error ? err.message : String(err);
+        this.logger.error(
+          `Password reset email delivery failed for ${maskEmail(email)} — ${message}`,
+        );
+      }
+      return;
+    }
+
     if (!this.resend) {
       // Dev fallback: log only the masked address — never the token or URL.
       // Raw tokens in logs are a supply-chain risk: cloud logging agents,
@@ -76,11 +138,9 @@ export class EmailService {
         this.resend.emails.send({
           from: this.from,
           to: email,
-          subject: 'Reset your Lexis password',
-          html: buildResetPasswordHtml(resetUrl),
-          // Plain-text alternative: improves spam-filter scoring (multi-part
-          // MIME) and ensures the flow works on text-only email clients.
-          text: buildResetPasswordText(resetUrl),
+          subject,
+          html,
+          text,
         }),
         SEND_TIMEOUT_MS,
       );
