@@ -13,7 +13,13 @@ export interface VocabularyPageParams {
   apiFilters?: VocabularyFilters
 }
 
-export const fetchVocabularyPage = (params: VocabularyPageParams): Promise<PaginatedVocabulary> => {
+// apiClient resolves an empty 2xx body to `null` (see shared/api/base.ts) —
+// a valid contract for single-resource endpoints, but every caller here
+// destructures PaginatedVocabulary's fields directly (items.find, etc.), so
+// coerce that edge case to an honestly-empty page rather than leaking null.
+const EMPTY_PAGE: PaginatedVocabulary = { items: [], total: 0, totalCount: 0, hasMore: false }
+
+export const fetchVocabularyPage = async (params: VocabularyPageParams): Promise<PaginatedVocabulary> => {
   const search = new URLSearchParams()
   if (params.q)       search.set('q',       params.q)
   if (params.filters) search.set('filters', params.filters)
@@ -31,7 +37,8 @@ export const fetchVocabularyPage = (params: VocabularyPageParams): Promise<Pagin
   }
 
   const qs = search.toString()
-  return apiClient.get(`/vocabulary${qs ? `?${qs}` : ''}`)
+  const page = await apiClient.get<PaginatedVocabulary | null>(`/vocabulary${qs ? `?${qs}` : ''}`)
+  return page ?? EMPTY_PAGE
 }
 
 export const saveWord = (wordId: string): Promise<void> =>
