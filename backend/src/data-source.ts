@@ -12,9 +12,12 @@ function buildDatabaseConfig(): Partial<DataSourceOptions> {
   if (process.env.DATABASE_URL) {
     return {
       url: process.env.DATABASE_URL,
-      // Railway managed Postgres requires SSL in production
+      // SSL is opt-in via DATABASE_SSL rather than implied by NODE_ENV.
+      // Managed providers (Railway) need it; a self-hosted Postgres reached
+      // over a unix socket does not speak TLS at all, and node-pg fails the
+      // connection outright when the server answers the SSLRequest with 'N'.
       ssl:
-        process.env.NODE_ENV === 'production'
+        process.env.DATABASE_SSL === 'true'
           ? { rejectUnauthorized: false }
           : false,
     };

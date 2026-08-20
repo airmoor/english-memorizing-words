@@ -1,0 +1,77 @@
+name: deploy-dev
+
+# Builds both images and redeploys the dev stand at https://dev.lexly.club
+# (tailnet-only). Runs on the iaxxai Forgejo Actions runner.
+#
+# Autodeploy on push to main is enabled below. Trigger manually from the
+# Forgejo UI ("Run workflow") when you need a rebuild without a commit.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+env:
+  REGISTRY: git.iaxx.ai/rouzoo
+  TAG: dev-${{ github.sha }}
+  # Build against the HOST podman, not a nested one: building inside the job
+  # container would stack overlayfs on overlayfs.
+  CONTAINER_HOST: unix:///run/podman/podman.sock
+  DOCKER_HOST: unix:///run/podman/podman.sock
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      options: >-
+        --volume /run/podman/podman.sock:/run/podman/podman.sock
+        --volume /run/deploy-agent.sock:/run/deploy-agent.sock
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            podman docker.io jq netcat-openbsd ca-certificates
+
+      - name: Login to git.iaxx.ai
+        run: |
+          echo "${{ secrets.REGISTRY_PASSWORD }}" | \
+            docker login git.iaxx.ai -u "${{ github.actor }}" --password-stdin
+
+      # --pull=newer keeps the node/nginx base images patched; without it a
+      # base-image CVE would live on forever in our layers.
+      # seccomp=unconfined applies to the BUILD only — the host runs containers
+      # under a real seccomp profile.
+      - name: Build + push lexly-backend
+        run: |
+          IMG="${REGISTRY}/lexly-backend"
+          podman --remote build --pull=newer --security-opt seccomp=unconfined \
+            -t "${IMG}:${TAG}" -t "${IMG}:dev" -f deploy/backend.Dockerfile .
+          docker push "${IMG}:${TAG}"
+          docker push "${IMG}:dev"
+
+      # VITE_API_URL is deliberately empty: the SPA and the API share the
+      # dev.lexly.club origin, so the bundle uses a relative /api.
+      - name: Build + push lexly-frontend
+        run: |
+          IMG="${REGISTRY}/lexly-frontend"
+          podman --remote build --pull=newer --security-opt seccomp=unconfined \
+            --build-arg VITE_API_URL= \
+            -t "${IMG}:${TAG}" -t "${IMG}:dev" -f deploy/frontend.Dockerfile .
+          docker push "${IMG}:${TAG}"
+          docker push "${IMG}:dev"
+
+      # Backend first: it runs the TypeORM migrations on boot, and the frontend
+      # must not start talking to a schema that has not been migrated yet.
+      - name: Redeploy
+        run: |
+          set -e
+          for svc in lexly-backend lexly-frontend; do
+            payload=$(printf '{"app":"%s","image":"%s/%s:dev"}' "$svc" "$REGISTRY" "$svc")
+            response=$(echo "$payload" | nc -U /run/deploy-agent.sock)
+            echo "→ ${svc}: $response"
+            echo "$response" | jq -e '.ok == true' >/dev/null
+          done

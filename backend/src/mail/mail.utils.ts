@@ -37,11 +37,16 @@ export function maskEmail(email: string): string {
  * special handling required beyond what already exists for provider errors.
  */
 export function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  const timeout = new Promise<never>((_, reject) =>
-    setTimeout(
+  // The timer is cleared once the race settles. Promise.race does not cancel
+  // the loser, so without this every call leaves a live timer behind for the
+  // full deadline — enough to keep the Node process (and a test runner) alive
+  // long after the send has already returned.
+  let timer: ReturnType<typeof setTimeout>;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(
       () => reject(new Error(`Email provider timed out after ${ms}ms`)),
       ms,
-    ),
-  );
-  return Promise.race([promise, timeout]);
+    );
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }

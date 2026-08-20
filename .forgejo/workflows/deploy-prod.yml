@@ -1,0 +1,69 @@
+name: deploy-prod
+
+# Builds both images and redeploys production at https://app.lexly.club.
+#
+# NOT WIRED UP YET. Production is not provisioned: there is no lexly-*-prod
+# entry in the deploy-agent allowlist and no app.lexly.club vhost, so the
+# "Redeploy" step will fail with {"ok":false,...} until nixos/apps/lexly.nix
+# grows the prod containers. The build + push steps do work today.
+#
+# Manual on purpose — production never deploys itself off a push.
+
+on:
+  workflow_dispatch: {}
+
+env:
+  REGISTRY: git.iaxx.ai/rouzoo
+  TAG: ${{ github.sha }}
+  CONTAINER_HOST: unix:///run/podman/podman.sock
+  DOCKER_HOST: unix:///run/podman/podman.sock
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      options: >-
+        --volume /run/podman/podman.sock:/run/podman/podman.sock
+        --volume /run/deploy-agent.sock:/run/deploy-agent.sock
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            podman docker.io jq netcat-openbsd ca-certificates
+
+      - name: Login to git.iaxx.ai
+        run: |
+          echo "${{ secrets.REGISTRY_PASSWORD }}" | \
+            docker login git.iaxx.ai -u "${{ github.actor }}" --password-stdin
+
+      - name: Build + push lexly-backend
+        run: |
+          IMG="${REGISTRY}/lexly-backend"
+          podman --remote build --pull=newer --security-opt seccomp=unconfined \
+            -t "${IMG}:${TAG}" -t "${IMG}:latest" -f deploy/backend.Dockerfile .
+          docker push "${IMG}:${TAG}"
+          docker push "${IMG}:latest"
+
+      - name: Build + push lexly-frontend
+        run: |
+          IMG="${REGISTRY}/lexly-frontend"
+          podman --remote build --pull=newer --security-opt seccomp=unconfined \
+            --build-arg VITE_API_URL= \
+            -t "${IMG}:${TAG}" -t "${IMG}:latest" -f deploy/frontend.Dockerfile .
+          docker push "${IMG}:${TAG}"
+          docker push "${IMG}:latest"
+
+      - name: Redeploy
+        run: |
+          set -e
+          for svc in lexly-backend-prod lexly-frontend-prod; do
+            image=$(printf '%s/%s:latest' "$REGISTRY" "${svc%-prod}")
+            payload=$(printf '{"app":"%s","image":"%s"}' "$svc" "$image")
+            response=$(echo "$payload" | nc -U /run/deploy-agent.sock)
+            echo "→ ${svc}: $response"
+            echo "$response" | jq -e '.ok == true' >/dev/null
+          done
