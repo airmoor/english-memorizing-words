@@ -29,6 +29,15 @@ interface Props {
   onNavigateNext?: () => void
   /** Shown between nav arrows */
   navLabel?: string
+  /**
+   * Optional secondary view (e.g. the board picker) slid in over `children`
+   * instead of stacking a second sheet on top — the word stays reachable one
+   * swipe/tap away rather than being covered. When omitted, the sheet renders
+   * `children` alone, unchanged from before.
+   */
+  secondaryView?: ReactNode
+  /** Whether the secondary view is the one currently showing. */
+  secondaryOpen?: boolean
 }
 
 const DISMISS_THRESHOLD = 0.3  // drag below 30% of sheet height → dismiss
@@ -59,6 +68,8 @@ export function BottomSheet({
   onNavigatePrev,
   onNavigateNext,
   navLabel,
+  secondaryView,
+  secondaryOpen = false,
 }: Props) {
   const sheetRef  = useRef<HTMLDivElement>(null)
   const bodyRef   = useRef<HTMLDivElement>(null)
@@ -95,6 +106,23 @@ export function BottomSheet({
     })
     return () => cancelAnimationFrame(id)
   }, [isOpen, isExiting])
+
+  // ── Move focus into the pane that just became visible ─────────────────────
+  // `inert` (below) already makes the hidden pane unfocusable, but nothing
+  // moves focus INTO the newly-shown one on its own.
+  useEffect(() => {
+    if (!isOpen || isExiting || !secondaryView) return
+    const id = requestAnimationFrame(() => {
+      const scope = sheetRef.current?.querySelector<HTMLElement>(
+        `[data-pane="${secondaryOpen ? 'secondary' : 'primary'}"]`,
+      )
+      const first = scope?.querySelector<HTMLElement>(
+        'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      )
+      first?.focus({ preventScroll: true })
+    })
+    return () => cancelAnimationFrame(id)
+  }, [secondaryOpen, isOpen, isExiting, secondaryView])
 
   // ── Scroll-to-top on word change ──────────────────────────────────────────
   // When the user navigates prev/next, isOpen stays true but the word changes.
@@ -251,12 +279,32 @@ export function BottomSheet({
           <div className={styles.handleBar} />
         </div>
 
-        {/* Scrollable content */}
-        <div ref={bodyRef} className={styles.body}>
-          {children}
-        </div>
+        {/* Scrollable content — slides to the secondary view (e.g. board
+            picker) in place, rather than stacking a second sheet on top. */}
+        {secondaryView ? (
+          <div className={styles.viewport}>
+            <div className={styles.track} data-open={secondaryOpen}>
+              <div className={styles.pane} data-pane="primary" inert={secondaryOpen || undefined}>
+                <div ref={bodyRef} className={styles.paneScroll}>
+                  {children}
+                </div>
+              </div>
+              <div className={styles.pane} data-pane="secondary" inert={!secondaryOpen || undefined}>
+                <div className={styles.paneScroll}>
+                  {secondaryView}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div ref={bodyRef} className={styles.body}>
+            {children}
+          </div>
+        )}
 
-        {/* Navigation bar */}
+        {/* Navigation bar — hidden while the secondary view is showing, since
+            prev/next word navigation doesn't apply mid board-selection. */}
+        {!secondaryOpen && (
         <nav className={styles.nav} aria-label="Word navigation">
           <button
             className={styles.navBtn}
@@ -282,6 +330,7 @@ export function BottomSheet({
             ›
           </button>
         </nav>
+        )}
       </div>
     </>,
     document.body,

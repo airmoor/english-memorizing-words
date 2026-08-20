@@ -7,6 +7,8 @@ import { BottomSheet } from './BottomSheet'
 import { SidePanel } from './SidePanel'
 import { WordDetailContent } from './WordDetailContent'
 import { Spinner } from '../Spinner'
+import { BoardPickerPanel } from '../../../features/boards/ui/BoardPickerPanel'
+import { featureFlags } from '../../../shared/lib/featureFlags'
 import type { PaginatedVocabulary } from '../../../entities/vocabulary/model/types'
 import styles from './WordDetailContainer.module.css'
 
@@ -88,6 +90,15 @@ export function WordDetailContainer({ children, onSave, onRemove, context = 'voc
   const queryClient = useQueryClient()
   const headingId = useId()
 
+  // Mobile only: "Add to board" slides in as a secondary view of this same
+  // sheet instead of opening a second sheet on top of it (see BottomSheet's
+  // secondaryView prop below). Resets whenever the active word changes —
+  // covers prev/next navigation and closing the sheet entirely.
+  const [boardPickerOpen, setBoardPickerOpen] = useState(false)
+  useEffect(() => {
+    setBoardPickerOpen(false)
+  }, [state.activeWordId])
+
   // Resolve the word text for useWordDetailData.
   // Priority: vocabulary cache lookup (Phase 1 only use case).
   // When the word is not in vocab cache (URL restore, search context), wordText
@@ -155,7 +166,7 @@ export function WordDetailContainer({ children, onSave, onRemove, context = 'voc
   //   word title — removes the absolute floating close button from SidePanel.
   // BottomSheet: omit onClose — the sheet chrome handles closing (nav bar + swipe).
   //
-  const buildDetailContent = (withInlineClose: boolean) =>
+  const buildDetailContent = (withInlineClose: boolean, onRequestAddToBoard?: () => void) =>
     isLoading ? (
       <Spinner />
     ) : error ? (
@@ -171,8 +182,21 @@ export function WordDetailContainer({ children, onSave, onRemove, context = 'voc
         onRemove={handleRemove}
         context={context}
         onClose={withInlineClose ? actions.close : undefined}
+        onRequestAddToBoard={onRequestAddToBoard}
       />
     ) : null
+
+  // Mobile only — see boardPickerOpen above.
+  const boardPickerView =
+    featureFlags.boardsTags && vocabEntry?.cardId ? (
+      <BoardPickerPanel
+        cardId={vocabEntry.cardId}
+        wordId={vocabEntry.wordId}
+        assignedBoards={vocabEntry.boards}
+        onDismiss={() => setBoardPickerOpen(false)}
+        dismissIcon="back"
+      />
+    ) : undefined
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
@@ -218,6 +242,8 @@ export function WordDetailContainer({ children, onSave, onRemove, context = 'voc
             onNavigatePrev={actions.navigatePrev}
             onNavigateNext={actions.navigateNext}
             navLabel={navLabel}
+            secondaryView={boardPickerView}
+            secondaryOpen={boardPickerOpen}
           >
             {/* Hidden heading for aria-labelledby */}
             {word && (
@@ -229,7 +255,7 @@ export function WordDetailContainer({ children, onSave, onRemove, context = 'voc
                 {word.text}
               </h2>
             )}
-            {buildDetailContent(/* withInlineClose */ false)}
+            {buildDetailContent(/* withInlineClose */ false, () => setBoardPickerOpen(true))}
           </BottomSheet>
         </>
       )}

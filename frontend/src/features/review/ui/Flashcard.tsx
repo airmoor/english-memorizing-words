@@ -12,6 +12,7 @@ import { PosBadge } from '../../../shared/ui/PosBadge/PosBadge'
 import { ExampleSentence } from '../../../shared/ui/ExampleSentence/ExampleSentence'
 import { RatingButtons } from './RatingButtons'
 import { TranslationBlock } from '../../translation/ui/TranslationBlock'
+import { PronunciationButton } from '../../pronunciation/ui/PronunciationButton'
 import styles from './Flashcard.module.css'
 
 interface Props {
@@ -49,11 +50,14 @@ export function Flashcard({ card, onRated }: Props) {
         <Stack gap="md">
           <Text variant="heading" className={styles.word}>{card.word}</Text>
 
-          {card.transcription && (
-            <Text variant="caption" color="secondary" className={styles.transcription}>
-              /{card.transcription}/
-            </Text>
-          )}
+          <div className={styles.pronunciationRow}>
+            {card.transcription && (
+              <Text variant="caption" color="secondary" className={styles.transcription}>
+                /{card.transcription}/
+              </Text>
+            )}
+            <PronunciationButton wordId={card.wordId} word={card.word} />
+          </div>
 
           {card.example && (
             <ExampleSentence>&ldquo;{card.example}&rdquo;</ExampleSentence>

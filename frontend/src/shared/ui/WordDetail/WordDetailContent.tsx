@@ -34,6 +34,13 @@ interface SelectionProps {
   onSeeAlso?: (term: string) => void
   /** Called when user clicks "Saved ✓" and edit mode should open. */
   onEdit?: () => void
+  /**
+   * Mobile only: routes "Add to board" to the parent sheet's own secondary
+   * view instead of BoardsSection opening its own stacked sheet. Omitted on
+   * desktop (SidePanel), where BoardsSection falls back to its standalone
+   * BoardPickerSheet — a centered modal doesn't have the same covering problem.
+   */
+  onRequestAddToBoard?: () => void
 }
 
 type Props = WordDetailContentProps & SelectionProps
@@ -84,6 +91,7 @@ export function WordDetailContent({
   onViewInVocabulary,
   onSeeAlso,
   onEdit,
+  onRequestAddToBoard,
 }: Props) {
   const totalMeanings = word.meanings.length
   const collapsedMeanings = takeTopSenses(word.meanings, DEFAULT_VISIBLE_TOP_SENSES)
@@ -202,6 +210,7 @@ export function WordDetailContent({
               cardId={vocabCard.cardId}
               wordId={vocabCard.wordId}
               boards={vocabCard.boards}
+              onRequestAddToBoard={onRequestAddToBoard}
             />
           )}
 

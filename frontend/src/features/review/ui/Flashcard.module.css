@@ -28,6 +28,12 @@
   letter-spacing: var(--tracking-tight);
 }
 
+.pronunciationRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs, 0.25rem);
+}
+
 .transcription {
   font-family: var(--font-mono, monospace);
   letter-spacing: var(--tracking-normal);

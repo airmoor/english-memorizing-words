@@ -9,14 +9,21 @@ interface BoardsSectionProps {
   cardId: string
   wordId: string
   boards: BoardSummary[]
+  /**
+   * When provided (mobile word-detail sheet), "Add to board" routes here
+   * instead of opening BoardPickerSheet as its own stacked sheet — the
+   * parent sheet slides to a secondary view. Omit to fall back to the
+   * standalone sheet (desktop side panel, where stacking isn't a problem).
+   */
+  onRequestAddToBoard?: () => void
 }
 
 /**
  * Boards section in card detail.
  * Shows board chips with remove button and an "+ Add to board" button
- * that opens the BoardPickerSheet.
+ * that opens the board picker.
  */
-export function BoardsSection({ cardId, wordId, boards }: BoardsSectionProps) {
+export function BoardsSection({ cardId, wordId, boards, onRequestAddToBoard }: BoardsSectionProps) {
   const [pickerOpen, setPickerOpen] = useState(false)
   const removeMutation              = useRemoveCardFromBoard()
 
@@ -38,20 +45,22 @@ export function BoardsSection({ cardId, wordId, boards }: BoardsSectionProps) {
         <button
           type="button"
           className={styles.addBtn}
-          onClick={() => setPickerOpen(true)}
+          onClick={() => (onRequestAddToBoard ? onRequestAddToBoard() : setPickerOpen(true))}
           aria-label="Add to board"
         >
           + Add to board
         </button>
       </div>
 
-      <BoardPickerSheet
-        open={pickerOpen}
-        onClose={() => setPickerOpen(false)}
-        cardId={cardId}
-        wordId={wordId}
-        assignedBoards={boards}
-      />
+      {!onRequestAddToBoard && (
+        <BoardPickerSheet
+          open={pickerOpen}
+          onClose={() => setPickerOpen(false)}
+          cardId={cardId}
+          wordId={wordId}
+          assignedBoards={boards}
+        />
+      )}
     </section>
   )
 }
