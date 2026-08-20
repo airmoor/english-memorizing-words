@@ -33,6 +33,10 @@
   letter-spacing: var(--tracking-normal);
 }
 
+.selfCheckInput {
+  margin-top: var(--space-xs);
+}
+
 .revealBtn {
   margin-top: var(--space-sm);
 }
@@ -77,6 +81,53 @@
 .answerSlotOpen .back {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* ── Self-check echo (this attempt / previous attempt) ────────────────────────
+   Deliberately no colored fill on either block — a filled box would outweigh
+   the plain-paragraph definition below it. The definition stays the most
+   visually prominent element; these are reference text for the user's own
+   comparison, not competing content. */
+
+.echoBlock {
+  border-left: 2px solid var(--color-text-secondary);
+  padding-left: var(--space-md);
+}
+
+.echoLabel {
+  font-size: var(--font-2xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  margin: 0 0 2px;
+  font-weight: var(--fw-medium);
+}
+
+.echoText {
+  font-size: var(--font-md);
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: var(--leading-normal);
+}
+
+.prevBlock {
+  padding-left: var(--space-md);
+}
+
+.prevLabel {
+  font-size: var(--font-2xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  margin: 0 0 2px;
+}
+
+.prevText {
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+  font-style: italic;
+  margin: 0;
+  line-height: var(--leading-normal);
 }
 
 /* ── Meaning list ──────────────────────────────────────────────────────────── */

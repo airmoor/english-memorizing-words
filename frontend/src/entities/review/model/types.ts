@@ -50,6 +50,8 @@ export interface NextReviewPreviews {
 export interface CardAnswer {
   meanings: CardMeaning[]
   nextReviewPreviews: NextReviewPreviews
+  /** Most recent self-check text the user typed for this card, from a previous review. */
+  previousAnswerText: string | null
 }
 
 export interface ReviewResult {

@@ -17,7 +17,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { IsIn, IsOptional, IsUUID } from 'class-validator';
+import { IsIn, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 import { AuthUser, CurrentUser } from '../common/decorators/current-user.decorator';
 import {
   CardAnswerDto,
@@ -32,6 +32,15 @@ export class ReviewRatingDto {
   @ApiProperty({ enum: ['again', 'hard', 'good', 'easy'] })
   @IsIn(['again', 'hard', 'good', 'easy'])
   rating: 'again' | 'hard' | 'good' | 'easy';
+
+  @ApiPropertyOptional({
+    description: 'Self-check text the user typed before revealing the answer',
+    maxLength: 500,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  answerText?: string;
 }
 
 export class ReviewProgressQueryDto {
@@ -95,6 +104,6 @@ export class ReviewsController {
     @Param('cardId', new ParseUUIDPipe()) cardId: string,
     @Body() dto: ReviewRatingDto,
   ): Promise<ReviewResultDto> {
-    return this.reviewsService.reviewCard(user.id, cardId, dto.rating);
+    return this.reviewsService.reviewCard(user.id, cardId, dto.rating, dto.answerText);
   }
 }

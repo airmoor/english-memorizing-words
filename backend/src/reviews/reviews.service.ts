@@ -50,6 +50,13 @@ export class CardAnswerDto {
 
   @ApiProperty({ type: RatingPreviewsDto })
   nextReviewPreviews: RatingPreviewsDto;
+
+  @ApiProperty({
+    example: 'a happy accident',
+    nullable: true,
+    description: 'The most recent self-check text the user typed for this card, from a previous review',
+  })
+  previousAnswerText: string | null;
 }
 
 export class NextCardQueryDto {
@@ -278,15 +285,21 @@ export class ReviewsService {
       word_id: string;
       interval_days: number;
       ease_factor: number;
+      last_answer_text: string | null;
     }[]>(
-      `SELECT word_id, interval_days, ease_factor
+      `SELECT word_id, interval_days, ease_factor, last_answer_text
        FROM cards WHERE id = $1 AND user_id = $2`,
       [cardId, userId],
     );
 
     if (cards.length === 0) throw new NotFoundException(`Card ${cardId} not found`);
 
-    const { word_id: wordId, interval_days: intervalDays, ease_factor: easeFactor } = cards[0];
+    const {
+      word_id: wordId,
+      interval_days: intervalDays,
+      ease_factor: easeFactor,
+      last_answer_text: previousAnswerText,
+    } = cards[0];
 
     const meanings = await this.dataSource.query<CardMeaningDto[]>(
       `SELECT
@@ -305,6 +318,7 @@ export class ReviewsService {
     return {
       meanings,
       nextReviewPreviews: this.reviewTiming.computePreviews(intervalDays, easeFactor),
+      previousAnswerText,
     };
   }
 
@@ -314,6 +328,7 @@ export class ReviewsService {
     userId: string,
     cardId: string,
     rating: Rating,
+    answerText?: string,
   ): Promise<ReviewResultDto> {
     const qr = this.dataSource.createQueryRunner();
     await qr.connect();
@@ -332,15 +347,22 @@ export class ReviewsService {
       const { interval_days: intervalDays, ease_factor: easeFactor } = current[0];
       const next = applySmTwo(intervalDays, easeFactor, rating);
 
+      // A blank/omitted answerText leaves last_answer_text untouched (COALESCE)
+      // rather than clearing it — skipping the self-check on one review
+      // shouldn't erase what was typed on an earlier one.
+      const trimmedAnswer = answerText?.trim();
+      const answerParam = trimmedAnswer ? trimmedAnswer : null;
+
       const updated = (await qr.query(
         `UPDATE cards
-         SET interval_days    = $1,
-             ease_factor      = $2,
-             next_review      = NOW() + ($3 * INTERVAL '1 day'),
-             last_reviewed_at = NOW()
+         SET interval_days     = $1,
+             ease_factor       = $2,
+             next_review       = NOW() + ($3 * INTERVAL '1 day'),
+             last_reviewed_at  = NOW(),
+             last_answer_text  = COALESCE($6, last_answer_text)
          WHERE id = $4 AND user_id = $5
          RETURNING next_review`,
-        [next.intervalDays, next.easeFactor, next.intervalDays, cardId, userId],
+        [next.intervalDays, next.easeFactor, next.intervalDays, cardId, userId, answerParam],
       )) as { next_review: Date }[];
 
       // Guard: SELECT FOR UPDATE guarantees the card exists; this branch is

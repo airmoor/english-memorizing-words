@@ -5,6 +5,7 @@ import { submitRating } from '../api/submitRating'
 import type { NextCard, Rating } from '../../../entities/review/model/types'
 import { Card } from '../../../shared/ui/Card/Card'
 import { Button } from '../../../shared/ui/Button/Button'
+import { Input } from '../../../shared/ui/Input/Input'
 import { Text } from '../../../shared/ui/Typography/Typography'
 import { Stack } from '../../../shared/ui/Stack/Stack'
 import { PosBadge } from '../../../shared/ui/PosBadge/PosBadge'
@@ -21,7 +22,10 @@ interface Props {
 
 export function Flashcard({ card, onRated }: Props) {
   const [revealed, setRevealed] = useState(false)
+  const [attempt, setAttempt] = useState('')
   const queryClient = useQueryClient()
+
+  const reveal = () => setRevealed(true)
 
   const answerQuery = useQuery({
     queryKey: ['answer', card.cardId],
@@ -30,7 +34,7 @@ export function Flashcard({ card, onRated }: Props) {
   })
 
   const rateMutation = useMutation({
-    mutationFn: (rating: Rating) => submitRating(card.cardId, rating),
+    mutationFn: (rating: Rating) => submitRating(card.cardId, rating, attempt.trim() || undefined),
     onSuccess: (_data, rating) => {
       onRated?.(rating)
       queryClient.invalidateQueries({ queryKey: ['nextCard'] })
@@ -56,9 +60,20 @@ export function Flashcard({ card, onRated }: Props) {
           )}
 
           {!revealed && (
-            <Button fullWidth onClick={() => setRevealed(true)} className={styles.revealBtn}>
-              Show answer
-            </Button>
+            <>
+              <Input
+                fullWidth
+                value={attempt}
+                onChange={(e) => setAttempt(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') reveal() }}
+                placeholder="Put your answer (optional)"
+                aria-label="Put your answer (optional)"
+                className={styles.selfCheckInput}
+              />
+              <Button fullWidth onClick={reveal} className={styles.revealBtn}>
+                Show answer
+              </Button>
+            </>
           )}
         </Stack>
 
@@ -73,6 +88,20 @@ export function Flashcard({ card, onRated }: Props) {
 
               {answerQuery.data && (
                 <Stack gap="md">
+                  {attempt.trim() && (
+                    <div className={styles.echoBlock}>
+                      <p className={styles.echoLabel}>You just wrote</p>
+                      <p className={styles.echoText}>&ldquo;{attempt.trim()}&rdquo;</p>
+                    </div>
+                  )}
+
+                  {answerQuery.data.previousAnswerText && (
+                    <div className={styles.prevBlock}>
+                      <p className={styles.prevLabel}>Last time you wrote</p>
+                      <p className={styles.prevText}>&ldquo;{answerQuery.data.previousAnswerText}&rdquo;</p>
+                    </div>
+                  )}
+
                   <ol className={styles.meanings}>
                     {answerQuery.data.meanings.map((m) => (
                       <li key={m.id} className={styles.meaning}>
