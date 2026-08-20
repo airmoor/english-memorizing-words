@@ -9,6 +9,15 @@ name: deploy-dev
 on:
   push:
     branches: [main]
+    # Docs-only commits should not rebuild two images. Keep this in sync with
+    # anything the Dockerfiles actually COPY.
+    paths:
+      - backend/**
+      - frontend/**
+      - deploy/**
+      - package.json
+      - package-lock.json
+      - .forgejo/workflows/**
   workflow_dispatch: {}
 
 env:
