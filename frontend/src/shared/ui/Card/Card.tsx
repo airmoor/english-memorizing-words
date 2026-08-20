@@ -1,4 +1,4 @@
-import type { ElementType, HTMLAttributes } from 'react'
+import type { ElementType, HTMLAttributes, Ref } from 'react'
 import styles from './Card.module.css'
 
 interface CardProps extends HTMLAttributes<HTMLElement> {
@@ -14,6 +14,8 @@ interface CardProps extends HTMLAttributes<HTMLElement> {
    */
   variant?: 'default' | 'glass' | 'floating' | 'flat'
   as?: ElementType
+  /** React 19 supports ref as a plain prop — no forwardRef needed. */
+  ref?: Ref<HTMLElement>
 }
 
 export function Card({
@@ -22,6 +24,7 @@ export function Card({
   variant = 'default',
   as: Tag = 'div',
   className = '',
+  ref,
   ...props
 }: CardProps) {
   const classes = [
@@ -32,5 +35,5 @@ export function Card({
     className,
   ].filter(Boolean).join(' ')
 
-  return <Tag className={classes} {...props} />
+  return <Tag ref={ref} className={classes} {...props} />
 }
