@@ -6,6 +6,11 @@
   display: inline-flex;
 }
 
+.wrapFullWidth {
+  display: flex;
+  width: 100%;
+}
+
 .trigger {
   display: inline-flex;
   align-items: center;
@@ -43,6 +48,16 @@
   background: var(--color-accent-subtle);
   border-color: var(--color-accent);
   color: var(--color-accent-fg);
+}
+
+/* Stretches the trigger to match a full-width control stacked next to it
+   (e.g. a primary Button) so both share the same left/right edges instead
+   of one being a content-sized pill floating beside a full-width bar. */
+.triggerFullWidth {
+  width: 100%;
+  justify-content: space-between;
+  padding: 0.625rem 1.25rem;
+  font-size: var(--font-md);
 }
 
 .menu {

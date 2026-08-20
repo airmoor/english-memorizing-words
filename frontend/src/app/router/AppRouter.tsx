@@ -1,5 +1,6 @@
 import { createBrowserRouter, createRoutesFromElements, Route, Navigate, RouterProvider } from 'react-router-dom'
 import { RequireAuth } from '../../features/auth/ui/RequireAuth'
+import { RequireOnboarding } from '../../features/onboarding/ui/RequireOnboarding'
 import { AuthPage } from '../../pages/auth/AuthPage'
 import { ForgotPasswordPage } from '../../pages/auth/ForgotPasswordPage'
 import { ResetPasswordPage } from '../../pages/auth/ResetPasswordPage'
@@ -9,6 +10,7 @@ import { ReviewPage } from '../../pages/review/ReviewPage'
 import { VocabularyPage } from '../../pages/vocabulary/VocabularyPage'
 import { ImportPage } from '../../pages/import/ImportPage'
 import { SettingsPage } from '../../pages/settings/SettingsPage'
+import { OnboardingPage } from '../../pages/onboarding/OnboardingPage'
 import { SharedBoardPage } from '../../pages/shared-board/SharedBoardPage'
 
 // A data router (rather than plain <BrowserRouter>) is required for the
@@ -34,11 +36,22 @@ const router = createBrowserRouter(
       {/* Public — no RequireAuth. Read-only preview of an unlisted board;
           signed-in visitors get an "Add to my vocabulary" action. */}
       <Route path="/board/:slug" element={<SharedBoardPage />} />
+      {/* No RequireOnboarding here — this is the redirect target itself. */}
+      <Route
+        path="/onboarding"
+        element={
+          <RequireAuth>
+            <OnboardingPage />
+          </RequireAuth>
+        }
+      />
       <Route
         path="/home"
         element={
           <RequireAuth>
-            <HomePage />
+            <RequireOnboarding>
+              <HomePage />
+            </RequireOnboarding>
           </RequireAuth>
         }
       />
@@ -46,7 +59,9 @@ const router = createBrowserRouter(
         path="/search"
         element={
           <RequireAuth>
-            <SearchPage />
+            <RequireOnboarding>
+              <SearchPage />
+            </RequireOnboarding>
           </RequireAuth>
         }
       />
@@ -54,7 +69,9 @@ const router = createBrowserRouter(
         path="/vocabulary"
         element={
           <RequireAuth>
-            <VocabularyPage />
+            <RequireOnboarding>
+              <VocabularyPage />
+            </RequireOnboarding>
           </RequireAuth>
         }
       />
@@ -62,7 +79,9 @@ const router = createBrowserRouter(
         path="/import"
         element={
           <RequireAuth>
-            <ImportPage />
+            <RequireOnboarding>
+              <ImportPage />
+            </RequireOnboarding>
           </RequireAuth>
         }
       />
@@ -70,7 +89,9 @@ const router = createBrowserRouter(
         path="/review"
         element={
           <RequireAuth>
-            <ReviewPage />
+            <RequireOnboarding>
+              <ReviewPage />
+            </RequireOnboarding>
           </RequireAuth>
         }
       />
@@ -78,7 +99,9 @@ const router = createBrowserRouter(
         path="/settings"
         element={
           <RequireAuth>
-            <SettingsPage />
+            <RequireOnboarding>
+              <SettingsPage />
+            </RequireOnboarding>
           </RequireAuth>
         }
       />
