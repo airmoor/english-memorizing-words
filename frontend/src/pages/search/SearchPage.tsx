@@ -3,13 +3,14 @@ import { useSearchParams } from 'react-router-dom'
 import { Search, AlertTriangle } from 'lucide-react'
 import { Icon } from '../../shared/ui/Icon/Icon'
 import { Spinner } from '../../shared/ui/Spinner'
+import { Crossfade } from '../../shared/ui/Crossfade/Crossfade'
 import { Text } from '../../shared/ui/Typography/Typography'
 import { SearchBar } from '../../features/word-search/ui/SearchBar'
 import { WordEntry } from '../../features/word-search/ui/WordEntry'
 import { Container } from '../../shared/ui/layout/Container'
 import { PageLayout } from '../../shared/ui/layout/PageLayout'
 import { useWordSearch } from '../../features/word-search/model/useWordSearch'
-import { useWordSuggestions } from '../../features/word-search/model/useWordSuggestions'
+import { useWordSuggestions, SUGGESTION_COUNT } from '../../features/word-search/model/useWordSuggestions'
 import styles from './SearchPage.module.css'
 
 function normalizeText(raw: string): string {
@@ -64,20 +65,31 @@ export function SearchPage() {
                 <p className={styles.idleHeading}>Look up any word</p>
                 <p className={styles.idleSubtext}>Meanings, transcription, and usage examples</p>
                 <p className={styles.chipsLabel}>Try these words</p>
-                <div className={styles.chipsRow}>
-                  {suggestions.map((word) => (
-                    <button
-                      key={word}
-                      className={styles.chip}
-                      onClick={() => {
-                        setInput(word)
-                        setQuery(normalizeText(word))
-                      }}
-                    >
-                      {word}
-                    </button>
-                  ))}
-                </div>
+                <Crossfade
+                  ready={suggestions !== null}
+                  fallback={
+                    <div className={styles.chipsRow} aria-hidden="true">
+                      {Array.from({ length: SUGGESTION_COUNT }, (_, i) => (
+                        <span key={i} className={styles.chipSkeleton} />
+                      ))}
+                    </div>
+                  }
+                >
+                  <div className={styles.chipsRow}>
+                    {(suggestions ?? []).map((word) => (
+                      <button
+                        key={word}
+                        className={styles.chip}
+                        onClick={() => {
+                          setInput(word)
+                          setQuery(normalizeText(word))
+                        }}
+                      >
+                        {word}
+                      </button>
+                    ))}
+                  </div>
+                </Crossfade>
               </div>
             )}
 
