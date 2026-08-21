@@ -44,18 +44,12 @@ export function SettingsPage() {
         <div className={styles.content}>
           <header className={styles.heading}>
             <Text variant="title" as="h1" className={styles.title}>Settings</Text>
-            <Text variant="body" color="secondary" as="p">
-              Choose your atmosphere. Changes apply immediately and persist on this device.
-            </Text>
           </header>
 
           {/* Theme Mode */}
           <Card variant="flat" padding="lg" className={styles.section}>
             <div className={styles.sectionHeader}>
               <Text variant="label" as="h2" className={styles.sectionTitle}>Theme mode</Text>
-              <Text variant="caption" color="secondary" as="p">
-                System follows your operating system's preference.
-              </Text>
             </div>
             <div className={styles.modeGrid}>
               {MODE_OPTIONS.map((opt) => (
@@ -66,12 +60,10 @@ export function SettingsPage() {
                   icon={opt.icon}
                   active={settings.mode === opt.value}
                   onClick={() => setMode(opt.value)}
+                  hint={opt.value === 'system' ? resolved : undefined}
                 />
               ))}
             </div>
-            <Text variant="caption" color="secondary" as="p" className={styles.footnote}>
-              Currently active: <strong>{resolved}</strong>
-            </Text>
           </Card>
 
           {/* Light variants */}
@@ -336,13 +328,15 @@ function ChangePasswordForm() {
 }
 
 function ModeTile({
-  value, label, icon, active, onClick,
+  value, label, icon, active, onClick, hint,
 }: {
   value: ThemeMode
   label: string
   icon: string
   active: boolean
   onClick: () => void
+  /** Shown under the label — e.g. "System" shows what it currently resolves to. */
+  hint?: string
 }) {
   return (
     <button
@@ -355,6 +349,11 @@ function ModeTile({
     >
       <span className={styles.modeIcon} aria-hidden>{icon}</span>
       <span className={styles.modeLabel}>{label}</span>
+      {hint && (
+        <span className={styles.modeHint}>
+          {hint.charAt(0).toUpperCase() + hint.slice(1)}
+        </span>
+      )}
       {active && <Icon icon={Check} size={11} strokeWidth={3} className={styles.check} />}
     </button>
   )

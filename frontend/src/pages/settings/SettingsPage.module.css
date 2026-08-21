@@ -12,7 +12,7 @@
 
 .title {
   margin: 0;
-  font-size: var(--text-page-title);
+  font-size: var(--font-xl);
 }
 
 .section {
@@ -75,6 +75,11 @@
 
 .modeLabel {
   font-weight: var(--fw-medium);
+}
+
+.modeHint {
+  font-size: var(--font-xs);
+  color: var(--color-text-secondary);
 }
 
 /* Corner "selected" badge. Offset is a fixed 10px rather than --space-xs
@@ -251,15 +256,6 @@
   color: var(--color-text-secondary);
 }
 
-.footnote {
-  text-align: center;
-  opacity: 0.7;
-}
-
-.footnote strong {
-  color: var(--color-text-primary);
-  text-transform: capitalize;
-}
 
 /* ── Account / logout ─────────────────────────────────────────────────────── */
 
