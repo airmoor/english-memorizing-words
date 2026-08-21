@@ -191,10 +191,7 @@
 
 /* ── Rating buttons entry ──────────────────────────────────────────────────── */
 
-/* Stick above the viewport bottom so buttons stay reachable on long cards.
-   Desktop uses a generous gap from the bottom edge; mobile sits above the
-   fixed bottom nav with a frosted-glass surface so content scrolls cleanly
-   behind it. */
+/* Stick above the viewport bottom so buttons stay reachable on long cards. */
 .ratingSlot {
   position: sticky;
   bottom: 0;
@@ -203,22 +200,33 @@
   padding: var(--space-sm) var(--space-sm) calc(20px + var(--space-sm));
 }
 
+/* Mobile: docked as a second fixed row directly above MobileBottomNav —
+   not sticky. Sticky-inside-a-flex-column only tracks its own flex
+   container, so at the end of a long card it detached a few pixels short
+   of the nav, leaving a sliver of page background showing through (and on
+   short cards, floating a few pixels above it looked like two unrelated
+   cards stacked). Fixed + flush removes both: same background and border
+   language as the nav, no gap, no radius — one continuous bottom panel. */
 @media (max-width: 1023px) {
+  /* Reserve room below the card so the fixed rating bar never covers the
+     last bit of a long card's content (bar height + breathing gap). */
+  .wrapper {
+    padding-bottom: 84px;
+  }
+
   .wrapper .card {
     padding: var(--space-lg) var(--space-md);
   }
 
   .ratingSlot {
-    bottom: 0;
-    background-color: var(--surface-page);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    padding-top: 0;
-    padding-bottom: var(--space-sm);
-    /* Break out of container padding so buttons span the full screen width */
-    margin-inline: calc(-1 * var(--page-padding-x));
-    padding-inline: var(--page-padding-x);
-    margin-top: var(--space-sm);
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: var(--mobile-nav-height);
+    z-index: 90;
+    background-color: var(--color-bg-primary);
+    border-top: var(--border-default);
+    padding: var(--space-sm) var(--page-padding-x);
   }
 }
 

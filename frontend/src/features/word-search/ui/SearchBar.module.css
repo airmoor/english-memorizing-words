@@ -53,6 +53,7 @@
 
 .input {
   width: 100%;
+  min-width: 0;
   /* Extra right padding reserves space for the × button when present */
   padding: 14px calc(20px + var(--space-sm)) 14px var(--space-md); /* 20px = clearBtn width */
   background: transparent;
@@ -62,6 +63,7 @@
   font-size: var(--font-lg);
   letter-spacing: var(--tracking-snug);
   color: var(--color-text-primary);
+  text-overflow: ellipsis;
 }
 
 /* The bar's focus ring is the accessibility indicator for the input. */
@@ -131,4 +133,17 @@
 .btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+/* ── Mobile: smaller placeholder + tighter button so the text fits ───────── */
+
+@media (max-width: 639px) {
+  .input {
+    font-size: var(--font-md);
+    padding-right: calc(16px + var(--space-sm));
+  }
+
+  .btn {
+    padding: 8px 14px;
+  }
 }
