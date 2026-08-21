@@ -7,6 +7,7 @@ import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog/ConfirmDialog'
 import { useWordDetail } from '../../../shared/ui/WordDetail/WordDetailContext'
 import { BoardPickerSheet } from '../../boards/ui/BoardPickerSheet'
 import { useRemoveCardFromBoard } from '../../boards/model/useCardBoardMutation'
+import { RowActionMenu } from '../../../shared/ui/RowActionMenu/RowActionMenu'
 import { featureFlags } from '../../../shared/lib/featureFlags'
 import { useIsPointerDesktop } from '../../../shared/lib/useIsPointerDesktop'
 import { getCardState } from '../model/cardState'
@@ -76,6 +77,7 @@ export function VocabularyItemCompact({ item, onRemove, sourceList, activeBoard 
           isActive ? styles.rowActive : '',
           dndActive ? styles.rowDraggable : '',
           isDragging ? styles.rowDragging : '',
+          activeBoard && item.cardId ? styles.rowBoardScoped : '',
         ].join(' ')}
         onClick={handleOpen}
         role="button"
@@ -119,16 +121,27 @@ export function VocabularyItemCompact({ item, onRemove, sourceList, activeBoard 
         )}
 
         {/* Inside a board: primary action is unlinking from *this* board, not
-            deleting the word — full delete stays reachable via the detail panel. */}
+            deleting the word — full delete moves into an overflow menu so it
+            isn't sitting right next to the non-destructive board actions. */}
         {activeBoard && item.cardId ? (
-          <button
-            className={[styles.deleteBtn, 'icon-action'].join(' ')}
-            onClick={handleRemoveFromBoardClick}
-            aria-label={`Remove ${item.wordText} from ${activeBoard.name}`}
-            title={`Remove from "${activeBoard.name}"`}
-          >
-            <Icon icon={FolderMinus} size={14} muted />
-          </button>
+          <>
+            <button
+              className={[styles.deleteBtn, 'icon-action'].join(' ')}
+              onClick={handleRemoveFromBoardClick}
+              aria-label={`Remove ${item.wordText} from ${activeBoard.name}`}
+              title={`Remove from "${activeBoard.name}"`}
+            >
+              <Icon icon={FolderMinus} size={14} muted />
+            </button>
+            <RowActionMenu
+              triggerClassName={styles.menuBtn}
+              iconSize={14}
+              ariaLabel={`More actions for ${item.wordText}`}
+              items={[
+                { label: 'Delete word', onClick: () => setConfirmOpen(true), danger: true },
+              ]}
+            />
+          </>
         ) : (
           <button
             className={[styles.deleteBtn, 'icon-action'].join(' ')}

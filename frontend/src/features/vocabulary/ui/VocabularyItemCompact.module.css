@@ -49,6 +49,11 @@
   opacity: 0.35;
 }
 
+/* Board-scoped rows add a 3rd action slot (overflow menu for full delete) */
+.rowBoardScoped {
+  grid-template-columns: 10px 1fr 32px 32px 32px;
+}
+
 /* ── State dot ────────────────────────────────────────────────────────────── */
 
 .dot {
@@ -101,7 +106,8 @@
 /* ── Add-to-board / delete buttons ───────────────────────────────────────── */
 
 .addBoardBtn,
-.deleteBtn {
+.deleteBtn,
+.menuBtn {
   width: 28px;
   height: 28px;
   display: flex;
@@ -146,10 +152,25 @@
   outline-offset: 2px;
 }
 
+.menuBtn:hover {
+  border-color: var(--color-text-secondary);
+  color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--color-text-primary) 5%, transparent);
+}
+
+.menuBtn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
 /* ── Mobile: hide transcription if very narrow ───────────────────────────── */
 
 @media (max-width: 380px) {
   .row {
     grid-template-columns: 10px 1fr 32px 32px;
+  }
+
+  .rowBoardScoped {
+    grid-template-columns: 10px 1fr 32px 32px 32px;
   }
 }

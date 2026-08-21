@@ -134,7 +134,8 @@
 }
 
 .addBoardBtn,
-.removeBtn {
+.removeBtn,
+.menuBtn {
   flex-shrink: 0;
   width: 32px;
   height: 32px;
@@ -170,6 +171,17 @@
 
 .removeBtn:focus-visible {
   outline: 2px solid var(--color-danger);
+  outline-offset: 2px;
+}
+
+.menuBtn:hover {
+  border-color: var(--color-text-secondary);
+  color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--color-text-primary) 5%, transparent);
+}
+
+.menuBtn:focus-visible {
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 

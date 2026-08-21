@@ -10,6 +10,7 @@ import { useWordDetail } from '../../../shared/ui/WordDetail/WordDetailContext'
 import { PosBadge } from '../../../shared/ui/PosBadge/PosBadge'
 import { BoardPickerSheet } from '../../boards/ui/BoardPickerSheet'
 import { useRemoveCardFromBoard } from '../../boards/model/useCardBoardMutation'
+import { RowActionMenu } from '../../../shared/ui/RowActionMenu/RowActionMenu'
 import { getCardState } from '../model/cardState'
 import { featureFlags } from '../../../shared/lib/featureFlags'
 import { useIsPointerDesktop } from '../../../shared/lib/useIsPointerDesktop'
@@ -171,16 +172,26 @@ export function VocabularyItem({ item, onRemove, sourceList, activeBoard }: Prop
           )}
 
           {/* Inside a board: primary action is unlinking from *this* board, not
-              deleting the word — full delete stays reachable via the detail panel. */}
+              deleting the word — full delete moves into an overflow menu so it
+              isn't sitting right next to the non-destructive board actions. */}
           {activeBoard && item.cardId ? (
-            <button
-              className={[styles.removeBtn, 'icon-action'].join(' ')}
-              onClick={handleRemoveFromBoardClick}
-              aria-label={`Remove ${item.wordText} from ${activeBoard.name}`}
-              title={`Remove from "${activeBoard.name}"`}
-            >
-              <Icon icon={FolderMinus} size={15} muted />
-            </button>
+            <>
+              <button
+                className={[styles.removeBtn, 'icon-action'].join(' ')}
+                onClick={handleRemoveFromBoardClick}
+                aria-label={`Remove ${item.wordText} from ${activeBoard.name}`}
+                title={`Remove from "${activeBoard.name}"`}
+              >
+                <Icon icon={FolderMinus} size={15} muted />
+              </button>
+              <RowActionMenu
+                triggerClassName={styles.menuBtn}
+                ariaLabel={`More actions for ${item.wordText}`}
+                items={[
+                  { label: 'Delete word', onClick: () => setConfirmOpen(true), danger: true },
+                ]}
+              />
+            </>
           ) : (
             <button
               className={[styles.removeBtn, 'icon-action'].join(' ')}
