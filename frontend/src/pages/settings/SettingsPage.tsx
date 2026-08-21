@@ -20,7 +20,6 @@ import { useLogout } from '../../features/auth/model/useLogout'
 import { changePasswordApi } from '../../features/auth/api/changePassword'
 import { ManageBoardsSheet } from '../../features/boards/ui/ManageBoardsSheet'
 import { ManageTagsSheet } from '../../features/tags/ui/ManageTagsSheet'
-import { ImportSheet } from '../../features/import-vocabulary/ui/ImportSheet'
 import { useProfile, useUpdateNativeLanguage } from '../../features/profile/model/useProfile'
 import { SelectMenu, type SelectMenuOption } from '../../shared/ui/SelectMenu'
 import { SUPPORTED_LANGUAGES } from '../../shared/lib/languages'
@@ -33,7 +32,6 @@ export function SettingsPage() {
 
   const [boardsOpen, setBoardsOpen]   = useState(false)
   const [tagsOpen,   setTagsOpen]     = useState(false)
-  const [importOpen, setImportOpen]   = useState(false)
 
   // Decorative palette variants are archived behind a flag (calm redesign).
   // With the flag off, only the Light/Dark/System mode toggle remains.
@@ -136,25 +134,6 @@ export function SettingsPage() {
             <NativeLanguageSection />
           </Card>
 
-          {/* ── Vocabulary Import ────────────────────────────────────────── */}
-          {featureFlags.vocabularyImport && (
-            <Card variant="flat" padding="lg" className={styles.section}>
-              <div className={styles.sectionHeader}>
-                <Text variant="label" as="h2" className={styles.sectionTitle}>Import vocabulary</Text>
-                <Text variant="caption" color="secondary" as="p">
-                  Bulk-import words from a .txt or .csv file, or paste a word list.
-                </Text>
-              </div>
-              <button
-                type="button"
-                onClick={() => setImportOpen(true)}
-                className={styles.logoutBtn}
-              >
-                Import vocabulary
-              </button>
-            </Card>
-          )}
-
           {/* ── Boards ───────────────────────────────────────────────────── */}
           <Card variant="flat" padding="lg" className={styles.section}>
             <div className={styles.sectionHeader}>
@@ -225,9 +204,6 @@ export function SettingsPage() {
 
       <ManageBoardsSheet open={boardsOpen} onClose={() => setBoardsOpen(false)} />
       <ManageTagsSheet   open={tagsOpen}   onClose={() => setTagsOpen(false)}   />
-      {featureFlags.vocabularyImport && (
-        <ImportSheet open={importOpen} onClose={() => setImportOpen(false)} />
-      )}
     </PageLayout>
   )
 }
