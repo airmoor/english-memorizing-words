@@ -17,6 +17,14 @@
 .state_mature    { border-left-color: var(--color-success); }
 .state_difficult { border-left-color: var(--color-danger); }
 
+/* Card's shared .interactive hover lifts the card (translateY) — distracting
+   in a scrollable list of many rows. Keep the accent border/background tint,
+   drop just the motion. !important overrides that one shared-component
+   property for this consumer only, without touching Card itself. */
+.item:hover {
+  transform: none !important;
+}
+
 /* Pointer-desktop only — see useIsPointerDesktop. Signals the card can be
    dragged onto a board in the sidebar without adding new chrome. */
 .itemDraggable {
