@@ -19,9 +19,16 @@ interface Props {
   card: NextCard
   /** Called after a rating is successfully submitted — lets the parent track session counts */
   onRated?: (rating: Rating) => void
+  /**
+   * Skip the mount fadeUp (see .wrapper in Flashcard.module.css). Set by
+   * ReviewPage for the first card of a session, whose entrance is already
+   * covered by the page-level route transition — animating both stacks two
+   * motions on top of each other.
+   */
+  skipEntranceAnimation?: boolean
 }
 
-export function Flashcard({ card, onRated }: Props) {
+export function Flashcard({ card, onRated, skipEntranceAnimation }: Props) {
   const [revealed, setRevealed] = useState(false)
   const [attempt, setAttempt] = useState('')
   const queryClient = useQueryClient()
@@ -44,7 +51,7 @@ export function Flashcard({ card, onRated }: Props) {
   })
 
   return (
-    <div className={styles.wrapper}>
+    <div className={[styles.wrapper, skipEntranceAnimation ? styles.noEntrance : ''].join(' ')}>
       <Card variant="flat" padding="lg" className={styles.card}>
         {/* Front */}
         <Stack gap="md">

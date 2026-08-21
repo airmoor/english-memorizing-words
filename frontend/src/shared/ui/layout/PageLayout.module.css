@@ -50,5 +50,9 @@
        nav — the last bit of every mobile page's content ended up hidden
        behind the fixed nav bar. */
     height: calc(100dvh - var(--nav-height) - var(--mobile-nav-height) - env(safe-area-inset-bottom, 0px));
+    /* Padding-bottom on an overflow:auto box still extends its scrollable
+       area, so this guarantees clearance past the last item on every page
+       even when the height calc above under-reserves (dvh/safe-area drift). */
+    padding-bottom: var(--mobile-scroll-gutter);
   }
 }

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useNavigate } from '../../shared/lib/useAppNavigate'
 import { Check, Sparkles } from 'lucide-react'
@@ -55,7 +55,19 @@ export function ReviewPage() {
   const [counts, setCounts] = useState<RatingCounts>(INITIAL_COUNTS)
   const totalReviewed = Object.values(counts).reduce((sum, n) => sum + n, 0)
 
+  // The very first card shown after landing here rides the page-level route
+  // transition (native View Transitions crossfade of `.content`, see
+  // PageLayout) for its entrance. Flashcard also has its own fadeUp
+  // mount animation for the (far more common) in-session "rate → next card"
+  // advance, where it's the only motion happening. Stacking both on that
+  // first card doubles up: the screen crossfades in *and* the card
+  // independently slides/fades a beat later, which reads as a jitter/flash
+  // rather than one smooth entrance. Suppress Flashcard's own animation for
+  // that first card only; every later card in the session still gets it.
+  const isFirstCard = useRef(true)
+
   const handleRated = useCallback((rating: Rating) => {
+    isFirstCard.current = false
     setCounts((prev) => ({ ...prev, [rating]: prev[rating] + 1 }))
   }, [])
 
@@ -156,6 +168,7 @@ export function ReviewPage() {
               key={card.cardId}
               card={card}
               onRated={handleRated}
+              skipEntranceAnimation={isFirstCard.current}
             />
           )}
 

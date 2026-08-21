@@ -14,6 +14,17 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* Set by ReviewPage on the session's first card, whose entrance already rides
+   the page-level route transition (native View Transitions crossfade of
+   `.content` — see PageLayout). Playing fadeUp on top of that too made the
+   card visibly slide/pop a beat after the screen finished crossfading in —
+   two stacked motions reading as a single jittery one. Every later card in
+   the session (rate → next card, no route change involved) keeps fadeUp;
+   it's the only motion happening there. */
+.noEntrance {
+  animation: none;
+}
+
 /* ── Card ─────────────────────────────────────────────────────────────────── */
 .card {
   width: 100%;

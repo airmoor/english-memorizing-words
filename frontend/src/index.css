@@ -183,6 +183,12 @@
 
     /* Fixed-height constants referenced by layout components */
     --mobile-nav-height: 51px; /* MobileBottomNav visual bar height */
+    /* Extra breathing room appended past the last item on every page's mobile
+       scroll container, on top of the exact --mobile-nav-height reservation.
+       100dvh doesn't always track the address-bar/safe-area precisely, so an
+       exact-fit reservation could leave content flush against (or briefly
+       behind) the fixed nav; this gutter is the margin of safety. */
+    --mobile-scroll-gutter: var(--space-xl);
 
     /* ── Semantic tokens ─────────────────────────────────────────────────
        All values are aliases of primitives above — never raw values here.
