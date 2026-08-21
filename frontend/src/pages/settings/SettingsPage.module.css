@@ -77,12 +77,13 @@
   font-weight: var(--fw-medium);
 }
 
+/* Corner "selected" badge. Offset is a fixed 10px rather than --space-xs
+   (3-4px) — with --radius-md at 18px, that smaller inset sat inside the
+   corner's curve, crowding the mark against the border. 10px clears it. */
 .check {
   position: absolute;
-  top: var(--space-xs);
-  right: var(--space-xs);
-  font-size: var(--font-xs);
-  font-weight: var(--fw-semibold);
+  top: 10px;
+  right: 10px;
   color: var(--color-accent-fg);
 }
 

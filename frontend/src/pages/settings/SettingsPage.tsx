@@ -1,8 +1,10 @@
 import { useState, type FormEvent } from 'react'
+import { Check } from 'lucide-react'
 import { Container } from '../../shared/ui/layout/Container'
 import { PageLayout } from '../../shared/ui/layout/PageLayout'
 import { Card } from '../../shared/ui/Card/Card'
 import { Text } from '../../shared/ui/Typography/Typography'
+import { Icon } from '../../shared/ui/Icon/Icon'
 import { PasswordInput } from '../../shared/ui/PasswordInput/PasswordInput'
 import {
   useTheme,
@@ -378,7 +380,7 @@ function ModeTile({
     >
       <span className={styles.modeIcon} aria-hidden>{icon}</span>
       <span className={styles.modeLabel}>{label}</span>
-      {active && <span className={styles.check} aria-hidden>✓</span>}
+      {active && <Icon icon={Check} size={11} strokeWidth={3} className={styles.check} />}
     </button>
   )
 }
@@ -405,7 +407,7 @@ function VariantTile({
         <span className={styles.variantLabel}>{label}</span>
         <span className={styles.variantDesc}>{description}</span>
       </span>
-      {active && <span className={styles.check} aria-hidden>✓</span>}
+      {active && <Icon icon={Check} size={11} strokeWidth={3} className={styles.check} />}
     </button>
   )
 }
