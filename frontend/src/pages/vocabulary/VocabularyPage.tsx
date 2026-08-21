@@ -590,7 +590,7 @@ export function VocabularyPage() {
                   )}
                   {/* Review button — shown when there's something to review */}
                   {isLoading ? (
-                    <span className={styles.reviewBtn} aria-hidden="true">
+                    <span className={[styles.reviewBtn, styles.reviewBtnSkeleton].join(' ')} aria-hidden="true">
                       <span className={styles.skeletonIcon} />
                       <span className={styles.skeletonText}>Review all</span>
                     </span>

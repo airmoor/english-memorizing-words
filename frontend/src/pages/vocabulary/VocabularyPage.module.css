@@ -127,6 +127,13 @@
   background: color-mix(in srgb, var(--color-accent) 18%, transparent);
 }
 
+/* Skeleton reuses .reviewBtn for identical chrome/sizing, but the accent-
+   tinted border reads as "active/selected" rather than "loading" — every
+   other skeleton on this page is a neutral grey block. Flatten it here. */
+.reviewBtnSkeleton {
+  border-color: var(--color-border);
+}
+
 /* Heading + "← All" breadcrumb sit on the same row */
 .headingRow {
   display: flex;
