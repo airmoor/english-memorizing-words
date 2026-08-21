@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { selectParser } from '../../../shared/lib/import/parsers/parserRegistry'
 import type { ParsedRow } from '../../../entities/import-session/model/types'
 import type { ColumnSuggestion } from '../../../shared/lib/import/parsers/types'
@@ -45,9 +45,19 @@ export function ImportUploader({ onParsed, onError, initialWords }: ImportUpload
    */
   const [pendingFile, setPendingFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   // Live word count — lines with at least one non-whitespace character
   const wordCount = pasteValue === '' ? 0 : pasteValue.split('\n').filter((l) => l.trim().length > 0).length
+
+  // Auto-grow the textarea to fit its content (up to the CSS max-height, after
+  // which it scrolls). Runs before paint so there's no flash of the wrong size.
+  useLayoutEffect(() => {
+    const el = textareaRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${el.scrollHeight}px`
+  }, [pasteValue])
 
   const handleInlineError = useCallback(
     (message: string) => {
@@ -251,12 +261,13 @@ export function ImportUploader({ onParsed, onError, initialWords }: ImportUpload
 
       {/* ── Paste textarea ────────────────────────────────────────────── */}
       <textarea
+        ref={textareaRef}
         className={styles.textarea}
         placeholder="Type words here, one per line"
         value={pasteValue}
         onChange={handlePasteChange}
         onKeyDown={handleKeyDown}
-        rows={8}
+        rows={1}
         aria-label="Paste words to import, one per line"
         spellCheck={false}
         autoComplete="off"

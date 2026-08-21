@@ -59,9 +59,44 @@
   font-size: 14px;
   font-family: inherit;
   line-height: var(--leading-normal);
-  resize: vertical;
+  /* Height is driven by JS (auto-grow to fit content); min/max set the floor
+     and the point past which it scrolls instead of growing further. */
+  resize: none;
+  overflow-y: auto;
   min-height: 160px;
+  max-height: 400px;
   transition: border-color var(--transition-fast);
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: var(--color-border) transparent;
+}
+
+/* Thin, inset scrollbar — margin on the track keeps it clear of the
+   textarea's rounded corners instead of overlapping them. */
+.textarea::-webkit-scrollbar {
+  width: 6px;
+}
+
+.textarea::-webkit-scrollbar-track {
+  background: transparent;
+  margin-block: 8px;
+}
+
+.textarea::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.textarea::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-secondary);
+}
+
+/* Smaller default height on mobile — it still grows with content, this only
+   lowers the starting point so the empty state doesn't eat the viewport. */
+@media (max-width: 639px) {
+  .textarea {
+    min-height: 96px;
+    max-height: 45vh;
+  }
 }
 
 .textarea:focus {
