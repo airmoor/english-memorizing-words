@@ -130,7 +130,7 @@ export function Flashcard({ card, onRated }: Props) {
                             <ul className={styles.examples}>
                               {m.examples.map((ex, j) => (
                                 <li key={j}>
-                                  <ExampleSentence>&ldquo;{ex}&rdquo;</ExampleSentence>
+                                  <ExampleSentence bare>&ldquo;{ex}&rdquo;</ExampleSentence>
                                 </li>
                               ))}
                             </ul>

@@ -25,6 +25,16 @@
   border-radius: var(--radius-full);
 }
 
+/* ── Bare variant — no own bar/indent, for items inside a group that draws
+   one shared bar for the whole list (see `.examples` in Flashcard/Sense). ── */
+.bare {
+  padding-left: 0;
+}
+
+.bare::before {
+  display: none;
+}
+
 /* ── Truncation variant — 2-line clamp for compact surfaces ─────────────────
    Use in MeaningPickerSheet where vertical space is constrained.              */
 .truncate {

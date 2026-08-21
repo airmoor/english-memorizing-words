@@ -112,7 +112,7 @@ export function Sense({
             <ul className={styles.examples}>
               {meaning.examples.slice(0, 3).map((ex, i) => (
                 <li key={i}>
-                  <ExampleSentence>
+                  <ExampleSentence bare>
                     &ldquo;
                     {renderWithEditorialNotes(ex).map((part, j) =>
                       part.type === 'editorial' ? (

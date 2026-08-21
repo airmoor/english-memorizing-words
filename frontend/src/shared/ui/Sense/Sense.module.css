@@ -106,14 +106,27 @@
   padding-left: var(--space-sm);
 }
 
-/* ExampleSentence component handles individual example styling */
+/* One shared accent bar for the whole group, drawn here rather than per
+   item, so multiple examples read as one connected set. */
 .examples {
   list-style: none;
+  position: relative;
   margin: 0;
-  padding: 0;
+  padding: 0 0 0 var(--space-md);
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
+}
+
+.examples::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 3px;
+  bottom: 3px;
+  width: 3px;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
 }
 
 .synonyms {
