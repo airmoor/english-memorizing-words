@@ -248,6 +248,12 @@
     margin-inline: calc(-1 * var(--page-padding-x));
     padding-inline: var(--page-padding-x);
   }
+
+  /* iOS Safari auto-zooms the page on focus when an input's font-size is
+     under 16px, then doesn't zoom back out on blur. 16px avoids the trigger. */
+  .searchInput {
+    font-size: 16px;
+  }
 }
 
 .filterDivider {
