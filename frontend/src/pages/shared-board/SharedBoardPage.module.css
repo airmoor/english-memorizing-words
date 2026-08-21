@@ -1,5 +1,12 @@
+/* This page doesn't use PageLayout (see the component comment — it's the
+   app's one public, signed-out route), so it doesn't get PageLayout's
+   `.content` scroll container either. The global `html { overflow: hidden }`
+   (index.css) assumes every page has one, so without its own scroll region
+   here the word list was trapped and unscrollable once it overflowed the
+   viewport. `.shell` is that scroll region. */
 .shell {
-  min-height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
   background: var(--color-bg-primary);
   display: flex;
   flex-direction: column;
