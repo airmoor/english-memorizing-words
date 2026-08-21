@@ -129,6 +129,35 @@ function HeroContent({
   )
 }
 
+function RecentSkeleton() {
+  return (
+    <div aria-hidden="true">
+      <div className={styles.recentHeader}>
+        <div className={styles.recentHeading}>
+          <h3 className={styles.recentTitle}>
+            <span className={styles.skeletonText}>Recently saved</span>
+          </h3>
+        </div>
+      </div>
+      <ul className={styles.recentList}>
+        {Array.from({ length: 5 }, (_, i) => (
+          <li key={i} className={styles.recentItem}>
+            <span className={styles.recentWord}>
+              <span className={styles.skeletonText}>word</span>
+            </span>
+            <span className={styles.recentPos}>
+              <span className={styles.skeletonText}>noun</span>
+            </span>
+            <span className={styles.recentDef}>
+              <span className={styles.skeletonText}>A short placeholder definition</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 function RecentBody({
   recent,
   total,
@@ -223,17 +252,27 @@ export function HomePage() {
             </Card>
           )}
 
-          {/* ── 3. Recently saved — mount only once items exist, so an
-              empty vocabulary doesn't flash a skeleton card that then
-              collapses. The page grows downward, which is the safer
-              mismatch against the loaded layout. */}
-          {!vocabQuery.isPending && recent.length > 0 && (
-            <Card variant="flat" padding="lg" className={styles.recent}>
-              <RecentBody
-                recent={recent}
-                total={total}
-                onViewAll={() => navigate('/vocabulary')}
-              />
+          {/* ── 3. Recently saved — gated on progressQuery's `total`
+              (cards are 1:1 with saved words) rather than on vocabQuery
+              itself, so we know whether this section will be non-empty
+              before its own data has loaded. That lets an existing user's
+              always-there section reserve its space and skeleton in like
+              the hero above, while a genuinely empty vocabulary (total
+              stays 0) still never mounts a card that would just collapse. */}
+          {!progressQuery.isPending && total > 0 && (
+            <Card
+              variant="flat"
+              padding="lg"
+              className={styles.recent}
+              aria-busy={vocabQuery.isPending || undefined}
+            >
+              <Crossfade ready={!vocabQuery.isPending} fallback={<RecentSkeleton />}>
+                <RecentBody
+                  recent={recent}
+                  total={total}
+                  onViewAll={() => navigate('/vocabulary')}
+                />
+              </Crossfade>
             </Card>
           )}
         </div>
