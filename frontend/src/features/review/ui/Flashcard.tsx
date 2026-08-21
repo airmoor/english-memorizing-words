@@ -52,7 +52,11 @@ export function Flashcard({ card, onRated, skipEntranceAnimation }: Props) {
 
   return (
     <div className={[styles.wrapper, skipEntranceAnimation ? styles.noEntrance : ''].join(' ')}>
-      <Card variant="flat" padding="lg" className={styles.card}>
+      <Card
+        variant="flat"
+        padding="lg"
+        className={[styles.card, revealed ? styles.cardRevealed : ''].join(' ')}
+      >
         {/* Front */}
         <Stack gap="md">
           <Text variant="heading" className={styles.word}>{card.word}</Text>
@@ -66,14 +70,24 @@ export function Flashcard({ card, onRated, skipEntranceAnimation }: Props) {
             <PronunciationButton wordId={card.wordId} word={card.word} />
           </div>
 
-          {/* Self-check hint only — once revealed, the same example resurfaces
-              inside the first meaning below, so showing it twice is redundant. */}
-          {card.example && !revealed && (
-            <ExampleSentence>&ldquo;{card.example}&rdquo;</ExampleSentence>
-          )}
+          {/* Front-only extras — always mounted; CSS grid-collapses this block
+              on reveal (same 0fr/1fr trick as .answerSlot below) so it
+              shrinks and fades out in step with the answer fading in,
+              instead of unmounting instantly and leaving a blank beat
+              before the answer appears. `inert` drops it from tab order
+              and click handling once collapsed. */}
+          <div
+            className={[styles.frontExtras, revealed ? styles.frontExtrasClosed : ''].join(' ')}
+            inert={revealed}
+          >
+            <div className={styles.frontExtrasInner}>
+              {/* Self-check hint only — once revealed, the same example
+                  resurfaces inside the first meaning below, so showing it
+                  twice is redundant. */}
+              {card.example && (
+                <ExampleSentence>&ldquo;{card.example}&rdquo;</ExampleSentence>
+              )}
 
-          {!revealed && (
-            <>
               <Input
                 fullWidth
                 value={attempt}
@@ -86,8 +100,8 @@ export function Flashcard({ card, onRated, skipEntranceAnimation }: Props) {
               <Button fullWidth onClick={reveal} className={styles.revealBtn}>
                 Show answer
               </Button>
-            </>
-          )}
+            </div>
+          </div>
         </Stack>
 
         {/* Back — always rendered; CSS grid collapses/expands it smoothly.

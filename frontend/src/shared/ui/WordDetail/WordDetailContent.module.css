@@ -23,6 +23,20 @@
   margin-bottom: var(--space-md);
 }
 
+/* Part-of-speech is secondary info in search results — the definition is
+   what matters. Inline muted label instead of the canonical filled PosBadge:
+   a colored pill here competed visually with the "Show translation" row
+   above it, which uses the same accent. Mirrors the review flashcard's
+   .posBadge override. Scoped to search context only via className. */
+.posBadgeNeutral {
+  display: inline;
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  font-size: var(--font-2xs);
+  color: var(--color-text-muted);
+}
+
 /* ── Show more / fewer meanings toggle ────────────────────────────────────── */
 /* Collapses long entries (e.g. "get") to the first few senses. Low-prominence
    text button so it reads as a control, not a primary action. */

@@ -158,6 +158,7 @@ export function WordDetailContent({
             onToggle={onToggle}
             savedMeaningIds={!selectionMode ? savedMeaningIds : undefined}
             onSeeAlso={onSeeAlso}
+            posBadgeClassName={context === 'search' ? styles.posBadgeNeutral : undefined}
           />
         ))}
 

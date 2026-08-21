@@ -59,6 +59,34 @@
   margin-top: var(--space-sm);
 }
 
+/* ── Front extras collapse — mirrors .answerSlot's grid trick so closing
+   this block on reveal reads as one continuous motion with the answer
+   opening, instead of an instant unmount that left a blank gap before the
+   answer content faded in. Opacity drops faster than the grid closes, so
+   it's fully invisible well before the (slightly delayed) answer fade-in
+   catches up — no dead frame in between. ───────────────────────────────── */
+.frontExtras {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition:
+    grid-template-rows 0.32s var(--ease-out),
+    opacity 0.16s var(--ease-out);
+}
+
+.frontExtrasClosed {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+
+.frontExtrasInner {
+  overflow: hidden;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
 /* ── Answer reveal — CSS grid-template-rows trick ────────────────────────────
    Animating height: 0 → auto is impossible with CSS alone.
    grid-template-rows: 0fr → 1fr achieves the same effect cleanly:
@@ -80,6 +108,23 @@
 .answerInner {
   overflow: hidden;
   min-height: 0;
+}
+
+/* ── Reveal settle — a small tactile "pop" on the card itself when the
+   answer opens, standing in for a literal flip. Applied to the whole card
+   (not separate faces) so it works regardless of answer length and needs
+   no perspective/backface handling. Reuses --ease-spring, the same curve
+   already used for the header icon (AppHeader.module.css) — same motion
+   language, not a one-off trick. Kept small (0.99 → 1) to match the app's
+   restrained, no-glow motion style; prefers-reduced-motion zeroes the
+   duration globally (index.css), so this degrades to an instant no-op. */
+@keyframes cardSettle {
+  from { transform: scale(0.99); }
+  to   { transform: scale(1); }
+}
+
+.cardRevealed {
+  animation: cardSettle 0.4s var(--ease-spring);
 }
 
 /* ── Back face (revealed definitions) ─────────────────────────────────────── */
@@ -157,6 +202,25 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+}
+
+/* Cascade the meanings in one after another instead of popping in as a
+   block — cheap polish, capped at 5 items so a long list doesn't leave the
+   last entries waiting on a visible queue. */
+.meaning {
+  opacity: 0;
+  animation: meaningIn 0.28s var(--ease-out) both;
+}
+
+.meaning:nth-child(1) { animation-delay: 0.16s; }
+.meaning:nth-child(2) { animation-delay: 0.21s; }
+.meaning:nth-child(3) { animation-delay: 0.26s; }
+.meaning:nth-child(4) { animation-delay: 0.31s; }
+.meaning:nth-child(n + 5) { animation-delay: 0.36s; }
+
+@keyframes meaningIn {
+  from { opacity: 0; transform: translateY(3px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* Part-of-speech is secondary info here — the definition is what matters.

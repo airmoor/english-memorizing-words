@@ -14,6 +14,8 @@ interface Props {
   /** IDs of meanings already in the user's vocabulary — drives the saved highlight. */
   savedMeaningIds?: string[]
   onSeeAlso?: (term: string) => void
+  /** Override for the POS badge's default filled-accent styling. */
+  posBadgeClassName?: string
 }
 
 /**
@@ -23,7 +25,7 @@ interface Props {
  * Receives only the dictionary data slice it needs — no learning state,
  * no save/remove callbacks. This enforces the §4 boundary at component level.
  */
-export function MeaningGroup({ pos, meanings, selectionMode, selectedIds, onToggle, savedMeaningIds, onSeeAlso }: Props) {
+export function MeaningGroup({ pos, meanings, selectionMode, selectedIds, onToggle, savedMeaningIds, onSeeAlso, posBadgeClassName }: Props) {
   // Assign auto-incrementing integer counters to top-level senses only.
   // Sub-senses (e.g. "1a", "1b") get counter: null and are indented instead.
   let counter = 0
@@ -34,7 +36,7 @@ export function MeaningGroup({ pos, meanings, selectionMode, selectedIds, onTogg
 
   return (
     <section className={styles.group}>
-      {pos && <PosBadge pos={pos} />}
+      {pos && <PosBadge pos={pos} className={posBadgeClassName} />}
       <ol className={styles.senses}>
         {withCounters.map(({ meaning, isSubSense: sub, counter: c }) => (
           <Sense
