@@ -18,8 +18,8 @@
   flex-shrink: 0;
 }
 
-/* Textarea is the only element that grows to absorb extra space */
-.textarea {
+/* Textarea wrapper is the only element that grows to absorb extra space */
+.textareaWrapper {
   flex-shrink: 1;
 }
 
@@ -47,14 +47,33 @@
 
 /* ── Textarea ────────────────────────────────────────────────────────────── */
 
-.textarea {
+/*
+ * Border/radius/background live on the wrapper, not the textarea itself, with
+ * `overflow: hidden` there to clip the textarea's native scrollbar to the
+ * rounded corners. A radius + overflow-y:auto on the textarea alone doesn't
+ * reliably clip the browser's own scrollbar — it pokes out past the curve.
+ */
+.textareaWrapper {
   box-sizing: border-box;
-  width: 100%;
-  padding: 12px;
   margin-top: 16px;
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md, 8px);
   background: var(--color-bg-secondary);
+  overflow: hidden;
+  transition: border-color var(--transition-fast);
+}
+
+.textareaWrapper:focus-within {
+  border-color: var(--color-accent);
+}
+
+.textarea {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px;
+  border: none;
+  background: transparent;
   color: var(--color-text-primary);
   font-size: 14px;
   font-family: inherit;
@@ -65,29 +84,6 @@
   overflow-y: auto;
   min-height: 160px;
   max-height: 400px;
-  transition: border-color var(--transition-fast);
-  scrollbar-width: thin; /* Firefox */
-  scrollbar-color: var(--color-border) transparent;
-}
-
-/* Thin, inset scrollbar — margin on the track keeps it clear of the
-   textarea's rounded corners instead of overlapping them. */
-.textarea::-webkit-scrollbar {
-  width: 6px;
-}
-
-.textarea::-webkit-scrollbar-track {
-  background: transparent;
-  margin-block: 8px;
-}
-
-.textarea::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 3px;
-}
-
-.textarea::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-secondary);
 }
 
 /* Smaller default height on mobile — it still grows with content, this only
@@ -101,7 +97,6 @@
 
 .textarea:focus {
   outline: none;
-  border-color: var(--color-accent);
 }
 
 .textarea::placeholder {

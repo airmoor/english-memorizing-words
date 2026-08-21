@@ -260,18 +260,20 @@ export function ImportUploader({ onParsed, onError, initialWords }: ImportUpload
       </div>
 
       {/* ── Paste textarea ────────────────────────────────────────────── */}
-      <textarea
-        ref={textareaRef}
-        className={styles.textarea}
-        placeholder="Type words here, one per line"
-        value={pasteValue}
-        onChange={handlePasteChange}
-        onKeyDown={handleKeyDown}
-        rows={1}
-        aria-label="Paste words to import, one per line"
-        spellCheck={false}
-        autoComplete="off"
-      />
+      <div className={styles.textareaWrapper}>
+        <textarea
+          ref={textareaRef}
+          className={styles.textarea}
+          placeholder="Type words here, one per line"
+          value={pasteValue}
+          onChange={handlePasteChange}
+          onKeyDown={handleKeyDown}
+          rows={1}
+          aria-label="Paste words to import, one per line"
+          spellCheck={false}
+          autoComplete="off"
+        />
+      </div>
 
       {/* ── Textarea meta row: word count + example ───────────────────── */}
       <div className={styles.textareaMeta}>

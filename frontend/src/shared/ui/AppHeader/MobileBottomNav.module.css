@@ -33,6 +33,12 @@
 
     background: var(--color-bg-primary);
     border-top: 1px solid var(--color-border);
+
+    /* Same reasoning as .header in AppHeader.module.css: without its own
+       view-transition-name this fixed bar gets swept into the root
+       cross-fade on every route change, which on iOS Safari (where the View
+       Transitions API is supported) reads as the whole screen flashing. */
+    view-transition-name: mobile-bottom-nav;
   }
 }
 

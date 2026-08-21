@@ -16,6 +16,7 @@ import { SharedBoardPage } from '../../pages/shared-board/SharedBoardPage'
 import { queryClient } from '../providers/AppProviders'
 import { getNextCard } from '../../features/review/api/getNextCard'
 import { getProgress } from '../../features/review/api/getProgress'
+import { recordTabLocation } from '../../shared/lib/lastTabPath'
 
 // Warms the `nextCard`/`progress` react-query cache before the `/review`
 // navigation commits. Without this, the route mounts showing a Spinner and
@@ -144,6 +145,15 @@ const router = createBrowserRouter(
     </Route>
   )
 )
+
+// Tracks the last visited path (with query string) per bottom-nav tab, outside
+// React's lifecycle, so MobileBottomNav can restore search/filter state on tab
+// switch instead of always landing on the tab's bare root. See lastTabPath.ts.
+// Seed from the initial URL too — subscribe only fires on subsequent transitions.
+recordTabLocation(router.state.location.pathname, router.state.location.search)
+router.subscribe((state) => {
+  recordTabLocation(state.location.pathname, state.location.search)
+})
 
 export function AppRouter() {
   return <RouterProvider router={router} />

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Search, AlertTriangle } from 'lucide-react'
 import { Icon } from '../../shared/ui/Icon/Icon'
@@ -18,27 +18,52 @@ function normalizeText(raw: string): string {
 }
 
 export function SearchPage() {
-  // Seed from ?q= so links from elsewhere in the app (e.g. "search the
-  // dictionary for X" from an empty Vocabulary search) land pre-filled
-  // instead of on a blank box the visitor has to retype into.
-  const [searchParams] = useSearchParams()
-  const initialQuery = normalizeText(searchParams.get('q') ?? '')
+  // The ?q= param is the single source of truth for the committed (debounced)
+  // query, same pattern as VocabularyPage — this is what lets switching tabs
+  // and back restore the last search instead of always landing blank.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const query = normalizeText(searchParams.get('q') ?? '')
 
-  const [input, setInput] = useState(initialQuery)
-  const [query, setQuery] = useState(initialQuery)
+  const [input, setInput] = useState(query)
 
-  // Debounce input → query (300 ms)
+  // "setState during render" sync: when the URL's ?q= changes from an
+  // external source (back/forward nav, a chip click, "see also"), update
+  // the input to match without going through an effect.
+  const [prevQuery, setPrevQuery] = useState(query)
+  if (query !== prevQuery) {
+    setPrevQuery(query)
+    setInput(query)
+  }
+
+  const commitQuery = useCallback((next: string) => {
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev)
+      if (next) params.set('q', next)
+      else params.delete('q')
+      return params
+    }, { replace: true })
+  }, [setSearchParams])
+
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => {
-    const id = setTimeout(() => {
-      const normalized = normalizeText(input)
-      if (normalized !== query) setQuery(normalized)
-    }, 300)
-    return () => clearTimeout(id)
-  }, [input, query])
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
+  }, [])
+
+  function handleInputChange(value: string) {
+    setInput(value)
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => commitQuery(normalizeText(value)), 300)
+  }
 
   function handleSearch() {
-    const normalized = normalizeText(input)
-    setQuery(normalized)
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    commitQuery(normalizeText(input))
+  }
+
+  function jumpTo(word: string) {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    setInput(word)
+    commitQuery(normalizeText(word))
   }
 
   const searchState = useWordSearch(query)
@@ -52,7 +77,7 @@ export function SearchPage() {
           <div className={styles.searchWrap}>
             <SearchBar
               value={input}
-              onChange={setInput}
+              onChange={handleInputChange}
               onSearch={handleSearch}
               disabled={searchState.status === 'loading'}
             />
@@ -80,10 +105,7 @@ export function SearchPage() {
                       <button
                         key={word}
                         className={styles.chip}
-                        onClick={() => {
-                          setInput(word)
-                          setQuery(normalizeText(word))
-                        }}
+                        onClick={() => jumpTo(word)}
                       >
                         {word}
                       </button>
@@ -140,10 +162,7 @@ export function SearchPage() {
               <div className="content-fade-in">
                 <WordEntry
                   word={searchState.word}
-                  onSeeAlso={(term) => {
-                    setInput(term)
-                    setQuery(normalizeText(term))
-                  }}
+                  onSeeAlso={jumpTo}
                 />
               </div>
             )}

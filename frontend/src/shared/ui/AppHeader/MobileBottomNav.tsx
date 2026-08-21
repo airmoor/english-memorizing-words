@@ -1,5 +1,6 @@
 import { Home, Search, BookOpen, Upload, ClipboardCheck } from 'lucide-react'
 import { NavLink } from '../../lib/navigation'
+import { getTabHref } from '../../lib/lastTabPath'
 import { Icon } from '../Icon/Icon'
 import styles from './MobileBottomNav.module.css'
 
@@ -24,7 +25,7 @@ export function MobileBottomNav() {
   return (
     <nav className={styles.nav} aria-label="Main navigation">
       <NavLink
-        to="/home"
+        to={getTabHref('/home')}
         className={({ isActive }) => [styles.tab, isActive ? styles.tabActive : ''].join(' ')}
         aria-label="Home"
       >
@@ -35,7 +36,7 @@ export function MobileBottomNav() {
       </NavLink>
 
       <NavLink
-        to="/search"
+        to={getTabHref('/search')}
         className={({ isActive }) => [styles.tab, isActive ? styles.tabActive : ''].join(' ')}
         aria-label="Search"
       >
@@ -46,7 +47,7 @@ export function MobileBottomNav() {
       </NavLink>
 
       <NavLink
-        to="/vocabulary"
+        to={getTabHref('/vocabulary')}
         className={({ isActive }) => [styles.tab, isActive ? styles.tabActive : ''].join(' ')}
         aria-label="Vocabulary"
       >
@@ -57,7 +58,7 @@ export function MobileBottomNav() {
       </NavLink>
 
       <NavLink
-        to="/import"
+        to={getTabHref('/import')}
         className={({ isActive }) => [styles.tab, isActive ? styles.tabActive : ''].join(' ')}
         aria-label="Import"
       >
@@ -68,7 +69,7 @@ export function MobileBottomNav() {
       </NavLink>
 
       <NavLink
-        to="/review"
+        to={getTabHref('/review')}
         className={({ isActive }) => [styles.tab, isActive ? styles.tabActive : ''].join(' ')}
         aria-label="Review"
       >

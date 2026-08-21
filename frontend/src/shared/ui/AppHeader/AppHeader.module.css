@@ -9,6 +9,17 @@
   height: 60px;
   background: var(--color-bg-primary);
   border-bottom: 1px solid var(--color-border);
+
+  /* Opt this persistent chrome out of the root cross-fade (see navigation.tsx /
+     PageLayout.module.css): without its own name, the native View Transitions
+     API bundles it into the full-viewport `::view-transition-old/new(root)`
+     snapshot along with the page content, so on every route change it briefly
+     freezes into a bitmap and cross-fades with the rest of the screen — on
+     iOS Safari (where the API is supported) this reads as the whole app
+     flashing/jittering rather than just the content swapping. Naming it keeps
+     its own pixels out of the root capture; since it doesn't actually move or
+     change between routes, the browser just leaves it alone. */
+  view-transition-name: app-header;
 }
 
 .logoLink {

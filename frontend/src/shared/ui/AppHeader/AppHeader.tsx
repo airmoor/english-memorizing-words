@@ -6,9 +6,10 @@ import { useLogout } from '../../../features/auth/model/useLogout'
 import { Logo } from '../Logo/Logo'
 import { usePwaInstall } from '../../pwa/usePwaInstall'
 import { Icon } from '../Icon/Icon'
+import { getTabHref, type TabPath } from '../../lib/lastTabPath'
 import styles from './AppHeader.module.css'
 
-const NAV_ITEMS: { to: string; label: string }[] = [
+const NAV_ITEMS: { to: TabPath; label: string }[] = [
   { to: '/home',       label: 'Home' },
   { to: '/search',     label: 'Search' },
   { to: '/vocabulary', label: 'Vocabulary' },
@@ -49,7 +50,7 @@ export function AppHeader() {
         {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.to}
-            to={item.to}
+            to={getTabHref(item.to)}
             className={({ isActive }) =>
               [styles.link, isActive ? styles.active : ''].join(' ')
             }
