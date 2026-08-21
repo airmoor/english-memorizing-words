@@ -26,9 +26,9 @@
     right: 0;
     z-index: 100;
 
-    /* Base visual height: 56px. Padding-bottom expands into the iOS home
+    /* Base visual height: ~50px. Padding-bottom expands into the iOS home
        indicator zone so the frosted background fills the safe area. */
-    padding-top: 4px;
+    padding-top: 2px;
     padding-bottom: env(safe-area-inset-bottom, 0px);
 
     background: var(--color-bg-primary);
@@ -48,7 +48,7 @@
 
   /* nav-height minimum touch height — exceeds Apple's 44px minimum */
   min-height: var(--nav-height);
-  padding: 6px 4px;
+  padding: 4px 4px;
 
   text-decoration: none;
   color: var(--color-text-secondary);
@@ -64,7 +64,7 @@
   align-items: center;
   justify-content: center;
   width: 36px;
-  height: 28px;
+  height: 24px;
   border-radius: var(--radius-md);
 
   transition: background var(--transition-base);

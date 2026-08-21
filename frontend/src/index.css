@@ -182,7 +182,7 @@
     --page-padding-x: clamp(16px, 4vw, 48px);
 
     /* Fixed-height constants referenced by layout components */
-    --mobile-nav-height: 56px; /* MobileBottomNav visual bar height */
+    --mobile-nav-height: 51px; /* MobileBottomNav visual bar height */
 
     /* ── Semantic tokens ─────────────────────────────────────────────────
        All values are aliases of primitives above — never raw values here.
@@ -220,7 +220,7 @@
     --btn-radius-pill: var(--radius-full);
 
     /* — Navbar — */
-    --nav-height: 52px;
+    --nav-height: 48px;
     --nav-padding-x: var(--page-padding-x);
 
     /* — Review flashcard — */
