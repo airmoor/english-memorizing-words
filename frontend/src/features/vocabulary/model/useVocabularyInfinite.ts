@@ -66,7 +66,11 @@ export function useVocabularyInfinite(params: VocabularyQueryParams) {
       queryClient.setQueriesData<InfiniteData<PaginatedVocabulary>>(
         { queryKey: ['vocabulary'] },
         (old) => {
-          if (!old) return old
+          // The ['vocabulary'] prefix also matches non-infinite entries (e.g.
+          // useWordSuggestions' ['vocabulary', 'suggestion-pool'], a plain
+          // PaginatedVocabulary with no `pages`) — skip anything that isn't
+          // actually InfiniteData, or `.pages.some/.map` throws and aborts the mutation.
+          if (!old || !Array.isArray(old.pages)) return old
           // Only update cache entries that actually contain this word.
           // Queries for other boards/filters may not have it — decrementing
           // their totals would corrupt their counts.

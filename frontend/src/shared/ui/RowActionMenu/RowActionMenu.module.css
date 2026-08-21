@@ -1,0 +1,60 @@
+/* Trigger is unstyled here — box sizing/border comes from the caller's
+   triggerClassName so it matches the other icon buttons in that row. */
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font-family: inherit;
+  line-height: 1;
+}
+
+.menu {
+  /* position/top/right/z-index set inline — rendered via createPortal into
+     document.body so `position: fixed` avoids overflow clip. */
+  background: var(--color-bg-card);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  min-width: 160px;
+  animation: rowActionMenuIn 0.14s var(--ease-out, ease) both;
+}
+
+@keyframes rowActionMenuIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.item {
+  display: block;
+  width: 100%;
+  padding: 10px var(--space-md);
+  background: none;
+  border: none;
+  font-family: var(--font-sans);
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.item:hover {
+  background: color-mix(in srgb, var(--color-text-primary) 5%, transparent);
+  color: var(--color-text-primary);
+}
+
+.itemDanger {
+  color: var(--color-danger);
+}
+
+.itemDanger:hover {
+  background: color-mix(in srgb, var(--color-danger) 8%, transparent);
+  color: var(--color-danger);
+}

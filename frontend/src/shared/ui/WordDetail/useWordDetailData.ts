@@ -56,6 +56,7 @@ function findInVocabCache(
     // regular useQuery written to the same key prefix by mistake).
     if (!data || !Array.isArray(data.pages)) continue
     for (const page of data.pages) {
+      if (!page || !Array.isArray(page.items)) continue
       const found = page.items.find(predicate)
       if (found) return found
     }

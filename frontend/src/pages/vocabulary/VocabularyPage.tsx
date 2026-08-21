@@ -141,6 +141,8 @@ interface ContentProps {
   onLoadMore: () => void
   onClearFilters?: () => void
   onGoToAllVocabulary: () => void
+  /** The board currently scoping this list, if the user is inside a board (not "All Vocabulary"). */
+  activeBoard?: { id: string; name: string }
 }
 
 function VocabularyPageContent({
@@ -156,6 +158,7 @@ function VocabularyPageContent({
   onLoadMore,
   onClearFilters,
   onGoToAllVocabulary,
+  activeBoard,
 }: ContentProps) {
   const detail = useWordDetail()
 
@@ -180,6 +183,7 @@ function VocabularyPageContent({
       onLoadMore={onLoadMore}
       onClearFilters={onClearFilters}
       onGoToAllVocabulary={onGoToAllVocabulary}
+      activeBoard={activeBoard}
     />
   )
 }
@@ -667,6 +671,7 @@ export function VocabularyPage() {
                         onLoadMore={fetchNextPage}
                         onClearFilters={handleClearFilters}
                         onGoToAllVocabulary={() => handleBoardSelect(undefined)}
+                        activeBoard={activeBoard}
                       />
                     </WordDetailProvider>
                   )}

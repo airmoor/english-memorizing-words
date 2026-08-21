@@ -88,6 +88,25 @@
   border-color: var(--color-text-secondary);
 }
 
+@keyframes chipSkeletonPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.42; }
+}
+
+.chipSkeleton {
+  display: inline-block;
+  width: 4.5rem;
+  height: 1.65rem;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  animation: chipSkeletonPulse 1.8s ease-in-out infinite;
+}
+
+.chipSkeleton:nth-child(2) { width: 5.5rem; }
+.chipSkeleton:nth-child(3) { width: 3.75rem; }
+.chipSkeleton:nth-child(4) { width: 5rem; }
+.chipSkeleton:nth-child(5) { width: 4rem; }
+
 /* ── Empty / error states ─────────────────────────────────────────────────── */
 .emptyState {
   flex: 1;

@@ -1,4 +1,4 @@
-import { FolderPlus, Trash2 } from 'lucide-react'
+import { FolderMinus, FolderPlus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { Icon } from '../../../shared/ui/Icon/Icon'
@@ -6,15 +6,20 @@ import type { VocabularyWord } from '../../../entities/vocabulary/model/types'
 import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog/ConfirmDialog'
 import { useWordDetail } from '../../../shared/ui/WordDetail/WordDetailContext'
 import { BoardPickerSheet } from '../../boards/ui/BoardPickerSheet'
+import { useRemoveCardFromBoard } from '../../boards/model/useCardBoardMutation'
+import { RowActionMenu } from '../../../shared/ui/RowActionMenu/RowActionMenu'
 import { featureFlags } from '../../../shared/lib/featureFlags'
 import { useIsPointerDesktop } from '../../../shared/lib/useIsPointerDesktop'
 import { getCardState } from '../model/cardState'
+import { toast } from '../../../shared/ui/Toast'
 import styles from './VocabularyItemCompact.module.css'
 
 interface Props {
   item: VocabularyWord
   onRemove: (wordId: string) => void
   sourceList: string[]
+  /** The board currently scoping this list, if the user is inside a board (not "All Vocabulary"). */
+  activeBoard?: { id: string; name: string }
 }
 
 
@@ -23,12 +28,13 @@ interface Props {
  * Shows: state dot · word · transcription · delete button.
  * Clicking the row opens the word detail panel.
  */
-export function VocabularyItemCompact({ item, onRemove, sourceList }: Props) {
+export function VocabularyItemCompact({ item, onRemove, sourceList, activeBoard }: Props) {
   const { open, close, activeWordId } = useWordDetail()
   const isActive = activeWordId === item.wordId
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
   const isPointerDesktop = useIsPointerDesktop()
+  const removeFromBoard = useRemoveCardFromBoard()
 
   const state = getCardState(item)
 
@@ -55,6 +61,13 @@ export function VocabularyItemCompact({ item, onRemove, sourceList }: Props) {
     setConfirmOpen(true)
   }
 
+  const handleRemoveFromBoardClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!activeBoard || !item.cardId) return
+    removeFromBoard.mutate({ boardId: activeBoard.id, cardId: item.cardId, wordId: item.wordId })
+    toast.success(`Removed "${item.wordText}" from "${activeBoard.name}"`)
+  }
+
   return (
     <>
       <li
@@ -64,6 +77,7 @@ export function VocabularyItemCompact({ item, onRemove, sourceList }: Props) {
           isActive ? styles.rowActive : '',
           dndActive ? styles.rowDraggable : '',
           isDragging ? styles.rowDragging : '',
+          activeBoard && item.cardId ? styles.rowBoardScoped : '',
         ].join(' ')}
         onClick={handleOpen}
         role="button"
@@ -106,15 +120,38 @@ export function VocabularyItemCompact({ item, onRemove, sourceList }: Props) {
           </button>
         )}
 
-        {/* Delete */}
-        <button
-          className={[styles.deleteBtn, 'icon-action'].join(' ')}
-          onClick={handleRemoveClick}
-          aria-label={`Delete ${item.wordText}`}
-          title="Delete word"
-        >
-          <Icon icon={Trash2} size={14} muted />
-        </button>
+        {/* Inside a board: primary action is unlinking from *this* board, not
+            deleting the word — full delete moves into an overflow menu so it
+            isn't sitting right next to the non-destructive board actions. */}
+        {activeBoard && item.cardId ? (
+          <>
+            <button
+              className={[styles.deleteBtn, 'icon-action'].join(' ')}
+              onClick={handleRemoveFromBoardClick}
+              aria-label={`Remove ${item.wordText} from ${activeBoard.name}`}
+              title={`Remove from "${activeBoard.name}"`}
+            >
+              <Icon icon={FolderMinus} size={14} muted />
+            </button>
+            <RowActionMenu
+              triggerClassName={styles.menuBtn}
+              iconSize={14}
+              ariaLabel={`More actions for ${item.wordText}`}
+              items={[
+                { label: 'Delete word', onClick: () => setConfirmOpen(true), danger: true },
+              ]}
+            />
+          </>
+        ) : (
+          <button
+            className={[styles.deleteBtn, 'icon-action'].join(' ')}
+            onClick={handleRemoveClick}
+            aria-label={`Delete ${item.wordText}`}
+            title="Delete word"
+          >
+            <Icon icon={Trash2} size={14} muted />
+          </button>
+        )}
       </li>
 
       <ConfirmDialog

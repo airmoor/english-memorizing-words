@@ -10,9 +10,11 @@ export interface AssignTagByNameResponse {
   assigned: boolean
 }
 
-// GET /tags returns Tag[] directly — NOT { tags: Tag[] }
-export const fetchTags = (): Promise<Tag[]> =>
-  apiClient.get('/tags')
+// GET /tags returns Tag[] directly — NOT { tags: Tag[] }.
+// apiClient resolves an empty 2xx body to `null` (see shared/api/base.ts) —
+// coerce that to [] rather than leaking null into callers that .map()/.find() it.
+export const fetchTags = async (): Promise<Tag[]> =>
+  (await apiClient.get<Tag[] | null>('/tags')) ?? []
 
 export const createTag = (dto: CreateTagDto): Promise<Tag> =>
   apiClient.post('/tags', dto)

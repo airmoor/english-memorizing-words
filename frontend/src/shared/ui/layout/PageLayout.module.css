@@ -16,6 +16,7 @@
 .content{
   height: calc(100dvh - var(--app-header-height));
   overflow-y: auto;
+  overscroll-behavior-y: contain;
   scrollbar-gutter: stable;
 }
 
@@ -41,6 +42,13 @@
 }
 @media (max-width: 1023px) {
   .content {
-    height: calc(100dvh - var(--app-header-height) - var(--app-footer-height));
+    /* Mobile uses a shorter header (--nav-height, 52px) than desktop's
+       --app-header-height (60px), and the fixed MobileBottomNav is taller
+       than --app-footer-height once its safe-area inset is included. Using
+       the desktop constants here under-reserved space, so the scroll
+       container ran taller than the visible gap between header and bottom
+       nav — the last bit of every mobile page's content ended up hidden
+       behind the fixed nav bar. */
+    height: calc(100dvh - var(--nav-height) - var(--mobile-nav-height) - env(safe-area-inset-bottom, 0px));
   }
 }

@@ -1,4 +1,4 @@
-import { FolderPlus, Trash2 } from 'lucide-react'
+import { FolderMinus, FolderPlus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { Icon } from '../../../shared/ui/Icon/Icon'
@@ -9,9 +9,12 @@ import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog/ConfirmDialog'
 import { useWordDetail } from '../../../shared/ui/WordDetail/WordDetailContext'
 import { PosBadge } from '../../../shared/ui/PosBadge/PosBadge'
 import { BoardPickerSheet } from '../../boards/ui/BoardPickerSheet'
+import { useRemoveCardFromBoard } from '../../boards/model/useCardBoardMutation'
+import { RowActionMenu } from '../../../shared/ui/RowActionMenu/RowActionMenu'
 import { getCardState } from '../model/cardState'
 import { featureFlags } from '../../../shared/lib/featureFlags'
 import { useIsPointerDesktop } from '../../../shared/lib/useIsPointerDesktop'
+import { toast } from '../../../shared/ui/Toast'
 import styles from './VocabularyItem.module.css'
 
 interface Props {
@@ -19,6 +22,8 @@ interface Props {
   onRemove: (wordId: string) => void
   /** All word IDs in the current list, in display order. Used for panel navigation. */
   sourceList: string[]
+  /** The board currently scoping this list, if the user is inside a board (not "All Vocabulary"). */
+  activeBoard?: { id: string; name: string }
 }
 
 /**
@@ -28,13 +33,14 @@ interface Props {
  * - The trash button opens a confirmation dialog before removing.
  * - Active state: accent dot shown while this word is open in the panel.
  */
-export function VocabularyItem({ item, onRemove, sourceList }: Props) {
+export function VocabularyItem({ item, onRemove, sourceList, activeBoard }: Props) {
   const { open, close, activeWordId } = useWordDetail()
   const isActive = activeWordId === item.wordId
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
   const state = getCardState(item)
   const isPointerDesktop = useIsPointerDesktop()
+  const removeFromBoard = useRemoveCardFromBoard()
 
   // Drag-to-board — desktop pointer only (no equivalent affordance on touch);
   // "Add to board" button below stays as the accessible/mobile path either way.
@@ -57,6 +63,13 @@ export function VocabularyItem({ item, onRemove, sourceList }: Props) {
   const handleRemoveClick = (e: React.MouseEvent) => {
     e.stopPropagation()
     setConfirmOpen(true)
+  }
+
+  const handleRemoveFromBoardClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!activeBoard || !item.cardId) return
+    removeFromBoard.mutate({ boardId: activeBoard.id, cardId: item.cardId, wordId: item.wordId })
+    toast.success(`Removed "${item.wordText}" from "${activeBoard.name}"`)
   }
 
   const handleConfirmRemove = () => {
@@ -158,15 +171,37 @@ export function VocabularyItem({ item, onRemove, sourceList }: Props) {
             </button>
           )}
 
-          {/* Delete button — opens confirmation dialog, does not open the panel */}
-          <button
-            className={[styles.removeBtn, 'icon-action'].join(' ')}
-            onClick={handleRemoveClick}
-            aria-label={`Delete ${item.wordText} from vocabulary`}
-            title="Delete word"
-          >
-            <Icon icon={Trash2} size={15} muted />
-          </button>
+          {/* Inside a board: primary action is unlinking from *this* board, not
+              deleting the word — full delete moves into an overflow menu so it
+              isn't sitting right next to the non-destructive board actions. */}
+          {activeBoard && item.cardId ? (
+            <>
+              <button
+                className={[styles.removeBtn, 'icon-action'].join(' ')}
+                onClick={handleRemoveFromBoardClick}
+                aria-label={`Remove ${item.wordText} from ${activeBoard.name}`}
+                title={`Remove from "${activeBoard.name}"`}
+              >
+                <Icon icon={FolderMinus} size={15} muted />
+              </button>
+              <RowActionMenu
+                triggerClassName={styles.menuBtn}
+                ariaLabel={`More actions for ${item.wordText}`}
+                items={[
+                  { label: 'Delete word', onClick: () => setConfirmOpen(true), danger: true },
+                ]}
+              />
+            </>
+          ) : (
+            <button
+              className={[styles.removeBtn, 'icon-action'].join(' ')}
+              onClick={handleRemoveClick}
+              aria-label={`Delete ${item.wordText} from vocabulary`}
+              title="Delete word"
+            >
+              <Icon icon={Trash2} size={15} muted />
+            </button>
+          )}
         </div>
       </Card>
 

@@ -115,6 +115,7 @@ export function WordDetailContainer({ children, onSave, onRemove, context = 'voc
       // Checking Array.isArray on pages makes this loop safe regardless.
       if (!data || !Array.isArray(data.pages)) continue
       for (const page of data.pages) {
+        if (!page || !Array.isArray(page.items)) continue
         const found = page.items.find((v) => v.wordId === state.activeWordId)
         if (found) return found.wordText
       }

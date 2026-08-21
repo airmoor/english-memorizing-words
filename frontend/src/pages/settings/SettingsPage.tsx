@@ -1,8 +1,10 @@
 import { useState, type FormEvent } from 'react'
+import { Check } from 'lucide-react'
 import { Container } from '../../shared/ui/layout/Container'
 import { PageLayout } from '../../shared/ui/layout/PageLayout'
 import { Card } from '../../shared/ui/Card/Card'
 import { Text } from '../../shared/ui/Typography/Typography'
+import { Icon } from '../../shared/ui/Icon/Icon'
 import { PasswordInput } from '../../shared/ui/PasswordInput/PasswordInput'
 import {
   useTheme,
@@ -18,7 +20,6 @@ import { useLogout } from '../../features/auth/model/useLogout'
 import { changePasswordApi } from '../../features/auth/api/changePassword'
 import { ManageBoardsSheet } from '../../features/boards/ui/ManageBoardsSheet'
 import { ManageTagsSheet } from '../../features/tags/ui/ManageTagsSheet'
-import { ImportSheet } from '../../features/import-vocabulary/ui/ImportSheet'
 import { useProfile, useUpdateNativeLanguage } from '../../features/profile/model/useProfile'
 import { SelectMenu, type SelectMenuOption } from '../../shared/ui/SelectMenu'
 import { SUPPORTED_LANGUAGES } from '../../shared/lib/languages'
@@ -31,7 +32,6 @@ export function SettingsPage() {
 
   const [boardsOpen, setBoardsOpen]   = useState(false)
   const [tagsOpen,   setTagsOpen]     = useState(false)
-  const [importOpen, setImportOpen]   = useState(false)
 
   // Decorative palette variants are archived behind a flag (calm redesign).
   // With the flag off, only the Light/Dark/System mode toggle remains.
@@ -134,25 +134,6 @@ export function SettingsPage() {
             <NativeLanguageSection />
           </Card>
 
-          {/* ── Vocabulary Import ────────────────────────────────────────── */}
-          {featureFlags.vocabularyImport && (
-            <Card variant="flat" padding="lg" className={styles.section}>
-              <div className={styles.sectionHeader}>
-                <Text variant="label" as="h2" className={styles.sectionTitle}>Import vocabulary</Text>
-                <Text variant="caption" color="secondary" as="p">
-                  Bulk-import words from a .txt or .csv file, or paste a word list.
-                </Text>
-              </div>
-              <button
-                type="button"
-                onClick={() => setImportOpen(true)}
-                className={styles.logoutBtn}
-              >
-                Import vocabulary
-              </button>
-            </Card>
-          )}
-
           {/* ── Boards ───────────────────────────────────────────────────── */}
           <Card variant="flat" padding="lg" className={styles.section}>
             <div className={styles.sectionHeader}>
@@ -223,9 +204,6 @@ export function SettingsPage() {
 
       <ManageBoardsSheet open={boardsOpen} onClose={() => setBoardsOpen(false)} />
       <ManageTagsSheet   open={tagsOpen}   onClose={() => setTagsOpen(false)}   />
-      {featureFlags.vocabularyImport && (
-        <ImportSheet open={importOpen} onClose={() => setImportOpen(false)} />
-      )}
     </PageLayout>
   )
 }
@@ -378,7 +356,7 @@ function ModeTile({
     >
       <span className={styles.modeIcon} aria-hidden>{icon}</span>
       <span className={styles.modeLabel}>{label}</span>
-      {active && <span className={styles.check} aria-hidden>✓</span>}
+      {active && <Icon icon={Check} size={11} strokeWidth={3} className={styles.check} />}
     </button>
   )
 }
@@ -405,7 +383,7 @@ function VariantTile({
         <span className={styles.variantLabel}>{label}</span>
         <span className={styles.variantDesc}>{description}</span>
       </span>
-      {active && <span className={styles.check} aria-hidden>✓</span>}
+      {active && <Icon icon={Check} size={11} strokeWidth={3} className={styles.check} />}
     </button>
   )
 }
