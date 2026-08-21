@@ -69,6 +69,9 @@ export function SettingsPage() {
                 />
               ))}
             </div>
+            <Text variant="caption" color="secondary" as="p" className={styles.footnote}>
+              Currently active: <strong>{resolved}</strong>
+            </Text>
           </Card>
 
           {/* Light variants */}
@@ -118,10 +121,6 @@ export function SettingsPage() {
               </div>
             </Card>
           )}
-
-          <Text variant="caption" color="secondary" as="p" className={styles.footnote}>
-            Currently active: <strong>{resolved}</strong>
-          </Text>
 
           {/* ── Native language ──────────────────────────────────────────── */}
           <Card variant="flat" padding="lg" className={styles.section}>
