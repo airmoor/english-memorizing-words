@@ -53,12 +53,17 @@ export function WordEntry({ word, onSeeAlso }: Props) {
     onError: () => {
       setOptimistic(null) // revert — let real cache data decide
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       setSelectionMode(false)
       setIsEditMode(false)
+      // Await the refetch before clearing the optimistic override — otherwise
+      // isSaved falls back to the still-stale (pre-remove) cached status for
+      // a moment and the "Saved" badge flashes back on before disappearing.
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['saved-status', word.id] }),
+        queryClient.invalidateQueries({ queryKey: ['vocabulary'] }),
+      ])
       setOptimistic(null)
-      queryClient.invalidateQueries({ queryKey: ['saved-status', word.id] })
-      queryClient.invalidateQueries({ queryKey: ['vocabulary'] })
     },
   })
 
@@ -113,8 +118,10 @@ export function WordEntry({ word, onSeeAlso }: Props) {
         onSuccess: () => {
           setSelectionMode(false)
           setIsEditMode(false)
-          // Clear optimistic override — cache refetch (triggered by onSettled
-          // in useSaveSelectedMeaningsMutation) will supply the real value
+          // Safe to clear here: useSaveSelectedMeaningsMutation's own
+          // onSuccess (hook-level) has already awaited the saved-status
+          // refetch by the time this call-level onSuccess runs, so real
+          // cache data is in place before we stop overriding it.
           setOptimistic(null)
         },
       }

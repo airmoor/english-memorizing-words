@@ -294,6 +294,19 @@ html {
        the user's saved theme before React runs, eliminating FOUC. */
     background: var(--color-bg-primary);
     overflow: hidden;
+    /* `overflow: hidden` alone only blocks *user-drag* scrolling — it does not
+       stop iOS Safari from programmatically scrolling the document when a
+       focused input needs to clear the keyboard. Because dragging is blocked
+       but that programmatic scroll isn't, the page can end up shifted with no
+       way to drag it back: exactly the "review page scrolls up after typing
+       and gets stuck" bug. `position: fixed` removes html/body from the
+       scrolling machinery entirely, so there is nothing for iOS to scroll —
+       only the nested `.content` container (PageLayout.module.css) scrolls,
+       which is what all page layout already assumes. */
+    position: fixed;
+    inset: 0;
+    height: 100%;
+    width: 100%;
 }
 
 /* Background gradient lives in App.tsx → .background (position:fixed).
@@ -342,10 +355,18 @@ body {
     background: transparent;
     color: var(--color-text-primary);
     transition: color 0.25s var(--ease-out);
+    /* Locked in lockstep with html above — see the comment there. Without this,
+       html's `position: fixed` alone still leaves body as a normal, scrollable
+       in-flow box that iOS can shift on input focus. */
+    position: fixed;
+    inset: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
 }
 
 #root {
-    min-height: 100vh;
+    height: 100%;
 }
 
 /* ── Icon button micro-interactions ───────────────────────────────────────────
