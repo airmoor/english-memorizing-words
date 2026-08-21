@@ -26,14 +26,23 @@ export function useAssignCardToBoard() {
         { queryKey: ['vocabulary'] },
       )
 
-      // Resolve board name from boards cache (may be undefined if cache is cold)
-      const boards = queryClient.getQueryData<Board[]>(BOARDS_KEY)
-      const boardName = boards?.find((b) => b.id === boardId)?.name ?? ''
+      // Resolve board name from boards cache (may be undefined if cache is cold).
+      // BOARDS_KEY is only the prefix — the real cache entries are keyed
+      // [...BOARDS_KEY, { includeArchived }], so an exact getQueryData(BOARDS_KEY)
+      // never matches. Search all matching entries by prefix instead.
+      const boardsEntries = queryClient.getQueriesData<Board[]>({ queryKey: BOARDS_KEY })
+      const boardName = boardsEntries
+        .flatMap(([, data]) => data ?? [])
+        .find((b) => b.id === boardId)?.name ?? ''
 
       queryClient.setQueriesData<InfiniteData<PaginatedVocabulary>>(
         { queryKey: ['vocabulary'] },
         (old) => {
-          if (!old) return old
+          // The ['vocabulary'] prefix also matches non-infinite entries (e.g.
+          // useWordSuggestions' ['vocabulary', 'suggestion-pool'], a plain
+          // PaginatedVocabulary with no `pages`) — skip anything that isn't
+          // actually InfiniteData, or `.pages.map` throws and aborts the mutation.
+          if (!old || !Array.isArray(old.pages)) return old
           return {
             ...old,
             pages: old.pages.map((page) => ({
@@ -89,7 +98,9 @@ export function useRemoveCardFromBoard() {
       queryClient.setQueriesData<InfiniteData<PaginatedVocabulary>>(
         { queryKey: ['vocabulary'] },
         (old) => {
-          if (!old) return old
+          // See matching comment in useAssignCardToBoard — the ['vocabulary']
+          // prefix also matches non-infinite entries without a `pages` array.
+          if (!old || !Array.isArray(old.pages)) return old
           return {
             ...old,
             pages: old.pages.map((page) => ({

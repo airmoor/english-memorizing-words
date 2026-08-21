@@ -41,12 +41,18 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-md);
+  /* headerMain has a real min-width (below) instead of flex-basis:0, so
+     wrapping only kicks in once the title would actually be squeezed —
+     short titles like "My Vocabulary" keep the button on the same line;
+     long board names push it to its own line instead of compressing the
+     title into a narrow, multi-line column. */
+  flex-wrap: wrap;
 }
 
 /* Left side: title block */
 .headerMain {
-  flex: 1;
-  min-width: 0;
+  flex: 1 1 auto;
+  min-width: 160px;
 }
 
 /* Right side: review action */
@@ -81,6 +87,16 @@
   background: var(--color-bg-primary);
   border-color: var(--color-text-secondary);
   color: var(--color-text-primary);
+}
+
+/* Below 1024px, Import already has its own MobileBottomNav tab — showing it
+   again here just to duplicate a one-tap-away action, and it was the main
+   reason the header needed a whole extra row. Desktop keeps it since the
+   top nav's Import link is easy to miss up in the corner. */
+@media (max-width: 1023px) {
+  .importBtn {
+    display: none;
+  }
 }
 
 /* Review button — secondary CTA, compact, premium feel */

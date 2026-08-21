@@ -126,9 +126,14 @@ export function postImportExecute(
 /**
  * GET /import/sessions?limit=N
  * Returns the current user's import history, newest first.
+ *
+ * apiClient resolves an empty 2xx body to `null` (see shared/api/base.ts) —
+ * coerce that to an empty session list rather than leaking null into the
+ * `result.sessions` destructure at the call site.
  */
-export function getImportSessions(limit = 50): Promise<ImportSessionList> {
-  return apiClient.get<ImportSessionList>(`/import/sessions?limit=${limit}`)
+export async function getImportSessions(limit = 50): Promise<ImportSessionList> {
+  const result = await apiClient.get<ImportSessionList | null>(`/import/sessions?limit=${limit}`)
+  return result ?? { sessions: [] }
 }
 
 /**
