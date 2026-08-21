@@ -30,6 +30,8 @@ interface Props {
   onClearFilters?: () => void
   /** Called when user clicks "Go to All Vocabulary" from the empty-board state */
   onGoToAllVocabulary?: () => void
+  /** The board currently scoping this list, if the user is inside a board (not "All Vocabulary"). */
+  activeBoard?: { id: string; name: string }
 }
 
 export function VocabularyList({
@@ -45,6 +47,7 @@ export function VocabularyList({
   onLoadMore,
   onClearFilters,
   onGoToAllVocabulary,
+  activeBoard,
 }: Props) {
   const navigate    = useNavigate()
   const sentinelRef = useRef<HTMLDivElement>(null)
@@ -155,6 +158,7 @@ export function VocabularyList({
               item={item}
               onRemove={onRemove}
               sourceList={sourceList}
+              activeBoard={activeBoard}
             />
           ) : (
             <VocabularyItem
@@ -162,6 +166,7 @@ export function VocabularyList({
               item={item}
               onRemove={onRemove}
               sourceList={sourceList}
+              activeBoard={activeBoard}
             />
           ),
         )}
