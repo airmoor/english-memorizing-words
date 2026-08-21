@@ -108,7 +108,7 @@
     --font-xxl: clamp(1.75rem, 2.5vw + 1rem, 2.25rem);
     /* Display tier — hero moments only (e.g. the reviewed word, empty-state
        headlines). Scales from 2.5rem mobile to 3.5rem desktop. */
-    --font-display: clamp(2.5rem, 4vw + 1.25rem, 3.5rem);
+    --font-display: clamp(2.25rem, 4vw + 1rem, 3.5rem);
 
     /* Line-height scale — typography-first: every text role picks one of these
        instead of an ad-hoc value, so vertical rhythm stays consistent. */

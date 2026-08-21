@@ -7,9 +7,10 @@ import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog/ConfirmDialog'
 import { useWordDetail } from '../../../shared/ui/WordDetail/WordDetailContext'
 import { BoardPickerSheet } from '../../boards/ui/BoardPickerSheet'
 import { useRemoveCardFromBoard } from '../../boards/model/useCardBoardMutation'
-import { RowActionMenu } from '../../../shared/ui/RowActionMenu/RowActionMenu'
+import { RowActionMenu, type RowActionMenuItem } from '../../../shared/ui/RowActionMenu/RowActionMenu'
 import { featureFlags } from '../../../shared/lib/featureFlags'
 import { useIsPointerDesktop } from '../../../shared/lib/useIsPointerDesktop'
+import { useIsDesktop } from '../../../shared/lib/useIsDesktop'
 import { getCardState } from '../model/cardState'
 import { toast } from '../../../shared/ui/Toast'
 import styles from './VocabularyItemCompact.module.css'
@@ -34,9 +35,15 @@ export function VocabularyItemCompact({ item, onRemove, sourceList, activeBoard 
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
   const isPointerDesktop = useIsPointerDesktop()
+  const isDesktop = useIsDesktop()
   const removeFromBoard = useRemoveCardFromBoard()
 
   const state = getCardState(item)
+
+  // Below 1024px, every row action folds into a single overflow menu —
+  // 2-3 dedicated 32px icon buttons in a row this narrow crowd out the
+  // word/transcription text. Desktop keeps the always-visible icons.
+  const foldAllActions = !isDesktop
 
   // Drag-to-board — desktop pointer only (no equivalent affordance on touch);
   // "Add to board" button above stays as the accessible/mobile path either way.
@@ -61,11 +68,15 @@ export function VocabularyItemCompact({ item, onRemove, sourceList, activeBoard 
     setConfirmOpen(true)
   }
 
-  const handleRemoveFromBoardClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
+  const runRemoveFromBoard = () => {
     if (!activeBoard || !item.cardId) return
     removeFromBoard.mutate({ boardId: activeBoard.id, cardId: item.cardId, wordId: item.wordId })
     toast.success(`Removed "${item.wordText}" from "${activeBoard.name}"`)
+  }
+
+  const handleRemoveFromBoardClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    runRemoveFromBoard()
   }
 
   return (
@@ -77,7 +88,8 @@ export function VocabularyItemCompact({ item, onRemove, sourceList, activeBoard 
           isActive ? styles.rowActive : '',
           dndActive ? styles.rowDraggable : '',
           isDragging ? styles.rowDragging : '',
-          activeBoard && item.cardId ? styles.rowBoardScoped : '',
+          activeBoard && item.cardId && !foldAllActions ? styles.rowBoardScoped : '',
+          foldAllActions ? styles.rowFolded : '',
         ].join(' ')}
         onClick={handleOpen}
         role="button"
@@ -108,49 +120,69 @@ export function VocabularyItemCompact({ item, onRemove, sourceList, activeBoard 
           )}
         </div>
 
-        {/* Add to board */}
-        {featureFlags.boardsTags && item.cardId && (
-          <button
-            className={[styles.addBoardBtn, 'icon-action'].join(' ')}
-            onClick={(e) => { e.stopPropagation(); setPickerOpen(true) }}
-            aria-label={`Add ${item.wordText} to a board`}
-            title="Add to board"
-          >
-            <Icon icon={FolderPlus} size={14} muted />
-          </button>
-        )}
-
-        {/* Inside a board: primary action is unlinking from *this* board, not
-            deleting the word — full delete moves into an overflow menu so it
-            isn't sitting right next to the non-destructive board actions. */}
-        {activeBoard && item.cardId ? (
-          <>
-            <button
-              className={[styles.deleteBtn, 'icon-action'].join(' ')}
-              onClick={handleRemoveFromBoardClick}
-              aria-label={`Remove ${item.wordText} from ${activeBoard.name}`}
-              title={`Remove from "${activeBoard.name}"`}
-            >
-              <Icon icon={FolderMinus} size={14} muted />
-            </button>
-            <RowActionMenu
-              triggerClassName={styles.menuBtn}
-              iconSize={14}
-              ariaLabel={`More actions for ${item.wordText}`}
-              items={[
-                { label: 'Delete word', onClick: () => setConfirmOpen(true), danger: true },
-              ]}
-            />
-          </>
+        {/* Below 1024px, all row actions collapse into one overflow menu —
+            room is too tight for dedicated icons. Desktop keeps them
+            always-visible: "add to board" is common enough to earn its own
+            icon, and inside a board, unlinking (non-destructive) stays
+            separate from "delete word" (destructive, tucked in the menu). */}
+        {foldAllActions ? (
+          <RowActionMenu
+            triggerClassName={styles.menuBtn}
+            iconSize={14}
+            ariaLabel={`More actions for ${item.wordText}`}
+            items={[
+              ...(featureFlags.boardsTags && item.cardId
+                ? [{ label: 'Add to board', onClick: () => setPickerOpen(true) } satisfies RowActionMenuItem]
+                : []),
+              ...(activeBoard && item.cardId
+                ? [{ label: `Remove from "${activeBoard.name}"`, onClick: runRemoveFromBoard } satisfies RowActionMenuItem]
+                : []),
+              { label: 'Delete word', onClick: () => setConfirmOpen(true), danger: true },
+            ]}
+          />
         ) : (
-          <button
-            className={[styles.deleteBtn, 'icon-action'].join(' ')}
-            onClick={handleRemoveClick}
-            aria-label={`Delete ${item.wordText}`}
-            title="Delete word"
-          >
-            <Icon icon={Trash2} size={14} muted />
-          </button>
+          <>
+            {featureFlags.boardsTags && item.cardId && (
+              <button
+                className={[styles.addBoardBtn, 'icon-action'].join(' ')}
+                onClick={(e) => { e.stopPropagation(); setPickerOpen(true) }}
+                aria-label={`Add ${item.wordText} to a board`}
+                title="Add to board"
+              >
+                <Icon icon={FolderPlus} size={14} muted />
+              </button>
+            )}
+
+            {activeBoard && item.cardId ? (
+              <>
+                <button
+                  className={[styles.deleteBtn, 'icon-action'].join(' ')}
+                  onClick={handleRemoveFromBoardClick}
+                  aria-label={`Remove ${item.wordText} from ${activeBoard.name}`}
+                  title={`Remove from "${activeBoard.name}"`}
+                >
+                  <Icon icon={FolderMinus} size={14} muted />
+                </button>
+                <RowActionMenu
+                  triggerClassName={styles.menuBtn}
+                  iconSize={14}
+                  ariaLabel={`More actions for ${item.wordText}`}
+                  items={[
+                    { label: 'Delete word', onClick: () => setConfirmOpen(true), danger: true },
+                  ]}
+                />
+              </>
+            ) : (
+              <button
+                className={[styles.deleteBtn, 'icon-action'].join(' ')}
+                onClick={handleRemoveClick}
+                aria-label={`Delete ${item.wordText}`}
+                title="Delete word"
+              >
+                <Icon icon={Trash2} size={14} muted />
+              </button>
+            )}
+          </>
         )}
       </li>
 

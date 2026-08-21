@@ -5,7 +5,11 @@ import { Toaster } from '../../shared/ui/Toast'
 import { useAuthStore } from '../../features/auth/model/authStore'
 import { refreshToken } from '../../shared/api/base'
 
-const queryClient = new QueryClient({
+// Exported so route loaders (see AppRouter.tsx) can warm the cache with
+// `ensureQueryData` before a `viewTransition` navigation commits — outside
+// the React tree, so there's no QueryClientProvider context to pull this
+// from via `useQueryClient()`.
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: { retry: 1, staleTime: 30_000 },
   },

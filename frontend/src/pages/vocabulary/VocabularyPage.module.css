@@ -127,6 +127,23 @@
   background: color-mix(in srgb, var(--color-accent) 18%, transparent);
 }
 
+/* Below 1024px, the board name is already the page heading right above this
+   button — repeating it in the label ("Review Kirill Lesson 1") is what
+   stretches the pill into a full-width row once the header wraps. */
+.reviewLabelShort {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .reviewLabelFull {
+    display: none;
+  }
+
+  .reviewLabelShort {
+    display: inline;
+  }
+}
+
 /* Skeleton reuses .reviewBtn for identical chrome/sizing, but the accent-
    tinted border reads as "active/selected" rather than "loading" — every
    other skeleton on this page is a neutral grey block. Flatten it here. */
@@ -167,6 +184,15 @@
 .allVocabLink:hover {
   opacity: 1;
   text-decoration: underline;
+}
+
+/* Below 1024px, MobileBoardsSelector's "✕" already provides "back to all
+   vocabulary" right under the header — showing this breadcrumb too repeats
+   the board name and the same action a second time. */
+@media (max-width: 1023px) {
+  .allVocabLink {
+    display: none;
+  }
 }
 
 .wordCount {

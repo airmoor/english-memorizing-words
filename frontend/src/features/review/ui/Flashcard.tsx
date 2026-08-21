@@ -59,7 +59,9 @@ export function Flashcard({ card, onRated }: Props) {
             <PronunciationButton wordId={card.wordId} word={card.word} />
           </div>
 
-          {card.example && (
+          {/* Self-check hint only — once revealed, the same example resurfaces
+              inside the first meaning below, so showing it twice is redundant. */}
+          {card.example && !revealed && (
             <ExampleSentence>&ldquo;{card.example}&rdquo;</ExampleSentence>
           )}
 
@@ -92,6 +94,11 @@ export function Flashcard({ card, onRated }: Props) {
 
               {answerQuery.data && (
                 <Stack gap="md">
+                  {/* Native-language translation leads the reveal — the fastest way
+                      to confirm comprehension. Collapsed by default so the learner
+                      still reasons in English first if they don't need it. */}
+                  <TranslationBlock wordId={card.wordId} />
+
                   {attempt.trim() && (
                     <div className={styles.echoBlock}>
                       <p className={styles.echoLabel}>You just wrote</p>
@@ -111,7 +118,7 @@ export function Flashcard({ card, onRated }: Props) {
                       <li key={m.id} className={styles.meaning}>
                         <Stack gap="xs">
                           {m.partOfSpeech && (
-                            <PosBadge pos={m.partOfSpeech} />
+                            <PosBadge pos={m.partOfSpeech} className={styles.posBadge} />
                           )}
                           <Text variant="body" as="p" className={styles.definition}>{m.definition}</Text>
                           {m.examples.length > 0 && (
@@ -134,10 +141,6 @@ export function Flashcard({ card, onRated }: Props) {
                       </li>
                     ))}
                   </ol>
-
-                  {/* Native-language translation — bottom fallback, collapsed by
-                      default so the learner reasons in English first. */}
-                  <TranslationBlock wordId={card.wordId} variant="footer" />
                 </Stack>
               )}
 

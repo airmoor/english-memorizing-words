@@ -147,11 +147,13 @@
   gap: var(--space-md);
 }
 
-.meaning {
-  padding-left: var(--space-md);
-  border-left: 2px solid var(--color-border);
+/* Part-of-speech is secondary info here — the definition is what matters.
+   Smaller than the canonical PosBadge used in Search/Vocabulary/MeaningPicker,
+   scoped to this surface only via className override. */
+.posBadge {
+  font-size: var(--font-2xs);
+  padding: 2px var(--space-xs);
 }
-
 
 .definition {
   margin: 0;
@@ -202,6 +204,10 @@
 }
 
 @media (max-width: 1023px) {
+  .wrapper .card {
+    padding: var(--space-lg) var(--space-md);
+  }
+
   .ratingSlot {
     bottom: 0;
     background-color: var(--surface-page);

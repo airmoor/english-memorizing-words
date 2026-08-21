@@ -605,12 +605,13 @@ export function VocabularyPage() {
                       }
                     >
                       <Icon icon={Play} size={12} />
-                      <span>
+                      <span className={styles.reviewLabelFull}>
                         {urlBoard
                           ? `Review ${activeBoard?.name ?? 'board'}`
                           : 'Review all'
                         }
                       </span>
+                      <span className={styles.reviewLabelShort}>Review</span>
                     </button>
                   )}
                 </div>

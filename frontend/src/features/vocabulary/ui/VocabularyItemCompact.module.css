@@ -54,6 +54,16 @@
   grid-template-columns: 10px 1fr 32px 32px 32px;
 }
 
+/* Below 1024px: all actions collapse into one overflow-menu trigger, pulled
+   in close to the row's right edge instead of sitting at the same inset as
+   the word text. Column matches the button's own 28px width (not the 32px
+   slot used elsewhere) and padding-right is cut to a minimal 4px so the
+   trigger sits right against the card border. */
+.rowFolded {
+  grid-template-columns: 10px 1fr 28px;
+  padding-right: 4px;
+}
+
 /* ── State dot ────────────────────────────────────────────────────────────── */
 
 .dot {
