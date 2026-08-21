@@ -85,39 +85,6 @@
   border-radius: var(--radius-full);
 }
 
-/* Inline review progress — replaces the old standalone progress stat card.
-   A slim track tucked under the subtitle with an exact "n / total" count,
-   so it reads as a quiet anchor rather than a loading bar. */
-.progressRow {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  margin-top: var(--space-sm);
-}
-
-.progress {
-  flex: 1;
-  height: 4px;
-  background: var(--color-border);
-  border-radius: var(--radius-full);
-  overflow: hidden;
-}
-
-.progressFill {
-  height: 100%;
-  background: var(--color-accent);
-  border-radius: var(--radius-full);
-  transition: width var(--transition-base);
-}
-
-.progressCount {
-  flex-shrink: 0;
-  font-size: var(--text-micro);
-  font-weight: var(--fw-medium);
-  color: var(--color-text-muted);
-  white-space: nowrap;
-}
-
 .heroTitle {
   margin: 0;
   font-family: var(--font-serif);
@@ -236,7 +203,7 @@
 
 .recentItem {
   display: grid;
-  grid-template-columns: max-content max-content 1fr;
+  grid-template-columns: max-content 1fr;
   gap: var(--space-sm);
   align-items: baseline;
   padding: var(--space-sm) 0;
@@ -250,12 +217,6 @@
 .recentWord {
   font-weight: var(--fw-semibold);
   color: var(--color-text-primary);
-}
-
-.recentPos {
-  font-size: var(--font-xs);
-  color: var(--color-text-secondary);
-  font-style: italic;
 }
 
 .recentDef {

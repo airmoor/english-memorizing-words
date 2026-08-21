@@ -150,7 +150,7 @@ export class ReviewsService {
           [userId, boardId],
         ),
         this.dataSource.query<[{ count: string }]>(
-          `SELECT COUNT(*) AS count
+          `SELECT COUNT(DISTINCT rl.card_id) AS count
            FROM review_logs rl
            JOIN cards c ON c.id = rl.card_id
            JOIN card_boards cb ON cb.card_id = c.id AND cb.board_id = $2
@@ -197,7 +197,7 @@ export class ReviewsService {
         [userId],
       ),
       this.dataSource.query<[{ count: string }]>(
-        `SELECT COUNT(*) AS count
+        `SELECT COUNT(DISTINCT rl.card_id) AS count
          FROM review_logs rl
          JOIN cards c ON c.id = rl.card_id
          WHERE c.user_id = $1

@@ -16,9 +16,11 @@ interface SessionProgressProps {
 
 /**
  * In-session review progress experience.
- * Shows: today's progress bar (reviewed / due+reviewed) + streak badge.
- * When boardId is provided, all counts are board-scoped so the bar and label
- * accurately reflect "N of M board cards reviewed", not the global queue.
+ * Shows: how many cards are left to review right now (matches the Home page's
+ * "X cards due today" — both surfaces read the same live `dueToday` count so
+ * they never disagree) + streak badge.
+ * When boardId is provided, all counts are board-scoped so the label
+ * accurately reflects the board's queue, not the global one.
  */
 export function SessionProgress({ boardId, boardName }: SessionProgressProps) {
   const { data } = useQuery({
@@ -30,23 +32,27 @@ export function SessionProgress({ boardId, boardName }: SessionProgressProps) {
 
   if (!data) return <div className={styles.bar} aria-hidden />
 
-  const sessionTotal = data.dueToday + data.reviewedToday
-  const percent = sessionTotal === 0 ? 0 : Math.round((data.reviewedToday / sessionTotal) * 100)
-  const isDone = sessionTotal > 0 && data.dueToday === 0
+  const hasEverHadCards = data.dueToday > 0 || data.reviewedToday > 0
+  const isDone = hasEverHadCards && data.dueToday === 0
+  // No fixed "total due today" exists — dueToday is a live remaining count,
+  // not a fraction of an original total — so the track is a done/not-done
+  // indicator rather than a fabricated percentage.
+  const percent = isDone ? 100 : 0
 
   // Board-scoped sessions get explicit contextual labels so users know
   // they are reviewing one board's queue, not the global queue.
   const statusText = (() => {
-    if (sessionTotal === 0) {
+    if (!hasEverHadCards) {
       return boardName ? `No cards due in ${boardName}` : 'No cards due today'
     }
     if (isDone) {
       return boardName ? `${boardName} — all done ✓` : 'Session complete ✓'
     }
+    const left = `${data.dueToday} card${data.dueToday !== 1 ? 's' : ''} left`
     if (boardName) {
-      return `${data.reviewedToday} of ${sessionTotal} · ${boardName}`
+      return `${left} · ${boardName}`
     }
-    return `${data.reviewedToday} of ${sessionTotal} reviewed`
+    return data.reviewedToday > 0 ? `${left} · ${data.reviewedToday} reviewed today` : left
   })()
 
   return (

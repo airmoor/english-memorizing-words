@@ -25,12 +25,6 @@ function HeroSkeleton() {
         <p className={styles.heroSubtitle}>
           <span className={styles.skeletonText}>You haven't reviewed anything yet today.</span>
         </p>
-        <div className={styles.progressRow}>
-          <div className={styles.progress} />
-          <span className={styles.progressCount}>
-            <span className={styles.skeletonText}>0 / 1</span>
-          </span>
-        </div>
       </div>
       <div className={styles.heroActions}>
         <span className={styles.skeletonBtn}>Start review</span>
@@ -71,9 +65,7 @@ function HeroContent({
             <p className={styles.heroSubtitle}>
               {reviewedToday === 0
                 ? "You haven't reviewed anything yet today."
-                : reviewedToday < dueToday
-                  ? `Good progress — ${reviewedToday} done, ${dueToday - reviewedToday} to go.`
-                  : 'All done for today. Come back tomorrow.'}
+                : `Good progress — ${reviewedToday} reviewed so far today.`}
             </p>
           </>
         ) : total === 0 ? (
@@ -88,27 +80,6 @@ function HeroContent({
             <h2 className={styles.heroTitle}>You're all caught up 🎉</h2>
             <p className={styles.heroSubtitle}>Come back tomorrow for more reviews.</p>
           </>
-        )}
-
-        {dueToday > 0 && (
-          <div className={styles.progressRow}>
-            <div
-              className={styles.progress}
-              role="progressbar"
-              aria-valuemin={0}
-              aria-valuemax={dueToday}
-              aria-valuenow={Math.min(reviewedToday, dueToday)}
-              aria-label="Today's review progress"
-            >
-              <div
-                className={styles.progressFill}
-                style={{ width: `${Math.min(100, (reviewedToday / dueToday) * 100)}%` }}
-              />
-            </div>
-            <span className={styles.progressCount}>
-              {Math.min(reviewedToday, dueToday)} / {dueToday}
-            </span>
-          </div>
         )}
       </div>
 
@@ -144,9 +115,6 @@ function RecentSkeleton() {
           <li key={i} className={styles.recentItem}>
             <span className={styles.recentWord}>
               <span className={styles.skeletonText}>word</span>
-            </span>
-            <span className={styles.recentPos}>
-              <span className={styles.skeletonText}>noun</span>
             </span>
             <span className={styles.recentDef}>
               <span className={styles.skeletonText}>A short placeholder definition</span>
@@ -193,9 +161,6 @@ function RecentBody({
           return (
             <li key={entry.wordId} className={styles.recentItem}>
               <span className={styles.recentWord}>{entry.wordText}</span>
-              {firstMeaning?.partOfSpeech && (
-                <span className={styles.recentPos}>{firstMeaning.partOfSpeech}</span>
-              )}
               {firstMeaning && (
                 <span className={styles.recentDef}>{firstMeaning.definition}</span>
               )}
