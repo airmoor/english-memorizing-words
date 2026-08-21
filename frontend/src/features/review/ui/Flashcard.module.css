@@ -32,6 +32,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-2xs, 0.25rem);
+  margin-top: calc(-1 * var(--space-md) + var(--space-2xs, 0.25rem));
 }
 
 .transcription {
@@ -148,11 +149,17 @@
 }
 
 /* Part-of-speech is secondary info here — the definition is what matters.
-   Smaller than the canonical PosBadge used in Search/Vocabulary/MeaningPicker,
-   scoped to this surface only via className override. */
+   Inline muted label instead of the canonical filled PosBadge used in
+   Search/Vocabulary/MeaningPicker: a colored pill here competed visually
+   with the "Show translation" toggle above it, which uses the same accent.
+   Scoped to this surface only via className override. */
 .posBadge {
+  display: inline;
+  background: none;
+  padding: 0;
+  border-radius: 0;
   font-size: var(--font-2xs);
-  padding: 2px var(--space-xs);
+  color: var(--color-text-muted);
 }
 
 .definition {

@@ -117,10 +117,15 @@ export function Flashcard({ card, onRated }: Props) {
                     {answerQuery.data.meanings.map((m) => (
                       <li key={m.id} className={styles.meaning}>
                         <Stack gap="xs">
-                          {m.partOfSpeech && (
-                            <PosBadge pos={m.partOfSpeech} className={styles.posBadge} />
-                          )}
-                          <Text variant="body" as="p" className={styles.definition}>{m.definition}</Text>
+                          <Text variant="body" as="p" className={styles.definition}>
+                            {m.partOfSpeech && (
+                              <>
+                                <PosBadge pos={m.partOfSpeech} className={styles.posBadge} />
+                                {' — '}
+                              </>
+                            )}
+                            {m.definition}
+                          </Text>
                           {m.examples.length > 0 && (
                             <ul className={styles.examples}>
                               {m.examples.map((ex, j) => (
